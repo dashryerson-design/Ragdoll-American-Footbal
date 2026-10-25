@@ -249,7 +249,7 @@ addEventListener('blur',()=>{keys={};});
 const lockEl=renderer.domElement;
 addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('mouseup',e=>{if(e.button===2)aimOn=false;});
-lockEl.addEventListener('mousedown',e=>{if(e.button===2)aimOn=true;if(e.button===0&&aimOn)throwBall();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
+lockEl.addEventListener('mousedown',e=>{if(e.button===2)aimOn=true;if(e.button===0&&aimOn)startThrow();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
 addEventListener('mousemove',e=>{if(document.pointerLockElement!==lockEl)return;camYaw-=e.movementX*.006;camPitch=Math.max(-.6,Math.min(1.2,camPitch+e.movementY*.006));});
 addEventListener('wheel',e=>{camDist=Math.max(1.8,Math.min(8,camDist+e.deltaY*.003));});
 addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
@@ -412,12 +412,12 @@ function control(dt){
   if(cur.bufB&&(js===4||js===0)&&contact()&&!limp){if(performance.now()-cur.bufB<400){jpt=.2;startBound();}cur.bufB=0;}   // space pressed just before landing: chain straight into the next bound
  }
  ballArm();
- const lean=-.08*qbK+.95*reachK+.18*crK+mv*(run?.28:.1)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
+ const lean=thLean-.08*qbK+.95*reachK+.18*crK+mv*(run?.28:.1)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
  if(!limp){
   // balance: keep pelvis and chest facing the heading, upright
   const tw=.12*Math.sin(phase)*mv;
-  qa.setFromAxisAngle(Y,yaw-tw-.3*qbK);qb.setFromAxisAngle(X,lean);qa.mult(qb,des);pd(pel,null,2.2,false);
-  qb.setFromAxisAngle(X,lean+(run?.18:.03)*mv);qa.setFromAxisAngle(Y,yaw+tw-.55*qbK);qa.mult(qb,des);pd(chest,null,1.8,false);   // aiming: right shoulder turned back
+  qa.setFromAxisAngle(Y,yaw-tw-.3*qbK+.6*thTw);qb.setFromAxisAngle(X,lean);qa.mult(qb,des);pd(pel,null,2.2,false);
+  qb.setFromAxisAngle(X,lean+(run?.18:.03)*mv);qa.setFromAxisAngle(Y,yaw+tw-.55*qbK+thTw);qa.mult(qb,des);pd(chest,null,1.8,false);   // aiming: right shoulder turned back
   qb.setFromAxisAngle(X,run?.1*mv:0);qa.setFromAxisAngle(Y,yaw);qa.mult(qb,des);pd(neck,null,2.2,false);pd(head,null,2.2,false);
   if(js===0&&mv>.1)for(const sd of[-1,1]){const ft=parts['foot'+sd],t2=tnorm(phase+(sd>0?0:Math.PI));
    if(t2>.3&&t2<(keys.shift?.58:.8)){qb.setFromAxisAngle(X,lowH(ft)<.03?0:-.16);qa.setFromAxisAngle(Y,yaw);qa.mult(qb,des);pd(ft,null,1.4,false);}}
@@ -467,7 +467,7 @@ const ballMesh=new THREE.Group();
  for(let i=-2;i<=2;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(.03,.006,.01),white);c.position.set(0,i*.015,.085);ballMesh.add(c);}
  for(const y of[-.1,.1]){const r=new THREE.Mesh(new THREE.TorusGeometry(y>0?.062:.062,.005,6,20),white);r.rotation.x=Math.PI/2;r.position.y=y;ballMesh.add(r);}}
 scene.add(ballMesh);
-let qbK=0,held=false,reachK=0,reachOn=false,ballCool=0,aimOn=false,thrT=0;
+let qbK=0,held=false,reachK=0,reachOn=false,ballCool=0,aimOn=false,thr=-1,thTw=0,thLean=0;
 const handR=()=>parts['hand-1'];
 // should the body start reaching? predict when the ball passes under us at the current velocity (in stride: no slowing down)
 function reachPredict(){if(held||limp||cs>0||js>0||ballCool>0||ball.position.y>.45)return false;
@@ -481,7 +481,17 @@ function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));c
  if(qbK>.01){const L=(x,y)=>x+(y-x)*qbK,J=joints;   // quarterback set: left foot forward, right foot back, free arm points at the target
   J.hip1.x=L(J.hip1.x,-.38);J.knee1.x=L(J.knee1.x,.3);J.ankle1.x=-(J.hip1.x+J.knee1.x);J['hip-1'].x=L(J['hip-1'].x,.22);J['knee-1'].x=L(J['knee-1'].x,.28);J['ankle-1'].x=-(J['hip-1'].x+J['knee-1'].x);
   J.shoulder1.x=L(J.shoulder1.x,pc-1.3);J.shoulder1.z=L(J.shoulder1.z,-.2);J.elbow1.x=L(J.elbow1.x,-.5);}
- if(thrT>0){thrT-=DT;sh.x=pc-.9;sh.z=-.1;el.x=-.15;wr.x=-.4;return;}   // follow-through after the throw
+ if(thr>=0){thr+=DT;const t=thr,sm=x=>x*x*(3-2*x),mix=(A,B,u)=>A.map((x,i)=>x+(B[i]-x)*u);
+  // [shoulder x (from chest pitch), shoulder z, elbow, wrist, torso twist, lean]: load -> whip (hips + shoulders rotate, arm drives through) -> follow-through across the body
+  const S0=[-1.6,-1.05,-2.05,.3,0,-.08],W=[-1.8,-1.2,-2.2,.35,-.3,-.14],Rl=[-1.2,-.5,-.85,0,.6,.25],F=[-.45,.45,-.7,-.5,.75,.42];
+  const a=t<.1?mix(S0,W,sm(t/.1)):t<.2?mix(W,Rl,sm((t-.1)/.1)):t<.45?mix(Rl,F,sm((t-.2)/.25)):F;
+  const whip=t>=.1&&t<.24;for(const n of['uarm-1','farm-1','hand-1'])parts[n].wk=whip?2.6:1;   // the throwing arm's muscles fire hard only during the whip
+  if(held&&t>=.16)throwBall();                                     // release mid-whip, from wherever the hand really is
+  if(t>=.45)thr=-1;
+  sh.x=pc+a[0];sh.z=a[1];el.x=a[2];wr.x=a[3];thTw=a[4];thLean=a[5];
+  const J=joints,w=sm(cl((t-.1)/.15,0,1));J.hip1.x+=(-.25-J.hip1.x)*w;J['hip-1'].x+=(.35-J['hip-1'].x)*w;J['knee-1'].x+=(.45-J['knee-1'].x)*w;   // drive off the back leg onto the front
+  return;}
+ thTw=0;thLean=0;
  if(held&&aimOn){sh.x=pc-1.6;sh.z=-1.05;el.x=-2.05;wr.x=.3;return;}     // ball up by the ear, elbow out at shoulder height
  if(held&&keys.shift&&mv>.3){sh.x=pc-.2+.3*Math.sin(phase+Math.PI)*mv;sh.z=.2;el.x=-1.45;wr.x=.1;joints.shoulder1.z=.35;return;}   // sprinting: ball arm pumps a little, free arm swings wide
  if(held){sh.x=pc+.12;sh.z=.3;el.x=-1.55;wr.x=.15;return;}   // jogging: tucked tight at the hip, forearm along the side   // tucked: upper arm down at the side, forearm across the belly (arm angle in the world = chest pitch - shoulder x)
@@ -498,7 +508,9 @@ function aimTick(){aimLine.visible=held&&aimOn&&!limp;if(!aimLine.visible)return
  const p=bpt(handR(),0,-.02,.07),v=throwVel(),a=aimLine.geometry.attributes.position,dt=.05,dmp=Math.pow(.9,dt);let x=p.x,y=p.y,z=p.z,vx=v.x,vy=v.y,vz=v.z,n=0;
  for(;n<60;n++){a.setXYZ(n,x,y,z);if(y<.09)break;vx*=dmp;vy*=dmp;vz*=dmp;vy-=9.82*dt;x+=vx*dt;y+=vy*dt;z+=vz*dt;}   // same gravity + damping as the ball body
  for(let i=n+1;i<60;i++)a.setXYZ(i,x,Math.max(.09,y),z);a.needsUpdate=true;}
-function throwBall(){if(!held||limp)return;const p=bpt(handR(),0,-.02,.07),v=throwVel();held=false;ballCool=.6;thrT=.3;
+function startThrow(){if(held&&aimOn&&thr<0&&!limp)thr=0;}
+function throwBall(){if(!held||limp)return;const p=bpt(handR(),0,-.02,.07),v=throwVel();held=false;aimOn=false;ballCool=.6;
+ chest.velocity.x-=v.x*.42/15.7;chest.velocity.y-=v.y*.42/15.7;chest.velocity.z-=v.z*.42/15.7;   // the ball's momentum pushes back on the thrower
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.velocity.copy(v);const d=v.unit();ball.quaternion.setFromVectors(new V(0,1,0),d);
  ball.angularVelocity.set(d.x*25,d.y*25,d.z*25);world.addBody(ball);ball.wakeUp();}   // nose-first spiral
 function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);}
@@ -523,7 +535,7 @@ if('ontouchstart'in window||matchMedia('(pointer:coarse)').matches)document.body
  const jEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.on=false;joy.x=joy.y=0;keys.shift=false;K.style.transform='';}};J.addEventListener('touchend',jEnd);J.addEventListener('touchcancel',jEnd);
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
  tap(aimB,()=>{aimOn=!aimOn&&held;});
- tap(big,()=>{if(aimOn){throwBall();aimOn=false;}});
+ tap(big,()=>{if(aimOn)startThrow();});
  tap($('bjump'),()=>key(' ','keydown'));$('bjump').addEventListener('touchend',()=>key(' ','keyup'));
  tap($('bdrop'),()=>{key('t','keydown');key('t','keyup');});
  const look={};   // any other finger on the screen drags the camera
@@ -536,7 +548,7 @@ const DT=1/400;let acc=0,last=performance.now();
 const tgt=new THREE.Vector3(0,1,0);let camCD=3.6;
 function frame(now){
  requestAnimationFrame(frame);
- acc+=Math.min(.05,(now-last)/1000);last=now;
+ acc+=Math.min(.05,(now-last)/1000);last=now;if(window.DBGFREEZE)acc=0;   // test hook
  sense();
  while(acc>=DT){
   control(DT);for(const k in joints)drive(joints[k]);

@@ -38,7 +38,7 @@ ground.collisionFilterGroup=1;ground.collisionFilterMask=-1;world.addBody(ground
 let parts,list,joints,totalMass,pel,abd,chest,neck,head;
 function part(n,hx,hy,hz,x,y,z,mass,col){
  const b=new C.Body({mass,material:bm,linearDamping:.05,angularDamping:.15});
- b.addShape(new C.Box(new V(hx,hy,hz)));b.position.set(x,y,z);b.collisionFilterGroup=2;b.collisionFilterMask=1;
+ b.addShape(new C.Box(new V(hx,hy,hz)));b.position.set(x,y,z);b.collisionFilterGroup=2;b.collisionFilterMask=5;   // world + ball
  b.allowSleep=false;b.pn=n.replace(/-?1$/,'');b.I=(b.inertia.x+b.inertia.y+b.inertia.z)/3;b.home=[x,y,z];world.addBody(b);totalMass+=mass;
  const m=new THREE.Mesh(new THREE.BoxGeometry(hx*2,hy*2,hz*2),new THREE.MeshStandardMaterial({color:col,roughness:.55}));
  m.castShadow=true;scene.add(m);b.mesh=m;parts[n]=b;list.push(b);return b;}
@@ -459,7 +459,8 @@ function castRay(from,dir,maxD){const f=new V(from.x,from.y,from.z),to=new V(fro
 const ballM=new C.Material('ball');world.addContactMaterial(new C.ContactMaterial(ballM,gm,{friction:.5,restitution:.45}));
 const ball=new C.Body({mass:.42,material:ballM,linearDamping:.1,angularDamping:.3});
 ball.addShape(new C.Sphere(.085),new V(0,.05,0));ball.addShape(new C.Sphere(.085),new V(0,-.05,0));   // two spheres = a rough prolate football
-ball.collisionFilterGroup=4;ball.collisionFilterMask=1;ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);world.addBody(ball);
+// the ball hits the world and the doll
+ball.collisionFilterGroup=4;ball.collisionFilterMask=3;world.addContactMaterial(new C.ContactMaterial(ballM,bm,{friction:.4,restitution:.3}));ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);world.addBody(ball);
 const ballMesh=new THREE.Group();
 {const leather=new THREE.MeshStandardMaterial({color:0x6b3416,roughness:.7}),white=new THREE.MeshStandardMaterial({color:0xf2efe6,roughness:.6});
  const e=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),leather);e.scale.set(.085,.143,.085);e.castShadow=true;ballMesh.add(e);
@@ -509,15 +510,15 @@ function aimTick(){aimLine.visible=held&&aimOn&&!limp;if(!aimLine.visible)return
  for(;n<60;n++){a.setXYZ(n,x,y,z);if(y<.09)break;vx*=dmp;vy*=dmp;vz*=dmp;vy-=9.82*dt;x+=vx*dt;y+=vy*dt;z+=vz*dt;}   // same gravity + damping as the ball body
  for(let i=n+1;i<60;i++)a.setXYZ(i,x,Math.max(.09,y),z);a.needsUpdate=true;}
 function startThrow(){if(held&&aimOn&&thr<0&&!limp)thr=0;}
-function throwBall(){if(!held||limp)return;const p=bpt(handR(),0,-.02,.07),v=throwVel();held=false;aimOn=false;ballCool=.6;
+function throwBall(){if(!held||limp)return;const p=bpt(handR(),0,-.02,.07),v=throwVel();held=false;aimOn=false;ballCool=.6;ball.collisionFilterMask=1;
  chest.velocity.x-=v.x*.42/15.7;chest.velocity.y-=v.y*.42/15.7;chest.velocity.z-=v.z*.42/15.7;   // the ball's momentum pushes back on the thrower
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.velocity.copy(v);const d=v.unit();ball.quaternion.setFromVectors(new V(0,1,0),d);
  ball.angularVelocity.set(d.x*25,d.y*25,d.z*25);world.addBody(ball);ball.wakeUp();}   // nose-first spiral
 function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);}
-function dropBall(){if(!held)return;held=false;ballCool=.6;const h=handR(),p=bpt(h,0,-.02,.06);
+function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);
  ball.velocity.set(pel.velocity.x,pel.velocity.y,pel.velocity.z);ball.angularVelocity.set(0,0,0);world.addBody(ball);ball.wakeUp();}   // it was asleep on the turf before the pickup
-function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballTick.t=now;ballCool=Math.max(0,ballCool-dt);
+function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballTick.t=now;ballCool=Math.max(0,ballCool-dt);if(!held&&ballCool<.35)ball.collisionFilterMask=3;   // ignore your own body for a moment after a throw / drop so it leaves the hand cleanly
  reachOn=reachPredict();
  if(!held&&reachK>.3){const h=handR().position,b=ball.position,hd=Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z),pd2=Math.hypot(pel.position.x-b.x,pel.position.z-b.z);
   if(hd<.3||(pd2<.45&&reachK>.6))grabBall();}                     // hand on it, or right underfoot with the arm already down

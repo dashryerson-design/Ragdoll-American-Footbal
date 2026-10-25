@@ -473,7 +473,6 @@ function dropBall(){if(!held)return;held=false;ballCool=.6;const h=handR(),p=bpt
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);
  ball.velocity.set(pel.velocity.x,pel.velocity.y,pel.velocity.z);ball.angularVelocity.set(0,0,0);world.addBody(ball);ball.wakeUp();}   // it was asleep on the turf before the pickup
 function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballTick.t=now;ballCool=Math.max(0,ballCool-dt);
- if(held&&limp)dropBall();                                        // fumble when you go limp
  reachOn=reachPredict();
  if(!held&&reachK>.3){const h=handR().position,b=ball.position,hd=Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z),pd2=Math.hypot(pel.position.x-b.x,pel.position.z-b.z);
   if(hd<.3||(pd2<.45&&reachK>.6))grabBall();}                     // hand on it, or right underfoot with the arm already down

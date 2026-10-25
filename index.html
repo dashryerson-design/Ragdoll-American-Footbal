@@ -1203,9 +1203,9 @@ function applyOrg(){ORG.wi=Math.random()*5|0;for(const d of roster)if(d!==player
  const P=player.cur;for(const k of['role','side','kind','mark','x0','z0','px','pz','half','you','lab','m'])delete P[k];
  roster=[player];playOn=!ORG.free;document.body.classList.toggle('play',playOn);let n=0,oT=ORG.you,dT;
  const add=(s,side)=>{const d=s.you?player:bot(n++);if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,s,{side,role:side==='o'?s.role:'df',team:side==='o'?oT:dT});if(d!==player)d.cur.at=botAt(d.cur.role,d.cur.team);return d;};
- if(playOn){const p=plan();oT=p.oT;dT=p.dT;const os=p.O.map(s=>add(s,'o'));for(const s of p.D){const d=add(s,'d');if(s.m)d.cur.mark=os[s.m];}}
+ if(playOn){const p=plan();oT=p.oT;dT=p.dT;const os=p.O.map(s=>add(s,'o'));for(const s of p.D){const d=add(s,'d');if(s.m)d.cur.mark=os[s.m];}lgAssign();}
  else{P.side='o';P.team=ORG.you;}
- for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);kit(d,d===player?player.cur.look:DEFLOOK,d===player&&!playOn?null:TEAM[o?oT:dT]);if(d===player)shape(player,player.cur.bio);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
+ for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);kit(d,d===player?player.cur.app:(d.cur.app||DEFLOOK),d===player&&!playOn?null:TEAM[o?oT:dT]);shape(d,d.cur.bio||null);if(d!==player){jersey(d,d.cur.num??null,d.cur.nm);showDoll(d,true);}}   // teams collide with each other, never with themselves
  if(playOn)resetPlay();else{routeMesh.visible=false;losMesh.visible=fdMesh.visible=false;playState='live';}}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
 function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
@@ -1537,7 +1537,7 @@ function jersey(d,num,name){for(const m of d.decals||[]){m.parent.remove(m);m.ma
  for(const[z,ry,nm]of[[.1115,0,''],[-.1115,Math.PI,name||'']]){const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');g.fillStyle='#fff';g.textAlign='center';
   g.font='900 80px Impact,"Arial Black",sans-serif';g.fillText(String(num),64,nm?116:100);if(nm){g.font='800 22px system-ui,sans-serif';g.fillText(nm.toUpperCase().slice(0,12),64,26);}
   const m=new THREE.Mesh(new THREE.PlaneGeometry(.3,.28),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false}));m.position.z=z;m.rotation.y=ry;d.parts.chest.mesh.add(m);d.decals.push(m);}}
-function applyProf(p){const P=player.cur;P.at=p?{...p.att}:null;P.look=p?migLook(p.look):{...DEFLOOK};P.bio=p?bioOf(p):null;P.bm=p?bioMods(P.bio):null;P.bd=p?Object.fromEntries((p.badges||[]).map(id=>[id,btier(p,id)])):{};kit(player,P.look,null);shape(player,P.bio);jersey(player,p?p.num:null,p&&p.last);}
+function applyProf(p){const P=player.cur;P.at=p?{...p.att}:null;P.app=p?migLook(p.look):{...DEFLOOK};P.bio=p?bioOf(p):null;P.bm=p?bioMods(P.bio):null;P.bd=p?Object.fromEntries((p.badges||[]).map(id=>[id,btier(p,id)])):{};kit(player,P.app,null);shape(player,P.bio);jersey(player,p?p.num:null,p&&p.last);}
 // ---------- menus: control pick -> QUICK PLAY / CAREER MODE -> career hub -> creator ----------
 let pendMode=null,ED=null,TAB='bio';
 const show=id=>{for(const x of['mm','mode','car','cre','pre','fin','upg','teams','comb','dft','slots'])$m(x).hidden=x!==id;};
@@ -1568,7 +1568,7 @@ const zst=()=>Object.fromEntries(STK.map(k=>[k,0]));
 function newSeason(p,year){const a=[...Array(16).keys()].sort(()=>Math.random()-.5),weeks=[];
  for(let r=0;r<15;r++){weeks.push(Array.from({length:8},(_,i)=>r%2?[a[15-i],a[i]]:[a[i],a[15-i]]));a.splice(1,0,a.pop());}   // circle method: everyone meets everyone once
  for(let r=0;r<5;r++)weeks.push(weeks[r].map(([x,y])=>[y,x]));   // weeks 16-20: rematches with home and away swapped
- p.season={year,week:0,weeks,res:weeks.map(w=>w.map(()=>null)),rat:CLUBS.map((_,i)=>i===p.team?76:68+(Math.random()*17|0)),st:zst(),po:null,champ:null,ugames:0};}
+ p.season={year,week:0,weeks,res:weeks.map(w=>w.map(()=>null)),rat:(lgEnsure(p),CLUBS.map((_,i)=>lgRat(p,i))),st:zst(),po:null,champ:null,ugames:0};}
 const gauss=()=>(Math.random()+Math.random()+Math.random()-1.5)*1.4;
 function simScore(ra,rb,ko){const td=d=>Math.max(0,Math.round(2.3+d/6+gauss()));let x=7*td(ra-rb),y=7*td(rb-ra);if(ko&&x===y)(ra+Math.random()*6>rb+Math.random()*6)?x+=7:y+=7;return[x,y];}   // knockout ties go to overtime
 function standings(S){const T=CLUBS.map((_,i)=>({i,w:0,l:0,t:0,pf:0,pa:0}));S.weeks.forEach((wk,w)=>wk.forEach(([a,b],g)=>{const r=S.res[w][g];if(!r)return;const A=T[a],B=T[b];A.pf+=r[0];A.pa+=r[1];B.pf+=r[1];B.pa+=r[0];if(r[0]>r[1]){A.w++;B.l++;}else if(r[1]>r[0]){B.w++;A.l++;}else{A.t++;B.t++;}}));
@@ -1592,9 +1592,9 @@ function startPO(S){const st=standings(S),seed=st.map(x=>x.i);S.po={seeds:seed,r
 // your own game simulated (no XP, no stats): the team plays without you
 function simMine(){const p=PROF,n=nextGame(p);if(!n){const S=p.season;if(S&&S.po&&S.champ==null){while(S.champ==null)advance(p);saveProf(p);carUI();}return;}   // knocked out: the rest of the bracket plays out
  const S=p.season,[x,y]=simScore(S.rat[p.team],S.rat[n.op],n.ctx.k==='po');record(p,n.ctx,x,y);saveProf(p);carUI();}
-function newSeasonGo(){const p=PROF;newSeason(p,(p.season?p.season.year:0)+1);saveProf(p);carUI();}
+function newSeasonGo(){const p=PROF;if(p.season&&p.season.champ!=null)offseason(p);newSeason(p,(p.season?p.season.year:0)+1);saveProf(p);carUI();}
 // teammates: three named club-mates, two-way roles like yours, rated around the club
-function mates(p){const c=p.team,qb=STYLES[p.style][4]==='qb',r=p.season?p.season.rat[c]:74;return[0,1,2].map(i=>({n:DFN[(c*5+i*3)%16]+' '+DLN[(c*7+i*5)%16],pos:qb?'WR / CB':i===0?'QB / S':'WR / CB',num:(c*13+i*29+7)%99,ovr:Math.round(r-3+((c+i*7)%7))}));}
+function mates(p,c=p.team){const L=lgEnsure(p);return L.rost[c].filter(id=>id!=='U').map(id=>{const P=L.pl[id];return{n:P.first+' '+P.last,pos:tcase(STYLES[P.style][0])+' · '+DEV[P.dev][0],num:P.num,ovr:ovr(P.att,P.style)};});}
 let HTAB='over';
 function carUI(){const p=PROF;if(p&&p.draft&&!p.season){newSeason(p,1);saveProf(p);}hubUI();}
 function hubUI(){const p=PROF,T=[['over','Overview'],['player','Player'],['attr','Ratings'],['team','Team'],['sched','Schedule'],['stand','Standings'],['stats','Stats'],['next','Next Match']];
@@ -1620,10 +1620,10 @@ function nextCard(p,S,n){if(!p.draft)return`<h3>Next Match</h3><p class="note">F
  return`<h3>${ttl}</h3><div class="mu"><div>${icon(A)}<b>${A.city} ${A.name}</b><small>Club rating ${sa}${n.home?' · HOME':''}</small></div><div class="vs">VS</div><div>${icon(B)}<b>${B.city} ${B.name}</b><small>Club rating ${sb}${n.home?'':' · HOME'}</small></div></div><p class="note" style="text-align:center">${B.id} ${B.st}.</p><button class="mrow pri2" data-go="play" style="width:100%">Play Match</button>`;}
 const TABS={
  over:(p,S,n,c)=>`<h3>Player Profile</h3><div class="kv"><span>Club</span><b>${p.draft?c.city+' '+c.name:'Undrafted'}</b><span>Playstyle</span><b>${tcase(STYLES[p.style][0])}</b><span>Roles</span><b>${STYLES[p.style][4]==='qb'?'QB':'WR'} on offence · CB on defence</b><span>Draft</span><b>${p.draft?`Round ${p.draft.round}, pick ${p.draft.pick} (#${p.draft.overall}) · ${p.draft.school}`:'—'}</b><span>Level</span><b>${p.lvl} · ${p.xp} total XP · ${p.up} upgrade pts</b><span>Career</span><b>${p.career.gp} games · ${p.career.w}-${p.career.l}${p.career.t?'-'+p.career.t:''} · ${p.titles||0} titles</b></div>
-  <h4>Coming up</h4>${nextCard(p,S,n)}`,
+  <h4>Coming up</h4>${nextCard(p,S,n)}${p.lg&&p.lg.log.length?`<h4>League news</h4>${p.lg.log.slice(0,2).map(g=>`<p class="note"><b>${g.yr?'After season '+g.yr:'Draft'}</b><br>${[...g.tr,...g.dv].map(esc).join('<br>')||'No moves'}</p>`).join('')}`:''}`,
  player:(p)=>`<h3>Player & Appearance</h3><div class="kv"><span>Name</span><b>${esc(p.first)} ${esc(p.last)}</b><span>Number</span><b>#${p.num}</b><span>Playstyle</span><b>${tcase(STYLES[p.style][0])}</b><span>Body</span><b>${ftin(bioOf(p).h)} · ${bioOf(p).w} lb · wingspan ${ftin(bioOf(p).ws)}</b><span>Badges</span><b>${(p.badges||[]).map(id=>`${BMAP[id][2]} ${BMAP[id][1]} (${BTIER[btier(p,id)]})`).join(' · ')||'none'}</b></div><p class="note">Edit your name, number, look and base ratings. Upgrades stay on top; a new playstyle refunds them in full.</p><button class="mrow" data-go="edit">Edit Player</button>`,
  attr:(p)=>`<h3>Ratings</h3>${tblHTML(p,false)}<button class="mrow pri2" data-go="upg" style="margin-top:10px;width:100%">Upgrade Player · ${p.up} pts</button>`,
- team:(p,S,n,c)=>p.draft?`<h3>${c.ic} ${c.city} ${c.name}</h3><p class="note">${c.id} Home: ${c.st}. Founded ${c.yr}.</p><table class="gt"><tr><th>#</th><th>Player</th><th>Offence / Defence</th><th style="text-align:right">OVR</th></tr><tr class="me"><td>${p.num}</td><td>${esc(p.first)} ${esc(p.last)} (you)</td><td>${STYLES[p.style][4]==='qb'?'QB / CB':'WR / CB'}</td><td class="n">${ovr(p.att,p.style)}</td></tr>${mates(p).map(m=>`<tr><td>${m.num}</td><td>${m.n}</td><td>${m.pos}</td><td class="n">${m.ovr}</td></tr>`).join('')}</table><p class="note">Club rating ${S?S.rat[p.team]:'—'} · every player goes both ways in 4 v 4.</p>`:'<h3>Team</h3><p class="note">Get drafted to join a club.</p>',
+ team:(p,S,n,c)=>p.draft?`<h3>${c.ic} ${c.city} ${c.name}</h3><p class="note">${c.id} Home: ${c.st}. Founded ${c.yr}.</p><table class="gt"><tr><th>#</th><th>Player</th><th>Offence / Defence</th><th style="text-align:right">OVR</th></tr><tr class="me"><td>${p.num}</td><td>${esc(p.first)} ${esc(p.last)} (you)</td><td>${STYLES[p.style][4]==='qb'?'QB / CB':'WR / CB'}</td><td class="n">${ovr(p.att,p.style)}</td></tr>${mates(p).map(m=>`<tr><td>${m.num}</td><td>${m.n}</td><td>${m.pos}</td><td class="n">${m.ovr}</td></tr>`).join('')}</table><p class="note">Team OVR ${tStr(p,p.team)} · ${tTier(p,p.team)} · every player goes both ways in 4 v 4.</p>`:'<h3>Team</h3><p class="note">Get drafted to join a club.</p>',
  sched:(p,S)=>!S?'<h3>Schedule</h3><p class="note">Your season starts after the draft.</p>':`<h3>Season ${S.year} Schedule</h3><table class="gt"><tr><th>Wk</th><th>Opponent</th><th></th><th style="text-align:right">Result</th></tr>${S.weeks.map((wk,w)=>{const g=wk.findIndex(x=>x.includes(p.team)),pr=wk[g],home=pr[0]===p.team,op=home?pr[1]:pr[0],r=S.res[w][g];let res='';if(r){const m=home?r[0]:r[1],t=home?r[1]:r[0];res=`<span class="${m>t?'W':m<t?'L':'T'}">${m>t?'W':m<t?'L':'T'}</span> ${m}-${t}`;}return`<tr class="${w===S.week?'cur':''}"><td>${w+1}</td><td>${tn(op)}</td><td>${home?'vs':'@'}</td><td class="n">${res||(w===S.week?'NEXT':'')}</td></tr>`;}).join('')}</table>${S.po?'<h4>Playoffs</h4>'+bracket(p,S):''}`,
  stand:(p,S)=>!S?'<h3>Standings</h3><p class="note">Your season starts after the draft.</p>':`<h3>Season ${S.year} Standings</h3><table class="gt"><tr><th>Seed</th><th>Club</th><th>W-L-T</th><th style="text-align:right">PF</th><th style="text-align:right">PA</th><th style="text-align:right">Diff</th></tr>${standings(S).map((x,i)=>`<tr class="${x.i===p.team?'me':''}"><td>${i+1}</td><td>${tn(x.i)}</td><td>${x.w}-${x.l}-${x.t}</td><td class="n">${x.pf}</td><td class="n">${x.pa}</td><td class="n">${x.pf-x.pa>0?'+':''}${x.pf-x.pa}</td></tr>`).join('')}</table><p class="note">All 16 clubs make the playoffs, seeded by wins: 1 v 16, 2 v 15 … winners move up the bracket to the Championship.</p>${S.po?bracket(p,S):''}`,
  stats:(p,S)=>`<h3>Statistics</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px"><div><h4>Season ${S?S.year:''}</h4>${rowS(S?S.st:zst(),STL)}</div><div><h4>Career · ${p.career.gp} games</h4>${rowS(p.career,STL)}</div></div>`,
@@ -1764,10 +1764,67 @@ const CLUBS=[['POR','Portland','Timberwolves','🐺',0x1f5d3a,0x14261b,0xc9a227,
  ['JAX','Jacksonville','Gators','🐊',0x0f6b3c,0x08301c,0xf47b20,1995,'St. Johns Stadium','Ambush defence: bait the throw, snap the jaws shut.'],
  ['SLC','Salt Lake','Mountain Lions','🐆',0x2f3b4c,0x161c25,0xc8102e,1979,'Wasatch Field','Stealthy coverage and big cats in the open field.']];
 const club=i=>{const c=CLUBS[i];return{ab:c[0],city:c[1],name:c[2],ic:c[3],jer:c[4],pant:c[5],acc:c[6],yr:c[7],st:c[8],id:c[9]};};
+// ================= LEAGUE ROSTERS: 4 two-way players per club; one saved record per player (identity, ratings, look, development) =================
+// lives in the career save (p.lg); the user is roster id 'U' and stays the profile itself, so there is never a second copy of you
+const DEV=[['High Potential',1.6,1],['Steady Developer',1,.6],['Established Player',0,.7],['Declining Player',-1.4,.7],['Unpredictable',0,2]];   // [name, mean change, spread] per affected rating
+const STR0=[80,79,78,77,75,74,74,73,73,72,71,70,69,68,67,66];   // club targets: 4 contenders, 8 in the middle, 4 rebuilding (dealt out by a fixed seed)
+const BIOS=[[75,220],[73,205],[71,185],[72,195],[70,190],[71,235],[73,210],[74,215]];   // [height in, weight lb] per playstyle
+const rng=s=>()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+const pOvr=(p,id)=>id==='U'?ovr(p.att,p.style):ovr(p.lg.pl[id].att,p.lg.pl[id].style);   // the one OVR (ovr()) for everyone
+// team strength: average OVR plus a share of the best player (stars matter in 4 v 4)
+function tStr(p,i){const o=p.lg.rost[i].map(id=>pOvr(p,id)).sort((a,b)=>b-a);return Math.round(.7*o.reduce((a,b)=>a+b,0)/4+.3*o[0]);}
+function tTier(p,i){const s=tStr(p,i),r=CLUBS.filter((_,j)=>tStr(p,j)>s).length;return r<4?'CONTENDER':r<12?'MID-TIER':'REBUILDING';}
+function genPlayer(p,R,c,st,tgt,dev){const L=p.lg,id='P'+String(++L.next).padStart(3,'0'),a=styleAt(st);for(const k of AK)a[k]+=Math.round((R()-.5)*8);   // same playstyle, never the same build
+ for(let n=0;n<80;n++){const d=Math.sign(tgt-ovr(a,st));if(!d)break;for(const k of AK)a[k]=cl(a[k]+d,A_MIN,96);}for(const k of AK)a[k]=cl(a[k],A_MIN,96);
+ const[h,w]=BIOS[st],bh=cl(h+Math.round((R()-.5)*4),68,78),used=new Set(L.rost[c]?.map(x=>x==='U'?p.num:L.pl[x]&&L.pl[x].num)),pk=A=>A[R()*A.length|0];let num;do num=1+(R()*98|0);while(used.has(num));
+ let first,last;do{first=pk(DFN);last=pk(DLN);}while(Object.values(L.pl).some(q=>q.first===first&&q.last===last));
+ const look={...DEFLOOK,skin:R()*6|0,eye:R()<.3?1:0,shell:R()*4|0,mask:R()*4|0,visor:R()<.25?1:0,sleeve:R()*3|0,comp:R()<.5?0:1+(R()*3|0),compLen:R()<.3?1:0,wrist:R()*4|0,sock:R()<.7?1:0,cstyle:R()*3|0,knee:R()<.2?1:0,leg:R()<.15?3:0,
+  c_glove:pk([-1,0xffffff,0x111111,CLUBS[c][6]]),c_cleat:pk([0x111111,0xffffff,CLUBS[c][6]]),c_comp:pk([0x111111,0xffffff,CLUBS[c][6]]),c_sock:pk([0xffffff,0x111111])};
+ return L.pl[id]={id,first,last,num,style:st,att:a,bio:{h:bh,w:cl(w+Math.round((R()-.5)*20),170,260),ws:cl(bh+Math.round(R()*5),66,84)},look,dev:dev??(tgt>=80?pk([2,2,1,3,4]):tgt<70?pk([0,0,1,4]):pk([0,1,1,2,4])),yrs:0,team:c,hist:[]};}
+function lgEnsure(p){if(!p.lg){const R=rng(2027),str=[...STR0].sort(()=>R()-.5);p.lg={pl:{},rost:CLUBS.map(()=>[]),fa:[],ret:[],log:[],next:0};
+  CLUBS.forEach((_,c)=>{const sty=[R()<.7?0:1,...[2,3,4,5,6,7].sort(()=>R()-.5).slice(0,3)],off=[4,1,-1,-4].sort(()=>R()-.5);
+   sty.forEach((st,j)=>p.lg.rost[c].push(genPlayer(p,R,c,st,str[c]+off[j]+(str[c]>=77&&off[j]===4?3:0)+Math.round((R()-.5)*4)).id));});}   // contenders get a true star
+ if(p.draft&&!p.lg.rost.some(r=>r.includes('U')))lgDraft(p,p.team);return p.lg;}
+// drafting you: you replace the LOWEST-OVR player on the club's current four (ties: lowest id), whatever your own OVR is; he goes to free agency, never deleted
+function lgDraft(p,t){const L=p.lg;for(const r of L.rost){const i=r.indexOf('U');if(i>=0){const c=L.rost.indexOf(r),f=L.fa.sort((a,b)=>pOvr(p,b)-pOvr(p,a))[0];if(f&&c!==t){r[i]=f;L.fa.shift();L.pl[f].team=c;L.pl[f].hist.push('Signed by '+CLUBS[c][0]);}else r.splice(i,1);}}   // a club you leave signs the best free agent
+ const r=L.rost[t],out=r.filter(id=>id!=='U').sort((a,b)=>pOvr(p,a)-pOvr(p,b)||(a<b?-1:1))[0];
+ if(out){r[r.indexOf(out)]='U';const P=L.pl[out];P.team=-1;P.hist.push('Released by '+CLUBS[t][0]+' (draft)');L.fa.push(out);}else r.push('U');
+ for(const x of r)if(x!=='U'&&L.pl[x].num===p.num){const u=new Set(r.map(y=>y==='U'?p.num:L.pl[y].num));let n=L.pl[x].num;while(u.has(n))n=n%99+1;L.pl[x].num=n;}   // your number is yours; a clash moves the teammate
+ L.log.unshift({yr:p.season?p.season.year:0,tr:[`Draft: ${p.first} ${p.last} joins ${CLUBS[t][0]}${out?`, ${L.pl[out].first} ${L.pl[out].last} (${pOvr(p,out)}) released`:''}`],dv:[]});L.log.length=Math.min(L.log.length,6);return out;}
+// one offseason step for a player: 1-3 ratings move 1-3 points, mostly his playstyle's; tops are hard to reach, regression stops at 55
+function devStep(R,P){const[,m,s]=DEV[P.dev],key=STYLES[P.style][2],o0=ovr(P.att,P.style),n=2+(R()*3|0);
+ for(let i=0;i<n;i++){const k=R()<.75?key[R()*key.length|0]:AK[R()*AK.length|0];let d=cl(Math.round(m+gauss()*s),-3,3);
+  if(d>0&&P.att[k]>=82&&R()<(P.att[k]-78)/16)d=0;if(d<0&&P.att[k]<=55)d=0;P.att[k]=cl(P.att[k]+d,A_MIN,99);}
+ P.yrs++;if((P.dev===0&&P.yrs>=3)||(P.dev===1&&P.yrs>=5)||(P.dev===2&&P.yrs>=6)||(P.dev===4&&P.yrs>=5)){P.dev=P.dev===4?2:P.dev+1;P.yrs=0;}   // careers age: prospect -> steady -> established -> declining
+ return ovr(P.att,P.style)-o0;}
+const hasQB=(p,r)=>r.some(id=>[0,1].includes(id==='U'?p.style:p.lg.pl[id].style));
+// the offseason (menus only, between seasons): trades, then development, retirements with rookies, then new club ratings
+function offseason(p){const L=lgEnsure(p),R=rng((p.season?p.season.year:0)*7919+(L.next|0)),yr=p.season?p.season.year:0,log={yr,tr:[],dv:[]},nm=id=>id==='U'?p.first+' '+p.last:L.pl[id].first+' '+L.pl[id].last;
+ // trades: a top-6 club buys a proven player from a bottom-6 club with a prospect of similar value (0-4 OVR less); each club trades once at most; you are never traded
+ const rank=CLUBS.map((_,i)=>i).sort((a,b)=>tStr(p,b)-tStr(p,a)),done=new Set();
+ for(let n=0;n<40&&log.tr.length<3;n++){const A=rank[R()*6|0],B=rank[10+(R()*6|0)];if(done.has(A)||done.has(B))continue;let best=null;
+  for(const x of L.rost[A])for(const y of L.rost[B]){if(x==='U'||y==='U'||(L.pl[x].dev>1&&L.pl[x].dev!==4)||L.pl[y].dev<2||L.pl[y].dev>3)continue;const g=pOvr(p,y)-pOvr(p,x);if(g<0||g>4)continue;
+   const rA=L.rost[A].map(z=>z===x?y:z),rB=L.rost[B].map(z=>z===y?x:z);if((hasQB(p,L.rost[A])&&!hasQB(p,rA))||(hasQB(p,L.rost[B])&&!hasQB(p,rB)))continue;   // never strip a club's passer
+   const need=L.rost[A].some(z=>z!==x&&z!=='U'&&L.pl[z].style===L.pl[y].style)?0:1,sc=need+R()*.8;if(!best||sc>best[2])best=[x,y,sc];}
+  if(!best)continue;const[x,y]=best;L.rost[A][L.rost[A].indexOf(x)]=y;L.rost[B][L.rost[B].indexOf(y)]=x;L.pl[x].team=B;L.pl[y].team=A;done.add(A);done.add(B);
+  L.pl[x].hist.push(`Y${yr}: traded ${CLUBS[A][0]} -> ${CLUBS[B][0]}`);L.pl[y].hist.push(`Y${yr}: traded ${CLUBS[B][0]} -> ${CLUBS[A][0]}`);
+  log.tr.push(`${CLUBS[A][0]} get ${nm(y)} (${pOvr(p,y)}, ${tcase(STYLES[L.pl[y].style][0])}) · ${CLUBS[B][0]} get ${nm(x)} (${pOvr(p,x)}, ${DEV[L.pl[x].dev][0]})`);}
+ // development for every league player (you grow through XP and upgrades instead)
+ const ch=[];for(const id in L.pl){const P=L.pl[id];if(P.team===-2)continue;const d=devStep(R,P);if(d)ch.push([d,id]);}
+ ch.sort((a,b)=>Math.abs(b[0])-Math.abs(a[0]));log.dv=ch.slice(0,6).map(([d,id])=>`${nm(id)} ${d>0?'+':''}${d} → ${pOvr(p,id)}`);
+ // a declining veteran past 3 years retires; his club signs a rookie prospect in the same slot
+ L.rost.forEach((r,c)=>r.forEach((id,i)=>{if(id==='U')return;const P=L.pl[id];if(P.dev===3&&P.yrs>=3){P.team=-2;P.hist.push(`Y${yr}: retired`);L.ret.push(id);const nw=genPlayer(p,R,c,P.style,66+(R()*6|0),0);r[i]=nw.id;log.dv.push(`${nm(id)} retires · ${CLUBS[c][0]} sign rookie ${nm(nw.id)} (${pOvr(p,nw.id)})`);}}));
+ L.fa.forEach(id=>devStep(R,L.pl[id]));L.log.unshift(log);L.log.length=Math.min(L.log.length,6);return log;}
+const lgRat=(p,i)=>Math.round(74+(tStr(p,i)-74)*.25);   // season sim rating: compressed so underdogs still win their share
+// in a career match: every bot slot is a real club player (best passer takes the QB snap); ratings, look, body and jersey come from his record
+function lgAssign(){const p=PROF,L=p&&p.lg;if(!L||!MATCH)return;const tc={blue:p.team,red:preMatch.op};
+ for(const tm of['blue','red']){const ds=roster.filter(d=>d!==player&&d.cur.team===tm).sort((a,b)=>(b.cur.role==='qb')-(a.cur.role==='qb')),ps=id=>L.pl[id].att.thp+L.pl[id].att.tha,
+  ids=L.rost[tc[tm]].filter(id=>id!=='U').sort((a,b)=>ps(b)-ps(a)||(a<b?-1:1));
+  ds.forEach((d,i)=>{const P=L.pl[ids[i]];if(P)Object.assign(d.cur,{pid:P.id,at:{...P.att},app:migLook(P.look),bio:bioOf(P),num:P.num,nm:P.last});});}}
 const TABB={blue:'BLU',red:'RED'},TEAM0={blue:[...TEAM.blue],red:[...TEAM.red]};
 function useClubs(a,b){if(a==null){TEAM.blue=[...TEAM0.blue];TEAM.red=[...TEAM0.red];TABB.blue='BLU';TABB.red='RED';return;}const A=club(a),B=club(b);TEAM.blue=[A.jer,A.pant];TEAM.red=[B.jer,B.pant];TABB.blue=A.ab;TABB.red=B.ab;}   // the two slots wear the clubs' kits
 const jerseySVG=(c,n)=>`<svg viewBox="0 0 60 56" class="jsv"><path d="M18 4l-14 8 5 13 7-3v30h28V22l7 3 5-13-14-8c-2 5-6 7-12 7S20 9 18 4z" fill="${hx(c.jer)}" stroke="${hx(c.acc)}" stroke-width="2.5"/><text x="30" y="40" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif" font-weight="800" font-size="17" fill="${hx(c.acc)}">${n}</text></svg>`;
-function teamsUI(){const my=PROF?PROF.team??0:0;$m('tgrid').innerHTML=CLUBS.map((_,i)=>{const c=club(i);return`<button class="tcard${i===my?' on':''}" data-i="${i}" style="--j:${hx(c.jer)};--a:${hx(c.acc)}"><div class="tbadge">${c.ic}</div><div class="tinfo"><small>${c.city.toUpperCase()} · EST. ${c.yr}</small><b>${c.name}</b><span>${c.id}</span><em>${c.st} · ${c.ab}</em></div>${jerseySVG(c,i===my&&PROF?PROF.num:(i*7+11)%99)}</button>`;}).join('');}
+function teamsUI(){const my=PROF?PROF.team??0:0;$m('tgrid').innerHTML=CLUBS.map((_,i)=>{const c=club(i);return`<button class="tcard${i===my?' on':''}" data-i="${i}" style="--j:${hx(c.jer)};--a:${hx(c.acc)}"><div class="tbadge">${c.ic}</div><div class="tinfo"><small>${c.city.toUpperCase()} · EST. ${c.yr}</small><b>${c.name}</b><span>${c.id}</span><em>${c.st} · ${c.ab}${PROF?` · TEAM OVR ${(lgEnsure(PROF),tStr(PROF,i))} · ${tTier(PROF,i)}`:''}</em></div>${jerseySVG(c,i===my&&PROF?PROF.num:(i*7+11)%99)}</button>`;}).join('');}
 {$m('tgrid').onclick=e=>{const b=e.target.closest('.tcard');if(!b||!PROF||PROF.draft)return;PROF.team=+b.dataset.i;saveProf(PROF);teamsUI();};$m('tback').onclick=()=>{show('car');carUI();};$m('cteams').onclick=()=>{show('teams');teamsUI();};}
 // ================= COMBINE: five drills on the real engine (your ragdoll, ball, catching, tackling) =================
 const DR_Z=-20*YD,drillG=new THREE.Group();scene.add(drillG);let DRILL=null;
@@ -1828,7 +1885,7 @@ function makeDraft(p){const st=stockOf(p),R=roundOf(st.v),lo=R<5?RCUT[R-1]:50,hi
  const pick=cl(Math.round((1-f)*15)+1+(Math.random()*3|0)-1,1,16),order=[...Array(16).keys()].sort(()=>Math.random()-.5),team=order[pick-1];
  const board=Array.from({length:(R-1)*16+pick-1},(_,i)=>({n:DFN[Math.random()*16|0]+' '+DLN[Math.random()*16|0],pos:['QB','WR','CB','S','WR','CB'][Math.random()*6|0],sc:SCHOOLS[Math.random()*10|0]}));
  return{done:true,stock:st,round:R,pick,overall:(R-1)*16+pick,team,order,school:SCHOOLS[Math.random()*10|0],board:board.slice(-12),at:Date.now()};}
-function enterDraft(){const p=PROF;if(!DRILLS.every(d=>p.combine&&p.combine[d.id]))return;if(!p.draft){p.draft=makeDraft(p);p.team=p.draft.team;saveProf(p);}draftShow();}   // saved BEFORE the reveal: no rerolls
+function enterDraft(){const p=PROF;if(!DRILLS.every(d=>p.combine&&p.combine[d.id]))return;if(!p.draft){p.draft=makeDraft(p);p.team=p.draft.team;lgEnsure(p);saveProf(p);}draftShow();}   // saved BEFORE the reveal: no rerolls
 function draftShow(){const p=PROF,D=p.draft,ord=D.order,ov=D.overall,first=Math.max(1,ov-D.board.length);show('dft');$m('dreveal').hidden=true;$m('dskip').hidden=false;let n=first;clearTimeout(draftShow.t);
  const club2=i=>club(ord[(i-1)%16]),otc=$m('dotc'),setOtc=(i,txt)=>{const c=club2(i);otc.style.setProperty('--j',hx(c.jer));otc.style.setProperty('--a',hx(c.acc));otc.innerHTML=`<small>${txt}</small><div class="bd">${c.ic}</div><div class="lb">${c.city.toUpperCase()} ${c.name.toUpperCase()}</div><small>ROUND ${Math.ceil(i/16)} · PICK ${(i-1)%16+1}</small>`;$m('dround').textContent='ROUND '+Math.ceil(i/16);};
  const prev=(b,i)=>{const c=club2(i);$m('dprev').innerHTML=`<small>PREVIOUS PICK · #${i}</small><b>${b.n}</b><i></i><span>${b.pos} · ${b.sc} → ${c.ab}</span>`;};
@@ -1845,9 +1902,9 @@ function draftShow(){const p=PROF,D=p.draft,ord=D.order,ov=D.overall,first=Math.
 {$m('ccomb').onclick=()=>{if(!PROF)return;if(PROF.draft)return draftShow();show('comb');combUI();};$m('kback').onclick=()=>{show('car');carUI();};$m('dskip').onclick=()=>draftShow.skip();$m('dgo').onclick=()=>{show('car');carUI();};
  $m('clist').onclick=e=>{const b=e.target.closest('button');if(b&&!(PROF.combine||{})[DRILLS[+b.dataset.i].id])drillStart(+b.dataset.i);};}
 function preMatch(){if(!PROF)return;if(!PROF.draft){show('comb');combUI();return;}const nx=nextGame(PROF);if(!nx){HTAB='next';show('car');carUI();return;}show('pre');const my=PROF.team??0,op=nx.op;preMatch.op=op;preMatch.ctx=nx.ctx;const A=club(my),B=club(op);$m('pvs').innerHTML=`<span style="color:${hx(A.acc)}">${A.ic} ${A.city} ${A.name}</span> vs <span style="color:${hx(B.acc)}">${B.ic} ${B.city} ${B.name}</span>`;pvShow('pvp',PROF);$m('pvip').innerHTML=pviHTML(PROF);
- const pos=STYLES[PROF.style][4]==='qb'?'QB':'WR 1';$m('pline').innerHTML=`<div class="tbl"><div class="th"><span>${club(PROF.team??0).name} · your team</span><span></span><span></span></div>${[['YOU · '+esc(PROF.last.toUpperCase()),pos+' on offence · CB on defence'],['Bot',pos==='QB'?'WR':'QB'],['Bot','WR'],['Bot','WR']].map(([a,b])=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">${a}</span><span>${b}</span></div>`).join('')}
- <div class="th" style="margin-top:10px"><span>${club(preMatch.op).name} · opponents</span><span></span><span></span></div>${['QB / S','WR / CB','WR / CB','WR / CB'].map(r=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">Bot</span><span>${r}</span></div>`).join('')}</div>`;}
-function kickOff(){show(null);useClubs(PROF.team??0,preMatch.op);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:STYLES[PROF.style][4]});{const S=PROF.season;BADJ.blue=(S.rat[PROF.team]-74)/1.5;BADJ.red=(S.rat[preMatch.op]-74)/1.5;}MATCH={ctx:preMatch.ctx,id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj(STYLES[PROF.style][4]==='qb')};newGame();applyOrg();
+ const pos=STYLES[PROF.style][4]==='qb'?'QB':'WR 1';$m('pline').innerHTML=`<div class="tbl"><div class="th"><span>${club(PROF.team??0).name} · your team</span><span></span><span></span></div>${[['YOU · '+esc(PROF.last.toUpperCase()),pos+' on offence · CB on defence'],...mates(PROF).map(m=>['#'+m.num+' '+m.n+' · '+m.ovr,m.pos])].map(([a,b])=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">${a}</span><span>${b}</span></div>`).join('')}
+ <div class="th" style="margin-top:10px"><span>${club(preMatch.op).name} · opponents</span><span></span><span></span></div>${mates(PROF,op).map(m=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">#${m.num} ${m.n} · ${m.ovr}</span><span>${m.pos}</span></div>`).join('')}</div>`;}
+function kickOff(){show(null);useClubs(PROF.team??0,preMatch.op);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:STYLES[PROF.style][4]});lgEnsure(PROF);BADJ.blue=BADJ.red=0;MATCH={ctx:preMatch.ctx,id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj(STYLES[PROF.style][4]==='qb')};newGame();applyOrg();
  $m('pcard').hidden=false;$m('pcard').innerHTML=`<span class="o">${ovr(PROF.att,PROF.style)}</span><span><span class="n">#${PROF.num} ${esc(PROF.last)}</span><small>${STYLES[PROF.style][0]}</small></span>`;}
 function endMatch(){const M=MATCH,S=M.st,me=ORG.you,op=me==='blue'?'red':'blue',r=SCORE[me]>SCORE[op]?'w':SCORE[me]<SCORE[op]?'l':'t';M.my=SCORE[me];M.their=SCORE[op];
  MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;toMenu();

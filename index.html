@@ -594,17 +594,27 @@ const CATCH_ASSIST=.1;
 // held catch for 1.2 s+ (an early, set receiver): +20% reach, range and reaction
 const catchBoost=()=>catchOn&&cur.catchT0&&performance.now()-cur.catchT0>1200?1.2:1;
    // catch assist: 10 cm of extra wiggle room on every catch (hands and chest trap)
-function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(ball);let want=0,cp=null;
+// intercept: walk the ball's predicted flight (relative to the moving catcher) and take the EARLIEST point that is in front of the body
+// and within arm's length of a shoulder: the hand goes out to meet the ball there, before it can sail past the shoulder
+const _ic=new V();
+function interceptPoint(){const b=ball.position,v=ball.velocity,c=chest.position,u=chest.velocity,R=.68*catchBoost();
+ for(let t=0;t<=1.5;t+=.02){const bx=b.x+v.x*t,by=b.y+v.y*t-4.91*t*t,bz=b.z+v.z*t;
+  chest.vectorToLocalFrame(_ic.set(bx-c.x-u.x*t,by-c.y-u.y*t,bz-c.z-u.z*t),_cv);if(_cv.z<.08)continue;   // in front of the chest only
+  const dl=Math.hypot(_cv.x-.27,_cv.y-.12,_cv.z),dr=Math.hypot(_cv.x+.27,_cv.y-.12,_cv.z);if(dl>R&&dr>R)continue;
+  const side=Math.abs(_cv.x)<.22&&dl<=R&&dr<=R?0:dl<dr?1:-1;return{p:new V(bx+0*u.x,by,bz),side,t};}   // the arm reaches to where the ball will be, at that moment
+ return null;}
+function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(ball);let want=0,cp=null,ip=null;
  if(live){cp=catchPoint();const near=Math.hypot(ball.position.x-chest.position.x,ball.position.y-chest.position.y,ball.position.z-chest.position.z);
   chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);const cb=catchBoost();want=near<15*cb&&cp.d<4*cb&&_cv.z>-.12?1:0;}   // receivers pick the ball up from far away   // only balls passing in front of or beside the body: arms can't reach behind the back
- if(want&&catchK<.05){chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);catchSide=_cv.x>.3?1:_cv.x<-.3?-1:0;}   // decide 1 or 2 hands as the reach starts
+ if(want)ip=interceptPoint();const tp=ip?ip.p:cp&&cp.p;   // arms go to the intercept point; closest approach is only the fallback
+ if(want&&(catchK<.05||ip&&catchK<.5)){if(ip)catchSide=ip.side;else{chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);catchSide=_cv.x>.3?1:_cv.x<-.3?-1:0;}}   // 1 or 2 hands, settled as the reach builds
  cur.look=live?ball.position:null;cur.cp=live&&want?cp:null;   // eyes on the ball while catch is held; cp also guides a jump catch
- cur.high=cp?catchK*cl((cp.p.y-chest.position.y-.35)/.6,0,1):0;   // ball passing above the shoulders: reach up tall
+ cur.high=tp?catchK*cl((tp.y-chest.position.y-.35)/.6,0,1):0;   // ball passing above the shoulders: reach up tall
  catchK+=(want-catchK)*Math.min(1,DT*(want?20*catchBoost():6));if(catchK<.05||!cp)return;
  if(cur.high>.01)for(const sd of[1,-1])joints['ankle'+sd].x+=.35*cur.high;   // up on the toes
  // high ball: elbows lock straight so the arms reach as high as they go
  for(const sd of catchSide?[catchSide]:[1,-1]){const S=bpt(chest,sd*.27,.12,0),o=catchSide?0:sd*.07;   // two hands: each aims a little to its own side of the ball
-  chest.vectorToLocalFrame(new V(cp.p.x-S.x,cp.p.y-S.y,cp.p.z-S.z),_cv);_cv.x+=o;const L=Math.hypot(_cv.x,_cv.y,_cv.z)||1,J=joints,k=catchK;
+  chest.vectorToLocalFrame(new V(tp.x-S.x,tp.y-S.y,tp.z-S.z),_cv);_cv.x+=o;const L=Math.hypot(_cv.x,_cv.y,_cv.z)||1,J=joints,k=catchK;
   const ax=cl(-Math.atan2(_cv.z,-_cv.y),-3,.3),az=cl(Math.asin(cl(_cv.x/L,-1,1)),sd>0?-.5:-1.4,sd>0?1.4:.5),M=(a,b)=>a+(b-a)*k;   // shoulder range: no reaching back past the body, limited reach across it
   J['shoulder'+sd].x=M(J['shoulder'+sd].x,ax);J['shoulder'+sd].z=M(J['shoulder'+sd].z,az);J['shoulder'+sd].y=0;J['elbow'+sd].x=M(J['elbow'+sd].x,cur.high>.2?-.03:-.2);J['wrist'+sd].x=M(J['wrist'+sd].x,0);}
  // the catch itself: a reaching hand gets to the ball (checked every physics step, so fast passes can't skip past)

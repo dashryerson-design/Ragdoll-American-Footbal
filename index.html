@@ -63,6 +63,7 @@ for(const sd of[-1,1]){
  joint('wrist'+k,fa,[0,-.15,0],hd,[0,.06,0],1.5);
 }}
 buildDoll(0x2a6fdb,0x23304d);
+for(const b of list){b.position.z-=6;b.home[2]-=6;}   // start 6 m behind the ball on the 50
 // ---------- muscles (PD torque controllers) ----------
 const qa=new Q(),qb=new Q(),qc=new Q(),tq=new Q(),des=new Q(),er=new Q(),inv=new Q();
 const X=new V(1,0,0),Y=new V(0,1,0),Z=new V(0,0,1);
@@ -228,7 +229,7 @@ function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z
 function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
- if(k==='f'){limp=!limp;js=0;}   // F: go limp / get up
+ if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();   // T: drop the ball   // F: go limp / get up
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key===' '&&jp===1){jp=0;if(!limp&&js===0&&contact())startBound();}});
@@ -396,7 +397,8 @@ function control(dt){
   if(js===0&&mv>.3&&contact()){const f=pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw);cur.runV=(cur.runV==null?f:cur.runV*.995+f*.005);}   // remember normal ground speed: a bound only beats it by ~20%
   if(cur.bufB&&(js===4||js===0)&&contact()&&!limp){if(performance.now()-cur.bufB<400){jpt=.2;startBound();}cur.bufB=0;}   // space pressed just before landing: chain straight into the next bound
  }
- const lean=.18*crK+mv*(run?.28:.1)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
+ ballArm();
+ const lean=.95*reachK+.18*crK+mv*(run?.28:.1)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
  if(!limp){
   // balance: keep pelvis and chest facing the heading, upright
   const tw=.12*Math.sin(phase)*mv;
@@ -409,7 +411,7 @@ function control(dt){
   // support + drive while feet are on the ground
   if(contact()&&(js===0||js===1||js===4)){
    const y=pel.position.y,uu=Math.min(1,jt/.13),dip=js===0?Math.max(...[-1,1].map(sd=>tnorm(phase+(sd>0?0:Math.PI))>=.5?(1-legW[sd])*.2*Math.max(.35,mv):0)):0,   // body sags onto a weak leg
-    hy=gs-dip-.36*crK+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55;
+    hy=gs-dip-.36*crK-.42*reachK+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55;
    pel.force.y+=Math.max(0,Math.min(fy,totalMass*9.82*1.0));
    const vd=speed*mv;if(moving){const bf=Math.max(0,Math.min(totalMass*3,totalMass*4*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
    const tau=gdir*(moving?Math.max(0,Math.min(420,totalMass*8*(vd-(pel.velocity.x*dx+pel.velocity.z*dz)))):0);
@@ -439,6 +441,44 @@ function reset(){if(cs>0)endClimb(0);for(const k in pins)unpin(k);
 const rr=new C.RaycastResult();
 function castRay(from,dir,maxD){const f=new V(from.x,from.y,from.z),to=new V(from.x+dir.x*maxD,from.y+dir.y*maxD,from.z+dir.z*maxD);
  rr.reset();if(world.raycastClosest(f,to,{collisionFilterMask:1,skipBackfaces:true},rr))return{hit:true,p:rr.hitPointWorld.clone()};return{hit:false};}
+// ---------- the football: a real physics ball (long axis = local y); picked up in stride, carried tucked under the right arm ----------
+const ballM=new C.Material('ball');world.addContactMaterial(new C.ContactMaterial(ballM,gm,{friction:.5,restitution:.45}));
+const ball=new C.Body({mass:.42,material:ballM,linearDamping:.1,angularDamping:.3});
+ball.addShape(new C.Sphere(.085),new V(0,.05,0));ball.addShape(new C.Sphere(.085),new V(0,-.05,0));   // two spheres = a rough prolate football
+ball.collisionFilterGroup=4;ball.collisionFilterMask=1;ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);world.addBody(ball);
+const ballMesh=new THREE.Group();
+{const leather=new THREE.MeshStandardMaterial({color:0x6b3416,roughness:.7}),white=new THREE.MeshStandardMaterial({color:0xf2efe6,roughness:.6});
+ const e=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),leather);e.scale.set(.085,.143,.085);e.castShadow=true;ballMesh.add(e);
+ const l=new THREE.Mesh(new THREE.BoxGeometry(.012,.075,.012),white);l.position.z=.084;ballMesh.add(l);
+ for(let i=-2;i<=2;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(.03,.006,.01),white);c.position.set(0,i*.015,.085);ballMesh.add(c);}
+ for(const y of[-.1,.1]){const r=new THREE.Mesh(new THREE.TorusGeometry(y>0?.062:.062,.005,6,20),white);r.rotation.x=Math.PI/2;r.position.y=y;ballMesh.add(r);}}
+scene.add(ballMesh);
+let held=false,reachK=0,reachOn=false,ballCool=0;
+const handR=()=>parts['hand-1'];
+// should the body start reaching? predict when the ball passes under us at the current velocity (in stride: no slowing down)
+function reachPredict(){if(held||limp||cs>0||js>0||ballCool>0||ball.position.y>.45)return false;
+ const vx=pel.velocity.x,vz=pel.velocity.z,sp=Math.hypot(vx,vz),dx=ball.position.x-pel.position.x,dz=ball.position.z-pel.position.z,d=Math.hypot(dx,dz);
+ if(sp<.6)return d<.9;                                            // standing / creeping: reach when it's right there
+ const along=(dx*vx+dz*vz)/sp,lat=Math.abs(dx*vz-dz*vx)/sp;
+ return along>-.25&&along/sp<.38&&lat<.75&&d<2.6;}
+// right arm (side -1): swing down toward the ball while reaching; tucked across the belly while carrying
+function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));const pc=pitchOf(chest),sh=joints['shoulder-1'],el=joints['elbow-1'],wr=joints['wrist-1'];
+ if(held){sh.x=pc-.15;sh.z=.3;el.x=-1.65;wr.x=.1;return;}   // tucked: upper arm down at the side, forearm across the belly (arm angle in the world = chest pitch - shoulder x)
+ if(reachK<.01)return;
+ const S=bpt(chest,-.27,.12,0),dx=ball.position.x-S.x,dz=ball.position.z-S.z,fw=Math.max(.05,dx*Math.sin(yaw)+dz*Math.cos(yaw)),dn=Math.max(.2,S.y-ball.position.y);
+ const a=cl(Math.atan2(fw,dn),.1,1.2),L=(x,y)=>x+(y-x)*reachK;   // forward angle of the arm from straight down
+ sh.x=L(sh.x,pc-a);sh.z=L(sh.z,.12);el.x=L(el.x,-.12);wr.x=L(wr.x,-.3);}
+function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);}
+function dropBall(){if(!held)return;held=false;ballCool=.6;const h=handR(),p=bpt(h,0,-.02,.06);
+ ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);
+ ball.velocity.set(pel.velocity.x,pel.velocity.y,pel.velocity.z);ball.angularVelocity.set(0,0,0);world.addBody(ball);ball.wakeUp();}   // it was asleep on the turf before the pickup
+function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballTick.t=now;ballCool=Math.max(0,ballCool-dt);
+ if(held&&limp)dropBall();                                        // fumble when you go limp
+ reachOn=reachPredict();
+ if(!held&&reachK>.3){const h=handR().position,b=ball.position,hd=Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z),pd2=Math.hypot(pel.position.x-b.x,pel.position.z-b.z);
+  if(hd<.3||(pd2<.45&&reachK>.6))grabBall();}                     // hand on it, or right underfoot with the arm already down
+ if(held){const h=handR(),p=bpt(h,0,-.02,.07);ballMesh.position.set(p.x,p.y,p.z);ballMesh.quaternion.copy(parts['farm-1'].quaternion);}
+ else{ballMesh.position.copy(ball.position);ballMesh.quaternion.copy(ball.quaternion);}}
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
 const DT=1/400;let acc=0,last=performance.now();
 const tgt=new THREE.Vector3(0,1,0);let camCD=3.6;
@@ -451,12 +491,14 @@ function frame(now){
   world.step(DT);acc-=DT;
   for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}
  for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}
+ ballTick(now);
  tgt.x+=(pel.position.x-tgt.x)*.45;tgt.z+=(pel.position.z-tgt.z)*.45;tgt.y+=(Math.max(.4,pel.position.y-.08)-tgt.y)*.1;   // follow the doll tightly (incl. height on platforms)
  const sh=.55,pvx=tgt.x+Math.cos(camYaw)*sh,pvy=tgt.y+.55,pvz=tgt.z-Math.sin(camYaw)*sh,cp=Math.cos(camPitch);   // pivot: over the doll's right shoulder
  const dx=Math.sin(camYaw)*cp,dy=Math.sin(camPitch),dz=Math.cos(camYaw)*cp,rc=castRay({x:pvx,y:pvy,z:pvz},{x:dx,y:dy,z:dz},camDist+.2);
  const cd=rc.hit?Math.max(.6,Math.hypot(rc.p.x-pvx,rc.p.y-pvy,rc.p.z-pvz)-.2):camDist;
  camCD+=(cd-camCD)*(cd<camCD?.5:.06);                   // move in quickly when blocked, ease back out slowly (no snapping)
  cam.position.set(pvx+dx*camCD,Math.max(.2,pvy+dy*camCD),pvz+dz*camCD);cam.lookAt(pvx,pvy,pvz);
+ if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,.8,pel.position.z);}   // test hook: side view
  sun.position.set(pel.position.x+5,12,pel.position.z+4);sun.target.position.set(pel.position.x,0,pel.position.z);
  renderer.render(scene,cam);
 }

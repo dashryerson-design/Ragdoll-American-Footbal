@@ -401,7 +401,7 @@ function control(dt){
  // per-limb weakness (wk, 1 = healthy) slows the gait and makes the body sag onto that leg
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
- const speed=(run?4.8:qbMove?(keys.shift?1.6:1.1):1.7)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.6:.37,w=Math.PI*(run?.38:.5)*speed/S;
+ const speed=(run?7.2:qbMove?(keys.shift?1.6:1.1):2.3)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,w=Math.PI*(run?.38:.5)*speed/S;
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
@@ -458,8 +458,9 @@ function control(dt){
    const y=pel.position.y,uu=Math.min(1,jt/.13),dip=js===0?Math.max(...[-1,1].map(sd=>tnorm(phase+(sd>0?0:Math.PI))>=.5?(1-legW[sd])*.2*Math.max(.35,mv):0)):0,   // body sags onto a weak leg
     hy=gs-dip-.36*crK-.42*reachK+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55;
    pel.force.y+=Math.max(0,Math.min(fy,totalMass*9.82*1.0));
-   const vd=speed*mv;if(moving){const bf=Math.max(0,Math.min(totalMass*3,totalMass*4*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
-   const tau=gdir*(moving?Math.max(0,Math.min(420,totalMass*8*(vd-(pel.velocity.x*dx+pel.velocity.z*dz)))):0);
+   // sprinting pushes harder (bigger force cap + gain)
+   const vd=speed*mv;if(moving){const bf=Math.max(0,Math.min(totalMass*(run?6:3.5),totalMass*(run?7:4.5)*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
+   const tau=gdir*(moving?Math.max(0,Math.min(run?650:420,totalMass*8*(vd-(pel.velocity.x*dx+pel.velocity.z*dz)))):0);
    const ax=Math.cos(yaw),az=-Math.sin(yaw);
    const sf=[];for(const sd of[-1,1]){const ft=parts['foot'+sd];if(tnorm(phase+(sd>0?0:Math.PI))>=.5&&low(ft)<.05)sf.push(parts['thigh'+sd]);}
    for(const th of sf){const t=tau/sf.length;th.torque.x+=t*ax;th.torque.z+=t*az;pel.torque.x-=t*ax;pel.torque.z-=t*az;}

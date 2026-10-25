@@ -753,7 +753,7 @@ function setDef(on){defOn=on;$m('bdf').textContent='DEFENDER AI: '+(on?'ON':'OFF
 function defThink(dt){const c=cur,Rc=teammate?player:wrMode?wrD:player,P=pel.position,RP=Rc.pel.position,RV=Rc.pel.velocity;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;
  const face=(x,z)=>{camYaw=Math.atan2(x-P.x,z-P.z)+Math.PI;};
  // move to (x,z) running exactly like the player (face the way he runs, sprint unless it's a short adjustment); only tiny last-metre fixes are a shuffle facing the receiver
- const goTo=(x,z,run,look)=>{const mx=x-P.x,mz=z-P.z,d=Math.hypot(mx,mz);if(d<.45){if(look)face(look.x,look.z);return;}
+ let want=null,wantRun=false;const goTo=(x,z,run,look)=>{const mx=x-P.x,mz=z-P.z,d=Math.hypot(mx,mz);want=d<.45?null:[x,z];wantRun=run&&d>1.5;if(d<.45){if(look)face(look.x,look.z);return;}
   if(look&&d<1){face(look.x,look.z);const cy=camYaw,f=-(mx*Math.sin(cy)+mz*Math.cos(cy))/d,r=(mx*Math.cos(cy)-mz*Math.sin(cy))/d;keys.w=f>.3;keys.s=f<-.3;keys.d=r>.3;keys.a=r<-.3;}
   else{face(x,z);keys.w=true;keys.shift=run&&d>1.5;}};
  if(c.st==='pre'){face(RP.x,RP.z);return;}
@@ -778,7 +778,8 @@ function defThink(dt){const c=cur,Rc=teammate?player:wrMode?wrD:player,P=pel.pos
  if(c.st==='chase'){if(!Rc.held){c.st='cover';}goTo(RP.x+RV.x*.5,RP.z+RV.z*.5,true,null);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);
   if(dd<1.3&&dv===0){face(RP.x,RP.z);startDive();for(const b of Rc.list){b.velocity.x+=dx/dd*3;b.velocity.z+=dz/dd*3;}Rc.limp=true;Rc.limpT=performance.now()+2600;c.st='down';}}   // tackle: dive into him, he goes limp for a moment
- if(c.st==='int'&&c.t-c.intT<1.5)goTo(P.x,P.z-6,true,null);}   // picked it off: a few strides back the other way
+ if(c.st==='int'&&c.t-c.intT<1.5)goTo(P.x,P.z-6,true,null);   // picked it off: a few strides back the other way
+ if(dv===0)plantCut(want,wantRun,29.4);}   // plants and changes direction hard (3 g)
 let teammate=false,wrMode=false,qbClock=0,callReq=null;
 const active=()=>{const a=teammate?[player,qbD]:wrMode?[player,wrD]:[player];if(defOn)a.push(dfD);return a;};
 function showDoll(d,on){for(const b of d.list){if(on)world.addBody(b);else world.removeBody(b);b.mesh.visible=on;}for(const c of d.cons)if(on)world.addConstraint(c);else world.removeConstraint(c);if(!on){use(d);for(const k in pins)unpin(k);held=false;use(player);}}
@@ -839,8 +840,12 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
  if(tx!==null){camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=sprint;}
  // ball in the air: plant and cut hard. Any velocity he doesn't want (overshooting, wrong direction) is braked at up to 2 g -
  // a sprint stops in ~0.3 s. shortcut: braking only, never adds speed, so it can't make him faster than his legs
- if(c.st==='ball'&&contact()){const v=pel.velocity,wl=tx===null?0:sprint?6:2.6;let wx=0,wz=0;if(tx!==null){const L=Math.hypot(tx-P.x,tz-P.z)||1;wx=(tx-P.x)/L*wl;wz=(tz-P.z)/L*wl;}
-  let ax=(wx-v.x)*10,az=(wz-v.z)*10;if(ax*v.x+az*v.z<0){const m=Math.hypot(ax,az),cap=19.6;if(m>cap){ax*=cap/m;az*=cap/m;}for(const b of list){b.force.x+=b.mass*ax;b.force.z+=b.mass*az;}}}}
+ if(c.st==='ball')plantCut(tx===null?null:[tx,tz],sprint,19.6);}
+// plant and cut: brake away any velocity the doll doesn't want (overshoot, wrong direction) at up to cap m/s^2.
+// shortcut: braking only, never adds speed, so it can't outrun the legs
+function plantCut(T,sprint,cap){if(!contact())return;const P=pel.position,v=pel.velocity,wl=T?(sprint?6:2.6):0;let wx=0,wz=0;
+ if(T){const L=Math.hypot(T[0]-P.x,T[1]-P.z)||1;wx=(T[0]-P.x)/L*wl;wz=(T[1]-P.z)/L*wl;}
+ let ax=(wx-v.x)*10,az=(wz-v.z)*10;if(ax*v.x+az*v.z<0){const m=Math.hypot(ax,az);if(m>cap){ax*=cap/m;az*=cap/m;}for(const b of list){b.force.x+=b.mass*ax;b.force.z+=b.mass*az;}}}
 function setTeammate(on){if(on===teammate)return;if(on&&wrMode)setWR(false);teammate=on;document.body.classList.toggle('play',teammate||wrMode);$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
  showDoll(qbD,on);if(on)resetPlay();else modeOff();}
 function looseBall(){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=11;}

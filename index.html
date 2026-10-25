@@ -6,12 +6,34 @@
 .tb{position:absolute;border-radius:50%;background:#000a;border:2px solid #ffffff66;color:#fff;font:700 13px system-ui,sans-serif;display:flex;align-items:center;justify-content:center}
 .tb.on{background:#ffd23fcc;color:#111;border-color:#ffd23f}
 #bbig{width:96px;height:96px;right:calc(30px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px));font-size:16px}
-.sm{width:58px;height:58px}</style></head><body>
+.sm{width:58px;height:58px}
+#tpause{width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:15px}
+.ov{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;overflow-y:auto;padding:24px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;color:#fff;user-select:none;-webkit-user-select:none}
+.ov[hidden]{display:none}
+#mm{background:#000}
+#logo{text-align:center;font:900 min(10vw,64px,10vh)/.92 Impact,"Arial Black",sans-serif;letter-spacing:.04em;text-transform:uppercase}
+#logo svg{display:block;margin:0 auto 1.5vh;width:min(26vw,150px,22vh);height:auto}
+#logo .r{display:block;color:#fff}#logo .a{display:block;font-size:.62em;letter-spacing:.14em;color:#d8a24a;margin-top:.12em}
+#pick{display:flex;gap:min(5vw,32px);flex-wrap:wrap;justify-content:center}
+.ch{width:min(42vw,230px);padding:min(22px,3vh) 14px min(18px,3vh);border:2px solid #333;border-radius:14px;background:#0d0d0d;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:14px;font:700 15px system-ui,sans-serif;letter-spacing:.08em;transition:border-color .15s,transform .15s,background .15s}
+.ch:hover,.ch:focus-visible{border-color:#d8a24a;background:#17130c;transform:translateY(-3px);outline:none}
+.ch svg{width:70%;height:auto;max-width:130px;max-height:18vh}
+#pm{background:#000c}#pm h2{margin:0;font:900 40px Impact,"Arial Black",sans-serif;letter-spacing:.08em}
+#pm button{font:700 16px system-ui,sans-serif;letter-spacing:.08em;color:#fff;background:#111;border:2px solid #d8a24a;border-radius:10px;padding:14px 28px;cursor:pointer}
+#pm button:hover,#pm button:focus-visible{background:#2a2112;outline:none}
+</style></head><body>
+<div id="mm" class="ov"><div id="logo"><svg viewBox="0 0 120 70" aria-hidden="true"><ellipse cx="60" cy="35" rx="56" ry="31" fill="#7a3a16"/><ellipse cx="60" cy="35" rx="56" ry="31" fill="none" stroke="#4a210a" stroke-width="3"/>
+<path d="M17 20q6 15 0 30M103 20q-6 15 0 30" stroke="#f4efe6" stroke-width="4" fill="none"/><path d="M38 35h44" stroke="#f4efe6" stroke-width="4"/><path d="M45 29v12M52 29v12M60 29v12M68 29v12M75 29v12" stroke="#f4efe6" stroke-width="3"/></svg>
+<span class="r">Ragdoll</span><span class="a">American Football</span></div>
+<div id="pick"><button class="ch" id="ctouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="#fff" stroke-width="4"/><circle cx="40" cy="84" r="4" fill="#fff"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#d8a24a"/></svg>TOUCH CONTROLS</button>
+<button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="#fff" stroke-width="4"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="#fff" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#d8a24a" stroke-width="4"/><path d="M103 18v14" stroke="#d8a24a" stroke-width="4"/></svg>KEYBOARD &amp; MOUSE</button></div></div>
+<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bmenu">RETURN TO MAIN MENU</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
 <div class="tb" id="bbig"></div>
 <div class="tb sm" id="baim" style="right:calc(49px + env(safe-area-inset-right,0px));bottom:calc(152px + env(safe-area-inset-bottom,0px))">AIM</div>
 <div class="tb sm" id="bjump" style="right:calc(138px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))">JUMP</div>
 <div class="tb sm" id="bdrop" style="right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px))">DROP</div>
+<div class="tb" id="tpause">II</div>
 <div class="tb sm" id="bsprint" style="right:calc(232px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px))">SPRINT</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
@@ -241,7 +263,7 @@ const cur={};   // movement memory (normal ground speed, queued bounds)
 function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>1){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=jdz=0;}}
 function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
  if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();   // T: drop the ball   // F: go limp / get up
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
@@ -250,8 +272,8 @@ addEventListener('blur',()=>{keys={};});
 const lockEl=renderer.domElement;
 addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('mouseup',e=>{if(e.button===2)aimOn=false;if(e.button===0)releaseCharge();});
-lockEl.addEventListener('mousedown',e=>{if(e.button===2)aimOn=true;if(e.button===0)startCharge();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
-addEventListener('mousemove',e=>{if(document.pointerLockElement!==lockEl)return;camYaw-=e.movementX*.006;camPitch=Math.max(-.6,Math.min(1.2,camPitch+e.movementY*.006));});
+lockEl.addEventListener('mousedown',e=>{if(mode!=='kb'||paused)return;if(e.button===2)aimOn=true;if(e.button===0)startCharge();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
+addEventListener('mousemove',e=>{if(document.pointerLockElement!==lockEl||paused)return;camYaw-=e.movementX*.006;camPitch=Math.max(-.6,Math.min(1.2,camPitch+e.movementY*.006));});
 addEventListener('wheel',e=>{camDist=Math.max(1.8,Math.min(8,camDist+e.deltaY*.003));});
 addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
 function contact(){return Math.min(parts.foot1.position.y-fh[1],parts['foot-1'].position.y-fh[-1])<.2;}
@@ -549,7 +571,6 @@ function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballT
  else{ballMesh.position.copy(ball.position);ballMesh.quaternion.copy(ball.quaternion);}}
 // ---------- touch: joystick (push to the edge to sprint), drag the right side to look, AIM toggles, the big button throws while aiming ----------
 const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles sprinting
-if('ontouchstart'in window||matchMedia('(pointer:coarse)').matches)document.body.classList.add('touch');
 {const $=id=>document.getElementById(id),J=$('joy'),K=$('knob'),big=$('bbig'),aimB=$('baim'),key=(k,t)=>dispatchEvent(new KeyboardEvent(t,{key:k}));
  const mvJ=t=>{const r=J.getBoundingClientRect(),x=(t.clientX-r.left-r.width/2)/(r.width/2),y=(t.clientY-r.top-r.height/2)/(r.height/2),l=Math.hypot(x,y),k=l>1?1/l:1;
   joy.x=x*k;joy.y=y*k;K.style.transform=`translate(${joy.x*44}px,${joy.y*44}px)`;};
@@ -567,11 +588,22 @@ if('ontouchstart'in window||matchMedia('(pointer:coarse)').matches)document.body
  $('tc').addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches){const L=look[t.identifier];if(!L)continue;camYaw-=(t.clientX-L[0])*.008;camPitch=Math.max(-.6,Math.min(1.2,camPitch+(t.clientY-L[1])*.008));L[0]=t.clientX;L[1]=t.clientY;}},{passive:false});
  const lEnd=e=>{for(const t of e.changedTouches)delete look[t.identifier];};$('tc').addEventListener('touchend',lEnd);$('tc').addEventListener('touchcancel',lEnd);
  setInterval(()=>{if(!held&&document.body.classList.contains('touch'))aimOn=false;big.textContent=aimOn?'THROW':'';big.classList.toggle('on',aimOn);aimB.classList.toggle('on',aimOn);$('bsprint').classList.toggle('on',!!keys.shift);},100);}
+// ---------- menus: main menu (pick a control scheme) and the P pause menu ----------
+let mode=null,paused=false;const $m=id=>document.getElementById(id);
+function startGame(m){mode=m;document.body.classList.toggle('touch',m==='touch');$m('mm').hidden=true;last=performance.now();}
+function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
+function toMenu(){paused=false;$m('pm').hidden=true;mode=null;document.body.classList.remove('touch');
+ if(held||!world.bodies.includes(ball)){held=false;world.addBody(ball);}thr=-1;aimOn=false;chargeT=-1;reset();   // a fresh start next time: doll back on the 45, ball on the 50
+ ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=3;$m('mm').hidden=false;}
+$m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
+$m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
 const DT=1/400;let acc=0,last=performance.now();
 const tgt=new THREE.Vector3(0,1,0);let camCD=3.6;
 function frame(now){
  requestAnimationFrame(frame);
+ if(!mode){last=now;return;}                                  // main menu: nothing of the game is drawn
+ if(paused){last=now;renderer.render(scene,cam);return;}        // paused: frozen frame, no physics
  acc+=Math.min(.05,(now-last)/1000);last=now;if(window.DBGFREEZE)acc=0;   // test hook
  sense();
  while(acc>=DT){

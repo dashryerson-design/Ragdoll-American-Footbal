@@ -9,9 +9,9 @@
 .sm{width:58px;height:58px}
 #brst{position:fixed;z-index:3;display:none;width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:22px;cursor:pointer}body.play #brst{display:flex}body.play.touch #brst{right:calc(70px + env(safe-area-inset-right,0px))}
 #bedit{display:none}body.touch #bedit{display:inline-block}
-#ed{position:fixed;z-index:12;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:#000c;border:1px solid #d8a24a;border-radius:12px;padding:8px 10px;font:600 13px system-ui,sans-serif;color:#fff;white-space:nowrap}
+#ed{position:fixed;z-index:12;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:#000c;border:1px solid #ff5a1f;border-radius:12px;padding:8px 10px;font:600 13px system-ui,sans-serif;color:#fff;white-space:nowrap}
 #ed[hidden]{display:none}#ed button{font:700 15px system-ui,sans-serif;color:#fff;background:#1a1a1a;border:1px solid #666;border-radius:8px;min-width:40px;height:36px;padding:0 10px}
-#ed #edone{border-color:#d8a24a;background:#2a2112}.esel{outline:3px solid #d8a24a;outline-offset:3px}
+#ed #edone{border-color:#ff5a1f;background:#1f1f22}.esel{outline:3px solid #ff5a1f;outline-offset:3px}
 .wrb{display:none}body.play .wrb{display:flex}
 #tpause{width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:15px}
 .ov{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;overflow-y:auto;padding:24px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;color:#fff;user-select:none;-webkit-user-select:none}
@@ -19,24 +19,69 @@
 #mm{background:#000}
 #logo{text-align:center;font:900 min(10vw,64px,10vh)/.92 Impact,"Arial Black",sans-serif;letter-spacing:.04em;text-transform:uppercase}
 #logo svg{display:block;margin:0 auto 1.5vh;width:min(26vw,150px,22vh);height:auto}
-#logo .r{display:block;color:#fff}#logo .a{display:block;font-size:.62em;letter-spacing:.14em;color:#d8a24a;margin-top:.12em}
+#logo .r{display:block;color:#fff}#logo .a{display:block;font-size:.62em;letter-spacing:.14em;color:#ff5a1f;margin-top:.12em}
 #pick{display:flex;gap:min(5vw,32px);flex-wrap:wrap;justify-content:center}
 .ch{width:min(42vw,230px);padding:min(22px,3vh) 14px min(18px,3vh);border:2px solid #333;border-radius:14px;background:#0d0d0d;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:14px;font:700 15px system-ui,sans-serif;letter-spacing:.08em;transition:border-color .15s,transform .15s,background .15s}
-.ch:hover,.ch:focus-visible{border-color:#d8a24a;background:#17130c;transform:translateY(-3px);outline:none}
+.ch:hover,.ch:focus-visible{border-color:#ff5a1f;background:#1a1a1d;transform:translateY(-3px);outline:none}
 .ch svg{width:70%;height:auto;max-width:130px;max-height:18vh}
-#pm,#org{background:#000c}#org{gap:1.2vh;justify-content:flex-start}#obox{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;width:min(100%,920px);background:#151515ee;border:2px solid #d8a24a;border-radius:12px;padding:12px;box-sizing:border-box}#obox h3{grid-column:1/-1;margin:0;text-align:center;font:900 26px Impact,"Arial Black",sans-serif;letter-spacing:.08em}#org #obox button{font-size:13px;padding:10px 12px}.cnt{display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 13px system-ui,sans-serif;letter-spacing:.06em;border:2px solid #d8a24a55;border-radius:10px;padding:4px 10px}#org .cnt button{padding:6px 14px!important}.cnt span{font:900 22px Impact,sans-serif;min-width:24px;text-align:center}#oline{width:min(100%,920px)}.obtn{display:flex;gap:12px}#pm h2{margin:0;font:900 40px Impact,"Arial Black",sans-serif;letter-spacing:.08em}
-#pm button,#org button{font:700 16px system-ui,sans-serif;letter-spacing:.08em;color:#fff;background:#111;border:2px solid #d8a24a;border-radius:10px;padding:14px 28px;cursor:pointer}
-#pm button:hover,#pm button:focus-visible,#org button:hover,#org button:focus-visible{background:#2a2112;outline:none}
+#pm,#org{background:#000c}#org{gap:1.2vh;justify-content:flex-start}#obox{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;width:min(100%,920px);background:#151515ee;border:2px solid #ff5a1f;border-radius:12px;padding:12px;box-sizing:border-box}#obox h3{grid-column:1/-1;margin:0;text-align:center;font:900 26px Impact,"Arial Black",sans-serif;letter-spacing:.08em}#org #obox button{font-size:13px;padding:10px 12px}.cnt{display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 13px system-ui,sans-serif;letter-spacing:.06em;border:2px solid #ff5a1f55;border-radius:10px;padding:4px 10px}#org .cnt button{padding:6px 14px!important}.cnt span{font:900 22px Impact,sans-serif;min-width:24px;text-align:center}#oline{width:min(100%,920px)}.obtn{display:flex;gap:12px}#pm h2{margin:0;font:900 40px Impact,"Arial Black",sans-serif;letter-spacing:.08em}
+#pm button,#org button{font:700 16px system-ui,sans-serif;letter-spacing:.08em;color:#fff;background:#111;border:2px solid #ff5a1f;border-radius:10px;padding:14px 28px;cursor:pointer}
+#pm button:hover,#pm button:focus-visible,#org button:hover,#org button:focus-visible{background:#1f1f22;outline:none}
+:root{--ac:#ff5a1f;--bg:#0a0a0b;--pn:#141416;--pn2:#1b1b1e;--ln:#2a2a2f;--mu:#8a8a93}
+.ov{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.ov:not([hidden]){animation:ovIn .28s ease}@keyframes ovIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#mm,#mode,#car,#cre{background:radial-gradient(120% 90% at 75% 20%,#1d1d21 0,#0a0a0b 60%),#0a0a0b}
+#logo .a{color:var(--ac)}.ch{background:var(--pn);border:1px solid var(--ln);border-radius:4px}.ch:hover,.ch:focus-visible{background:var(--pn2);border-color:var(--ac)}
+#pm,#org{background:#000d}#pm button,#org button{background:var(--pn);border:1px solid var(--ln);border-radius:4px;transition:border-color .15s,background .15s}#pm button:hover,#org button:hover{border-color:var(--ac);background:var(--pn2)}
+#obox{background:#111114ee;border:1px solid var(--ln);border-top:3px solid var(--ac);border-radius:4px}
+.crumb{font:700 12px system-ui,sans-serif;letter-spacing:.3em;color:var(--mu)}.ttl{margin:0;font:800 34px system-ui,sans-serif;letter-spacing:.04em}
+.scr button{font:700 14px system-ui,sans-serif;letter-spacing:.12em;color:#fff;cursor:pointer;border-radius:4px;padding:13px 24px;transition:background .15s,border-color .15s,transform .15s,opacity .15s}
+.scr button:disabled{opacity:.35;cursor:default}.ghost{background:var(--pn);border:1px solid var(--ln)}.ghost:hover{border-color:#fff}.pri{background:var(--ac);border:1px solid var(--ac);color:#111!important}.pri:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px #ff5a1f55}
+.mpick{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}.mc{width:min(86vw,300px);text-align:left;background:var(--pn)!important;border:1px solid var(--ln)!important;padding:26px 22px!important;display:flex;flex-direction:column;gap:10px}
+.mc b{font:800 24px system-ui,sans-serif;letter-spacing:.06em}.mc span{font:500 14px/1.45 system-ui,sans-serif;letter-spacing:0;color:#bdbdc4}.mc:hover{border-color:var(--ac)!important;transform:translateY(-3px)}.mc.acc{border-top:3px solid var(--ac)!important}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#ccard{display:flex;gap:24px;align-items:center;background:var(--pn);border:1px solid var(--ln);border-left:3px solid var(--ac);border-radius:4px;padding:18px 24px;width:min(100%,640px);box-sizing:border-box;flex-wrap:wrap;justify-content:center}
+#ccard .pvw{width:150px}.empty{color:var(--mu);padding:30px}.ci{flex:1;min-width:220px}
+.ovr{font:900 46px/1 system-ui,sans-serif;color:var(--ac);display:flex;align-items:baseline;gap:6px}.ovr small{font:800 13px system-ui;letter-spacing:.2em;color:#fff}
+.ci h3,#pvi h3{margin:6px 0 2px;font:400 26px system-ui,sans-serif;letter-spacing:.03em;text-transform:uppercase}.ci h3 b,#pvi h3 b{font-weight:900}.tag{font:700 12px system-ui;letter-spacing:.2em;color:var(--mu)}
+.mini{margin-top:12px;display:grid;gap:5px}.mini div{display:grid;grid-template-columns:110px 1fr 30px;align-items:center;gap:8px;font:600 12px system-ui;color:#ccc}.mini i{height:5px;background:var(--ac);display:block;border-radius:2px}.mini b{text-align:right}
+#cre{justify-content:flex-start;gap:14px}.ctop{width:min(100%,1100px);display:flex;flex-direction:column;gap:10px}
+#ctabs{display:flex;gap:4px;border-bottom:1px solid var(--ln)}#ctabs button{background:none;border:0;border-bottom:3px solid transparent;border-radius:0;padding:10px 16px;color:var(--mu)}#ctabs button.on{color:#fff;border-bottom-color:var(--ac)}#ctabs button:hover{color:#fff}
+.cbody{width:min(100%,1100px);display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}.cl{flex:1 1 420px;min-width:0}.cr{flex:0 1 320px;margin:0 auto;background:linear-gradient(#141416,#0a0a0b);border:1px solid var(--ln);border-radius:4px;padding:16px;text-align:center}
+#pv .pvs{width:min(220px,60vw);height:auto}#pvi p{font:500 13px/1.45 system-ui;color:#bdbdc4;margin:8px 0 0}#pvi .ovr{justify-content:center}
+#cre label{display:flex;flex-direction:column;gap:6px;font:700 11px system-ui;letter-spacing:.24em;color:var(--mu);margin-bottom:14px}
+#cre input{font:700 18px system-ui;color:#fff;background:var(--pn);border:1px solid var(--ln);border-radius:4px;padding:12px 14px;outline:none}#cre input:focus{border-color:var(--ac)}.note{font:500 12px/1.5 system-ui;color:var(--mu)}
+#stc{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.sty{text-align:left;background:var(--pn)!important;border:1px solid var(--ln)!important;padding:14px!important;display:flex;flex-direction:column;gap:6px;letter-spacing:0!important}
+.sty b{font:800 15px system-ui;letter-spacing:.08em}.sty span{font:500 12.5px/1.4 system-ui;color:#bdbdc4}.sty em{font:600 11.5px/1.35 system-ui;font-style:normal;color:#7fe08a}.sty em.dn{color:#ff8a7a}.sty u{text-decoration:none;font:700 11px system-ui;letter-spacing:.16em;color:var(--mu);margin-top:2px}
+.sty:hover{border-color:#fff!important}.sty.on{border-color:var(--ac)!important;box-shadow:inset 0 0 0 1px var(--ac);background:#1d1410!important}
+.fp{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;font:700 12px system-ui;letter-spacing:.2em;color:var(--mu);margin-bottom:10px}.fp b{font:900 22px system-ui;color:#fff}.fp b.warn{color:var(--ac)}.fp small{flex-basis:100%;letter-spacing:0;font-weight:500}
+#atl{display:grid;gap:4px}.ar{display:grid;grid-template-columns:minmax(96px,130px) 30px 1fr 34px 30px;align-items:center;gap:8px;background:var(--pn);border:1px solid transparent;border-radius:3px;padding:5px 8px;font:600 13px system-ui}
+.ar.key{border-left:3px solid var(--ac)}.ar button{padding:2px 0!important;background:var(--pn2);border:1px solid var(--ln);font-size:16px!important}.ar button:hover{border-color:#fff}.ar b{text-align:right;font:800 15px system-ui}
+.bar{height:7px;background:#26262b;border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:#d9d9de;transition:width .2s}.bar i.hi{background:#7fe08a}.bar i.el{background:var(--ac)}.bar i.lo{background:#77777f}
+.lk{font:700 11px system-ui;letter-spacing:.24em;color:var(--mu);margin-bottom:16px}.lk div{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.sw{width:42px;height:42px;padding:0!important;border:2px solid var(--ln)!important}.sw.on{border-color:var(--ac)!important;box-shadow:0 0 0 2px #0a0a0b inset}
+.cbot{width:min(100%,1100px);display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;border-top:1px solid var(--ln);padding-top:12px}#cerr{flex:1;color:#ff8a7a;font:600 13px system-ui}
+#stam{position:fixed;left:calc(14px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:3;width:110px;height:6px;background:#0008;border:1px solid #fff4;border-radius:3px;pointer-events:none}#stam i{display:block;height:100%;width:100%;border-radius:2px}
 </style></head><body>
 <div id="mm" class="ov"><div id="logo"><svg viewBox="0 0 120 70" aria-hidden="true"><ellipse cx="60" cy="35" rx="56" ry="31" fill="#7a3a16"/><ellipse cx="60" cy="35" rx="56" ry="31" fill="none" stroke="#4a210a" stroke-width="3"/>
 <path d="M17 20q6 15 0 30M103 20q-6 15 0 30" stroke="#f4efe6" stroke-width="4" fill="none"/><path d="M38 35h44" stroke="#f4efe6" stroke-width="4"/><path d="M45 29v12M52 29v12M60 29v12M68 29v12M75 29v12" stroke="#f4efe6" stroke-width="3"/></svg>
 <span class="r">Ragdoll</span><span class="a">American Football</span></div>
-<div id="pick"><button class="ch" id="ctouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="#fff" stroke-width="4"/><circle cx="40" cy="84" r="4" fill="#fff"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#d8a24a"/></svg>TOUCH CONTROLS</button>
-<button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="#fff" stroke-width="4"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="#fff" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#d8a24a" stroke-width="4"/><path d="M103 18v14" stroke="#d8a24a" stroke-width="4"/></svg>KEYBOARD &amp; MOUSE</button></div></div>
+<div id="pick"><button class="ch" id="ctouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="#fff" stroke-width="4"/><circle cx="40" cy="84" r="4" fill="#fff"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#ff5a1f"/></svg>TOUCH CONTROLS</button>
+<button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="#fff" stroke-width="4"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="#fff" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#ff5a1f" stroke-width="4"/><path d="M103 18v14" stroke="#ff5a1f" stroke-width="4"/></svg>KEYBOARD &amp; MOUSE</button></div></div>
 <div class="tb" id="brst" title="Reset the QB with the ball (R)">&#x21bb;</div>
 <div id="cboost" hidden style="position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3;font:800 13px system-ui,sans-serif;letter-spacing:.12em;color:#111;background:#ffd23f;border-radius:999px;padding:6px 14px;pointer-events:none">CATCH BOOST +20%</div>
-<div id="pbn" style="position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:3;font:900 min(10vw,64px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;text-shadow:0 3px 0 #000,0 0 22px #000;pointer-events:none;opacity:0;white-space:nowrap"></div><div id="score" class="wrb" style="position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:3;font:900 20px Impact,'Arial Black',sans-serif;letter-spacing:.08em;color:#fff;background:#000a;border:2px solid #d8a24a;border-radius:8px;padding:4px 14px;pointer-events:none"></div>
+<div id="pbn" style="position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:3;font:900 min(10vw,64px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;text-shadow:0 3px 0 #000,0 0 22px #000;pointer-events:none;opacity:0;white-space:nowrap"></div><div id="score" class="wrb" style="position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:3;font:900 20px Impact,'Arial Black',sans-serif;letter-spacing:.08em;color:#fff;background:#000a;border:2px solid #ff5a1f;border-radius:8px;padding:4px 14px;pointer-events:none"></div>
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
+<div id="mode" class="ov scr" hidden><div class="crumb">// SELECT MODE</div><div class="mpick"><button class="mc" id="mquick"><b>QUICK PLAY</b><span>Jump straight onto the field. Set up teams and plays from the pause menu.</span></button><button class="mc acc" id="mcar"><b>CAREER MODE</b><span>Create your player, choose a playstyle and take them into real drives.</span></button></div><button class="ghost" id="mback">BACK</button></div>
+<div id="car" class="ov scr" hidden><div class="crumb">// CAREER</div><h2 class="ttl">YOUR PLAYER</h2><div id="ccard"></div><div class="row"><button class="ghost" id="cback">BACK</button><button class="ghost" id="cnew">NEW PLAYER</button><button class="ghost" id="cedit">EDIT PLAYER</button><button class="pri" id="cplay">PLAY MATCH</button></div></div>
+<div id="cre" class="ov scr" hidden><div class="ctop"><div class="crumb">// CAREER · CREATE PLAYER</div><div id="ctabs"><button data-t="bio">BIO</button><button data-t="style">PLAYSTYLE</button><button data-t="attr">ATTRIBUTES</button><button data-t="look">APPEARANCE</button></div></div>
+<div class="cbody"><div class="cl">
+<section data-p="bio"><label>FIRST NAME<input id="fn" maxlength="14" autocomplete="off"></label><label>LAST NAME<input id="ln" maxlength="14" autocomplete="off"></label><label>JERSEY NUMBER<input id="jn" type="number" min="0" max="99" inputmode="numeric"></label><p class="note">Height and weight aren't offered: every ragdoll shares one physics body tuned for balance, so changing its size would change how it runs, not just how it looks.</p></section>
+<section data-p="style"><div id="stc"></div></section>
+<section data-p="attr"><div class="fp">POINTS TO SPEND <b id="fpts"></b><small>Every playstyle has the same rating budget. Move points between attributes with − / +.</small></div><div id="atl"></div></section>
+<section data-p="look"><div class="lk">SKIN TONE<div id="skw"></div></div><div class="lk">GLOVES<div id="glw"></div></div><div class="lk">CLEATS<div id="clw"></div></div></section>
+</div><div class="cr"><div id="pv"></div><div id="pvi"></div></div></div>
+<div class="cbot"><span id="cerr"></span><button class="ghost" id="ccan">CANCEL</button><button class="pri" id="csave">SAVE PLAYER</button></div></div>
+<div id="stam"><i></i></div>
 <div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="borg">GAME ORGANISER</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
 <div id="org" class="ov" hidden><div id="obox"><h3>GAME ORGANISER</h3><button id="omode"></button><button id="oyou"></button><button id="ooff"></button><button id="opos"></button><div class="cnt"><b>BLUE PLAYERS</b><button id="mblue">−</button><span id="nblue"></span><button id="pblue">+</button></div><div class="cnt"><b>RED PLAYERS</b><button id="mred">−</button><span id="nred"></span><button id="pred">+</button></div><button id="oos"></button><button id="ods"></button></div><div id="oline"></div><div class="obtn"><button id="oback">BACK</button><button id="ogo">START</button></div></div>
 <div id="ed" hidden><span id="edtxt">Drag to move · tap to select</span><button id="edm">−</button><button id="edp">+</button><button id="edr">RESET</button><button id="edone">DONE</button></div>
@@ -400,15 +445,15 @@ const DIVE_UP=1.15,DIVE_END=2.0;
 // then plant off that foot and burst out low the other way, half sideways, half upfield. Defenders reading you can bite on the fake and
 // chase the wrong way for a moment; one caught close and flat-footed can stumble over. E with no direction does nothing ----------
 function juke(){let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
- if(sd&&dv===0&&!limp&&cs===0&&js===0){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100;}}}
+ if(sd&&dv===0&&!limp&&cs===0&&js===0){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100*(1-.3*AT('bhd'));}}}
 function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the side you pressed (the cut), -r = the side-step
  // all pushes go through every body part evenly (no twisting the torso), so the juke never knocks him off balance
  if(j.t<.2){const v=pel.velocity,lat=v.x*rx+v.z*rz,k=Math.max(0,lat+2.4)*Math.min(1,dt*20);for(const b of list){b.velocity.x-=rx*k;b.velocity.z-=rz*k;}cur.low=Math.min(.35,(cur.low||0)+dt*3);}   // side-step the other way, sinking low on that leg
- else if(!j.cut){j.cut=true;const v=pel.velocity,sp=Math.hypot(v.x,v.z),T=Math.min(10,Math.max(sp,4)*1.15+2.5),L=Math.hypot(rx*1.8+fx,rz*1.8+fz),nx=(rx*1.8+fx)/L,nz=(rz*1.8+fz)/L;
+ else if(!j.cut){j.cut=true;const v=pel.velocity,sp=Math.hypot(v.x,v.z),T=Math.min(10,Math.max(sp,4)*1.15+2.5)*(1+.15*AT('bhd')),L=Math.hypot(rx*1.8+fx,rz*1.8+fz),nx=(rx*1.8+fx)/L,nz=(rz*1.8+fz)/L;
   for(const b of list){b.velocity.x+=nx*T-v.x;b.velocity.z+=nz*T-v.z;}cur.jkB=.4;for(const f of[parts.foot1,parts['foot-1']])kick(f.position.x,f.position.z,18,-nx,-nz,2.6,.6);j.nx=nx;j.nz=nz;   // push off that bent leg and explode out the way you pressed
   const P=pel.position;for(const d of roster){if(!d.cur.ai||d.cur.side==='d'===(cur.side==='d'))continue;const Q=d.pel.position,dist=Math.hypot(Q.x-P.x,Q.z-P.z);if(dist>8)continue;
-   if(Math.random()<.95-dist*.08){d.cur.biteEnd=(d.cur.t||0)+.6+Math.random()*.5;d.cur.biteV=[-rx*6,-rz*6];   // bit on the side-step
-    if(dist<5&&Math.random()<.55){d.limp=true;d.limpT=performance.now()+800+Math.random()*500;for(const b of d.list){b.velocity.x-=rx*3;b.velocity.z-=rz*3;}}}}}   // ...ankles broken: he stumbles over the wrong way
+   if(Math.random()<(.95-dist*.08)*(1+.4*AT('bhd'))*(1-.5*E(d,'awr'))){d.cur.biteEnd=(d.cur.t||0)+(.6+Math.random()*.5)*(1-.4*E(d,'rea'));d.cur.biteV=[-rx*6,-rz*6];   // bit on the side-step
+    if(dist<5&&Math.random()<.55*(1+.5*AT('bhd'))*(1-.5*E(d,'agi'))){d.limp=true;d.limpT=performance.now()+800+Math.random()*500;for(const b of d.list){b.velocity.x-=rx*3;b.velocity.z-=rz*3;}}}}}   // ...ankles broken: he stumbles over the wrong way
  else if(j.t<.45){cur.low=Math.max(0,(cur.low||0)-dt*2);const v=pel.velocity,a=Math.max(0,9-(v.x*j.nx+v.z*j.nz))*8;for(const b of list){b.force.x+=b.mass*j.nx*a;b.force.z+=b.mass*j.nz*a;}}   // rising out of it, still driving
  else{cur.jk=null;cur.low=0;}}
 function startDive(){if(dv>0||limp||cs>0)return;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);
@@ -428,7 +473,7 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  follow(t=>[0,dvY+(1.07+gs-dvY)*sm3(cl(t/(DIVE_END-DIVE_UP),0,1))],T-DIVE_UP,.9,70,16,35);
  ballArm();
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
-function control(dt){if(cur.jk)jukeTick(dt);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
+function control(dt){if(cur.jk)jukeTick(dt);cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
  let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;   // locked on the line until the snap (2)
  let dx=-s*f+c*r,dz=-c*f-s*r;const len=Math.hypot(dx,dz);
@@ -443,13 +488,13 @@ function control(dt){if(cur.jk)jukeTick(dt);if(cur.jkB)cur.jkB=Math.max(0,cur.jk
  if(moving){const fw=dx*Math.sin(yaw)+dz*Math.cos(yaw);gdir+=((fw<-.25?-1:1)-gdir)*Math.min(1,dt*8);}
  if(gdir<0)run=false;
  const qbMove=held&&aimOn;if(qbMove)run=false;   // aiming: no sprint gait; Shift gives a slower jog, otherwise a walk
- if(!limp){let d=camYaw+Math.PI-yaw;d=Math.atan2(Math.sin(d),Math.cos(d));yaw+=d*Math.min(1,dt*(js>0?14:9));}
+ if(!limp){let d=camYaw+Math.PI-yaw;d=Math.atan2(Math.sin(d),Math.cos(d));yaw+=d*Math.min(1,dt*(js>0?14:9)*(1+.35*AT('agi')));}
  mv+=((moving?1:0)-mv)*Math.min(1,dt*6);
  // per-limb weakness (wk, 1 = healthy) slows the gait and makes the body sag onto that leg
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
  if(held&&keys.shift&&mv>.5)cur.runT=(cur.runT||0)+dt;else{cur.runT=0;cur.boost=0;}cur.boost=Math.max(0,(cur.boost||0)-.12*dt);   // the burst fades unless you keep tapping
- const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(1+(cur.jkB||0))*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
+ const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(1+(cur.jkB||0))*(1+.13*AT('spd'))*(.85+.15*Math.min(1,(cur.stam??1)/.4))*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
@@ -513,7 +558,7 @@ function control(dt){if(cur.jk)jukeTick(dt);if(cur.jkB)cur.jkB=Math.max(0,cur.jk
     hy=gs-dip-.36*crK-.42*reachK-.45*(cur.low||0)+.07*(cur.high||0)+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55;
    pel.force.y+=Math.max(0,Math.min(fy,totalMass*9.82*1.0));
    // sprinting pushes harder (bigger force cap + gain)
-   const vd=speed*mv;if(moving){const bf=Math.max(0,Math.min(totalMass*(run?6:3.5),totalMass*(run?7:4.5)*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
+   const vd=speed*mv;if(moving){const aK=1+.35*AT('acc'),bf=Math.max(0,Math.min(totalMass*(run?6:3.5)*aK,totalMass*(run?7:4.5)*aK*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
    const tau=gdir*(moving?Math.max(0,Math.min(run?650:420,totalMass*8*(vd-(pel.velocity.x*dx+pel.velocity.z*dz)))):0);
    const ax=Math.cos(yaw),az=-Math.sin(yaw);
    const sf=[];for(const sd of[-1,1]){const ft=parts['foot'+sd];if(tnorm(phase+(sd>0?0:Math.PI))>=.5&&low(ft)<.05)sf.push(parts['thigh'+sd]);}
@@ -585,7 +630,7 @@ function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));c
   const J=joints,w=sm(cl((t-.1)/.15,0,1));J.hip1.x+=(-.25-J.hip1.x)*w;J['hip-1'].x+=(.35-J['hip-1'].x)*w;J['knee-1'].x+=(.45-J['knee-1'].x)*w;   // drive off the back leg onto the front
   return;}
  thTw=0;thLean=0;
- if(held&&aimOn){const ch=chargeT<0?0:(throwSpeed()-V_MIN)/(V_MAX-V_MIN);sh.x=pc-1.6-.35*ch;   // charging: the arm loads further back
+ if(held&&aimOn){const ch=chargeT<0?0:(throwSpeed()-V_MIN)/(VMX()-V_MIN);sh.x=pc-1.6-.35*ch;   // charging: the arm loads further back
   sh.z=-1.05;el.x=-2.05;wr.x=.3;return;}     // ball up by the ear, elbow out at shoulder height
  // carrying: same rhythm as the free arm but half the swing, and the backswing is capped so the ball never trails behind the torso
  if(held){const run=keys.shift&&mv>.3,back=Math.max(0,sh.x*.5);sh.x=pc+(run?-.3:-.15)+Math.min(sh.x*.5,.12);
@@ -600,14 +645,14 @@ function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));c
 // throwing: right mouse aims (trajectory preview), left mouse throws along the camera's aim, launched a little above the crosshair
 // hold to charge: 10 m/s tap (a soft toss) up to 27 m/s after 1.2 s (about the hardest NFL throws, ~60 mph)
 const V_MIN=10,V_MAX=27,CHARGE_MS=1200;let chargeT=-1,throwSpd=V_MIN;
-const throwSpeed=()=>chargeT<0?V_MIN:V_MIN+(V_MAX-V_MIN)*Math.min(1,(performance.now()-chargeT)/CHARGE_MS);
+const VMX=()=>V_MAX*(1+.12*AT('thp')),throwSpeed=()=>chargeT<0?V_MIN:V_MIN+(VMX()-V_MIN)*Math.min(1,(performance.now()-chargeT)/CHARGE_MS);
 function startCharge(){if(held&&aimOn&&thr<0&&!limp)chargeT=performance.now();}
 function releaseCharge(){if(chargeT<0)return;throwSpd=throwSpeed();chargeT=-1;startThrow();}
 // launch angle follows the aim (the default camera tilt .12 = level; looking up lobs it, 1.4x), plus a small 'zeroing' tilt like a real QB's line drive:
 // just enough lift that gravity brings the ball back to the aim line at d = min(30 m, 1.1 s of flight), so a hard level throw stays nearly straight
 // AI passes: solve the launch velocity that reaches target T at the arrival time, with the ball body's own gravity + damping (v*=0.9^t)
 const KD=-Math.log(.9);
-function solveVel(p,T,tr){const e=1-Math.exp(-KD*tr),hx=(T.x-p.x)*KD/e,hz=(T.z-p.z)*KD/e,vy=(T.y-p.y+9.82*tr/KD)*KD/e-9.82/KD,v=new V(hx,vy,hz),m=v.norm();if(m>V_MAX)v.scale(V_MAX/m,v);return v;}   // over the max: it simply falls short
+function solveVel(p,T,tr){const e=1-Math.exp(-KD*tr),hx=(T.x-p.x)*KD/e,hz=(T.z-p.z)*KD/e,vy=(T.y-p.y+9.82*tr/KD)*KD/e-9.82/KD,v=new V(hx,vy,hz),m=v.norm();if(m>VMX())v.scale(VMX()/m,v);return v;}   // over the max: it simply falls short
 function throwVel(){if(cur.ai&&cur.T)return solveVel(bpt(handR(),0,-.02,.07),cur.T,Math.max(.45,cur.arrive-qbClock));const THROW_V=thr>=0?throwSpd:throwSpeed(),d0=Math.min(30,THROW_V*1.1),e=cl((.12-camPitch)*1.4+.5*Math.asin(Math.min(1,9.82*d0/(THROW_V*THROW_V))),-.25,1.2),c=Math.cos(e);return new V(-Math.sin(camYaw)*c*THROW_V+pel.velocity.x,Math.sin(e)*THROW_V,-Math.cos(camYaw)*c*THROW_V+pel.velocity.z);}
 const aimLine=new THREE.Points(new THREE.BufferGeometry().setFromPoints(Array.from({length:60},()=>new THREE.Vector3())),new THREE.PointsMaterial({color:0xffe27a,size:.22,transparent:true,opacity:.9,depthWrite:false}));   // dotted arc (GL lines are 1 px)
 aimLine.frustumCulled=false;aimLine.visible=false;scene.add(aimLine);
@@ -617,7 +662,7 @@ function aimOne(){if(!held||!aimOn)chargeT=-1;if(!held||!aimOn||limp)return;aimL
  for(;n<60;n++){a.setXYZ(n,x,y,z);if(y<.09)break;vx*=dmp;vy*=dmp;vz*=dmp;vy-=9.82*dt;x+=vx*dt;y+=vy*dt;z+=vz*dt;}   // same gravity + damping as the ball body
  for(let i=n+1;i<60;i++)a.setXYZ(i,x,Math.max(.09,y),z);a.needsUpdate=true;}
 function startThrow(){if(held&&aimOn&&thr<0&&!limp)thr=0;}
-function throwBall(){if(!held||limp)return;const p=bpt(handR(),0,-.02,.07),v=throwVel();held=false;aimOn=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;
+function throwBall(){if(!held||limp)return;const p=bpt(handR(),0,-.02,.07),v=throwVel();if(!cur.ai)aimErr(v);held=false;aimOn=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;
  chest.velocity.x-=v.x*.42/15.7;chest.velocity.y-=v.y*.42/15.7;chest.velocity.z-=v.z*.42/15.7;   // the ball's momentum pushes back on the thrower
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.velocity.copy(v);const d=v.unit();ball.quaternion.setFromVectors(new V(0,1,0),d);
  ball.angularVelocity.set(d.x*25,d.y*25,d.z*25);world.addBody(ball);ball.wakeUp();}   // nose-first spiral
@@ -672,8 +717,8 @@ function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(bal
   const ax=cl(-Math.atan2(_cv.z,-_cv.y),-3,.3),az=cl(Math.asin(cl(_cv.x/L,-1,1)),sd>0?-.5:-1.4,sd>0?1.4:.5),M=(a,b)=>a+(b-a)*k;   // shoulder range: no reaching back past the body, limited reach across it
   J['shoulder'+sd].x=M(J['shoulder'+sd].x,ax);J['shoulder'+sd].z=M(J['shoulder'+sd].z,az);J['shoulder'+sd].y=0;J['elbow'+sd].x=M(J['elbow'+sd].x,cur.high>.2?-.03:-.2);J['wrist'+sd].x=M(J['wrist'+sd].x,0);}
  // the catch itself: a reaching hand gets to the ball (checked every physics step, so fast passes can't skip past)
- for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<(.36+CATCH_ASSIST)*catchBoost()&&catchGrab()){catchK=0;return;}}
- if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<(.42+CATCH_ASSIST)*catchBoost()&&catchGrab()){catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
+ for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<(.36+CATCH_ASSIST)*catchBoost()*handsK()&&catchGrab()){catchK=0;return;}}
+ if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<(.42+CATCH_ASSIST)*catchBoost()*handsK()&&catchGrab()){catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
 function grabBall(){held=true;world.removeBody(ball);cur.low=cur.high=0;cur.look=cur.cp=null;   // catch made: stop bending / reaching, stand back up into running form
  reachK=Math.max(reachK,.5);catchOn=false;}
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;const h=handR(),p=bpt(h,0,-.02,.06);
@@ -732,7 +777,7 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
 let mode=null,paused=false;const $m=id=>document.getElementById(id);
 function startGame(m){mode=m;document.body.classList.toggle('touch',m==='touch');$m('mm').hidden=true;last=performance.now();}
 function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
-function toMenu(){paused=false;$m('pm').hidden=true;mode=null;document.body.classList.remove('touch');
+function toMenu(){paused=false;$m('pm').hidden=true;$m('org').hidden=true;mode=null;document.body.classList.remove('touch');
  for(const d of active()){use(d);held=false;thr=-1;aimOn=false;chargeT=-1;catchOn=false;reset();}use(player);   // a fresh start next time
  looseBall();resetPlay();$m('mm').hidden=false;}
 // ---------- dolls: the player and the QB run the exact same ragdoll + controller; each doll's state is swapped in with use(d) ----------
@@ -769,10 +814,11 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
   if(look&&d<1){face(look.x,look.z);const cy=camYaw,f=-(mx*Math.sin(cy)+mz*Math.cos(cy))/d,r=(mx*Math.cos(cy)-mz*Math.sin(cy))/d;keys.w=f>.3;keys.s=f<-.3;keys.d=r>.3;keys.a=r<-.3;}
   else{face(x,z);keys.w=true;keys.shift=run&&d>1.5;}};
  if(c.st==='pre'){if(c.mark)face(RP.x,RP.z);else face(P.x,P.z-5);return;}
+ if(fumT&&!car){goTo(ball.position.x,ball.position.z,true,null);if(dv===0)plantCut(want,wantRun,29.4);return;}   // loose ball: dive on it
  if(c.st==='down'){if(dv===0)c.st='cover';return;}
  const hist=c.hist||(c.hist=[]);hist.push([c.t,RP.x,RP.z,RV.x,RV.z]);while(hist.length>2&&hist[1][0]<c.t-c.rd)hist.shift();const S=hist[0];   // what he "sees": the receiver c.rd seconds ago
  const inAir=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.3;
- if(inAir&&c.st!=='ball'&&!held){c.st='ball';c.canInt=Math.random()<.3;catchOn=true;cur.catchT0=1e15;}   // no catch boost for him
+ if(!inAir)c.seen=0;else if(!c.seen)c.seen=c.t;if(inAir&&c.st!=='ball'&&!held&&c.t-c.seen>.1*(1-AT('rea'))){c.st='ball';c.canInt=Math.random()<cl(.3*(1+1.2*AT('int')),.05,.75);catchOn=true;cur.catchT0=1e15;}   // no catch boost for him
  if(held&&c.st!=='int'){c.st='int';c.intT=c.t;}
  if(c.st==='ball'){if(!inAir){catchOn=false;c.st=car?'chase':'cover';}
   else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);
@@ -785,16 +831,16 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
   if(T){if(c.kind==='deep')goTo(c.px*.4+T.x*.6,Math.min(GOAL_Z+4,Math.max(LOS+c.pz,T.z+7)),true,T);else goTo(T.x*.7,cl(T.z-2,LOS+8,LOS+14),true,T);}}
  if(c.st==='cover'&&c.kind==='man'){
   const vx=S[3],vz=S[4],sp=Math.hypot(vx,vz);
-  if(c.pv&&sp>2){const pv=c.pv,cs2=(pv[0]*vx+pv[1]*vz)/((Math.hypot(pv[0],pv[1])||1)*sp);if(cs2<.6&&c.t>(c.biteEnd||0)&&Math.random()<.45){c.biteEnd=c.t+.35+Math.random()*.3;c.biteV=pv;}}   // a hard cut: sometimes he bites and keeps going
+  if(c.pv&&sp>2){const pv=c.pv,cs2=(pv[0]*vx+pv[1]*vz)/((Math.hypot(pv[0],pv[1])||1)*sp);if(cs2<.6&&c.t>(c.biteEnd||0)&&Math.random()<.45*(1+.8*E(Rc,'rte'))*(1-.6*AT('awr'))){c.biteEnd=c.t+.35+Math.random()*.3;c.biteV=pv;}}   // a hard cut: sometimes he bites and keeps going
   if(sp>.5)c.pv=[vx,vz];
-  const cush=Math.max(1.4,3.6-c.t*.45),inside=-Math.sign(S[1]||1)*.5;let tx=S[1]+vx*.4+inside,tz=S[2]+vz*.4+cush+Math.max(0,vz)*1.1;   // a cushion downfield that tightens, shaded inside, and grows with the receiver's speed at him (he gives ground early)
+  const CL=.4+.25*AT('cov'),cush=Math.max(1.4,3.6-c.t*.45)*(1-.3*AT('cov')),inside=-Math.sign(S[1]||1)*.5;let tx=S[1]+vx*CL+inside,tz=S[2]+vz*CL+cush+Math.max(0,vz)*1.1;   // a cushion downfield that tightens, shaded inside, and grows with the receiver's speed at him (he gives ground early)
   if(c.t<(c.biteEnd||0)){tx=P.x+c.biteV[0];tz=P.z+c.biteV[1];}
   goTo(tx,tz,true,RP);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);   // jam: hands on him early in the route
-  if(dd<1.1&&c.t<3.5&&c.t>(c.pushT||0)){c.pushT=c.t+1.2+Math.random();const kk=1.2+Math.random();for(const b of Rc.list){b.velocity.x+=dx/dd*kk;b.velocity.z+=dz/dd*kk;}}}
+  if(dd<1.1&&c.t<3.5&&c.t>(c.pushT||0)){c.pushT=c.t+1.2+Math.random();const kk=(1.2+Math.random())*(1+.4*AT('str'))*(1-.3*E(Rc,'str'));for(const b of Rc.list){b.velocity.x+=dx/dd*kk;b.velocity.z+=dz/dd*kk;}}}
  if(c.st==='chase'){if(!car){c.st='cover';}if(c.t<c.biteEnd)goTo(P.x+c.biteV[0],P.z+c.biteV[1],true,null);else goTo(RP.x+RV.x*.5,RP.z+RV.z*.5,true,null);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);
-  if(dd<1.3&&dv===0&&!(c.t<c.biteEnd)){face(RP.x,RP.z);startDive();for(const b of Rc.list){b.velocity.x+=dx/dd*3;b.velocity.z+=dz/dd*3;}Rc.limp=true;Rc.limpT=performance.now()+2600;c.st='down';}}   // tackle: dive into him, he goes limp for a moment
+  if(dd<1.3*(1+.15*AT('tak'))&&dv===0&&!(c.t<c.biteEnd)){face(RP.x,RP.z);startDive();for(const b of Rc.list){b.velocity.x+=dx/dd*3;b.velocity.z+=dz/dd*3;}tackleTry(Rc,curD);c.st='down';}}   // tackle: dive into him, he goes limp for a moment
  if(c.st==='int'&&c.t-c.intT<1.5)goTo(P.x,P.z-6,true,null);   // picked it off: a few strides back the other way
  if(dv===0)plantCut(want,wantRun,29.4);}   // plants and changes direction hard (3 g)
 const active=()=>roster;
@@ -825,7 +871,7 @@ function showRoute(){if(!playPre())return;routeVis=true;routeMesh.visible=true;r
 // the snap: the receiver (AI or you) can go, the defender reads and reacts
 // ---------- a real drive: the offence always attacks the +z end zone, starting from its own 25 (z = -25 yd). Four downs to gain 10 yards;
 // a touchdown, an interception or a turnover on downs flips possession: the other colour attacks and everyone swaps sides ----------
-const GOAL_Z=50*YD,SCORE={blue:0,red:0};let playEnd=0,resetT=0,LOS=-25*YD,DOWN=1,FD=-15*YD,flip=null;
+const GOAL_Z=50*YD,SCORE={blue:0,red:0};let playEnd=0,resetT=0,fumT=0,LOS=-25*YD,DOWN=1,FD=-15*YD,flip=null;
 const losMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0x3a7bff,transparent:true,opacity:.85,depthWrite:false})),fdMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.85,depthWrite:false}));
 for(const m of[losMesh,fdMesh]){m.rotation.x=-Math.PI/2;m.position.y=.03;m.visible=false;scene.add(m);}   // blue line of scrimmage, yellow first-down line
 const ORD=['','1ST','2ND','3RD','4TH'],spot=z=>{const y=Math.round(z/YD);return y<0?'OWN '+(50+y):y>0?'OPP '+(50-y):'50';};
@@ -840,23 +886,26 @@ function downAt(z,what){z=cl(z,-49*YD,GOAL_Z-YD);const g=Math.round((z-LOS)/YD);
 function playTick(){if(!playOn)return;if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){ORG.off=ORG.off==='blue'?'red':'blue';LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else resetPlay();}return;}   // possession change: rebuild both teams on their new sides
  if(playState==='pre'&&player.cur.side==='d'&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
  if(playState!=='live')return;const car=roster.find(H),ot=ORG.off;if(car)playTick.g=0;
+ if(fumT){if(car){const z=car.pel.position.z;fumT=0;if(car.cur.side==='d'){flip=-Math.max(z,-GOAL_Z+20*YD);playOver('FUMBLE! '+(ot==='blue'?'RED':'BLUE')+' RECOVERS','#ff5a4a');}else downAt(z,'FUMBLE, RECOVERED');return;}
+  if(performance.now()-fumT>500&&ball.position.y<.35){let best=null,bd=1e9;for(const d of roster){const P=d.pel.position,dd=Math.hypot(P.x-ball.position.x,P.z-ball.position.z)-.5*E(d,'rea');if(dd<bd){bd=dd;best=d;}}
+   if(best&&bd<1.4){const me=curD;use(best);grabBall();use(me);}}return;}   // the scramble: whoever gets there first (quick reactions help) falls on it
  if(car&&car.cur.side==='d'){flip=-Math.max(car.pel.position.z,-GOAL_Z+20*YD);playOver('INTERCEPTED!','#ff5a4a');return;}   // their ball where he picked it off (in the end zone: from their 20)
  if(car){const p=car.pel.position;
   if(p.z>GOAL_Z){SCORE[ot]+=7;flip=-25*YD;playOver('TOUCHDOWN '+ot.toUpperCase()+'!',hx(TEAM[ot][0]));}
   else if(Math.abs(p.x)>FW/2)downAt(p.z,'OUT OF BOUNDS');
   else if(car.limp)downAt(p.z,car.cur.role==='qb'&&p.z<LOS?'SACKED':'TACKLED');return;}
  if(!world.bodies.includes(ball))return;const q=roster.find(d=>d.cur.role==='qb');
- if(q&&!H(q)&&ball.position.y<.2&&!playTick.g)playTick.g=performance.now();if(playTick.g&&performance.now()-playTick.g>500)downAt(LOS,'INCOMPLETE');}   // thrown and it hit the turf: dead half a second later
+ if(q&&!H(q)&&!fumT&&ball.position.y<.2&&!playTick.g)playTick.g=performance.now();if(playTick.g&&performance.now()-playTick.g>500)downAt(LOS,'INCOMPLETE');}   // thrown and it hit the turf: dead half a second later
 function playStart(){if(!playPre())return;playState='live';for(const d of roster){if(d.cur.ai&&d.cur.role==='wr'){d.cur.st='route';d.cur.i=0;}if(d.cur.ai&&d.cur.side==='d')d.cur.st='cover';}routeVis=false;routeMesh.visible=false;}
 // R: everyone back to the line, the ball to the QB, a new route; nothing moves until 2
 // receiver split wide on the 50, QB 15 yd behind the line, defender 20 yd in front of the receiver
-function resetPlay(){if(!playOn)return;playTick.g=0;playEnd=0;resetT=performance.now();hud();losMesh.position.z=LOS;fdMesh.position.z=FD;losMesh.visible=fdMesh.visible=true;
+function resetPlay(){if(!playOn)return;fumT=0;for(const d of roster)d.cur.stam=Math.min(1,(d.cur.stam??1)+.35);playTick.g=0;playEnd=0;resetT=performance.now();hud();losMesh.position.z=LOS;fdMesh.position.z=FD;losMesh.visible=fdMesh.visible=true;
  for(const d of roster){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;limp=false;d.limpT=0;keys={};}use(player);
  const used=[];let q=null,rw=null;
  for(const d of roster){const c=d.cur;
   if(c.role==='qb'){q=d;placeAt(d,0,LOS+QB_DEPTH);Object.assign(c,{st:'idle',T:null,wait:null,tg:null});}
   if(c.role==='wr'){placeAt(d,c.x0,LOS+c.z0-.4);[c.route,c.rname]=pickRoute(c.x0,used);Object.assign(c,{st:'set',i:0,t:0});if(!rw||d===player)rw=d;}
-  if(c.side==='d'){placeAt(d,c.px,Math.min(GOAL_Z+4,LOS+c.pz));if(d===player)camYaw=0;Object.assign(c,{st:'pre',t:0,hist:[],rd:.22+Math.random()*.2,biteEnd:0,pushT:0,pv:null});}}
+  if(c.side==='d'){placeAt(d,c.px,Math.min(GOAL_Z+4,LOS+c.pz));if(d===player)camYaw=0;Object.assign(c,{st:'pre',t:0,hist:[],rd:(.3-.12*E(d,'rea'))+Math.random()*.12,biteEnd:0,pushT:0,pv:null});}}
  looseBall();ball.position.z=LOS;if(q){use(q);grabBall();}use(player);
  route=rw&&rw.cur.route;routeName=rw?rw.cur.rname:'';routeX=rw?rw.cur.x0:WR_X;routeShape(false);   // the route shown on 1: yours, or the first receiver's when you're the QB
  routeVis=false;routeMesh.visible=false;playState=q?'pre':'live';callReq=null;}
@@ -874,7 +923,7 @@ function plan(){const oT=ORG.off,dT=oT==='blue'?'red':'blue',youO=ORG.you===oT,n
 function applyOrg(){for(const d of roster)if(d!==player)showDoll(d,false);use(player);held=false;aimOn=false;thr=-1;reset();looseBall();
  const P=player.cur;for(const k of['role','side','kind','mark','x0','z0','px','pz','half','you','lab','m'])delete P[k];
  roster=[player];playOn=!ORG.free;document.body.classList.toggle('play',playOn);let n=0,oT=ORG.you,dT;
- const add=(s,side)=>{const d=s.you?player:bot(n++);if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,s,{side,role:side==='o'?s.role:'df'});return d;};
+ const add=(s,side)=>{const d=s.you?player:bot(n++);if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,s,{side,role:side==='o'?s.role:'df'});if(d!==player)d.cur.at=botAt(d.cur.role);return d;};
  if(playOn){const p=plan();oT=p.oT;dT=p.dT;const os=p.O.map(s=>add(s,'o'));for(const s of p.D){const d=add(s,'d');if(s.m)d.cur.mark=os[s.m];}}
  else{P.side='o';}
  for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
@@ -886,7 +935,7 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
  if((c.st==='route'||c.st==='after')&&inAir){let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);for(let t=0;t<5&&!(vy<0&&y<1.3)&&y>.09;t+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}
   const me=Math.hypot(x-P.x,z-P.z);c.go=roster.every(d=>d===curD||d.cur.role!=='wr'||Math.hypot(d.pel.position.x-x,d.pel.position.z-z)>=me);}   // only the receiver nearest where it comes down goes for it
  if((c.st==='route'||c.st==='after')&&inAir&&c.go){c.st='ball';catchOn=true;cur.catchT0=performance.now();}
- if(c.st==='route'){const W=route[c.i];if(Math.hypot(W[0]-P.x,W[1]-P.z)<1.1){if(c.i<route.length-1)c.i++;else c.st='after';}else{tx=W[0];tz=W[1];}}
+ if(c.st==='route'){const W=route[c.i];if(Math.hypot(W[0]-P.x,W[1]-P.z)<1.1*(1-.35*AT('rte'))){if(c.i<route.length-1)c.i++;else c.st='after';}else{tx=W[0];tz=W[1];}}
  if(c.st==='after'){const a=route[route.length-2]||[c.x0,LOS],b=route[route.length-1],stop=/CURL|COMEBACK/.test(c.rname);   // breaking routes settle and face the QB; the rest keep running
   if(!stop){const L=Math.hypot(b[0]-a[0],b[1]-a[1])||1;tx=P.x+(b[0]-a[0])/L*5;tz=P.z+(b[1]-a[1])/L*5;}}
  if(c.st==='ball'){if(!world.bodies.includes(ball)&&!held){c.st='after';catchOn=false;}
@@ -902,13 +951,14 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
    if(dd<3.2&&!cur.jk&&performance.now()>(c.jkCool||0)&&dv===0&&js===0){const cy=camYaw,rs=dx*Math.cos(cy)-dz*Math.sin(cy);cur.jk={t:0,sd:rs>0?-1:1,cut:false};c.jkCool=performance.now()+1500;}}   // one closing in: juke him
   const ex=Math.abs(P.x)>FW/2-3?-Math.sign(P.x)*.8:0;tx=P.x+(ax+ex)*4;tz=P.z+Math.max(.6,az)*6;sprint=true;}
  if(c.st==='set'){camYaw=Math.PI;}   // lined up, looking downfield
+ if(fumT&&!held&&playState==='live'){tx=ball.position.x;tz=ball.position.z;sprint=true;}   // loose ball: go get it
  if(tx!==null){camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=sprint;}
  // ball in the air: plant and cut hard. Any velocity he doesn't want (overshooting, wrong direction) is braked at up to 2 g -
  // a sprint stops in ~0.3 s. shortcut: braking only, never adds speed, so it can't make him faster than his legs
- if(c.st==='ball')plantCut(tx===null?null:[tx,tz],sprint,19.6);}
+ if(c.st==='ball')plantCut(tx===null?null:[tx,tz],sprint,19.6);else if(c.st==='route'&&AT('rte')>0)plantCut(tx===null?null:[tx,tz],sprint,24*AT('rte'));}
 // plant and cut: brake away any velocity the doll doesn't want (overshoot, wrong direction) at up to cap m/s^2.
 // shortcut: braking only, never adds speed, so it can't outrun the legs
-function plantCut(T,sprint,cap){if(!contact())return;const P=pel.position,v=pel.velocity,wl=T?(sprint?6:2.6):0;let wx=0,wz=0;
+function plantCut(T,sprint,cap){cap*=1+.3*AT('agi');if(!contact())return;const P=pel.position,v=pel.velocity,wl=T?(sprint?6:2.6):0;let wx=0,wz=0;
  if(T){const L=Math.hypot(T[0]-P.x,T[1]-P.z)||1;wx=(T[0]-P.x)/L*wl;wz=(T[1]-P.z)/L*wl;}
  let ax=(wx-v.x)*10,az=(wz-v.z)*10;if(ax*v.x+az*v.z<0){const m=Math.hypot(ax,az);if(m>cap){ax*=cap/m;az*=cap/m;}for(const b of list){b.force.x+=b.mass*ax;b.force.z+=b.mass*az;}}}
 function looseBall(){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=11;}
@@ -923,14 +973,14 @@ function primaryUp(){releaseCharge();catchOn=false;cur.catchT0=0;}
 function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
  // throwing to bots (you're not a receiver): after a 2-3.5 s drop, the most open one (most room from any defender, a bit of credit for depth)
  if(c.st==='idle'&&held&&!callReq&&playState==='live'&&(c.wait=(c.wait==null?(player.cur.role==='wr'?4.5:2)+Math.random()*1.5:c.wait)-dt)<0){let bs=-1e9;
-  for(const w of roster){if(w.cur.role!=='wr')continue;const p=w.pel.position;let sep=6;for(const d of roster)if(d.cur.side==='d')sep=Math.min(sep,Math.hypot(d.pel.position.x-p.x,d.pel.position.z-p.z));const sc=sep*2+Math.min(p.z,30)*.15;if(sc>bs){bs=sc;c.tg=w;}}
+  for(const w of roster){if(w.cur.role!=='wr')continue;const p=w.pel.position;let sep=6;for(const d of roster)if(d.cur.side==='d')sep=Math.min(sep,Math.hypot(d.pel.position.x-p.x,d.pel.position.z-p.z));const sc=sep*2+Math.min(p.z-LOS,30)*.15+(Math.random()-.5)*5*(1-AT('awr'));if(sc>bs){bs=sc;c.tg=w;}}
   if(c.tg)callReq={P:c.tg.pel.position.clone(),V:c.tg.pel.velocity.clone()};}
  const P=(c.tg||roster.find(d=>d.cur.role==='wr')||player).pel.position;let fx=P.x,fz=P.z;
  if(c.st==='idle'&&held&&callReq){const R=bpt(chest,-.2,.5,0),Q0=callReq.P,W=callReq.V,delay=.55;let tf=1;
   for(let i=0;i<4;i++){const tx=Q0.x+W.x*(delay+tf),tz=Q0.z+W.z*(delay+tf);tf=cl(Math.hypot(tx-R.x,tz-R.z)/17,.6,3);}   // flight time from distance, re-solved for where he'll be
   c.T=new V(Q0.x+W.x*(delay+tf),1.25,Q0.z+W.z*(delay+tf));
   {const dx=c.T.x-R.x,dz=c.T.z-R.z,L=Math.hypot(dx,dz)||1,fx=dx/L,fz=dz/L,r=Math.random();   // the QB isn't perfect: usually a little off, about 1 in 3 sails 1.5-3 m long (dive for it)
-   const long=r<.33?1.5+Math.random()*1.5:(Math.random()-.5)*.8,side=(Math.random()-.5)*(r<.33?1.6:.8);c.T.x+=fx*long-fz*side;c.T.z+=fz*long+fx*side;}c.arrive=qbClock+delay+tf;c.st='aim';c.t=0;aimOn=true;callReq=null;}
+   const ac=1-.7*AT('tha'),bad=r<.33*(1-.8*AT('tha')),long=(bad?1.5+Math.random()*1.5:(Math.random()-.5)*.8)*ac,side=(Math.random()-.5)*(bad?1.6:.8)*ac;c.T.x+=fx*long-fz*side;c.T.z+=fz*long+fx*side;}c.arrive=qbClock+delay+tf;c.st='aim';c.t=0;aimOn=true;callReq=null;}
  if(c.T&&c.st!=='idle'){fx=c.T.x;fz=c.T.z;}
  camYaw=Math.atan2(fx-pel.position.x,fz-pel.position.z)+Math.PI;      // the body turns to face camYaw + 180°
  if(c.st==='aim'&&(c.t+=dt)>.35){startThrow();c.st='throw';}
@@ -985,7 +1035,7 @@ $m('opos').onclick=()=>{ORG.pos=cyc(['qb','wr'],ORG.pos);orgUI();};$m('ods').onc
 $m('oos').onclick=()=>{const k=OSETS[ORG.os][1].length;do ORG.os=(ORG.os+1)%OSETS.length;while(OSETS[ORG.os][1].length!==k);orgUI();};   // sets with the same receiver count
 for(const t of['blue','red'])for(const[id,dd]of[['m',-1],['p',1]])$m(id+t).onclick=()=>{ORG.n[t]+=dd;orgUI();};
 $m('ogo').onclick=()=>{$m('org').hidden=true;newGame();applyOrg();togglePause();};$m('oback').onclick=()=>{$m('org').hidden=true;$m('pm').hidden=false;};
-$m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
+$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});
 // ---------- turf kicked up by cleats: real-looking bits - thin tapered, slightly curled grass blades and lumpy dirt crumbs -
 // two instanced meshes (two draw calls total); bits tumble through the air, land, and vanish after ~3 s ----------
@@ -1015,6 +1065,90 @@ function cleats(d,dt){const v=pel.velocity,sp=Math.hypot(v.x,v.z),dec=((d.psp??s
  for(const f of[parts.foot1,parts['foot-1']]){if(f.position.y-groundH(f.position.x,f.position.z)>.13)continue;
   if(keys.shift&&sp>4&&Math.random()<dt*14)kick(f.position.x,f.position.z,2+(Math.random()*3|0),ux,uz,1.6,.15);
   if(dec>9&&Math.random()<dt*14)kick(f.position.x,f.position.z,Math.min(10,dec/3|0),-ux,-uz,2.2,.55);}}   // braking: the foot shoves forward, so it sprays ahead
+// ================= PLAYER ATTRIBUTES (25-100: 50 average, 75 strong, 90+ elite) =================
+// eff(): 0 at 60 (the rating the game's physics were tuned at), smooth, with diminishing returns toward both ends (tanh), so 99 is not unbeatable
+const ATTRS=[['spd','Speed'],['acc','Acceleration'],['agi','Agility'],['str','Strength'],['sta','Stamina'],['awr','Awareness'],['rea','Reaction'],['thp','Throw Power'],['tha','Throw Accuracy'],['cth','Catching'],['rte','Route Running'],['car','Carrying'],['bhd','Ball Handling'],['cov','Coverage'],['int','Interceptions'],['tak','Tackling']];
+const AK=ATTRS.map(a=>a[0]),ANAME=Object.fromEntries(ATTRS);
+const eff=r=>Math.tanh(((r??60)-60)/28),AT=k=>eff(cur.at&&cur.at[k]),E=(d,k)=>eff(d.cur.at&&d.cur.at[k]);
+const handsK=()=>1+.18*AT(cur.side==='d'?'int':'cth');   // hands radius: Catching for the offence, Interceptions for defenders
+// manual throws: Throw Accuracy sets the spread (a 90 is near-perfect, a 40 sprays ~3°); AI throws use their own miss model above
+function aimErr(v){const sg=Math.max(0,.03*(1-1.15*AT('tha')));if(!sg)return;const a=(Math.random()-.5)*2*sg,c=Math.cos(a),s=Math.sin(a),x=v.x*c-v.z*s;v.z=v.x*s+v.z*c;v.x=x;v.y*=1+(Math.random()-.5)*sg*2;}
+// a tackle attempt: the tackler's Tackling against the runner's Strength (power) and Ball Handling (elusiveness); Carrying decides fumbles
+function tackleTry(car,tk){const p=cl(.72+.3*(E(tk,'tak')-.6*E(car,'str')-.4*E(car,'bhd')),.15,.95);
+ if(Math.random()>p){for(const b of car.list){b.velocity.x*=.8;b.velocity.z*=.8;}return false;}   // broken tackle: slowed, still up
+ car.limp=true;car.limpT=performance.now()+2600;
+ if(playOn&&H(car)&&Math.random()<cl(.05-.06*E(car,'car')+.04*E(tk,'tak')+.03*E(tk,'str'),.01,.18)){const me=curD;use(car);dropBall();ball.velocity.x+=(Math.random()-.5)*4;ball.velocity.z+=(Math.random()-.5)*4;ball.velocity.y+=2;use(me);fumT=performance.now();}   // the ball pops out
+ return true;}
+function botAt(role){const a={};for(const k of AK)a[k]=55+(Math.random()*11|0);for(const k of role==='qb'?['thp','tha','awr']:role==='df'?['cov','int','tak','rea']:['spd','cth','rte','bhd'])a[k]+=8;return a;}
+// ---------- playstyles: same rating budget for all (16 x 62), strengths up, weaknesses down; a specialisation, never a locked position ----------
+const STYLES=[['QUARTERBACK','A field general: a big, accurate arm and the eyes to find the open man.',['thp','tha','awr','rea'],['spd','tak','cov','int'],'qb'],
+ ['SCRAMBLER','Escapes pressure and makes plays with his legs, and can still sling it.',['spd','acc','agi','bhd'],['thp','tak','cov','int'],'qb'],
+ ['SPEEDSTER','Explosive separation and big-play catches in open space.',['spd','acc','rte','cth'],['str','tak','thp','tha'],'wr'],
+ ['ROUTE TECHNICIAN','Precise routes, sharp cuts and sure hands: always open.',['rte','agi','cth','awr'],['spd','str','thp'],'wr'],
+ ['ELUSIVE RUNNER','Makes tacklers miss and keeps the ball safe through traffic.',['bhd','car','agi','acc'],['str','thp','tha'],'wr'],
+ ['POWER RUNNER','Runs through contact, holds on to the ball and never tires.',['str','car','sta'],['agi','spd','thp','tha'],'wr'],
+ ['DEFENSIVE SPECIALIST','Reads the play, blankets receivers and takes the ball away.',['cov','int','tak','rea','awr'],['thp','tha','rte','bhd'],'wr'],
+ ['TWO-WAY ATHLETE','Balanced on both sides of the ball: no glaring hole, no elite skill.',['spd','acc','cth','tak','cov'],['thp','tha','str','sta','car'],'wr']];
+const BUDGET=AK.length*62,A_MIN=25,A_MAX0=92;   // starting ratings cap at 92; career upgrades can take them to 100 later
+function styleAt(i){const[, ,up,dn]=STYLES[i],two=i===7,a={};for(const k of AK)a[k]=60;up.forEach((k,j)=>a[k]=two?72:88-j*2);dn.forEach(k=>a[k]=two?50:40);
+ const free=AK.filter(k=>!up.includes(k)&&!dn.includes(k));let diff=BUDGET-AK.reduce((t,k)=>t+a[k],0);
+ for(let n=0;diff&&n<5000;n++){const k=free[n%free.length],st=Math.sign(diff);if(a[k]+st<A_MIN||a[k]+st>80)continue;a[k]+=st;diff-=st;}return a;}
+const ovr=(a,st)=>{let t=0,w=0;for(const k of AK){const x=STYLES[st][2].includes(k)?3:1;t+=a[k]*x;w+=x;}return Math.round(t/w);};   // weighted to what the playstyle is for
+// ---------- the saved player (localStorage; version field so career progression can extend it) ----------
+const PKEY='rafCareerPlayer',SKC=[0xf1c9a5,0xe0b48a,0xc68642,0x8d5524,0x5c3a21,0x3b2414],GLC=[null,0xffffff,0x111111,0xffd23f,0xff5a1f],CLC=[0x111111,0xffffff,0xff5a1f,0x2a6fdb];
+function loadProf(){try{const p=JSON.parse(localStorage.getItem(PKEY)||'null');if(p&&p.v===1&&p.att&&AK.every(k=>p.att[k]>=A_MIN&&p.att[k]<=100))return p;}catch(e){}return null;}
+function saveProf(p){try{localStorage.setItem(PKEY,JSON.stringify(p));return true;}catch(e){return false;}}
+let PROF=loadProf();
+// in the match: ratings onto the player's doll, skin / gloves / cleats onto its parts, number and name onto the jersey
+function dress(d,lk){const P=d.parts,sk=SKC[lk?lk.skin:1],gl=lk&&GLC[lk.glove]!=null?GLC[lk.glove]:sk,cl2=CLC[lk?lk.cleat:0];
+ for(const n of['neck','head','farm1','farm-1'])P[n].mesh.material.color.setHex(sk);for(const n of['hand1','hand-1'])P[n].mesh.material.color.setHex(gl);for(const n of['foot1','foot-1','toe1','toe-1'])P[n].mesh.material.color.setHex(cl2);}
+function jersey(d,num,name){for(const m of d.decals||[]){m.parent.remove(m);m.material.map.dispose();}d.decals=[];if(num==null)return;
+ for(const[z,ry,nm]of[[.1115,0,''],[-.1115,Math.PI,name||'']]){const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');g.fillStyle='#fff';g.textAlign='center';
+  g.font='900 80px Impact,"Arial Black",sans-serif';g.fillText(String(num),64,nm?116:100);if(nm){g.font='800 22px system-ui,sans-serif';g.fillText(nm.toUpperCase().slice(0,12),64,26);}
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(.3,.28),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false}));m.position.z=z;m.rotation.y=ry;d.parts.chest.mesh.add(m);d.decals.push(m);}}
+function applyProf(p){player.cur.at=p?{...p.att}:null;dress(player,p&&p.look);jersey(player,p?p.num:null,p&&p.last);}
+// ---------- menus: control pick -> QUICK PLAY / CAREER MODE -> career hub -> creator ----------
+let pendMode=null,ED=null,TAB='bio';
+const show=id=>{for(const x of['mm','mode','car','cre'])$m(x).hidden=x!==id;};
+function prevSVG(p,big){const lk=p.look,sk=hx(SKC[lk.skin]),gl=GLC[lk.glove]!=null?hx(GLC[lk.glove]):sk,cl2=hx(CLC[lk.cleat]),B=hx(TEAM.blue[0]),D=hx(TEAM.blue[1]);   // the ragdoll itself, block for block, in your gear
+ return`<svg viewBox="0 0 200 330" class="pvs"><defs><radialGradient id="pg" cx=".5" cy=".95" r=".6"><stop offset="0" stop-color="#fff2"/><stop offset="1" stop-color="#fff0"/></radialGradient></defs><ellipse cx="100" cy="318" rx="70" ry="10" fill="url(#pg)"/>
+ <rect x="74" y="210" width="22" height="98" fill="${D}"/><rect x="104" y="210" width="22" height="98" fill="${D}"/><rect x="70" y="306" width="30" height="12" rx="2" fill="${cl2}"/><rect x="100" y="306" width="30" height="12" rx="2" fill="${cl2}"/>
+ <rect x="66" y="190" width="68" height="34" fill="${D}"/><rect x="68" y="150" width="64" height="42" fill="${B}"/><rect x="60" y="92" width="80" height="62" fill="${B}"/>
+ <rect x="40" y="94" width="20" height="44" fill="${B}"/><rect x="140" y="94" width="20" height="44" fill="${B}"/><rect x="42" y="136" width="16" height="44" fill="${sk}"/><rect x="142" y="136" width="16" height="44" fill="${sk}"/><rect x="41" y="178" width="18" height="20" fill="${gl}"/><rect x="141" y="178" width="18" height="20" fill="${gl}"/>
+ <rect x="89" y="78" width="22" height="16" fill="${sk}"/><rect x="78" y="36" width="44" height="44" fill="${sk}"/><text x="100" y="${big?140:140}" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="40" fill="#fff">${p.num}</text></svg>`;}
+function carUI(){const p=PROF;$m('cplay').disabled=!p;$m('cedit').hidden=!p;
+ $m('ccard').innerHTML=p?`<div class="pvw">${prevSVG(p)}</div><div class="ci"><div class="ovr">${ovr(p.att,p.style)}<small>OVR</small></div><h3>${esc(p.first)} <b>${esc(p.last)}</b></h3><div class="tag">#${p.num} · ${STYLES[p.style][0]}</div>
+  <div class="mini">${AK.map(k=>[k,p.att[k]]).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`<div><span>${ANAME[k]}</span><i style="width:${v}%"></i><b>${v}</b></div>`).join('')}</div></div>`:'<div class="empty">No player yet. Create one to start your career.</div>';}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function openCre(fresh){ED=fresh||!PROF?{v:1,first:'',last:'',num:88,style:2,att:styleAt(2),look:{skin:1,glove:0,cleat:0}}:JSON.parse(JSON.stringify(PROF));TAB='bio';show('cre');creUI();}
+const freePts=()=>BUDGET-AK.reduce((t,k)=>t+ED.att[k],0);
+function creUI(){const e=ED,st=STYLES[e.style];
+ for(const b of document.querySelectorAll('#ctabs button'))b.classList.toggle('on',b.dataset.t===TAB);for(const x of document.querySelectorAll('#cre section'))x.hidden=x.dataset.p!==TAB;
+ $m('fn').value=e.first;$m('ln').value=e.last;$m('jn').value=e.num;
+ $m('stc').innerHTML=STYLES.map((s,i)=>`<button class="sty${i===e.style?' on':''}" data-i="${i}"><b>${s[0]}</b><span>${s[1]}</span><em>+ ${s[2].map(k=>ANAME[k]).join(' · ')}</em><em class="dn">– ${s[3].map(k=>ANAME[k]).join(' · ')}</em><u>${ovr(styleAt(i),i)} OVR · ${s[4]==='qb'?'PLAYS QB':'PLAYS WR'}</u></button>`).join('');
+ const fp=freePts();$m('fpts').textContent=fp;$m('fpts').className=fp?'warn':'';
+ $m('atl').innerHTML=AK.map(k=>{const v=e.att[k],c=v>=90?'el':v>=75?'hi':v>=50?'':'lo';return`<div class="ar${st[2].includes(k)?' key':''}"><span>${ANAME[k]}</span><button data-k="${k}" data-d="-1">−</button><div class="bar"><i class="${c}" style="width:${(v-A_MIN)/(100-A_MIN)*100}%"></i></div><b>${v}</b><button data-k="${k}" data-d="1">+</button></div>`;}).join('');
+ const sw=(id,arr,key)=>{$m(id).innerHTML=arr.map((c,i)=>`<button class="sw${e.look[key]===i?' on':''}" data-k="${key}" data-i="${i}" style="background:${c==null?'repeating-linear-gradient(45deg,#444 0 4px,#222 4px 8px)':hx(c)}" title="${c==null?'None':''}"></button>`).join('');};
+ sw('skw',SKC,'skin');sw('glw',GLC,'glove');sw('clw',CLC,'cleat');
+ $m('pv').innerHTML=prevSVG(e,1);$m('pvi').innerHTML=`<div class="ovr">${ovr(e.att,e.style)}<small>OVR</small></div><h3>${esc(e.first||'FIRST')} <b>${esc(e.last||'LAST')}</b></h3><div class="tag">#${e.num} · ${st[0]}</div><p>${st[1]}</p>`;}
+function validate(){const e=ED,nm=/^[A-Za-z][A-Za-z' .-]{0,13}$/;if(!nm.test(e.first.trim()))return'Enter a first name (letters, up to 14).';if(!nm.test(e.last.trim()))return'Enter a last name (letters, up to 14).';
+ if(!(Number.isInteger(e.num)&&e.num>=0&&e.num<=99))return'Jersey number must be 0-99.';const fp=freePts();if(fp)return fp>0?`Spend your remaining ${fp} attribute points.`:`You are ${-fp} points over budget.`;return'';}
+{$m('ctouch').onclick=()=>{pendMode='touch';show('mode');};$m('ckb').onclick=()=>{pendMode='kb';show('mode');};
+ $m('mquick').onclick=()=>{show(null);applyProf(null);startGame(pendMode);};$m('mcar').onclick=()=>{show('car');carUI();};$m('mback').onclick=()=>show('mm');
+ $m('cplay').onclick=()=>{if(!PROF)return;show(null);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,you:'blue',off:'blue',pos:STYLES[PROF.style][4],n:{blue:3,red:3}});newGame();applyOrg();};
+ $m('cedit').onclick=()=>openCre(false);$m('cnew').onclick=()=>openCre(true);$m('cback').onclick=()=>show('mode');
+ $m('ccan').onclick=()=>{show('car');carUI();};
+ $m('csave').onclick=()=>{ED.first=ED.first.trim();ED.last=ED.last.trim();const er=validate();$m('cerr').textContent=er;if(er)return;ED.created=ED.created||Date.now();PROF=JSON.parse(JSON.stringify(ED));
+  if(!saveProf(PROF))$m('cerr').textContent='Saved for this session only (storage is blocked).';show('car');carUI();};
+ $m('ctabs').onclick=e=>{const t=e.target.dataset.t;if(t){TAB=t;creUI();}};
+ $m('fn').oninput=e=>{ED.first=e.target.value;$m('pvi').querySelector('h3').innerHTML=`${esc(ED.first||'FIRST')} <b>${esc(ED.last||'LAST')}</b>`;};
+ $m('ln').oninput=e=>{ED.last=e.target.value;$m('pvi').querySelector('h3').innerHTML=`${esc(ED.first||'FIRST')} <b>${esc(ED.last||'LAST')}</b>`;};
+ $m('jn').oninput=e=>{const n=parseInt(e.target.value,10);ED.num=isNaN(n)?-1:n;if(n>=0&&n<=99){$m('pv').innerHTML=prevSVG(ED,1);}};
+ $m('stc').onclick=e=>{const b=e.target.closest('.sty');if(!b)return;ED.style=+b.dataset.i;ED.att=styleAt(ED.style);creUI();};   // a new playstyle starts from its own distribution
+ $m('atl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k,d=+b.dataset.d,v=ED.att[k]+d;if(v<A_MIN||v>A_MAX0||(d>0&&freePts()<=0))return;ED.att[k]=v;creUI();};   // points move between attributes; the budget never grows
+ $m('cre').addEventListener('click',e=>{const b=e.target.closest('.sw');if(!b)return;ED.look[b.dataset.k]=+b.dataset.i;creUI();});}
+// stamina meter (yours)
+{const st=$m('stam').firstElementChild;setInterval(()=>{const v=player.cur.stam??1;st.style.width=v*100+'%';st.style.background=v<.4?'#ff5a4a':'#fff';},120);}
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
 const DT=1/400;let acc=0,last=performance.now();
 const tgt=new THREE.Vector3(0,1,0);let camCD=3.6;
@@ -1033,7 +1167,7 @@ function frame(now){
  {const rd=(now-(frame.pt||now))/1000,fd=Math.min(.05,rd);frame.pt=now;for(const d of D){use(d);cleats(d,fd);}turfTick(fd,rd);}
  for(const d of D)if(d.limpT&&performance.now()>d.limpT){use(d);limp=false;d.limpT=0;}   // tackled: back on his feet
  use(player);playTick();
- if(player.cur.side==='d'&&dv>0){const c=roster.find(d=>d.cur.side==='o'&&d.held&&!d.limp);if(c&&c.pel.position.distanceTo(pel.position)<1.3){c.limp=true;c.limpT=performance.now()+2600;}}   // you on defence: dive into the ball carrier to tackle him
+ if(player.cur.side==='d'&&dv>0){const c=roster.find(d=>d.cur.side==='o'&&d.held&&!d.limp);if(c&&!cur.tkd&&c.pel.position.distanceTo(pel.position)<1.3*(1+.15*AT('tak'))){cur.tkd=1;tackleTry(c,player);}}else if(dv===0)cur.tkd=0;   // you on defence: dive into the ball carrier to tackle him
  ballTick(now);aimTick();$m('cboost').hidden=catchBoost()===1;
  tgt.x+=(pel.position.x-tgt.x)*.45;tgt.z+=(pel.position.z-tgt.z)*.45;tgt.y+=(Math.max(.4,pel.position.y-.08)-tgt.y)*.1;   // follow the doll tightly (incl. height on platforms)
  const sh=.55,pvx=tgt.x+Math.cos(camYaw)*sh,pvy=tgt.y+.55,pvz=tgt.z-Math.sin(camYaw)*sh,cp=Math.cos(camPitch);   // pivot: over the doll's right shoulder

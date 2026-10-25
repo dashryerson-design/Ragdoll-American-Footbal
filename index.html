@@ -120,7 +120,7 @@ function pd(c,p,s,react,KP=600,KD=30){
  const tx=I*(kp*ex-kd*(w.x-pw.x)),ty=I*(kp*ey-kd*(w.y-pw.y)),tz=I*(kp*ez-kd*(w.z-pw.z));
  c.torque.x+=tx;c.torque.y+=ty;c.torque.z+=tz;
  if(p&&react){p.torque.x-=tx;p.torque.y-=ty;p.torque.z-=tz;}}
-function drive(j){eul(j.x,j.y,j.z,tq);j.p.quaternion.mult(tq,des);pd(j.c,j.p,j.s,j.react);if(limp&&j.lim)limitJ(j);}
+function drive(j){eul(j.x,j.y,j.z,tq);j.p.quaternion.mult(tq,des);pd(j.c,j.p,j.s,j.react);if(j.lim)limitJ(j);}   // anatomical stops always apply, limp or not
 // bones and ligaments: a joint pushed past its natural range meets a stiff, damped stop (knees and elbows can't bend backwards, necks can't fold flat)
 const rq=new Q(),lv=new V(),lw=new V(),lt=new V();
 function limitJ(j){const P=j.p,Cb=j.c,L=j.lim;P.quaternion.inverse(inv);inv.mult(Cb.quaternion,rq);
@@ -580,16 +580,17 @@ function catchPoint(){const c=chest.position,b=ball.position,u=chest.velocity,v=
  
  const t=cl(-(rx*v.x+ry*v.y+rz*v.z)/vv,0,.5);return{p:new V(b.x+v.x*t,b.y+v.y*t-4.91*t*t,b.z+v.z*t),t,d:Math.hypot(rx+v.x*t,ry+v.y*t,rz+v.z*t)};}   // where the ball passes closest to the chest
 function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(ball);let want=0,cp=null;
- if(live){cp=catchPoint();const near=Math.hypot(ball.position.x-chest.position.x,ball.position.y-chest.position.y,ball.position.z-chest.position.z);want=near<4.5&&cp.d<1.5?1:0;}
+ if(live){cp=catchPoint();const near=Math.hypot(ball.position.x-chest.position.x,ball.position.y-chest.position.y,ball.position.z-chest.position.z);
+  chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);want=near<4.5&&cp.d<1.5&&_cv.z>-.12?1:0;}   // only balls passing in front of or beside the body: arms can't reach behind the back
  if(want&&catchK<.05){chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);catchSide=_cv.x>.3?1:_cv.x<-.3?-1:0;}   // decide 1 or 2 hands as the reach starts
  catchK+=(want-catchK)*Math.min(1,DT*(want?14:6));if(catchK<.05||!cp)return;
  for(const sd of catchSide?[catchSide]:[1,-1]){const S=bpt(chest,sd*.27,.12,0),o=catchSide?0:sd*.07;   // two hands: each aims a little to its own side of the ball
   chest.vectorToLocalFrame(new V(cp.p.x-S.x,cp.p.y-S.y,cp.p.z-S.z),_cv);_cv.x+=o;const L=Math.hypot(_cv.x,_cv.y,_cv.z)||1,J=joints,k=catchK;
-  const ax=-Math.atan2(_cv.z,-_cv.y),az=Math.asin(cl(_cv.x/L,-1,1)),M=(a,b)=>a+(b-a)*k;
+  const ax=cl(-Math.atan2(_cv.z,-_cv.y),-3,.3),az=cl(Math.asin(cl(_cv.x/L,-1,1)),sd>0?-.5:-1.4,sd>0?1.4:.5),M=(a,b)=>a+(b-a)*k;   // shoulder range: no reaching back past the body, limited reach across it
   J['shoulder'+sd].x=M(J['shoulder'+sd].x,ax);J['shoulder'+sd].z=M(J['shoulder'+sd].z,az);J['shoulder'+sd].y=0;J['elbow'+sd].x=M(J['elbow'+sd].x,-.2);J['wrist'+sd].x=M(J['wrist'+sd].x,0);}
  // the catch itself: a reaching hand gets to the ball (checked every physics step, so fast passes can't skip past)
  for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<.3){grabBall();catchK=0;return;}}
- if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;if(Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<.42){grabBall();catchK=0;}}}   // two-hand reach: a ball into the chest is trapped against it
+ if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<.42){grabBall();catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
 function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);catchOn=false;}
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);

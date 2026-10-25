@@ -123,6 +123,12 @@
 #uovr{display:grid;grid-template-columns:auto auto;align-items:end;gap:4px 10px}#uovr b{font:800 54px/1 "Barlow Condensed"}#uovr em{font:800 34px "Barlow Condensed";font-style:normal;color:#3ee07a}#uovr i{grid-column:1/-1;height:5px;background:#444}#uovr u{display:block;height:100%;background:#fff}#uovr small{font:700 13px "Barlow Condensed";letter-spacing:.2em;color:#aaa}
 .ufoot{display:flex;align-items:center;gap:16px;background:#141416;padding:0}#udev{font:800 20px "Barlow Condensed"!important;letter-spacing:.02em!important;text-transform:none;background:#ffd23f!important;color:#111!important;border:0!important;border-radius:0!important;padding:12px 26px!important}#udev:disabled{background:#3a3a40!important;color:#777!important}
 #ucost{font:600 20px "Barlow Condensed"}#ucost b{color:#3ee07a;font-weight:800}#ucost .no{color:#ff5a4a;font-size:16px;margin-left:8px}#ucost .mx{color:#ffcf4a}
+#tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;padding-bottom:40px}
+.tcard{display:grid!important;grid-template-columns:54px 1fr 56px;gap:12px;align-items:center;text-align:left;background:linear-gradient(110deg,color-mix(in srgb,var(--j) 55%,#111) 0,#151517 62%)!important;border:1px solid #ffffff18!important;border-left:4px solid var(--a)!important;padding:12px!important;letter-spacing:0!important;text-transform:none;color:#fff!important;transition:transform .15s,box-shadow .15s}
+.tcard:hover{transform:translateY(-2px);box-shadow:0 8px 24px #0008}.tcard.on{box-shadow:0 0 0 2px #ffd23f,0 8px 24px #0008}
+.tbadge{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:30px;background:var(--j);box-shadow:inset 0 0 0 3px var(--a)}
+.tinfo small{font:700 11px "Barlow Condensed";letter-spacing:.18em;color:#ffffffaa}.tinfo b{display:block;font:800 24px/1.05 "Barlow Condensed";text-transform:uppercase}.tinfo span{display:block;font:500 13px/1.3 "Barlow Condensed";color:#ddd;margin:3px 0}.tinfo em{font:600 12px "Barlow Condensed";font-style:normal;color:var(--a)}
+.jsv{width:56px;height:52px}
 #stam{position:fixed;left:calc(14px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:3;width:110px;height:6px;background:#0008;border:1px solid #fff4;border-radius:3px;pointer-events:none}#stam i{display:block;height:100%;width:100%;border-radius:2px}
 </style></head><body>
 <div id="mm" class="ov"><div id="logo"><svg viewBox="0 0 120 70" aria-hidden="true"><ellipse cx="60" cy="35" rx="56" ry="31" fill="#7a3a16"/><ellipse cx="60" cy="35" rx="56" ry="31" fill="none" stroke="#4a210a" stroke-width="3"/>
@@ -136,7 +142,7 @@
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
 <div id="mode" class="ov scr" hidden><div class="crumb">// SELECT MODE</div><div class="mpick"><button class="mc" id="mquick"><b>QUICK PLAY</b><span>Jump straight onto the field. Set up teams and plays from the pause menu.</span></button><button class="mc acc" id="mcar"><b>CAREER MODE</b><span>Create your player, choose a playstyle and take them into real drives.</span></button></div><button class="ghost" id="mback">BACK</button></div>
 <div id="car" class="ov scr mad" hidden><div class="vt">//CAREER</div><div class="mgrid">
-<div class="mleft"><h1>Career</h1><div class="sub" id="crec">Your player</div><div class="mlist"><button class="mrow pri2" id="cplay">Play Match</button><button class="mrow" id="cupg">Upgrade Player</button><button class="mrow" id="cedit">Edit Player</button><button class="mrow" id="cnew">Create New Player</button><button class="mrow" id="cback">Back</button></div><div id="cempty" class="note"></div></div>
+<div class="mleft"><h1>Career</h1><div class="sub" id="crec">Your player</div><div class="mlist"><button class="mrow pri2" id="cplay">Play Match</button><button class="mrow" id="cteams">Teams</button><button class="mrow" id="cupg">Upgrade Player</button><button class="mrow" id="cedit">Edit Player</button><button class="mrow" id="cnew">Create New Player</button><button class="mrow" id="cback">Back</button></div><div id="cempty" class="note"></div></div>
 <div class="mmid" id="ctbl"></div><div class="mright"><div class="pvbox" id="pvh"></div><div class="pvi" id="pvih"></div></div></div>
 <div class="hints"><span><i>✕</i> Select</span><span><i>◯</i> Back</span><span><i>⟲</i> Drag to rotate</span></div></div>
 <div id="cre" class="ov scr mad" hidden><div class="vt">//CAREER</div><div class="mgrid">
@@ -149,11 +155,11 @@
 <div class="mright"><div class="pvbox" id="pvc"></div><div class="pvi" id="pvi"></div></div></div>
 <div class="hints"><span><i>✕</i> Select</span><button id="ccan"><i>◯</i> Back</button><span><i>⟲</i> Drag to rotate</span><button id="csave"><i>△</i> Save Player</button></div></div>
 <div id="pre" class="ov scr mad" hidden><div class="vt">//CAREER · MATCHUP</div><div class="mgrid">
-<div class="mleft"><h1>Career Match</h1><div class="sub">4 v 4 · Blue vs Red · 6:00 game clock</div><div class="note" style="color:#ddd;font:500 16px/1.4 'Barlow Condensed'">You start on offence at your own 25. When the ball changes hands both teams swap sides, so you play offence and defence. Most points when the 6-minute clock runs out wins.</div>
+<div class="mleft"><h1>Career Match</h1><div class="sub" id="pvs"></div><div class="sub">4 v 4 · 6:00 game clock</div><div class="note" style="color:#ddd;font:500 16px/1.4 'Barlow Condensed'">You start on offence at your own 25. When the ball changes hands both teams swap sides, so you play offence and defence. Most points when the 6-minute clock runs out wins.</div>
 <div class="mlist" style="margin-top:16px"><button class="mrow pri2" id="pgo">Kick Off</button><button class="mrow" id="pback">Back</button></div></div>
 <div class="mmid" id="pline"></div><div class="mright"><div class="pvbox" id="pvp"></div><div class="pvi" id="pvip"></div></div></div>
 <div class="hints"><span><i>✕</i> Select</span><span><i>◯</i> Back</span></div></div>
-<div id="fin" class="ov scr mad" hidden><div class="vt">//CAREER · POST GAME</div><div class="fwrap">
+<div id="fin" class="ov scr mad" hidden><div class="vt">//CAREER · POST GAME</div><div class="fwrap" id="fwrap">
 <div class="fhead"><div><div class="res" id="fres"></div><div class="fsc"><span class="ftb">BLU</span><b id="fb"></b><span class="fx">FINAL</span><b id="fr"></b><span class="ftr">RED</span></div></div><div class="gbox"><div id="fgr" class="grade"></div><small>GRADE</small></div></div>
 <div class="fgrid"><div class="fpn"><h4>Player Stats</h4><div id="fst"></div></div><div class="fpn"><h4>Objectives</h4><div id="fobj"></div><h4 style="margin-top:14px">XP Breakdown</h4><div id="fxp"></div></div>
 <div class="fpn"><h4>Progress</h4><div class="lvrow"><b id="flv"></b><div class="lbar"><i id="fbar"></i></div></div><div class="note" id="fnext"></div><div id="flup" class="lup" hidden></div>
@@ -163,6 +169,8 @@
 <div class="ubox"><div class="ul"><h4>Details</h4><div id="uinfo"></div></div><div class="urt"><h4>Overall Rating Impact</h4><div id="uovr"></div></div></div>
 <div class="ufoot"><button id="udev">Develop</button><span id="ucost"></span></div></div><div class="mright"><div class="pvbox" id="pvu"></div></div></div>
 <div class="hints"><button id="ureset"><i>Y</i> Reset Upgrades</button><button id="uback"><i>◯</i> Back</button></div></div>
+<div id="teams" class="ov scr mad" hidden><div class="vt">//CAREER · LEAGUE</div><div style="width:min(100%,1240px)"><h1 style="margin:0 0 4px;font:500 34px 'Barlow Condensed'">The League</h1><div class="sub" style="font:600 14px 'Barlow Condensed';letter-spacing:.2em;color:#ffffff88;margin-bottom:14px">16 CLUBS · PICK THE TEAM YOU PLAY FOR</div><div id="tgrid"></div></div>
+<div class="hints"><button id="tback"><i>◯</i> Back</button></div></div>
 <canvas id="pv3"></canvas>
 <div id="stam"><i></i></div>
 <div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="borg">GAME ORGANISER</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
@@ -868,7 +876,7 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
 let mode=null,paused=false;const $m=id=>document.getElementById(id);
 function startGame(m){mode=m;document.body.classList.toggle('touch',m==='touch');$m('mm').hidden=true;last=performance.now();}
 function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
-function toMenu(){if(MATCH){MATCH=null;ORG.four=false;$m('pcard').hidden=true;}paused=false;$m('pm').hidden=true;$m('org').hidden=true;mode=null;document.body.classList.remove('touch');
+function toMenu(){useClubs(null);if(MATCH){MATCH=null;ORG.four=false;$m('pcard').hidden=true;}paused=false;$m('pm').hidden=true;$m('org').hidden=true;mode=null;document.body.classList.remove('touch');
  for(const d of active()){use(d);held=false;thr=-1;aimOn=false;chargeT=-1;catchOn=false;reset();}use(player);   // a fresh start next time
  looseBall();resetPlay();$m('mm').hidden=false;}
 // ---------- dolls: the player and the QB run the exact same ragdoll + controller; each doll's state is swapped in with use(d) ----------
@@ -966,7 +974,7 @@ const GOAL_Z=50*YD,SCORE={blue:0,red:0};let playEnd=0,resetT=0,fumT=0,LOS=-25*YD
 const losMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0x3a7bff,transparent:true,opacity:.85,depthWrite:false})),fdMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.85,depthWrite:false}));
 for(const m of[losMesh,fdMesh]){m.rotation.x=-Math.PI/2;m.position.y=.03;m.visible=false;scene.add(m);}   // blue line of scrimmage, yellow first-down line
 const ORD=['','1ST','2ND','3RD','4TH'],spot=z=>{const y=Math.round(z/YD);return y<0?'OWN '+(50+y):y>0?'OPP '+(50-y):'50';};
-function hud(){const b=playOn?POSS():ORG.off,dd=ORD[DOWN]+' & '+(FD>=GOAL_Z?'GOAL':Math.max(1,Math.round((FD-LOS)/YD)));$m('score').innerHTML=`<span class="tm b${b==='blue'?' pos':''}">BLU<b>${SCORE.blue}</b></span><span class="tm r${b==='red'?' pos':''}">RED<b>${SCORE.red}</b></span>${RET?'<span class="to">TURNOVER · RETURN</span>':`<span class="dd">${dd}</span>`}<span class="sp">${spot(LOS)}</span>${MATCH?`<span class="dr">${MATCH.clock>0?(Math.ceil(MATCH.clock)/60|0)+':'+String(Math.ceil(MATCH.clock)%60).padStart(2,'0'):'FINAL PLAY'}</span>`:''}`;}
+function hud(){const b=playOn?POSS():ORG.off,dd=ORD[DOWN]+' & '+(FD>=GOAL_Z?'GOAL':Math.max(1,Math.round((FD-LOS)/YD)));$m('score').innerHTML=`<span class="tm b${b==='blue'?' pos':''}" style="background:${hx(TEAM.blue[0])}">${TABB.blue}<b>${SCORE.blue}</b></span><span class="tm r${b==='red'?' pos':''}" style="background:${hx(TEAM.red[0])}">${TABB.red}<b>${SCORE.red}</b></span>${RET?'<span class="to">TURNOVER · RETURN</span>':`<span class="dd">${dd}</span>`}<span class="sp">${spot(LOS)}</span>${MATCH?`<span class="dr">${MATCH.clock>0?(Math.ceil(MATCH.clock)/60|0)+':'+String(Math.ceil(MATCH.clock)%60).padStart(2,'0'):'FINAL PLAY'}</span>`:''}`;}
 // your stat line: rushing / receiving yards and TDs when you carry it, passing yards and TDs when your pass is caught
 function tally(car,z,td){if(!MATCH)return;const S=MATCH.st,g=Math.round((Math.min(z,GOAL_Z)-LOS)/YD);if(car===player){if(MATCH.caught){S.recy+=g;if(td)S.rectd++;}else{S.rush+=g;if(td)S.rtd++;}}else if(car.cur.side==='o'&&player.cur.role==='qb'&&player.cur.side==='o'&&playTick.lc===car&&car.cur.role==='wr'){S.pyd+=g;if(td)S.ptd++;}}
 const POSS=()=>RET?RET.team:ORG.off,DIR=()=>RET?-1:1;   // who has the ball right now, and which way they're running
@@ -1231,7 +1239,7 @@ function jersey(d,num,name){for(const m of d.decals||[]){m.parent.remove(m);m.ma
 function applyProf(p){player.cur.at=p?{...p.att}:null;dress(player,p&&p.look);jersey(player,p?p.num:null,p&&p.last);}
 // ---------- menus: control pick -> QUICK PLAY / CAREER MODE -> career hub -> creator ----------
 let pendMode=null,ED=null,TAB='bio';
-const show=id=>{for(const x of['mm','mode','car','cre','pre','fin','upg'])$m(x).hidden=x!==id;};
+const show=id=>{for(const x of['mm','mode','car','cre','pre','fin','upg','teams'])$m(x).hidden=x!==id;};
 // ---------- the 3D preview: a second, tiny renderer showing the actual ragdoll's parts in their standing pose, in your gear ----------
 const PVW={r:null};
 function pvInit(){if(PVW.r)return;const r=PVW.r=new THREE.WebGLRenderer({canvas:$m('pv3'),antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio));
@@ -1254,7 +1262,7 @@ function tblHTML(p,edit){const base=styleAt(p.style),key=STYLES[p.style][2],row=
  return`<div class="tbl">${GROUPS.map(([g,ks],i)=>`<div class="th${i?' gp':''}"><span>${g} <em>${Math.round(ks.reduce((t,k)=>t+p.att[k],0)/ks.length)}</em></span><span>${i?'':'Max Potential'}</span><span>${i?'':'Point Slots'}</span></div>${ks.map(row).join('')}`).join('')}
  <div class="tf">${edit?`<span>Move points between ratings with − / +</span><span><span class="dotr">Spent: <b>${spent}</b></span>&nbsp;&nbsp;<span class="dotr">Remaining: <b>${rem}</b></span></span>`:`<span>Overall <b>${ovr(p.att,p.style)}</b></span><span>Level <b>${p.lvl||1}</b> · Upgrade pts <b>${p.up||0}</b></span>`}</div></div>`;}
 const pviHTML=p=>{const st=STYLES[p.style];return`<div class="ovr">${ovr(p.att,p.style)} <small>OVR</small></div><h3>${esc(tcase(st[0]))}</h3><div class="nm">${esc(p.first||'First')} ${esc(p.last||'Last')} · #${p.num>=0?p.num:''}</div><p>${st[1]}</p>`;};
-function carUI(){const p=PROF,C=p&&p.career;$m('crec').textContent=C?`LVL ${p.lvl} · Record ${C.w}-${C.l}${C.t?'-'+C.t:''} · ${C.gp} gp · ${C.pyd+C.rush+C.recy} yds · ${C.ptd+C.rtd+C.rectd+C.dtd} TD · ${C.tak} tkl · ${C.int} INT`:'Your player';$m('cupg').hidden=!p;$m('cupg').textContent=p&&p.up?`Upgrade Player · ${p.up} pts`:'Upgrade Player';$m('cplay').disabled=!p;$m('cedit').hidden=!p;$m('cempty').textContent=p?'':'No player yet. Create one to start your career.';
+function carUI(){const p=PROF,C=p&&p.career;$m('crec').textContent=C?`LVL ${p.lvl} · Record ${C.w}-${C.l}${C.t?'-'+C.t:''} · ${C.gp} gp · ${C.pyd+C.rush+C.recy} yds · ${C.ptd+C.rtd+C.rectd+C.dtd} TD · ${C.tak} tkl · ${C.int} INT`:'Your player';$m('cupg').hidden=!p;$m('cteams').hidden=!p;if(p){const c=club(p.team??0);$m('crec').textContent=c.ic+' '+c.city+' '+c.name+' · '+$m('crec').textContent;}$m('cupg').textContent=p&&p.up?`Upgrade Player · ${p.up} pts`:'Upgrade Player';$m('cplay').disabled=!p;$m('cedit').hidden=!p;$m('cempty').textContent=p?'':'No player yet. Create one to start your career.';
  $m('ctbl').hidden=!p;$m('pvih').innerHTML=p?pviHTML(p):'';if(p){$m('ctbl').innerHTML=tblHTML(p,false);pvShow('pvh',p);}}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let STEP=1;
@@ -1272,7 +1280,7 @@ function creUI(){const e=ED,st=STYLES[e.style];
 function validate(){const e=ED,nm=/^[A-Za-z][A-Za-z' .-]{0,13}$/;if(!nm.test(e.first.trim()))return'Enter a first name (letters, up to 14).';if(!nm.test(e.last.trim()))return'Enter a last name (letters, up to 14).';
  if(!(Number.isInteger(e.num)&&e.num>=0&&e.num<=99))return'Jersey number must be 0-99.';const fp=freePts();if(fp)return fp>0?`Spend your remaining ${fp} attribute points.`:`You are ${-fp} points over budget.`;return'';}
 {$m('ctouch').onclick=()=>{pendMode='touch';show('mode');};$m('ckb').onclick=()=>{pendMode='kb';show('mode');};
- $m('mquick').onclick=()=>{show(null);applyProf(null);startGame(pendMode);};$m('mcar').onclick=()=>{show('car');carUI();};$m('mback').onclick=()=>show('mm');
+ $m('mquick').onclick=()=>{useClubs(null);show(null);applyProf(null);startGame(pendMode);};$m('mcar').onclick=()=>{show('car');carUI();};$m('mback').onclick=()=>show('mm');
  $m('cplay').onclick=preMatch;$m('pback').onclick=()=>{show('car');carUI();};$m('pgo').onclick=kickOff;$m('fagain').onclick=preMatch;$m('fhub').onclick=()=>{show('car');carUI();};
  $m('cedit').onclick=()=>openCre(false);$m('cnew').onclick=()=>{if(PROF&&(PROF.xp||PROF.career.gp)&&!confirm('Create a new player? '+PROF.first+' '+PROF.last+' (level '+PROF.lvl+') will be replaced.'))return;openCre(true);};$m('cback').onclick=()=>show('mode');
  $m('ccan').onclick=()=>{show('car');carUI();};
@@ -1290,10 +1298,34 @@ function validate(){const e=ED,nm=/^[A-Za-z][A-Za-z' .-]{0,13}$/;if(!nm.test(e.f
  $m('cre').addEventListener('click',e=>{const b=e.target.closest('.sw');if(!b)return;ED.look[b.dataset.k]=+b.dataset.i;creUI();dress(PVW.d,ED.look);});}
 // ---------- career match: pre-match screen -> a real 4v4 drive game on the normal engine with your player in it -> final screen; stats saved to the profile ----------
 const MLEN=360;   // 6-minute games
-function preMatch(){if(!PROF)return;show('pre');pvShow('pvp',PROF);$m('pvip').innerHTML=pviHTML(PROF);
- const pos=STYLES[PROF.style][4]==='qb'?'QB':'WR 1';$m('pline').innerHTML=`<div class="tbl"><div class="th"><span>Blue · your team</span><span></span><span></span></div>${[['YOU · '+esc(PROF.last.toUpperCase()),pos+' on offence · CB on defence'],['Bot',pos==='QB'?'WR':'QB'],['Bot','WR'],['Bot','WR']].map(([a,b])=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">${a}</span><span>${b}</span></div>`).join('')}
- <div class="th" style="margin-top:10px"><span>Red · opponents</span><span></span><span></span></div>${['QB / S','WR / CB','WR / CB','WR / CB'].map(r=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">Bot</span><span>${r}</span></div>`).join('')}</div>`;}
-function kickOff(){show(null);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:STYLES[PROF.style][4]});MATCH={id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj(STYLES[PROF.style][4]==='qb')};newGame();applyOrg();
+// ================= THE LEAGUE: 16 clubs (fictional, styled like real ones) =================
+// [abbr, city, name, icon, jersey, pants, accent, founded, stadium, identity]
+const CLUBS=[['POR','Portland','Timberwolves','🐺',0x1f5d3a,0x14261b,0xc9a227,1961,'Cascade Field','Pack defence that swarms the ball; rain-soaked home games are a fortress.'],
+ ['AUS','Austin','Rattlers','🐍',0xc4521b,0x2a1a12,0xf2e6d0,1994,'Hill Country Stadium','Up-tempo air raid: quick strikes and no huddle.'],
+ ['DET','Detroit','Ironhawks','🦅',0x3d5a80,0x1c2433,0xc0c6cc,1933,'Foundry Park','Blue-collar and physical; wins in the trenches.'],
+ ['MIA','Miami','Barracudas','🐟',0x0aa3a3,0x0b3b3f,0xff7a59,1972,'Biscayne Bowl','Speed everywhere; deep shots under the lights.'],
+ ['DEN','Denver','Summit Bears','🐻',0x1d2b53,0x10172c,0xe8a33d,1960,'Mile High Grounds','Thin air, thick legs: a punishing run game.'],
+ ['SEA','Seattle','Orcas','🐋',0x16181c,0x0d0e10,0x2bb3c0,1976,'Sound Arena','The loudest crowd in the league and a ball-hawking secondary.'],
+ ['MEM','Memphis','Mustangs','🐎',0x4b2a7b,0x231338,0xd4af37,1998,'River Bluff Stadium','Explosive receivers who never stop running after the catch.'],
+ ['BOS','Boston','Harbor Sharks','🦈',0x23395d,0x121d30,0x9fb4c7,1920,'Harborside Park','Old-school, disciplined, and ruthless in the red zone.'],
+ ['LVS','Las Vegas','Scorpions','🦂',0x2b2b2b,0x141414,0xd6b85a,2004,'Desert Dome','High-risk, high-reward; trick plays on any down.'],
+ ['CHI','Chicago','Wolverines','🦡',0x6b1f2a,0x2e0d12,0xf2f2f2,1921,'Lakefront Field','Snow-game specialists with a brutal pass rush.'],
+ ['PHX','Phoenix','Firebirds','🔥',0xd1361f,0x3a0f09,0xf5b700,1988,'Sun Valley Stadium','Rose from the ashes: young, fast, and fearless.'],
+ ['NSH','Nashville','Night Owls','🦉',0x20263a,0x10131e,0x8fd3ff,2002,'Music Row Field','Patient, cerebral offence that picks you apart late.'],
+ ['SAT','San Antonio','Javelinas','🐗',0x7a5230,0x33220f,0xe9d8a6,2011,'Alamo Yards','Tough, scrappy underdogs who never quit on a play.'],
+ ['BUF','Buffalo','Thunder Bison','🦬',0x0b3d91,0x061d45,0xe03a3e,1946,'Lakeshore Bowl','Stampede running attack built for the cold.'],
+ ['JAX','Jacksonville','Gators','🐊',0x0f6b3c,0x08301c,0xf47b20,1995,'St. Johns Stadium','Ambush defence: bait the throw, snap the jaws shut.'],
+ ['SLC','Salt Lake','Mountain Lions','🐆',0x2f3b4c,0x161c25,0xc8102e,1979,'Wasatch Field','Stealthy coverage and big cats in the open field.']];
+const club=i=>{const c=CLUBS[i];return{ab:c[0],city:c[1],name:c[2],ic:c[3],jer:c[4],pant:c[5],acc:c[6],yr:c[7],st:c[8],id:c[9]};};
+const TABB={blue:'BLU',red:'RED'},TEAM0={blue:[...TEAM.blue],red:[...TEAM.red]};
+function useClubs(a,b){if(a==null){TEAM.blue=[...TEAM0.blue];TEAM.red=[...TEAM0.red];TABB.blue='BLU';TABB.red='RED';return;}const A=club(a),B=club(b);TEAM.blue=[A.jer,A.pant];TEAM.red=[B.jer,B.pant];TABB.blue=A.ab;TABB.red=B.ab;}   // the two slots wear the clubs' kits
+const jerseySVG=(c,n)=>`<svg viewBox="0 0 60 56" class="jsv"><path d="M18 4l-14 8 5 13 7-3v30h28V22l7 3 5-13-14-8c-2 5-6 7-12 7S20 9 18 4z" fill="${hx(c.jer)}" stroke="${hx(c.acc)}" stroke-width="2.5"/><text x="30" y="40" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif" font-weight="800" font-size="17" fill="${hx(c.acc)}">${n}</text></svg>`;
+function teamsUI(){const my=PROF?PROF.team??0:0;$m('tgrid').innerHTML=CLUBS.map((_,i)=>{const c=club(i);return`<button class="tcard${i===my?' on':''}" data-i="${i}" style="--j:${hx(c.jer)};--a:${hx(c.acc)}"><div class="tbadge">${c.ic}</div><div class="tinfo"><small>${c.city.toUpperCase()} · EST. ${c.yr}</small><b>${c.name}</b><span>${c.id}</span><em>${c.st} · ${c.ab}</em></div>${jerseySVG(c,i===my&&PROF?PROF.num:(i*7+11)%99)}</button>`;}).join('');}
+{$m('tgrid').onclick=e=>{const b=e.target.closest('.tcard');if(!b||!PROF)return;PROF.team=+b.dataset.i;saveProf(PROF);teamsUI();};$m('tback').onclick=()=>{show('car');carUI();};$m('cteams').onclick=()=>{show('teams');teamsUI();};}
+function preMatch(){if(!PROF)return;show('pre');const my=PROF.team??0;let op;do op=Math.random()*16|0;while(op===my);preMatch.op=op;const A=club(my),B=club(op);$m('pvs').innerHTML=`<span style="color:${hx(A.acc)}">${A.ic} ${A.city} ${A.name}</span> vs <span style="color:${hx(B.acc)}">${B.ic} ${B.city} ${B.name}</span>`;pvShow('pvp',PROF);$m('pvip').innerHTML=pviHTML(PROF);
+ const pos=STYLES[PROF.style][4]==='qb'?'QB':'WR 1';$m('pline').innerHTML=`<div class="tbl"><div class="th"><span>${club(PROF.team??0).name} · your team</span><span></span><span></span></div>${[['YOU · '+esc(PROF.last.toUpperCase()),pos+' on offence · CB on defence'],['Bot',pos==='QB'?'WR':'QB'],['Bot','WR'],['Bot','WR']].map(([a,b])=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">${a}</span><span>${b}</span></div>`).join('')}
+ <div class="th" style="margin-top:10px"><span>${club(preMatch.op).name} · opponents</span><span></span><span></span></div>${['QB / S','WR / CB','WR / CB','WR / CB'].map(r=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">Bot</span><span>${r}</span></div>`).join('')}</div>`;}
+function kickOff(){show(null);useClubs(PROF.team??0,preMatch.op);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:STYLES[PROF.style][4]});MATCH={id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj(STYLES[PROF.style][4]==='qb')};newGame();applyOrg();
  $m('pcard').hidden=false;$m('pcard').innerHTML=`<span class="o">${ovr(PROF.att,PROF.style)}</span><span><span class="n">#${PROF.num} ${esc(PROF.last)}</span><small>${STYLES[PROF.style][0]}</small></span>`;}
 function endMatch(){const M=MATCH,S=M.st,me=ORG.you,op=me==='blue'?'red':'blue',r=SCORE[me]>SCORE[op]?'w':SCORE[me]<SCORE[op]?'l':'t';
  MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;toMenu();
@@ -1314,7 +1346,7 @@ function xpFor(S,r,obj){const rows=[['Participation',80]];let st=0;for(const[k,v
 const XPN=l=>500+150*(l-1),UP_PER=3;   // XP to the next level; upgrade points per level
 function addXP(p,x){x=Math.max(0,x|0);p.xp+=x;p.lxp+=x;let n=0;while(p.lxp>=XPN(p.lvl)&&p.lvl<99){p.lxp-=XPN(p.lvl);p.lvl++;p.up+=UP_PER;n++;}return n;}
 const fmtS=S=>[['Comp / Att',`${S.comp}/${S.att}`],['Pass Yds',S.pyd],['Pass TD',S.ptd],['Receptions',S.rec],['Rec Yds',S.recy],['Rec TD',S.rectd],['Rush Yds',S.rush],['Rush TD',S.rtd],['Tackles',S.tak],['Stops',S.stop],['Pass Def',S.pd],['INT',S.int],['Def TD',S.dtd]];
-function finUI(M,S,r,X,L0,X0,ups,dup){const p=PROF;$m('fres').textContent=r==='w'?'VICTORY':r==='l'?'DEFEAT':'TIE GAME';$m('fres').className='res '+r;$m('fb').textContent=SCORE.blue;$m('fr').textContent=SCORE.red;
+function finUI(M,S,r,X,L0,X0,ups,dup){const p=PROF;{const A=club(p.team??0),B=club(preMatch.op);$m('fwrap').querySelector('.ftb').textContent=A.ab;$m('fwrap').querySelector('.ftb').style.background=hx(A.jer);$m('fwrap').querySelector('.ftr').textContent=B.ab;$m('fwrap').querySelector('.ftr').style.background=hx(B.jer);}$m('fres').textContent=r==='w'?'VICTORY':r==='l'?'DEFEAT':'TIE GAME';$m('fres').className='res '+r;$m('fb').textContent=SCORE.blue;$m('fr').textContent=SCORE.red;
  $m('fgr').textContent=X.grade;$m('fgr').className='grade g'+X.grade[0];
  $m('fst').innerHTML=fmtS(S).map(([l,v])=>`<div class="sr${v&&v!=='0/0'?'':' z'}"><span>${l}</span><b>${v}</b></div>`).join('');
  $m('fobj').innerHTML=M.obj.map((o,i)=>`<div class="ob${X.done[i]?' ok':''}"><i>${X.done[i]?'✓':''}</i><span>${o[2]} <em>${Math.min(objVal(S,o[0]),o[1])}/${o[1]}</em></span><b>+${o[3]}</b></div>`).join('');

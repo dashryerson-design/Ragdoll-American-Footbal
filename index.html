@@ -784,7 +784,11 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
    if(ball.position.y<.15&&ball.velocity.norm()<2){c.st='done';catchOn=false;}}}
  if(c.st==='caught'){if(c.t<1){tx=P.x+Math.sin(yaw)*4;tz=P.z+Math.cos(yaw)*4;sprint=c.t<.4;}}   // ease down to a stop with the ball
  if(c.st==='set'){camYaw=Math.PI;}   // lined up, looking downfield
- if(tx!==null){camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=sprint;}}
+ if(tx!==null){camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=sprint;}
+ // ball in the air: plant and cut hard. Any velocity he doesn't want (overshooting, wrong direction) is braked at up to 2 g -
+ // a sprint stops in ~0.3 s. shortcut: braking only, never adds speed, so it can't make him faster than his legs
+ if(c.st==='ball'&&contact()){const v=pel.velocity,wl=tx===null?0:sprint?6:2.6;let wx=0,wz=0;if(tx!==null){const L=Math.hypot(tx-P.x,tz-P.z)||1;wx=(tx-P.x)/L*wl;wz=(tz-P.z)/L*wl;}
+  let ax=(wx-v.x)*10,az=(wz-v.z)*10;if(ax*v.x+az*v.z<0){const m=Math.hypot(ax,az),cap=19.6;if(m>cap){ax*=cap/m;az*=cap/m;}for(const b of list){b.force.x+=b.mass*ax;b.force.z+=b.mass*az;}}}}
 function setTeammate(on){if(on===teammate)return;if(on&&wrMode)setWR(false);teammate=on;document.body.classList.toggle('qb',on);$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
  if(on){for(const b of qbD.list){world.addBody(b);b.mesh.visible=true;}for(const c of qbD.cons)world.addConstraint(c);use(qbD);reset();held=false;use(player);if(!held)giveQB();}
  else{use(qbD);for(const k in pins)unpin(k);const had=held;held=false;aimOn=false;thr=-1;use(player);for(const b of qbD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of qbD.cons)world.removeConstraint(c);if(had)looseBall();}}

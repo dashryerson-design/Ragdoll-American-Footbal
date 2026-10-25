@@ -42,6 +42,7 @@
 <div class="tb sm" id="bjump" style="right:calc(158px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))">JUMP</div>
 <div class="tb sm" id="bdrop" style="right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px))">DROP</div>
 <div class="tb" id="tpause">II</div>
+<div class="tb sm" id="bdive" style="right:calc(228px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))">DIVE</div>
 <div class="tb" id="bsprint" style="width:72px;height:72px;right:calc(118px + env(safe-area-inset-right,0px));bottom:calc(196px + env(safe-area-inset-bottom,0px))">SPRINT</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
@@ -255,7 +256,7 @@ function updatePins(dt){
  for(const sd of[-1,1]){
   const ft=parts['foot'+sd],ph=phase+(sd>0?0:Math.PI),key=ft.id,P=pins[key],tt=tnorm(ph);
   ft.cool=Math.max(0,(ft.cool||0)-dt);
-  let allow=!limp&&cs===0&&(js===1||js===4||(js===0&&(mv<.15||(!keys.shift&&tt>=.5&&tt<.78))));
+  let allow=!limp&&cs===0&&!dv&&(js===1||js===4||(js===0&&(mv<.15||(!keys.shift&&tt>=.5&&tt<.78))));
   if(P){P.age+=dt;const cur=new V();ft.pointToWorldFrame(P.loc,cur);if(cur.distanceTo(P.wp)>.08||P.age>.5){allow=false;ft.cool=.12;}}
   if(P&&!allow)unpin(key);
   else if(!P&&allow&&ft.cool<=0&&lowH(ft)<.04){
@@ -272,7 +273,7 @@ function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z
 function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
- if(k==='r')refreshQB();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();   // T: drop the ball   // F: go limp / get up
+ if(k==='r')refreshQB();if(k==='q')startDive();   // Q: dive the way the camera pointsif(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();   // T: drop the ball   // F: go limp / get up
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()&&catchOn){startJump();return;}   // going up for a catch: always a vertical leap
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
@@ -384,6 +385,23 @@ function climb(dt){
  leg(-1,tt[0],tt[1]);leg(1,ll[0],ll[1]);
  follow(t=>{const q=cl(t/CL_STAND,0,1),w=sm3(cl((q-.25)/.75,0,1));return[csL+(.45-csL)*w,cyL+(H+1.07-cyL)*w];},ct,.88,100,20,40);
 }
+// ---------- diving: launch the way the camera points, fly / slide laid out (the catch keeps working), then get back up ----------
+const DIVE_UP=1.15,DIVE_END=2.0;
+function startDive(){if(dv>0||limp||cs>0)return;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);
+ for(const k in pins)unpin(k);js=0;jp=0;dv=1e-4;yaw=Math.atan2(dvx,dvz);const push=Math.max(0,Math.min(4.5,8-sp));   // the dive adds speed the way you aim, capped
+ for(const b of list){b.velocity.x+=dvx*push;b.velocity.z+=dvz*push;b.velocity.y+=2.3;}}
+function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
+ if(T<DIVE_UP){torso(1.35,0,-.25);   // laid out flat toward the dive, chest lifted a touch so the eyes stay forward
+  for(const sd of[1,-1]){J['hip'+sd].x=.25;J['knee'+sd].x=.15;J['ankle'+sd].x=.35;J['toe'+sd].x=0;J['shoulder'+sd].x=-2.9;J['shoulder'+sd].z=sd*.15;J['elbow'+sd].x=-.1;J['wrist'+sd].x=0;}
+  ballArm();return;}
+ // get up: pelvis lifted along an eased path to standing height ("physics magic" as in climbing), legs from kneeling to standing
+ if(!dvY){dvY=pel.position.y;cdx=dvx;cdz=dvz;cex=pel.position.x;cez=pel.position.z;cl0=0;}
+ const u=cl((T-DIVE_UP)/(DIVE_END-DIVE_UP),0,1),su=sm3(u);
+ torso(1.1*(1-su),0,0);
+ for(const sd of[1,-1]){const h=-1.3*(1-su),kn=1.9*(1-su)+.05;J['hip'+sd].x=h;J['knee'+sd].x=kn;J['ankle'+sd].x=-(h+kn);J['toe'+sd].x=0;J['shoulder'+sd].x=.2*(1-su);J['shoulder'+sd].z=sd*.12;J['elbow'+sd].x=-.4;}
+ follow(t=>[0,dvY+(1.07+gs-dvY)*sm3(cl(t/(DIVE_END-DIVE_UP),0,1))],T-DIVE_UP,.9,70,16,35);
+ ballArm();
+ if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
 function control(dt){
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
  let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}
@@ -393,6 +411,7 @@ function control(dt){
  if(ccool>0)ccool-=dt;
  if(cs===0&&keys[' ']&&!limp&&js===0&&jp<2&&ccool<=0&&contact()){cscan-=dt;if(cscan<=0){cscan=.06;const L=findLedge();if(L)startClimb(L);}}
  if(cs>0){climb(dt);if(cs>0)return;}
+ if(dv>0){dive(dt);updatePins(dt);return;}
  if(len>0){dx/=len;dz/=len;if(js>0&&!limp){jdx=dx;jdz=dz;}}
  // moving against the way the body faces: step backwards (mirrored gait, no sprinting, a bit slower)
  if(moving){const fw=dx*Math.sin(yaw)+dz*Math.cos(yaw);gdir+=((fw<-.25?-1:1)-gdir)*Math.min(1,dt*8);}
@@ -513,7 +532,7 @@ const ballGlow=new THREE.Group();
  const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,60,40,.85)');r.addColorStop(1,'rgba(255,0,0,0)');g.fillStyle=r;g.fillRect(0,0,64,64);
  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));sp.scale.set(.75,.75,1);ballGlow.add(sp);}
 ballGlow.visible=false;ballMesh.add(ballGlow);
-let qbK=0,held=false,reachK=0,reachOn=false,ballCool=0,aimOn=false,thr=-1,thTw=0,thLean=0,catchOn=false,catchK=0,catchSide=0,maskT=0;
+let dv=0,dvx=0,dvz=1,dvY=0,qbK=0,held=false,reachK=0,reachOn=false,ballCool=0,aimOn=false,thr=-1,thTw=0,thLean=0,catchOn=false,catchK=0,catchSide=0,maskT=0;
 const handR=()=>parts['hand-1'];
 // should the body start reaching? predict when the ball passes under us at the current velocity (in stride: no slowing down)
 function reachPredict(){if(held||limp||!world.bodies.includes(ball)||cs>0||js>0||ballCool>0||ball.position.y>.45)return false;
@@ -600,13 +619,13 @@ const catchBoost=()=>catchOn&&cur.catchT0&&performance.now()-cur.catchT0>1200?1.
 const _ic=new V();
 function interceptPoint(){const b=ball.position,v=ball.velocity,c=chest.position,u=chest.velocity,R=.68*catchBoost();
  for(let t=0;t<=1.5;t+=.02){const bx=b.x+v.x*t,by=b.y+v.y*t-4.91*t*t,bz=b.z+v.z*t;
-  chest.vectorToLocalFrame(_ic.set(bx-c.x-u.x*t,by-c.y-u.y*t,bz-c.z-u.z*t),_cv);if(_cv.z<.08)continue;   // in front of the chest only
+  chest.vectorToLocalFrame(_ic.set(bx-c.x-u.x*t,by-c.y-u.y*t,bz-c.z-u.z*t),_cv);if(_cv.z<.08&&!(dv>0&&_cv.y>.1))continue;   // diving: ahead of the outstretched arms counts too   // in front of the chest only
   const dl=Math.hypot(_cv.x-.27,_cv.y-.12,_cv.z),dr=Math.hypot(_cv.x+.27,_cv.y-.12,_cv.z);if(dl>R&&dr>R)continue;
   const side=Math.abs(_cv.x)<.22&&dl<=R&&dr<=R?0:dl<dr?1:-1;return{p:new V(bx+0*u.x,by,bz),side,t};}   // the arm reaches to where the ball will be, at that moment
  return null;}
 function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(ball);let want=0,cp=null,ip=null;
  if(live){cp=catchPoint();const near=Math.hypot(ball.position.x-chest.position.x,ball.position.y-chest.position.y,ball.position.z-chest.position.z);
-  chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);const cb=catchBoost();want=near<15*cb&&cp.d<4*cb&&_cv.z>-.12?1:0;}   // receivers pick the ball up from far away   // only balls passing in front of or beside the body: arms can't reach behind the back
+  chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);const cb=catchBoost();want=near<15*cb&&cp.d<4*cb&&(_cv.z>-.12||dv>0&&_cv.y>0)?1:0;}   // receivers pick the ball up from far away   // only balls passing in front of or beside the body: arms can't reach behind the back
  if(want)ip=interceptPoint();const tp=ip?ip.p:cp&&cp.p;   // arms go to the intercept point; closest approach is only the fallback
  if(want&&(catchK<.05||ip&&catchK<.5)){if(ip)catchSide=ip.side;else{chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);catchSide=_cv.x>.3?1:_cv.x<-.3?-1:0;}}   // 1 or 2 hands, settled as the reach builds
  cur.look=live?ball.position:null;cur.cp=live&&want?cp:null;   // eyes on the ball while catch is held; cp also guides a jump catch
@@ -665,6 +684,7 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
  const jEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.on=false;joy.x=joy.y=0;K.style.transform='';}};J.addEventListener('touchend',jEnd);J.addEventListener('touchcancel',jEnd);
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
  tap($('bsprint'),()=>{keys.shift=!keys.shift;});   // sprint toggles (a held button + joystick + look is too many fingers)
+ tap($('bdive'),()=>startDive());
  tap(aimB,()=>{aimOn=!aimOn&&held;});
  tap(big,primaryDown);big.addEventListener('touchend',e=>{e.preventDefault();primaryUp();});
  tap($('bjump'),()=>key(' ','keydown'));$('bjump').addEventListener('touchend',()=>key(' ','keyup'));
@@ -683,15 +703,15 @@ function toMenu(){paused=false;$m('pm').hidden=true;mode=null;document.body.clas
  looseBall();if(teammate)giveQB();$m('mm').hidden=false;}
 // ---------- dolls: the player and the QB run the exact same ragdoll + controller; each doll's state is swapped in with use(d) ----------
 const SWAP=['parts','list','joints','totalMass','pel','abd','chest','neck','head','cons','limp','gdir','crK','fh','LH','gs','keys','camYaw','camPitch','js','jt','jdx','jdz','jp','jpt','bsd','bchg','cur','yaw','phase','mv','airT','ab','cs','ct','ctt','ccool','cscan','cH','cdx','cdz','cex','cez','cl0','cs0','cy0','cyL','csL','cT','pins','qbK','held','reachK','reachOn','ballCool','aimOn','thr','thTw','thLean','chargeT','throwSpd','carryOff','spread','catchOn','catchK','catchSide'];
-function saveTo(d){d.parts=parts;d.list=list;d.joints=joints;d.totalMass=totalMass;d.pel=pel;d.abd=abd;d.chest=chest;d.neck=neck;d.head=head;d.cons=cons;d.limp=limp;d.gdir=gdir;d.crK=crK;d.fh=fh;d.LH=LH;d.gs=gs;d.keys=keys;d.camYaw=camYaw;d.camPitch=camPitch;d.js=js;d.jt=jt;d.jdx=jdx;d.jdz=jdz;d.jp=jp;d.jpt=jpt;d.bsd=bsd;d.bchg=bchg;d.cur=cur;d.yaw=yaw;d.phase=phase;d.mv=mv;d.airT=airT;d.ab=ab;d.cs=cs;d.ct=ct;d.ctt=ctt;d.ccool=ccool;d.cscan=cscan;d.cH=cH;d.cdx=cdx;d.cdz=cdz;d.cex=cex;d.cez=cez;d.cl0=cl0;d.cs0=cs0;d.cy0=cy0;d.cyL=cyL;d.csL=csL;d.cT=cT;d.pins=pins;d.qbK=qbK;d.held=held;d.reachK=reachK;d.reachOn=reachOn;d.ballCool=ballCool;d.aimOn=aimOn;d.thr=thr;d.thTw=thTw;d.thLean=thLean;d.chargeT=chargeT;d.throwSpd=throwSpd;d.carryOff=carryOff;d.spread=spread;d.catchOn=catchOn;d.catchK=catchK;d.catchSide=catchSide;}
-function loadFrom(d){parts=d.parts;list=d.list;joints=d.joints;totalMass=d.totalMass;pel=d.pel;abd=d.abd;chest=d.chest;neck=d.neck;head=d.head;cons=d.cons;limp=d.limp;gdir=d.gdir;crK=d.crK;fh=d.fh;LH=d.LH;gs=d.gs;keys=d.keys;camYaw=d.camYaw;camPitch=d.camPitch;js=d.js;jt=d.jt;jdx=d.jdx;jdz=d.jdz;jp=d.jp;jpt=d.jpt;bsd=d.bsd;bchg=d.bchg;cur=d.cur;yaw=d.yaw;phase=d.phase;mv=d.mv;airT=d.airT;ab=d.ab;cs=d.cs;ct=d.ct;ctt=d.ctt;ccool=d.ccool;cscan=d.cscan;cH=d.cH;cdx=d.cdx;cdz=d.cdz;cex=d.cex;cez=d.cez;cl0=d.cl0;cs0=d.cs0;cy0=d.cy0;cyL=d.cyL;csL=d.csL;cT=d.cT;pins=d.pins;qbK=d.qbK;held=d.held;reachK=d.reachK;reachOn=d.reachOn;ballCool=d.ballCool;aimOn=d.aimOn;thr=d.thr;thTw=d.thTw;thLean=d.thLean;chargeT=d.chargeT;throwSpd=d.throwSpd;carryOff=d.carryOff;spread=d.spread;catchOn=d.catchOn;catchK=d.catchK;catchSide=d.catchSide;}
+function saveTo(d){d.parts=parts;d.list=list;d.joints=joints;d.totalMass=totalMass;d.pel=pel;d.abd=abd;d.chest=chest;d.neck=neck;d.head=head;d.cons=cons;d.limp=limp;d.gdir=gdir;d.crK=crK;d.fh=fh;d.LH=LH;d.gs=gs;d.keys=keys;d.camYaw=camYaw;d.camPitch=camPitch;d.js=js;d.jt=jt;d.jdx=jdx;d.jdz=jdz;d.jp=jp;d.jpt=jpt;d.bsd=bsd;d.bchg=bchg;d.cur=cur;d.yaw=yaw;d.phase=phase;d.mv=mv;d.airT=airT;d.ab=ab;d.cs=cs;d.ct=ct;d.ctt=ctt;d.ccool=ccool;d.cscan=cscan;d.cH=cH;d.cdx=cdx;d.cdz=cdz;d.cex=cex;d.cez=cez;d.cl0=cl0;d.cs0=cs0;d.cy0=cy0;d.cyL=cyL;d.csL=csL;d.cT=cT;d.pins=pins;d.qbK=qbK;d.held=held;d.reachK=reachK;d.reachOn=reachOn;d.ballCool=ballCool;d.aimOn=aimOn;d.thr=thr;d.thTw=thTw;d.thLean=thLean;d.chargeT=chargeT;d.throwSpd=throwSpd;d.carryOff=carryOff;d.spread=spread;d.catchOn=catchOn;d.catchK=catchK;d.catchSide=catchSide;d.dv=dv;d.dvx=dvx;d.dvz=dvz;d.dvY=dvY;}
+function loadFrom(d){parts=d.parts;list=d.list;joints=d.joints;totalMass=d.totalMass;pel=d.pel;abd=d.abd;chest=d.chest;neck=d.neck;head=d.head;cons=d.cons;limp=d.limp;gdir=d.gdir;crK=d.crK;fh=d.fh;LH=d.LH;gs=d.gs;keys=d.keys;camYaw=d.camYaw;camPitch=d.camPitch;js=d.js;jt=d.jt;jdx=d.jdx;jdz=d.jdz;jp=d.jp;jpt=d.jpt;bsd=d.bsd;bchg=d.bchg;cur=d.cur;yaw=d.yaw;phase=d.phase;mv=d.mv;airT=d.airT;ab=d.ab;cs=d.cs;ct=d.ct;ctt=d.ctt;ccool=d.ccool;cscan=d.cscan;cH=d.cH;cdx=d.cdx;cdz=d.cdz;cex=d.cex;cez=d.cez;cl0=d.cl0;cs0=d.cs0;cy0=d.cy0;cyL=d.cyL;csL=d.csL;cT=d.cT;pins=d.pins;qbK=d.qbK;held=d.held;reachK=d.reachK;reachOn=d.reachOn;ballCool=d.ballCool;aimOn=d.aimOn;thr=d.thr;thTw=d.thTw;thLean=d.thLean;chargeT=d.chargeT;throwSpd=d.throwSpd;carryOff=d.carryOff;spread=d.spread;catchOn=d.catchOn;catchK=d.catchK;catchSide=d.catchSide;dv=d.dv;dvx=d.dvx;dvz=d.dvz;dvY=d.dvY;}
 let curD=null;function use(d){if(curD===d)return;if(curD)saveTo(curD);loadFrom(d);curD=d;}
 const player={};saveTo(player);curD=player;
 // the QB: built like the player (same parts, masses, joints), in red, 10 m behind the 50; parked out of the world until switched on
 const QB_Z=-10,qbD={};
 {saveTo(player);buildDoll(0x8a1420,0x2a0a0e);for(const b of list){b.home[2]+=QB_Z;b.position.z+=QB_Z;}
  limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,st:'idle'};
- yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;
+ yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
  saveTo(qbD);loadFrom(player);curD=player;
  for(const b of qbD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of qbD.cons)world.removeConstraint(c);}
 let teammate=false,qbClock=0,callReq=null;
@@ -718,7 +738,7 @@ function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
 function refreshQB(){if(!teammate||!mode||paused)return;use(player);if(held){held=false;aimOn=false;thr=-1;}use(qbD);reset();held=false;aimOn=false;thr=-1;cur.st='idle';cur.T=null;use(player);callReq=null;giveQB();}
 $m('brst').addEventListener('click',refreshQB);$m('brst').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();refreshQB();},{passive:false});
 // ---------- touch layout editor: drag controls to move them, tap + -/+ to resize; saved on this device ----------
-const LAY_IDS=['joy','bbig','baim','bjump','bdrop','bsprint','tpause'],LAY_KEY='rafTouchLayout',layOrig={};
+const LAY_IDS=['joy','bbig','baim','bjump','bdrop','bsprint','tpause','bdive'],LAY_KEY='rafTouchLayout',layOrig={};
 for(const id of LAY_IDS)layOrig[id]=$m(id).getAttribute('style')||'';
 let lay={},editing=false,selId=null,drag=null;try{lay=JSON.parse(localStorage.getItem(LAY_KEY)||'{}')||{};}catch(e){}
 function applyLay(){for(const id of LAY_IDS){const el=$m(id),L=lay[id];el.setAttribute('style',layOrig[id]);if(id==='joy')$m('knob').removeAttribute('style');if(!L)continue;   // saved as a fraction of the screen, so it survives rotation / other screens

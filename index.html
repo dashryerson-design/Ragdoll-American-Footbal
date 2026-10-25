@@ -1803,7 +1803,7 @@ function offseason(p){const L=lgEnsure(p),R=rng((p.season?p.season.year:0)*7919+
  // trades: a top-6 club buys a proven player from a bottom-6 club with a prospect of similar value (0-4 OVR less); each club trades once at most; you are never traded
  const rank=CLUBS.map((_,i)=>i).sort((a,b)=>tStr(p,b)-tStr(p,a)),done=new Set();
  for(let n=0;n<40&&log.tr.length<3;n++){const A=rank[R()*6|0],B=rank[10+(R()*6|0)];if(done.has(A)||done.has(B))continue;let best=null;
-  for(const x of L.rost[A])for(const y of L.rost[B]){if(x==='U'||y==='U'||(L.pl[x].dev>1&&L.pl[x].dev!==4)||L.pl[y].dev<2||L.pl[y].dev>3)continue;const g=pOvr(p,y)-pOvr(p,x);if(g<0||g>4)continue;
+  for(const x of L.rost[A])for(const y of L.rost[B]){if(x==='U'||y==='U'||L.pl[x].dev===3||L.pl[y].dev===0||L.pl[x].dev>=L.pl[y].dev&&L.pl[x].dev!==4)continue;const g=pOvr(p,y)-pOvr(p,x);if(g<-1||g>5)continue;
    const rA=L.rost[A].map(z=>z===x?y:z),rB=L.rost[B].map(z=>z===y?x:z);if((hasQB(p,L.rost[A])&&!hasQB(p,rA))||(hasQB(p,L.rost[B])&&!hasQB(p,rB)))continue;   // never strip a club's passer
    const need=L.rost[A].some(z=>z!==x&&z!=='U'&&L.pl[z].style===L.pl[y].style)?0:1,sc=need+R()*.8;if(!best||sc>best[2])best=[x,y,sc];}
   if(!best)continue;const[x,y]=best;L.rost[A][L.rost[A].indexOf(x)]=y;L.rost[B][L.rost[B].indexOf(y)]=x;L.pl[x].team=B;L.pl[y].team=A;done.add(A);done.add(B);

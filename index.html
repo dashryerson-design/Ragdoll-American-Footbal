@@ -775,8 +775,10 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
   if(!stop){const L=Math.hypot(b[0]-a[0],b[1]-a[1])||1;tx=P.x+(b[0]-a[0])/L*5;tz=P.z+(b[1]-a[1])/L*5;}}
  if(c.st==='ball'){if(!world.bodies.includes(ball)&&!held){c.st='after';catchOn=false;}
   else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);   // where it comes down through catch height
-   for(let t=0;t<5&&!(vy<0&&y<1.3)&&y>.09;t+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}
-   if(Math.hypot(x-P.x,z-P.z)>.7){tx=x;tz=z;sprint=Math.hypot(x-P.x,z-P.z)>2.5;}else{camYaw=Math.atan2(ball.position.x-P.x,ball.position.z-P.z)+Math.PI;}   // there: face the ball
+   let tA=0;for(;tA<5&&!(vy<0&&y<1.3)&&y>.09;tA+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}
+   const mx=x-P.x,mz=z-P.z,d=Math.hypot(mx,mz),need=d/Math.max(tA,.15),behind=mx*pel.velocity.x+mz*pel.velocity.z<0;   // need = the speed that arrives just as the ball does
+   if(d<.5){camYaw=Math.atan2(ball.position.x-P.x,ball.position.z-P.z)+Math.PI;}   // there: plant and face the ball
+   else{tx=x;tz=z;sprint=need>2||behind;}   // run at it; sprint only when the timing needs it (or to turn back for a short ball), otherwise jog so he doesn't overrun it
    if(ball.position.y<.15&&ball.velocity.norm()<2){c.st='done';catchOn=false;}}}
  if(c.st==='caught'){if(c.t<1){tx=P.x+Math.sin(yaw)*4;tz=P.z+Math.cos(yaw)*4;sprint=c.t<.4;}}   // ease down to a stop with the ball
  if(c.st==='set'){camYaw=Math.PI;}   // lined up, looking downfield

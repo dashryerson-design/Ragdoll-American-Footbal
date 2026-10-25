@@ -399,17 +399,17 @@ const DIVE_UP=1.15,DIVE_END=2.0;
 // then plant off that foot and burst out low the other way, half sideways, half upfield. Defenders reading you can bite on the fake and
 // chase the wrong way for a moment; one caught close and flat-footed can stumble over. E with no direction does nothing ----------
 function juke(){let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
- if(sd&&dv===0&&!limp&&cs===0&&contact()&&mv>.2){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd:-sd,cut:false};cur.jkM=sd;cur.jkCool=performance.now()+1100;}}}
-function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the way you cut, -r = the fake (the side you pressed)
- if(j.t<.22){const v=pel.velocity,lat=v.x*rx+v.z*rz,k=Math.max(0,lat+3.2)*Math.min(1,dt*25);for(const b of list){b.velocity.x-=rx*k;b.velocity.z-=rz*k;}   // big jab step: the whole body really moves ~0.5 m to the fake side
-  for(const b of[chest,head,neck,abd]){b.force.x-=b.mass*rx*70;b.force.z-=b.mass*rz*70;}pel.force.y-=pel.mass*10;}   // shoulders and head thrown hard that way, hips sink low
- else if(!j.cut){j.cut=true;for(const k in pins)unpin(k);const v=pel.velocity,sp=Math.hypot(v.x,v.z),T=Math.min(10,Math.max(sp,4)*1.2+2.5),L=Math.hypot(rx*2.2+fx,rz*2.2+fz),nx=(rx*2.2+fx)/L,nz=(rz*2.2+fz)/L;
-  for(const b of list){b.velocity.x+=nx*T-v.x;b.velocity.z+=nz*T-v.z;b.velocity.y+=1.6;}cur.jkB=.4;yaw=Math.atan2(nx,nz);j.nx=nx;j.nz=nz;   // jump cut (Barry Sanders): a little hop off the plant foot that redirects him hard, mostly sideways, faster than before
+ if(sd&&dv===0&&!limp&&cs===0&&js===0){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100;}}}
+function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the side you pressed (the cut), -r = the side-step
+ // all pushes go through every body part evenly (no twisting the torso), so the juke never knocks him off balance
+ if(j.t<.2){const v=pel.velocity,lat=v.x*rx+v.z*rz,k=Math.max(0,lat+2.4)*Math.min(1,dt*20);for(const b of list){b.velocity.x-=rx*k;b.velocity.z-=rz*k;}cur.low=Math.min(.35,(cur.low||0)+dt*3);}   // side-step the other way, sinking low on that leg
+ else if(!j.cut){j.cut=true;const v=pel.velocity,sp=Math.hypot(v.x,v.z),T=Math.min(10,Math.max(sp,4)*1.15+2.5),L=Math.hypot(rx*1.8+fx,rz*1.8+fz),nx=(rx*1.8+fx)/L,nz=(rz*1.8+fz)/L;
+  for(const b of list){b.velocity.x+=nx*T-v.x;b.velocity.z+=nz*T-v.z;}cur.jkB=.4;j.nx=nx;j.nz=nz;   // push off that bent leg and explode out the way you pressed
   const P=pel.position;for(const d of roster){if(!d.cur.ai||d.cur.side==='d'===(cur.side==='d'))continue;const Q=d.pel.position,dist=Math.hypot(Q.x-P.x,Q.z-P.z);if(dist>8)continue;
-   if(Math.random()<.95-dist*.08){d.cur.biteEnd=(d.cur.t||0)+.6+Math.random()*.5;d.cur.biteV=[-rx*6,-rz*6];   // bit on the fake
+   if(Math.random()<.95-dist*.08){d.cur.biteEnd=(d.cur.t||0)+.6+Math.random()*.5;d.cur.biteV=[-rx*6,-rz*6];   // bit on the side-step
     if(dist<5&&Math.random()<.55){d.limp=true;d.limpT=performance.now()+800+Math.random()*500;for(const b of d.list){b.velocity.x-=rx*3;b.velocity.z-=rz*3;}}}}}   // ...ankles broken: he stumbles over the wrong way
- else if(j.t<.5){for(const b of[chest,head,neck]){b.force.x+=b.mass*rx*55;b.force.z+=b.mass*rz*55;}const v=pel.velocity,a=Math.max(0,9-(v.x*j.nx+v.z*j.nz))*10;for(const b of list){b.force.x+=b.mass*j.nx*a;b.force.z+=b.mass*j.nz*a;}}   // and keep driving out of it   // leaning hard into the cut, then back up into the sprint
- else cur.jk=null;}
+ else if(j.t<.45){cur.low=Math.max(0,(cur.low||0)-dt*2);const v=pel.velocity,a=Math.max(0,9-(v.x*j.nx+v.z*j.nz))*8;for(const b of list){b.force.x+=b.mass*j.nx*a;b.force.z+=b.mass*j.nz*a;}}   // rising out of it, still driving
+ else{cur.jk=null;cur.low=0;}}
 function startDive(){if(dv>0||limp||cs>0)return;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);
  for(const k in pins)unpin(k);js=0;jp=0;dv=1e-4;yaw=Math.atan2(dvx,dvz);const push=Math.max(0,Math.min(4.5,8-sp));   // the dive adds speed the way you aim, capped
  for(const b of list){b.velocity.x+=dvx*push;b.velocity.z+=dvz*push;b.velocity.y+=2.3;}}
@@ -429,7 +429,7 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
 function control(dt){if(cur.jk)jukeTick(dt);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
- let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;if(cur.jkM){if(Math.sign(r)!==cur.jkM)cur.jkM=0;else if(!cur.jk||cur.jk.cut)r=-r;}   // after a juke the side you're still holding steers you the way you cut, until you let go   // locked on the line until the snap (2)
+ let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;   // locked on the line until the snap (2)
  let dx=-s*f+c*r,dz=-c*f-s*r;const len=Math.hypot(dx,dz);
  const moving=len>0&&!limp&&js===0;let run=!!keys.shift;
  const crouchOn=(keys.c||keys.control)&&!limp&&js===0&&cs===0;crK+=((crouchOn?1:0)-crK)*Math.min(1,dt*8);if(crK>.3)run=false;   // crouch: C (or Ctrl)
@@ -752,8 +752,8 @@ function bot(i){if(pool[i])return pool[i];const d={};saveTo(player);buildDoll(0x
  for(const b of d.list){world.removeBody(b);b.mesh.visible=false;}for(const c of d.cons)world.removeConstraint(c);return pool[i]=d;}
 // offensive sets: receiver spots in metres (+x = left sideline, z = 0 on the line, slots 1 m off it); the QB is always 15 yd back
 const OSETS=[['SINGLEBACK - 1 WR',[[12,0]]],['PRO SET - 2 WR',[[12,0],[-12,0]]],['SHOTGUN TWINS - 2 WR',[[13,0],[8,-1]]],['11 PERSONNEL 2x1 - 3 WR',[[14,0],[8.5,-1],[-14,0]]],['SHOTGUN TRIPS - 3 WR',[[15,0],[10.5,-1],[6,-1]]],['SPREAD 2x2 - 4 WR',[[15,0],[9,-1],[-15,0],[-9,-1]]],['EMPTY 3x2 - 5 WR',[[16,0],[11,-1],[6,-1],[-16,0],[-10,-1]]]];
-// defensive sets: a man on every receiver first, then extra defenders fill these jobs in order (deep safety, QB rusher, robber)
-const DSETS=[['COVER 1 MAN FREE',['deep','rob','rush','deep']],['COVER 2 MAN',['deep','deep','rob','rush']],['COVER 0 BLITZ',['rush','rob','rush','deep']],['COVER 1 ROBBER',['rob','deep','rush','deep']],['COVER 2 ROBBER',['deep','deep','rob','rob']]];
+// defensive sets: a man on every receiver first, then extra defenders fill these jobs in order (deep safety, robber); no blitzes
+const DSETS=[['COVER 1 MAN FREE',['deep','rob','deep','rob']],['COVER 2 MAN',['deep','deep','rob','rob']],['COVER 1 ROBBER',['rob','deep','deep','rob']],['COVER 2 ROBBER',['deep','deep','rob','rob']]];
 const ORG={you:'blue',off:'blue',pos:'qb',n:{blue:2,red:2},os:0,ds:0,free:true};
 let playState='live',playOn=false,roster=[player],qbClock=0,callReq=null;
 const QB_DEPTH=-15*YD,DEF_Z=20*YD;

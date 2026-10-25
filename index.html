@@ -7,12 +7,12 @@
 .tb.on{background:#ffd23fcc;color:#111;border-color:#ffd23f}
 #bbig{width:96px;height:96px;right:calc(30px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px));font-size:16px}
 .sm{width:58px;height:58px}
-#brst{position:fixed;z-index:3;display:none;width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:22px;cursor:pointer}body.qb #brst{display:flex}body.qb.touch #brst{right:calc(70px + env(safe-area-inset-right,0px))}
+#brst{position:fixed;z-index:3;display:none;width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:22px;cursor:pointer}body.play #brst{display:flex}body.play.touch #brst{right:calc(70px + env(safe-area-inset-right,0px))}
 #bedit{display:none}body.touch #bedit{display:inline-block}
 #ed{position:fixed;z-index:12;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:#000c;border:1px solid #d8a24a;border-radius:12px;padding:8px 10px;font:600 13px system-ui,sans-serif;color:#fff;white-space:nowrap}
 #ed[hidden]{display:none}#ed button{font:700 15px system-ui,sans-serif;color:#fff;background:#1a1a1a;border:1px solid #666;border-radius:8px;min-width:40px;height:36px;padding:0 10px}
 #ed #edone{border-color:#d8a24a;background:#2a2112}.esel{outline:3px solid #d8a24a;outline-offset:3px}
-.wrb{display:none}body.wr .wrb{display:flex}
+.wrb{display:none}body.play .wrb{display:flex}
 #tpause{width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:15px}
 .ov{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;overflow-y:auto;padding:24px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;color:#fff;user-select:none;-webkit-user-select:none}
 .ov[hidden]{display:none}
@@ -277,8 +277,9 @@ function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z
 function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
+ if(playPre()&&(k===' '||k==='q'))return;   // no jumping / diving before the snap
  // R: reset (QB / receiver drill), Q: dive the way the camera points, F: go limp / get up, T: drop the ball, 1: show the receiver's route, 2: receiver goes
- if(k==='r'){if(wrMode)resetPlay();else refreshQB();}if(k==='q')startDive();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')wrGo();
+ if(k==='r')resetPlay();if(k==='q')startDive();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')playStart();
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()&&catchOn){startJump();return;}   // going up for a catch: always a vertical leap
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
@@ -411,7 +412,7 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
 function control(dt){
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
- let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}
+ let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;   // locked on the line until the snap (2)
  let dx=-s*f+c*r,dz=-c*f-s*r;const len=Math.hypot(dx,dz);
  const moving=len>0&&!limp&&js===0;let run=!!keys.shift;
  const crouchOn=(keys.c||keys.control)&&!limp&&js===0&&cs===0;crK+=((crouchOn?1:0)-crK)*Math.min(1,dt*8);if(crK>.3)run=false;   // crouch: C (or Ctrl)
@@ -429,7 +430,7 @@ function control(dt){
  // per-limb weakness (wk, 1 = healthy) slows the gait and makes the body sag onto that leg
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
- const speed=(run?7.2:qbMove?(keys.shift?1.6:1.1):2.3)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
+ const speed=(run?7.2:qbMove?(keys.shift?1.6:1.1):2.3)*(cur.spd||1)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
@@ -623,6 +624,7 @@ function catchFx(){const b=ball.position;cfxS.position.set(b.x,b.y,b.z);const t0
  const tick=()=>{const u=(performance.now()-t0)/450;if(u>=1){cfxS.visible=false;return;}const r=.4+2.4*u;cfxS.scale.set(r,r,1);cfxS.material.opacity=1-u;requestAnimationFrame(tick);};tick();
  document.getElementById('cfx').animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.15)',offset:.2},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.7},{opacity:0,transform:'translate(-50%,-60%) scale(1)'}],{duration:900,easing:'ease-out'});}
 const CATCH_ASSIST=.1;
+function catchGrab(){if(cur.role==='df'&&!cur.canInt)return false;catchFx();grabBall();return true;}   // a defender who isn't going to hang on still gets his hands on it (a deflection)
 // held catch for 1.2 s+ (an early, set receiver): +20% reach, range and reaction
 const catchBoost=()=>catchOn&&cur.catchT0&&performance.now()-cur.catchT0>1200?1.2:1;
    // catch assist: 10 cm of extra wiggle room on every catch (hands and chest trap)
@@ -651,8 +653,8 @@ function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(bal
   const ax=cl(-Math.atan2(_cv.z,-_cv.y),-3,.3),az=cl(Math.asin(cl(_cv.x/L,-1,1)),sd>0?-.5:-1.4,sd>0?1.4:.5),M=(a,b)=>a+(b-a)*k;   // shoulder range: no reaching back past the body, limited reach across it
   J['shoulder'+sd].x=M(J['shoulder'+sd].x,ax);J['shoulder'+sd].z=M(J['shoulder'+sd].z,az);J['shoulder'+sd].y=0;J['elbow'+sd].x=M(J['elbow'+sd].x,cur.high>.2?-.03:-.2);J['wrist'+sd].x=M(J['wrist'+sd].x,0);}
  // the catch itself: a reaching hand gets to the ball (checked every physics step, so fast passes can't skip past)
- for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<(.36+CATCH_ASSIST)*catchBoost()){catchFx();grabBall();catchK=0;return;}}
- if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<(.42+CATCH_ASSIST)*catchBoost()){catchFx();grabBall();catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
+ for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<(.36+CATCH_ASSIST)*catchBoost()&&catchGrab()){catchK=0;return;}}
+ if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<(.42+CATCH_ASSIST)*catchBoost()&&catchGrab()){catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
 function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);catchOn=false;}
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);
@@ -671,7 +673,6 @@ function landMarker(){if(!ballGlow.visible){landG.visible=false;return;}
 const rt=.35+t*2.2;u.r=fresh?rt:u.r+(rt-u.r)*(1-Math.exp(-fd*10));landG.children[0].scale.set(u.r,u.r,1);   // ring radius ~ time left: shrinks onto the spot
  const yd=Math.round(Math.hypot(x-player.pel.position.x,z-player.pel.position.z)/.9144)+' yd';
  if(yd!==landTxt){landTxt=yd;const g=landC.getContext('2d');g.clearRect(0,0,128,48);g.font='800 30px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineWidth=6;g.strokeStyle='rgba(0,0,0,.7)';g.strokeText(yd,64,25);g.fillStyle='#ffd23f';g.fillText(yd,64,25);landT.needsUpdate=true;}}
-let restT=0;
 function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballTick.t=now;let carrier=null;
  if(performance.now()>maskT)ball.collisionFilterMask=11;   // the thrower's own body is ignored for 0.25 s so the ball leaves the hand cleanly
  for(const d of active()){use(d);ballCool=Math.max(0,ballCool-dt);reachOn=reachPredict();
@@ -685,8 +686,7 @@ function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballT
  if(!carrier){ballMesh.position.copy(ball.position);ballMesh.quaternion.copy(ball.quaternion);}
  const sp=ball.velocity.norm();ballGlow.visible=!carrier&&(ball.position.y>.3||sp>3);   // red outline while it's in the air
  landMarker();
- // an incomplete pass that comes to rest goes back to the QB
- if(teammate&&!carrier&&sp<.4&&ball.position.y<.2){if((restT+=dt)>2.5){restT=0;giveQB();}}else restT=0;}
+}
 // ---------- touch: joystick (push to the edge to sprint), drag the right side to look, AIM toggles, the big button throws while aiming ----------
 const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles sprinting
 {const $=id=>document.getElementById(id),J=$('joy'),K=$('knob'),big=$('bbig'),aimB=$('baim'),key=(k,t)=>dispatchEvent(new KeyboardEvent(t,{key:k}));
@@ -698,7 +698,7 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
  tap($('bsprint'),()=>{keys.shift=!keys.shift;});   // sprint toggles (a held button + joystick + look is too many fingers)
  tap($('bdive'),()=>startDive());
- tap($('broute'),()=>{keys['1']=true;showRoute();});$('broute').addEventListener('touchend',()=>{keys['1']=false;});tap($('bgo'),wrGo);
+ tap($('broute'),()=>{keys['1']=true;showRoute();});$('broute').addEventListener('touchend',()=>{keys['1']=false;});tap($('bgo'),playStart);
  tap(aimB,()=>{aimOn=!aimOn&&held;});
  tap(big,primaryDown);big.addEventListener('touchend',e=>{e.preventDefault();primaryUp();});
  tap($('bjump'),()=>key(' ','keydown'));$('bjump').addEventListener('touchend',()=>key(' ','keyup'));
@@ -714,7 +714,7 @@ function startGame(m){mode=m;document.body.classList.toggle('touch',m==='touch')
 function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
 function toMenu(){paused=false;$m('pm').hidden=true;mode=null;document.body.classList.remove('touch');
  for(const d of active()){use(d);held=false;thr=-1;aimOn=false;chargeT=-1;catchOn=false;reset();}use(player);   // a fresh start next time
- looseBall();if(teammate)giveQB();$m('mm').hidden=false;}
+ looseBall();if(teammate||wrMode||defOn)resetPlay();$m('mm').hidden=false;}
 // ---------- dolls: the player and the QB run the exact same ragdoll + controller; each doll's state is swapped in with use(d) ----------
 const SWAP=['parts','list','joints','totalMass','pel','abd','chest','neck','head','cons','limp','gdir','crK','fh','LH','gs','keys','camYaw','camPitch','js','jt','jdx','jdz','jp','jpt','bsd','bchg','cur','yaw','phase','mv','airT','ab','cs','ct','ctt','ccool','cscan','cH','cdx','cdz','cex','cez','cl0','cs0','cy0','cyL','csL','cT','pins','qbK','held','reachK','reachOn','ballCool','aimOn','thr','thTw','thLean','chargeT','throwSpd','carryOff','spread','catchOn','catchK','catchSide'];
 function saveTo(d){d.parts=parts;d.list=list;d.joints=joints;d.totalMass=totalMass;d.pel=pel;d.abd=abd;d.chest=chest;d.neck=neck;d.head=head;d.cons=cons;d.limp=limp;d.gdir=gdir;d.crK=crK;d.fh=fh;d.LH=LH;d.gs=gs;d.keys=keys;d.camYaw=camYaw;d.camPitch=camPitch;d.js=js;d.jt=jt;d.jdx=jdx;d.jdz=jdz;d.jp=jp;d.jpt=jpt;d.bsd=bsd;d.bchg=bchg;d.cur=cur;d.yaw=yaw;d.phase=phase;d.mv=mv;d.airT=airT;d.ab=ab;d.cs=cs;d.ct=ct;d.ctt=ctt;d.ccool=ccool;d.cscan=cscan;d.cH=cH;d.cdx=cdx;d.cdz=cdz;d.cex=cex;d.cez=cez;d.cl0=cl0;d.cs0=cs0;d.cy0=cy0;d.cyL=cyL;d.csL=csL;d.cT=cT;d.pins=pins;d.qbK=qbK;d.held=held;d.reachK=reachK;d.reachOn=reachOn;d.ballCool=ballCool;d.aimOn=aimOn;d.thr=thr;d.thTw=thTw;d.thLean=thLean;d.chargeT=chargeT;d.throwSpd=throwSpd;d.carryOff=carryOff;d.spread=spread;d.catchOn=catchOn;d.catchK=catchK;d.catchSide=catchSide;d.dv=dv;d.dvx=dvx;d.dvz=dvz;d.dvY=dvY;}
@@ -738,17 +738,46 @@ const wrD={};
 // defender: fourth doll (group 8, collides with players and the ball), slow on purpose so he's easy to beat
 const dfD={};
 {saveTo(player);buildDoll(0x222222,0x111111);
- limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,role:'df'};
+ limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,role:'df',spd:.93};
  yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
  for(const b of list){b.collisionFilterGroup=8;b.collisionFilterMask=15;}saveTo(dfD);loadFrom(player);curD=player;
  for(const b of dfD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of dfD.cons)world.removeConstraint(c);}
 for(const d of[player,qbD,wrD])for(const b of d.list)b.collisionFilterMask|=8;
-let defOn=false;
-function setDef(on){defOn=on;$m('bdf').textContent='DEFENDER AI: '+(on?'ON':'OFF');showDoll(dfD,on);if(on)placeAt(dfD,wrMode?WR_X-2:-3,wrMode?8:6);}
-function defThink(){for(const k in keys)keys[k]=false;const T=(wrMode?wrD:player).pel,P=pel.position,air=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.3;
- catchOn=air;if(air&&!cur.catchT0)cur.catchT0=1e15;   // no catch boost
- const tx=T.position.x+T.velocity.x*.4,tz=T.position.z+T.velocity.z*.4;if(Math.hypot(tx-P.x,tz-P.z)>1){camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=true;}   // chase the receiver at a sprint
- if(air&&js===0&&contact()&&cur.cp&&cur.cp.t<.45&&cur.cp.p.y>head.position.y)startJump();}   // go up for it
+let defOn=false,playState='live';
+const QB_DEPTH=-15*YD,DEF_Z=20*YD;
+const playPre=()=>(teammate||wrMode)&&playState==='pre';
+function setDef(on){defOn=on;$m('bdf').textContent='DEFENDER AI: '+(on?'ON':'OFF');showDoll(dfD,on);if(on)resetPlay();}
+// ---------- defender: reads the receiver with a reaction delay, mirrors with a cushion, sometimes bites on cuts,
+// jams early, plays the ball in the air (deflects, sometimes intercepts), and tackles the ball carrier ----------
+function defThink(dt){const c=cur,Rc=teammate?player:wrMode?wrD:player,P=pel.position,RP=Rc.pel.position,RV=Rc.pel.velocity;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;
+ const face=(x,z)=>{camYaw=Math.atan2(x-P.x,z-P.z)+Math.PI;};
+ // move to (x,z): near the receiver keep eyes on him and backpedal / shuffle (slower), otherwise turn and run
+ const goTo=(x,z,run,look)=>{const mx=x-P.x,mz=z-P.z,d=Math.hypot(mx,mz);if(d<.45){if(look)face(look.x,look.z);return;}
+  if(look&&d<2.5){face(look.x,look.z);const cy=camYaw,f=-(mx*Math.sin(cy)+mz*Math.cos(cy))/d,r=(mx*Math.cos(cy)-mz*Math.sin(cy))/d;keys.w=f>.3;keys.s=f<-.3;keys.d=r>.3;keys.a=r<-.3;keys.shift=run&&f>.3;}
+  else{face(x,z);keys.w=true;keys.shift=run;}};
+ if(c.st==='pre'){face(RP.x,RP.z);return;}
+ if(c.st==='down'){if(dv===0)c.st='cover';return;}
+ const hist=c.hist||(c.hist=[]);hist.push([c.t,RP.x,RP.z,RV.x,RV.z]);while(hist.length>2&&hist[1][0]<c.t-c.rd)hist.shift();const S=hist[0];   // what he "sees": the receiver c.rd seconds ago
+ const inAir=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.3;
+ if(inAir&&c.st!=='ball'&&!held){c.st='ball';c.canInt=Math.random()<.3;catchOn=true;cur.catchT0=1e15;}   // no catch boost for him
+ if(held&&c.st!=='int'){c.st='int';c.intT=c.t;}
+ if(c.st==='ball'){if(!inAir){catchOn=false;c.st=Rc.held?'chase':'cover';}
+  else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);
+   for(let t=0;t<5&&!(vy<0&&y<1.6)&&y>.09;t+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}   // where it comes down through a defender's reach
+   goTo(x,z,true,null);if(js===0&&contact()&&cur.cp&&cur.cp.t<.45&&cur.cp.p.y>head.position.y)startJump();}}   // go up for it
+ if(c.st==='cover'){if(Rc.held){c.st='chase';}
+  const vx=S[3],vz=S[4],sp=Math.hypot(vx,vz);
+  if(c.pv&&sp>2){const pv=c.pv,cs2=(pv[0]*vx+pv[1]*vz)/((Math.hypot(pv[0],pv[1])||1)*sp);if(cs2<.6&&c.t>(c.biteEnd||0)&&Math.random()<.45){c.biteEnd=c.t+.35+Math.random()*.3;c.biteV=pv;}}   // a hard cut: sometimes he bites and keeps going
+  if(sp>.5)c.pv=[vx,vz];
+  const cush=Math.max(1.4,3.6-c.t*.45),inside=-Math.sign(S[1]||1)*.5;let tx=S[1]+vx*.4+inside,tz=S[2]+vz*.4+cush+Math.max(0,vz)*1.1;   // a cushion downfield that tightens, shaded inside, and grows with the receiver's speed at him (he gives ground early)
+  if(c.t<(c.biteEnd||0)){tx=P.x+c.biteV[0];tz=P.z+c.biteV[1];}
+  goTo(tx,tz,true,RP);
+  const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);   // jam: hands on him early in the route
+  if(dd<1.1&&c.t<3.5&&c.t>(c.pushT||0)){c.pushT=c.t+1.2+Math.random();const kk=1.2+Math.random();for(const b of Rc.list){b.velocity.x+=dx/dd*kk;b.velocity.z+=dz/dd*kk;}}}
+ if(c.st==='chase'){if(!Rc.held){c.st='cover';}goTo(RP.x+RV.x*.5,RP.z+RV.z*.5,true,null);
+  const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);
+  if(dd<1.3&&dv===0){face(RP.x,RP.z);startDive();for(const b of Rc.list){b.velocity.x+=dx/dd*3;b.velocity.z+=dz/dd*3;}Rc.limp=true;Rc.limpT=performance.now()+2600;c.st='down';}}   // tackle: dive into him, he goes limp for a moment
+ if(c.st==='int'&&c.t-c.intT<1.5)goTo(P.x,P.z-6,true,null);}   // picked it off: a few strides back the other way
 let teammate=false,wrMode=false,qbClock=0,callReq=null;
 const active=()=>{const a=teammate?[player,qbD]:wrMode?[player,wrD]:[player];if(defOn)a.push(dfD);return a;};
 function showDoll(d,on){for(const b of d.list){if(on)world.addBody(b);else world.removeBody(b);b.mesh.visible=on;}for(const c of d.cons)if(on)world.addConstraint(c);else world.removeConstraint(c);if(!on){use(d);for(const k in pins)unpin(k);held=false;use(player);}}
@@ -771,14 +800,22 @@ function routeShape(full){if(!route)return;let P=[[WR_X,0],...route];
   pos.push(a[0]+nx,y,a[1]+nz,a[0]-nx,y,a[1]-nz,bx+nx,y,bz+nz, a[0]-nx,y,a[1]-nz,bx-nx,y,bz-nz,bx+nx,y,bz+nz);
   if(e){pos.push(bx+nx*3,y,bz+nz*3,bx-nx*3,y,bz-nz*3,b[0]+(b[0]-a[0])/L*w,y,b[1]+(b[1]-a[1])/L*w);}}return pos;};   // arrowhead
  for(const[m,w,y]of[[rtCore,.2,.04],[rtGlow,.55,.035]]){m.geometry.dispose();m.geometry=new THREE.BufferGeometry();m.geometry.setAttribute('position',new THREE.Float32BufferAttribute(ribbon(w,y),3));}routeFull=full;}
-function showRoute(){if(!wrMode||wrD.cur.st!=='set')return;routeVis=true;routeMesh.visible=true;routeDownT=performance.now();}   // tap: the vague hint; hold: bird's-eye + full route
-function wrGo(){if(!wrMode||wrD.cur.st!=='set')return;wrD.cur.st='route';wrD.cur.i=0;routeVis=false;routeMesh.visible=false;}
-// a fresh play: you at QB with the ball, the receiver split wide on the 50, a new random route
-function resetPlay(){if(!wrMode)return;for(const d of[player,wrD]){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;}
- placeAt(player,0,QB_Zs);placeAt(wrD,WR_X,-.4);use(wrD);cur.st='set';cur.i=0;cur.t=0;keys={};use(player);
- looseBall();use(player);grabBall();pickRoute();routeVis=false;routeMesh.visible=false;}
-function setWR(on){if(on===wrMode)return;if(on&&teammate)setTeammate(false);wrMode=on;document.body.classList.toggle('wr',on);$m('bwr').textContent='WIDE RECEIVER AI: '+(on?'ON':'OFF');
- showDoll(wrD,on);if(on)resetPlay();else{routeMesh.visible=false;use(player);if(held){held=false;}looseBall();use(player);reset();}}
+function showRoute(){if(!playPre())return;routeVis=true;routeMesh.visible=true;routeDownT=performance.now();}   // tap: the vague hint; hold: bird's-eye + full route
+// the snap: the receiver (AI or you) can go, the defender reads and reacts
+function playStart(){if(!playPre())return;playState='live';if(wrMode){wrD.cur.st='route';wrD.cur.i=0;}if(defOn)dfD.cur.st='cover';routeVis=false;routeMesh.visible=false;}
+// R: everyone back to the line, the ball to the QB, a new route; nothing moves until 2
+// receiver split wide on the 50, QB 15 yd behind the line, defender 20 yd in front of the receiver
+function resetPlay(){const on=teammate||wrMode;if(!on&&!defOn)return;
+ for(const d of active()){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;limp=false;d.limpT=0;keys={};}use(player);
+ const qb=teammate?qbD:player,rc=teammate?player:wrMode?wrD:null;
+ if(on){placeAt(qb,0,QB_DEPTH);placeAt(rc,WR_X,-.4);}
+ if(defOn){placeAt(dfD,rc?WR_X-1.5:-3,rc?DEF_Z:8);Object.assign(dfD.cur,{st:on?'pre':'cover',t:0,hist:[],rd:.22+Math.random()*.2,biteEnd:0,pushT:0,pv:null});}
+ if(wrMode)Object.assign(wrD.cur,{st:'set',i:0,t:0});if(teammate)Object.assign(qbD.cur,{st:'idle',T:null});
+ looseBall();if(on){use(qb);grabBall();}use(player);
+ if(on)pickRoute();routeVis=false;routeMesh.visible=false;playState=on?'pre':'live';callReq=null;}
+function modeOff(){routeMesh.visible=false;playState='live';use(player);held=false;aimOn=false;thr=-1;reset();use(player);looseBall();if(defOn)resetPlay();}
+function setWR(on){if(on===wrMode)return;if(on&&teammate)setTeammate(false);wrMode=on;document.body.classList.toggle('play',teammate||wrMode);$m('bwr').textContent='WIDE RECEIVER AI: '+(on?'ON':'OFF');
+ showDoll(wrD,on);if(on)resetPlay();else modeOff();}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
 function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
  const P=pel.position,inAir=world.bodies.includes(ball)&&!player.held&&ball.velocity.norm()>3&&ball.position.y>.25;
@@ -803,13 +840,11 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
  // a sprint stops in ~0.3 s. shortcut: braking only, never adds speed, so it can't make him faster than his legs
  if(c.st==='ball'&&contact()){const v=pel.velocity,wl=tx===null?0:sprint?6:2.6;let wx=0,wz=0;if(tx!==null){const L=Math.hypot(tx-P.x,tz-P.z)||1;wx=(tx-P.x)/L*wl;wz=(tz-P.z)/L*wl;}
   let ax=(wx-v.x)*10,az=(wz-v.z)*10;if(ax*v.x+az*v.z<0){const m=Math.hypot(ax,az),cap=19.6;if(m>cap){ax*=cap/m;az*=cap/m;}for(const b of list){b.force.x+=b.mass*ax;b.force.z+=b.mass*az;}}}}
-function setTeammate(on){if(on===teammate)return;if(on&&wrMode)setWR(false);teammate=on;document.body.classList.toggle('qb',on);$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
- if(on){for(const b of qbD.list){world.addBody(b);b.mesh.visible=true;}for(const c of qbD.cons)world.addConstraint(c);use(qbD);reset();held=false;use(player);if(!held)giveQB();}
- else{use(qbD);for(const k in pins)unpin(k);const had=held;held=false;aimOn=false;thr=-1;use(player);for(const b of qbD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of qbD.cons)world.removeConstraint(c);if(had)looseBall();}}
+function setTeammate(on){if(on===teammate)return;if(on&&wrMode)setWR(false);teammate=on;document.body.classList.toggle('play',teammate||wrMode);$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
+ showDoll(qbD,on);if(on)resetPlay();else modeOff();}
 function looseBall(){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=11;}
-function giveQB(){use(player);if(held){use(player);return;}use(qbD);if(!held){if(!world.bodies.includes(ball))world.addBody(ball);grabBall();cur.st='idle';cur.T=null;}use(player);}
 // left click / big touch button: throw (charging) when aiming, call for the pass when the QB has it, otherwise catch (hold)
-function primaryDown(){if(held){startCharge();return;}if(teammate&&qbD.held&&qbD.cur.st==='idle')callReq={P:pel.position.clone(),V:new V(pel.velocity.x,0,pel.velocity.z)};catchOn=true;cur.catchT0=performance.now();}   // calling also starts holding catch: keep holding until the ball arrives
+function primaryDown(){if(playPre())return;if(held){startCharge();return;}if(teammate&&qbD.held&&qbD.cur.st==='idle')callReq={P:pel.position.clone(),V:new V(pel.velocity.x,0,pel.velocity.z)};catchOn=true;cur.catchT0=performance.now();}   // calling also starts holding catch: keep holding until the ball arrives
 function primaryUp(){releaseCharge();catchOn=false;cur.catchT0=0;}
 // QB brain (runs with the QB swapped in): face the receiver; on a call, lead him (where he'll be, at the speed he had when he called), aim, throw
 function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
@@ -823,8 +858,8 @@ function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
  camYaw=Math.atan2(fx-pel.position.x,fz-pel.position.z)+Math.PI;      // the body turns to face camYaw + 180°
  if(c.st==='aim'&&(c.t+=dt)>.35){startThrow();c.st='throw';}
  if(c.st==='throw'&&thr<0){c.st='idle';}}
-// refresh: QB back on his spot with the ball (for a missed catch)
-function refreshQB(){if(!teammate||!mode||paused)return;use(player);if(held){held=false;aimOn=false;thr=-1;}use(qbD);reset();held=false;aimOn=false;thr=-1;cur.st='idle';cur.T=null;use(player);callReq=null;giveQB();}
+// refresh button (and R): reset the play
+function refreshQB(){if(mode&&!paused)resetPlay();}
 $m('brst').addEventListener('click',refreshQB);$m('brst').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();refreshQB();},{passive:false});
 // ---------- touch layout editor: drag controls to move them, tap + -/+ to resize; saved on this device ----------
 const LAY_IDS=['joy','bbig','baim','bjump','bdrop','bsprint','tpause','bdive'],LAY_KEY='rafTouchLayout',layOrig={};
@@ -865,6 +900,7 @@ function frame(now){
   world.step(DT);acc-=DT;
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}
+ for(const d of D)if(d.limpT&&performance.now()>d.limpT){use(d);limp=false;d.limpT=0;}   // tackled: back on his feet
  use(player);ballTick(now);aimTick();$m('cboost').hidden=catchBoost()===1;
  tgt.x+=(pel.position.x-tgt.x)*.45;tgt.z+=(pel.position.z-tgt.z)*.45;tgt.y+=(Math.max(.4,pel.position.y-.08)-tgt.y)*.1;   // follow the doll tightly (incl. height on platforms)
  const sh=.55,pvx=tgt.x+Math.cos(camYaw)*sh,pvy=tgt.y+.55,pvz=tgt.z-Math.sin(camYaw)*sh,cp=Math.cos(camPitch);   // pivot: over the doll's right shoulder
@@ -872,7 +908,7 @@ function frame(now){
  const cd=rc.hit?Math.max(.6,Math.hypot(rc.p.x-pvx,rc.p.y-pvy,rc.p.z-pvz)-.2):camDist;
  camCD+=(cd-camCD)*(cd<camCD?.5:.06);                   // move in quickly when blocked, ease back out slowly (no snapping)
  cam.position.set(pvx+dx*camCD,Math.max(.2,pvy+dy*camCD),pvz+dz*camCD);cam.lookAt(pvx,pvy,pvz);
- {const hold=wrMode&&routeVis&&keys['1']&&performance.now()-routeDownT>250&&route;if(hold!==routeFull)routeShape(!!hold);   // holding 1: rise to a bird's-eye view of the whole route
+ {const hold=(wrMode||teammate)&&routeVis&&keys['1']&&performance.now()-routeDownT>250&&route;if(hold!==routeFull)routeShape(!!hold);   // holding 1: rise to a bird's-eye view of the whole route
   birdK+=((hold?1:0)-birdK)*Math.min(1,(now-(frame.lt||now))/1000*3.5);frame.lt=now;
   if(birdK>.001&&route){const xs=[WR_X,...route.map(p=>p[0])],zs=[0,...route.map(p=>p[1])],cx=(Math.min(...xs)+Math.max(...xs))/2,cz=(Math.min(...zs)+Math.max(...zs))/2,span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs),20);
    const k=birdK*birdK*(3-2*birdK),bp=new THREE.Vector3(cx,span*1.15+8,cz-span*.35),lk=new THREE.Vector3(cx,0,cz);

@@ -24,7 +24,7 @@
 .ch{width:min(42vw,230px);padding:min(22px,3vh) 14px min(18px,3vh);border:2px solid #333;border-radius:14px;background:#0d0d0d;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:14px;font:700 15px system-ui,sans-serif;letter-spacing:.08em;transition:border-color .15s,transform .15s,background .15s}
 .ch:hover,.ch:focus-visible{border-color:#d8a24a;background:#17130c;transform:translateY(-3px);outline:none}
 .ch svg{width:70%;height:auto;max-width:130px;max-height:18vh}
-#pm,#org{background:#000c}#org{gap:1.4vh}#osum{font:700 13px system-ui,sans-serif;letter-spacing:.06em;color:#d8a24a;text-align:center}#pm h2{margin:0;font:900 40px Impact,"Arial Black",sans-serif;letter-spacing:.08em}
+#pm,#org{background:#000c}#org{gap:1.2vh;justify-content:flex-start}#obox{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;width:min(100%,920px);background:#151515ee;border:2px solid #d8a24a;border-radius:12px;padding:12px;box-sizing:border-box}#obox h3{grid-column:1/-1;margin:0;text-align:center;font:900 26px Impact,"Arial Black",sans-serif;letter-spacing:.08em}#org #obox button{font-size:13px;padding:10px 12px}.cnt{display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 13px system-ui,sans-serif;letter-spacing:.06em;border:2px solid #d8a24a55;border-radius:10px;padding:4px 10px}#org .cnt button{padding:6px 14px!important}.cnt span{font:900 22px Impact,sans-serif;min-width:24px;text-align:center}#oline{width:min(100%,920px)}.obtn{display:flex;gap:12px}#pm h2{margin:0;font:900 40px Impact,"Arial Black",sans-serif;letter-spacing:.08em}
 #pm button,#org button{font:700 16px system-ui,sans-serif;letter-spacing:.08em;color:#fff;background:#111;border:2px solid #d8a24a;border-radius:10px;padding:14px 28px;cursor:pointer}
 #pm button:hover,#pm button:focus-visible,#org button:hover,#org button:focus-visible{background:#2a2112;outline:none}
 </style></head><body>
@@ -37,7 +37,7 @@
 <div id="cboost" hidden style="position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3;font:800 13px system-ui,sans-serif;letter-spacing:.12em;color:#111;background:#ffd23f;border-radius:999px;padding:6px 14px;pointer-events:none">CATCH BOOST +20%</div>
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
 <div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="borg">GAME ORGANISER</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
-<div id="org" class="ov" hidden><h2>GAME ORGANISER</h2><button id="oyou"></button><button id="ooff"></button><button id="opos"></button><button id="oos"></button><button id="ods"></button><div id="osum"></div><button id="ogo">START</button><button id="oback">BACK</button></div>
+<div id="org" class="ov" hidden><div id="obox"><h3>GAME ORGANISER</h3><button id="omode"></button><button id="oyou"></button><button id="ooff"></button><button id="opos"></button><div class="cnt"><b>BLUE PLAYERS</b><button id="mblue">−</button><span id="nblue"></span><button id="pblue">+</button></div><div class="cnt"><b>RED PLAYERS</b><button id="mred">−</button><span id="nred"></span><button id="pred">+</button></div><button id="oos"></button><button id="ods"></button></div><div id="oline"></div><div class="obtn"><button id="oback">BACK</button><button id="ogo">START</button></div></div>
 <div id="ed" hidden><span id="edtxt">Drag to move · tap to select</span><button id="edm">−</button><button id="edp">+</button><button id="edr">RESET</button><button id="edone">DONE</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
 <div class="tb" id="bbig"></div>
@@ -736,10 +736,10 @@ function bot(i){if(pool[i])return pool[i];const d={};saveTo(player);buildDoll(0x
  saveTo(d);loadFrom(player);curD=player;tagCols(d);
  for(const b of d.list){world.removeBody(b);b.mesh.visible=false;}for(const c of d.cons)world.removeConstraint(c);return pool[i]=d;}
 // offensive sets: receiver spots in metres (+x = left sideline, z = 0 on the line, slots 1 m off it); the QB is always 15 yd back
-const OSETS=[['FREE ROAM (NO PLAY)',null],['SINGLEBACK - 1 WR',[[12,0]]],['PRO SET - 2 WR',[[12,0],[-12,0]]],['SHOTGUN TWINS - 2 WR',[[13,0],[8,-1]]],['11 PERSONNEL 2x1 - 3 WR',[[14,0],[8.5,-1],[-14,0]]],['SHOTGUN TRIPS - 3 WR',[[15,0],[10.5,-1],[6,-1]]],['SPREAD 2x2 - 4 WR',[[15,0],[9,-1],[-15,0],[-9,-1]]],['EMPTY 3x2 - 5 WR',[[16,0],[11,-1],[6,-1],[-16,0],[-10,-1]]]];
-// defensive sets: a man on every receiver, plus [deep safeties, QB rushers, robbers]
-const DSETS=[['NO DEFENCE',null],['COVER 0 BLITZ',[0,1,0]],['COVER 1 MAN FREE',[1,0,0]],['COVER 1 ROBBER',[1,0,1]],['COVER 2 MAN',[2,0,0]],['NICKEL COVER 1 BLITZ',[1,1,0]],['DIME 2 MAN UNDER',[2,0,1]]];
-const ORG={you:'blue',off:'blue',pos:'qb',os:0,ds:0};
+const OSETS=[['SINGLEBACK - 1 WR',[[12,0]]],['PRO SET - 2 WR',[[12,0],[-12,0]]],['SHOTGUN TWINS - 2 WR',[[13,0],[8,-1]]],['11 PERSONNEL 2x1 - 3 WR',[[14,0],[8.5,-1],[-14,0]]],['SHOTGUN TRIPS - 3 WR',[[15,0],[10.5,-1],[6,-1]]],['SPREAD 2x2 - 4 WR',[[15,0],[9,-1],[-15,0],[-9,-1]]],['EMPTY 3x2 - 5 WR',[[16,0],[11,-1],[6,-1],[-16,0],[-10,-1]]]];
+// defensive sets: a man on every receiver first, then extra defenders fill these jobs in order (deep safety, QB rusher, robber)
+const DSETS=[['COVER 1 MAN FREE',['deep','rob','rush','deep']],['COVER 2 MAN',['deep','deep','rob','rush']],['COVER 0 BLITZ',['rush','rob','rush','deep']],['COVER 1 ROBBER',['rob','deep','rush','deep']],['COVER 2 ROBBER',['deep','deep','rob','rob']]];
+const ORG={you:'blue',off:'blue',pos:'qb',n:{blue:2,red:2},os:0,ds:0,free:true};
 let playState='live',playOn=false,roster=[player],qbClock=0,callReq=null;
 const QB_DEPTH=-15*YD,DEF_Z=20*YD;
 const playPre=()=>playOn&&playState==='pre';
@@ -818,19 +818,24 @@ function resetPlay(){if(!playOn)return;
  looseBall();if(q){use(q);grabBall();}use(player);
  route=rw&&rw.cur.route;routeName=rw?rw.cur.rname:'';routeX=rw?rw.cur.x0:WR_X;routeShape(false);   // the route shown on 1: yours, or the first receiver's when you're the QB
  routeVis=false;routeMesh.visible=false;playState=q?'pre':'live';callReq=null;}
-// apply the game organiser: your team and spot, the offence's set, the defence's set; everyone else is a bot
+// the organiser's plan: offence = QB + receivers (the set matching the head count), defence = a man per receiver, then the set's extra jobs
+function plan(){const oT=ORG.off,dT=oT==='blue'?'red':'blue',youO=ORG.you===oT,nO=ORG.n[oT]=cl(ORG.n[oT],2,6),nD=ORG.n[dT]=cl(ORG.n[dT],youO?0:1,8);
+ if(OSETS[ORG.os][1].length!==nO-1)ORG.os=OSETS.findIndex(o=>o[1].length===nO-1);
+ const wr=OSETS[ORG.os][1],ex=DSETS[ORG.ds][1],LB={deep:'S',rush:'BLITZ',rob:'ROB'};
+ const O=[{role:'qb',lab:'QB',you:youO&&ORG.pos==='qb'},...wr.map(([x,z],i)=>({role:'wr',x0:x,z0:z,lab:'WR'+(i+1),you:youO&&ORG.pos==='wr'&&!i}))],D=[];
+ for(let i=0;i<nD;i++){if(i<wr.length){const x=wr[i][0];D.push({kind:'man',m:i+1,lab:Math.abs(x)>=12?'CB':'NB',px:x-Math.sign(x)*1.5,pz:Math.abs(x)>=12?DEF_Z:7});}else{const k=ex[(i-wr.length)%ex.length];D.push({kind:k,lab:LB[k]});}}
+ if(!youO)D[0].you=true;
+ const dp=D.filter(d=>d.kind==='deep');dp.forEach((d,i)=>Object.assign(d,{half:dp.length>1,px:dp.length>1?(i%2?-10:10)*(i<2?1:.4):0,pz:DEF_Z+8}));
+ D.filter(d=>d.kind==='rush').forEach((d,i)=>Object.assign(d,{px:i%2?-3:3,pz:2}));D.filter(d=>d.kind==='rob').forEach((d,i)=>Object.assign(d,{px:i%2?-5:i?5:0,pz:10}));
+ return{oT,dT,O,D};}
+// apply it: your spot, everyone else a bot
 function applyOrg(){for(const d of roster)if(d!==player)showDoll(d,false);use(player);held=false;aimOn=false;thr=-1;reset();looseBall();
- const youO=ORG.you===ORG.off,os=OSETS[ORG.os][1],ds=DSETS[ORG.ds][1],defT=ORG.off==='blue'?'red':'blue';let n=0;
- const P=player.cur;for(const k of['role','side','kind','mark','x0','z0','px','pz','half'])delete P[k];
- roster=[player];playOn=!!os;document.body.classList.toggle('play',playOn);
- const add=(d,o)=>{if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,o);return d;};
- if(playOn){add(youO&&ORG.pos==='qb'?player:bot(n++),{role:'qb',side:'o'});
-  const wrs=os.map(([x,z],i)=>add(youO&&ORG.pos==='wr'&&!i?player:bot(n++),{role:'wr',side:'o',x0:x,z0:z}));
-  (ds||!youO?(ds?wrs:wrs.slice(0,1)):[]).forEach((w,i)=>add(!youO&&!i?player:bot(n++),{role:'df',side:'d',kind:'man',mark:w,px:w.cur.x0-Math.sign(w.cur.x0)*1.5,pz:Math.abs(w.cur.x0)>=12?DEF_Z:7}));   // outside corners off, slot defenders 7 m
-  if(ds){const[dp,ru,ro]=ds;for(let i=0;i<dp;i++)add(bot(n++),{role:'df',side:'d',kind:'deep',half:dp>1,px:dp>1?(i?-10:10):0,pz:DEF_Z+8});
-   for(let i=0;i<ru;i++)add(bot(n++),{role:'df',side:'d',kind:'rush',px:3,pz:2});for(let i=0;i<ro;i++)add(bot(n++),{role:'df',side:'d',kind:'rob',px:0,pz:10});}}
+ const P=player.cur;for(const k of['role','side','kind','mark','x0','z0','px','pz','half','you','lab','m'])delete P[k];
+ roster=[player];playOn=!ORG.free;document.body.classList.toggle('play',playOn);let n=0,oT=ORG.you,dT;
+ const add=(s,side)=>{const d=s.you?player:bot(n++);if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,s,{side,role:side==='o'?s.role:'df'});return d;};
+ if(playOn){const p=plan();oT=p.oT;dT=p.dT;const os=p.O.map(s=>add(s,'o'));for(const s of p.D){const d=add(s,'d');if(s.m)d.cur.mark=os[s.m];}}
  else{P.side='o';}
- for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?ORG.off:defT);if(d===player&&!playOn)paint(d,ORG.you);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
+ for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
  if(playOn)resetPlay();else{routeMesh.visible=false;playState='live';}}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
 function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
@@ -911,15 +916,30 @@ $m('edr').onclick=()=>{lay={};saveLay();selectCtl(null);applyLay();};
 $m('bedit').onclick=()=>{editing=true;$m('pm').hidden=true;$m('ed').hidden=false;};
 $m('edone').onclick=()=>{editing=false;saveLay();selectCtl(null);$m('ed').hidden=true;$m('pm').hidden=false;};
 $m('bres').onclick=togglePause;$m('borg').onclick=()=>{$m('pm').hidden=true;$m('org').hidden=false;orgUI();};
-// game organiser page: each button cycles its choice
 const cyc=(a,v)=>a[(a.indexOf(v)+1)%a.length];
-function orgUI(){const youO=ORG.you===ORG.off,os=OSETS[ORG.os][1],ds=DSETS[ORG.ds][1],nW=os?os.length:0,nD=!os?0:ds?nW+ds[0]+ds[1]+ds[2]:youO?0:1,dT=ORG.off==='blue'?'red':'blue';
- $m('oyou').textContent='YOUR TEAM: '+ORG.you.toUpperCase();$m('ooff').textContent='ON OFFENCE: '+ORG.off.toUpperCase()+' (DEFENCE: '+dT.toUpperCase()+')';
- $m('opos').textContent='YOUR POSITION: '+(!os?'FREE ROAM':youO?(ORG.pos==='qb'?'QUARTERBACK':'WIDE RECEIVER 1'):'DEFENDER (ON WR 1)');
- $m('oos').textContent='OFFENCE SET: '+OSETS[ORG.os][0];$m('ods').textContent='DEFENCE SET: '+DSETS[ORG.ds][0];
- $m('osum').textContent=os?ORG.off.toUpperCase()+': QB + '+nW+' WR ('+(youO?nW:nW+1)+' BOTS)  ·  '+dT.toUpperCase()+': '+nD+' DEFENDERS ('+(youO?nD:nD-1)+' BOTS)':'JUST YOU ON THE FIELD';}
-$m('oyou').onclick=()=>{ORG.you=cyc(['blue','red'],ORG.you);orgUI();};$m('ooff').onclick=()=>{ORG.off=cyc(['blue','red'],ORG.off);orgUI();};
-$m('opos').onclick=()=>{ORG.pos=cyc(['qb','wr'],ORG.pos);orgUI();};$m('oos').onclick=()=>{ORG.os=(ORG.os+1)%OSETS.length;orgUI();};$m('ods').onclick=()=>{ORG.ds=(ORG.ds+1)%DSETS.length;orgUI();};
+// game organiser page: options box on top, the two teams lined up facing each other below (like a 2K team select)
+const hx=h=>'#'+h.toString(16).padStart(6,'0'),OSK=['#8d5524','#c68642','#e0ac69','#5c3a1e','#f1c27d'];
+function fig(x,y,s,t,num,lab,you,face,k){const[B,D]=TEAM[t].map(hx),sk=OSK[k%5],f=face;   // one player, feet at (x, y), scale s, facing f (+1 right, -1 left)
+ return`<g transform="translate(${x} ${y}) scale(${s})"><ellipse rx="34" ry="9" fill="none" stroke="${you?'#ffd23f':'#fff8'}" stroke-width="${you?4:2}"/>
+ <rect x="-15" y="-92" width="11" height="88" rx="5" fill="${sk}"/><rect x="4" y="-92" width="11" height="88" rx="5" fill="${sk}"/><rect x="-18" y="-6" width="15" height="7" rx="3" fill="#eee"/><rect x="3" y="-6" width="15" height="7" rx="3" fill="#eee"/>
+ <rect x="-21" y="-118" width="42" height="40" rx="6" fill="${D}"/><rect x="-32" y="-170" width="10" height="62" rx="5" fill="${sk}"/><rect x="22" y="-170" width="10" height="62" rx="5" fill="${sk}"/>
+ <path d="M-22 -172 Q0 -160 22 -172 L21 -112 L-21 -112 Z" fill="${B}" stroke="${D}" stroke-width="3"/><text y="-132" text-anchor="middle" font="900 22px Impact" font-family="Impact,Arial Black,sans-serif" font-size="22" fill="#fff">${num}</text>
+ <rect x="-6" y="-184" width="12" height="12" fill="${sk}"/><circle cx="${f*2}" cy="-198" r="17" fill="${sk}"/><path d="M${-17+f*2} -202 A17 17 0 0 1 ${17+f*2} -202 Z" fill="#111"/>
+ <text y="34" text-anchor="middle" font-family="system-ui,sans-serif" font-style="italic" font-weight="800" font-size="26" fill="${you?'#ffd23f':'#fff'}">${you?'YOU':lab}</text></g>`;}
+function orgUI(){const{oT,dT,O,D}=plan(),youO=ORG.you===oT;
+ $m('oyou').textContent='YOUR TEAM: '+ORG.you.toUpperCase();$m('ooff').textContent='OFFENCE: '+oT.toUpperCase()+'  ·  DEFENCE: '+dT.toUpperCase();
+ $m('opos').textContent='YOUR POSITION: '+(youO?(ORG.pos==='qb'?'QB':'WR 1'):'CORNER (ON WR 1)');$m('oos').textContent='OFFENCE SET: '+OSETS[ORG.os][0];$m('ods').textContent='DEFENCE SET: '+DSETS[ORG.ds][0];
+ $m('omode').textContent='MODE: '+(ORG.free?'FREE ROAM (NO PLAY)':'PLAY');$m('nblue').textContent=ORG.n.blue;$m('nred').textContent=ORG.n.red;
+ const side=(L,t,left)=>{let g='';const n=L.length;for(let i=n-1;i>=0;i--){const u=n>1?i/(n-1):0,x=left?60+u*300:740-u*300;g+=fig(x,340-u*120,1-u*.45,t,(i*7+(t==='red'?23:3))%99||1,L[i].lab,L[i].you,left?1:-1,i+(left?0:2));}return g;};
+ const bl=oT==='blue'?O:D,rd=oT==='red'?O:D;
+ $m('oline').innerHTML=`<svg viewBox="0 0 800 400" width="100%"><defs><radialGradient id="fl" cx=".5" cy=".7" r=".7"><stop offset="0" stop-color="#5a5f6a"/><stop offset="1" stop-color="#1a1c22"/></radialGradient></defs>
+ <path d="M0 160 L800 160 L800 400 L0 400 Z" fill="url(#fl)"/><line x1="400" y1="160" x2="400" y2="400" stroke="#fff6" stroke-width="3"/><ellipse cx="400" cy="300" rx="120" ry="40" fill="none" stroke="#fff4" stroke-width="3"/>
+ <text x="20" y="40" font-family="Impact,Arial Black,sans-serif" font-size="34" fill="${hx(TEAM.blue[0])}">BLUE · ${oT==='blue'?'OFFENCE':'DEFENCE'}</text><text x="780" y="40" text-anchor="end" font-family="Impact,Arial Black,sans-serif" font-size="34" fill="${hx(TEAM.red[0])}">RED · ${oT==='red'?'OFFENCE':'DEFENCE'}</text>
+ ${side(bl,'blue',true)}${side(rd,'red',false)}</svg>`;}
+$m('oyou').onclick=()=>{ORG.you=cyc(['blue','red'],ORG.you);orgUI();};$m('ooff').onclick=()=>{ORG.off=cyc(['blue','red'],ORG.off);orgUI();};$m('omode').onclick=()=>{ORG.free=!ORG.free;orgUI();};
+$m('opos').onclick=()=>{ORG.pos=cyc(['qb','wr'],ORG.pos);orgUI();};$m('ods').onclick=()=>{ORG.ds=(ORG.ds+1)%DSETS.length;orgUI();};
+$m('oos').onclick=()=>{const k=OSETS[ORG.os][1].length;do ORG.os=(ORG.os+1)%OSETS.length;while(OSETS[ORG.os][1].length!==k);orgUI();};   // sets with the same receiver count
+for(const t of['blue','red'])for(const[id,dd]of[['m',-1],['p',1]])$m(id+t).onclick=()=>{ORG.n[t]+=dd;orgUI();};
 $m('ogo').onclick=()=>{$m('org').hidden=true;applyOrg();togglePause();};$m('oback').onclick=()=>{$m('org').hidden=true;$m('pm').hidden=false;};
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});

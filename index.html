@@ -91,7 +91,7 @@
 .hints i{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#fff;color:#111;font:800 11px system-ui;font-style:normal;margin-right:6px}.hints button{background:none!important;border:0!important;padding:0!important;font:500 16px "Barlow Condensed"!important;letter-spacing:0!important;text-transform:none;color:#ddd!important}.hints button:hover{color:#fff!important}
 #pv3{position:fixed;left:-9999px;width:10px;height:10px}
 #score{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:3;pointer-events:none;align-items:stretch;font:700 17px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.04em;color:#fff;background:#111;box-shadow:0 6px 18px #0009;border-radius:2px;overflow:hidden;white-space:nowrap}
-#score>span{display:flex;align-items:center;gap:8px;padding:5px 12px}#score .tm b{font-size:22px;font-weight:800}#score .b{background:#1d4fae}#score .r{background:#9a1820}#score .pos{box-shadow:inset 0 -3px 0 #ffd23f}#score .dd{background:#1b1b1e;color:#ffd23f}#score .sp,#score .dr{background:#1b1b1e;color:#bbb;font-weight:600}
+#score>span{display:flex;align-items:center;gap:8px;padding:5px 12px}#score .tm b{font-size:22px;font-weight:800}#score .b{background:#1d4fae}#score .r{background:#9a1820}#score .pos{box-shadow:inset 0 -3px 0 #ffd23f}#score .dd{background:#1b1b1e;color:#ffd23f}#score .to{background:#e8321e;color:#fff;font-weight:800;animation:tog .6s ease-in-out infinite alternate}@keyframes tog{to{background:#a3180c}}#score .sp,#score .dr{background:#1b1b1e;color:#bbb;font-weight:600}
 #pcard{position:fixed;left:calc(14px + env(safe-area-inset-left,0px));top:calc(26px + env(safe-area-inset-top,0px));z-index:3;pointer-events:none;display:flex;align-items:center;gap:10px;background:#111d;border-left:3px solid #e8321e;padding:6px 12px 6px 8px;font:600 14px "Barlow Condensed","Arial Narrow",sans-serif;color:#fff;border-radius:2px}
 #pcard[hidden]{display:none}#pcard .o{font:800 26px/1 "Barlow Condensed";}#pcard .n{font-weight:800;font-size:17px;text-transform:uppercase;letter-spacing:.03em}#pcard small{display:block;color:#aaa;letter-spacing:.12em;font-size:11px}
 .fin{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;width:min(100%,640px)}.fin div{background:#1b1b1dee;padding:10px 12px;border-radius:2px;font:600 13px "Barlow Condensed";letter-spacing:.12em;color:#aaa}.fin b{display:block;font:800 30px "Barlow Condensed";color:#fff;letter-spacing:0}
@@ -493,7 +493,7 @@ const DIVE_UP=1.15,DIVE_END=2.0;
 // ---------- juke: a direction + E. Like a real one: a hard jab step and dropped shoulder / head snap the wrong way (sells the fake),
 // then plant off that foot and burst out low the other way, half sideways, half upfield. Defenders reading you can bite on the fake and
 // chase the wrong way for a moment; one caught close and flat-footed can stumble over. E with no direction does nothing ----------
-function juke(){if(cur.side==='d')return;   // on defence E is the stance, not a juke
+function juke(){if(playOn&&POSS()!==cur.team)return;   // on defence E is the stance, not a juke
  let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
  if(sd&&dv===0&&!limp&&cs===0&&js===0){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100*(1-.3*AT('bhd'));}}}
 function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the side you pressed (the cut), -r = the side-step
@@ -523,9 +523,9 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  follow(t=>[0,dvY+(1.07+gs-dvY)*sm3(cl(t/(DIVE_END-DIVE_UP),0,1))],T-DIVE_UP,.9,70,16,35);
  ballArm();
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
-function control(dt){if(cur.jk)jukeTick(dt);if(held&&cur.side==='o'&&player.cur.stance&&curD!==player){const P=player.pel.position,dx=pel.position.x-P.x,dz=pel.position.z-P.z;   // ball carrier running into a defender's stance (E): held up and stopped, Strength vs Strength
+function control(dt){if(cur.jk)jukeTick(dt);if(held&&cur.team!==player.cur.team&&player.cur.stance&&curD!==player){const P=player.pel.position,dx=pel.position.x-P.x,dz=pel.position.z-P.z;   // ball carrier running into a defender's stance (E): held up and stopped, Strength vs Strength
  if(dx*dx+dz*dz<2.1){const k=Math.exp(-14*cl(.6+.3*(E(player,'str')-AT('str')),.2,.95)*dt);for(const b of list){b.velocity.x*=k;b.velocity.z*=k;}const k2=Math.exp(-10*dt);for(const b of player.list){b.velocity.x*=k2;b.velocity.z*=k2;}}}   // the defender stays planted too
-if(!cur.ai){const st=cur.side==='d'&&!!keys.e&&playOn;if(st)cur.low=.3;else if(cur.stance)cur.low=0;cur.stance=st;}   // holding E on defence: sink into a wide, low defensive stancecur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
+if(!cur.ai){const st=playOn&&POSS()!==cur.team&&!!keys.e;if(st)cur.low=.3;else if(cur.stance)cur.low=0;cur.stance=st;}   // holding E on defence: sink into a wide, low defensive stancecur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
  let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;   // locked on the line until the snap (2)
  let dx=-s*f+c*r,dz=-c*f-s*r;const len=Math.hypot(dx,dz);
@@ -858,7 +858,7 @@ const OSETS=[['SINGLEBACK - 1 WR',[[12,0]]],['PRO SET - 2 WR',[[12,0],[-12,0]]],
 // defensive sets: a man on every receiver first, then extra defenders fill these jobs in order (deep safety, robber); no blitzes
 const DSETS=[['COVER 1 MAN FREE',['deep','rob','deep','rob']],['COVER 2 MAN',['deep','deep','rob','rob']],['COVER 1 ROBBER',['rob','deep','deep','rob']],['COVER 2 ROBBER',['deep','deep','rob','rob']]];
 const ORG={you:'blue',off:'blue',pos:'qb',n:{blue:2,red:2},os:0,ds:0,free:true};
-let EVT=0,PASS=null,DRIVE=1,MATCH=null,playState='live',playOn=false,roster=[player],qbClock=0,callReq=null;
+let RET=null,NEXT=null,EVT=0,PASS=null,DRIVE=1,MATCH=null,playState='live',playOn=false,roster=[player],qbClock=0,callReq=null;
 const QB_DEPTH=-15*YD,DEF_Z=20*YD;
 const playPre=()=>playOn&&playState==='pre';
 const H=d=>d===curD?held:d.held;   // the swapped-in doll's live state is in the globals
@@ -932,38 +932,46 @@ const GOAL_Z=50*YD,SCORE={blue:0,red:0};let playEnd=0,resetT=0,fumT=0,LOS=-25*YD
 const losMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0x3a7bff,transparent:true,opacity:.85,depthWrite:false})),fdMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.85,depthWrite:false}));
 for(const m of[losMesh,fdMesh]){m.rotation.x=-Math.PI/2;m.position.y=.03;m.visible=false;scene.add(m);}   // blue line of scrimmage, yellow first-down line
 const ORD=['','1ST','2ND','3RD','4TH'],spot=z=>{const y=Math.round(z/YD);return y<0?'OWN '+(50+y):y>0?'OPP '+(50-y):'50';};
-function hud(){const b=ORG.off,dd=ORD[DOWN]+' & '+(FD>=GOAL_Z?'GOAL':Math.max(1,Math.round((FD-LOS)/YD)));$m('score').innerHTML=`<span class="tm b${b==='blue'?' pos':''}">BLU<b>${SCORE.blue}</b></span><span class="tm r${b==='red'?' pos':''}">RED<b>${SCORE.red}</b></span><span class="dd">${dd}</span><span class="sp">${spot(LOS)}</span>${MATCH?`<span class="dr">${MATCH.clock>0?(Math.ceil(MATCH.clock)/60|0)+':'+String(Math.ceil(MATCH.clock)%60).padStart(2,'0'):'FINAL PLAY'}</span>`:''}`;}
+function hud(){const b=playOn?POSS():ORG.off,dd=ORD[DOWN]+' & '+(FD>=GOAL_Z?'GOAL':Math.max(1,Math.round((FD-LOS)/YD)));$m('score').innerHTML=`<span class="tm b${b==='blue'?' pos':''}">BLU<b>${SCORE.blue}</b></span><span class="tm r${b==='red'?' pos':''}">RED<b>${SCORE.red}</b></span>${RET?'<span class="to">TURNOVER · RETURN</span>':`<span class="dd">${dd}</span>`}<span class="sp">${spot(LOS)}</span>${MATCH?`<span class="dr">${MATCH.clock>0?(Math.ceil(MATCH.clock)/60|0)+':'+String(Math.ceil(MATCH.clock)%60).padStart(2,'0'):'FINAL PLAY'}</span>`:''}`;}
 // your stat line: rushing / receiving yards and TDs when you carry it, passing yards and TDs when your pass is caught
 function tally(car,z,td){if(!MATCH)return;const S=MATCH.st,g=Math.round((Math.min(z,GOAL_Z)-LOS)/YD);if(car===player){S.yds+=g;if(td)S.td++;}else if(car.cur.side==='o'&&player.cur.role==='qb'&&player.cur.side==='o'&&playTick.lc===car&&car.cur.role==='wr'){S.pyd+=g;if(td)S.ptd++;}}
+const POSS=()=>RET?RET.team:ORG.off,DIR=()=>RET?-1:1;   // who has the ball right now, and which way they're running
 function newGame(){SCORE.blue=SCORE.red=0;DRIVE=1;LOS=-25*YD;DOWN=1;FD=LOS+10*YD;flip=null;}
+function toast(msg,col){const b=$m('pbn');b.textContent=msg;b.style.color=col||'#ffd23f';b.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.7)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.15},{opacity:1,offset:.7},{opacity:0,transform:'translate(-50%,-60%) scale(1)'}],{duration:1300,fill:'forwards'});}
 function playOver(msg,col){if(playEnd)return;playEnd=performance.now()+2600;const b=$m('pbn');b.textContent=msg;b.style.color=col||'#ffd23f';b.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.1)',offset:.15},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:2500,fill:'forwards'});}
 // where the ball is down: gain the yards, move the chains, or lose it on downs
 function downAt(z,what){z=cl(z,-49*YD,GOAL_Z-YD);const g=Math.round((z-LOS)/YD);
  if(z>=FD){LOS=z;DOWN=1;FD=Math.min(GOAL_Z,z+10*YD);playOver(what+'  '+(g>=0?'+':'')+g+' YD  ·  FIRST DOWN!');return;}
- if(what!=='INCOMPLETE')LOS=z;if(++DOWN>4){flip=-LOS;playOver(what+'  ·  TURNOVER ON DOWNS','#ff5a4a');return;}
+ if(what!=='INCOMPLETE')LOS=z;if(++DOWN>4){flip=-LOS;NEXT=null;playOver(what+'  ·  TURNOVER ON DOWNS','#ff5a4a');return;}
  playOver(what==='INCOMPLETE'?what:what+'  '+(g>=0?'+':'')+g+' YD');}
 const readRing=new THREE.Mesh(new THREE.RingGeometry(.55,.75,40),new THREE.MeshBasicMaterial({color:0xff3b2a,transparent:true,opacity:.8,depthWrite:false}));readRing.rotation.x=-Math.PI/2;readRing.visible=false;scene.add(readRing);
 function readTick(){const P=player.cur,tg=PASS&&PASS.tg,on=playOn&&P.side==='d'&&tg&&world.bodies.includes(ball)&&performance.now()-EVT>1000*cl(.75-.6*E(player,'awr'),.1,1.3);readRing.visible=!!on;if(on){readRing.position.set(tg.pel.position.x,.03,tg.pel.position.z);}}
+// markers: a ring at your feet in your team colour, and a gold chevron over whoever has the ball
+const youRing=new THREE.Mesh(new THREE.RingGeometry(.42,.52,36),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.85,depthWrite:false}));youRing.rotation.x=-Math.PI/2;youRing.visible=false;scene.add(youRing);
+const carMark=new THREE.Mesh(new THREE.ConeGeometry(.08,.16,4),new THREE.MeshBasicMaterial({color:0xffd23f}));carMark.rotation.x=Math.PI;carMark.visible=false;scene.add(carMark);
+function markTick(){const on=playOn&&mode;youRing.visible=on;carMark.visible=false;if(!on)return;const P=player.pel.position;youRing.position.set(P.x,.025,P.z);youRing.material.color.setHex(TEAM[player.cur.team||ORG.you][0]);
+ const car=roster.find(H);if(car){const h=car.parts.head.position;carMark.visible=true;carMark.position.set(h.x,h.y+.42+Math.sin(performance.now()/160)*.05,h.z);}}
 function playTick(){if(!playOn)return;readTick();const tn=performance.now();if(MATCH){MATCH.clock=Math.max(0,MATCH.clock-Math.min(.5,(tn-(playTick.t||tn))/1000));if((MATCH.clock|0)!==playTick.c){playTick.c=MATCH.clock|0;hud();}}playTick.t=tn;   // the game clock runs whenever the match isn't paused
  if(MATCH&&MATCH.clock<=0&&(playState==='pre'||playEnd&&tn>playEnd)){flip=null;endMatch();return;}   // time's up: the play in progress finishes, then the final whistle
- if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){DRIVE++;ORG.off=ORG.off==='blue'?'red':'blue';LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
+ if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){DRIVE++;ORG.off=NEXT||(ORG.off==='blue'?'red':'blue');NEXT=null;LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
  if(playState==='pre'&&player.cur.side==='d'&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
  if(playState!=='live')return;const car=roster.find(H),ot=ORG.off;if(car)playTick.g=0;
  if(car&&car!==playTick.lc){if(MATCH&&playTick.lc){const S=MATCH.st;if(car===player)S[player.cur.side==='d'?'int':'rec']++;else if(playTick.lc===player&&car.cur.side==='o')S.comp++;}playTick.lc=car;}   // who caught it from whom
- if(fumT){if(car){const z=car.pel.position.z;fumT=0;if(car.cur.side==='d'){flip=-Math.max(z,-GOAL_Z+20*YD);playOver('FUMBLE! '+(ot==='blue'?'RED':'BLUE')+' RECOVERS','#ff5a4a');}else downAt(z,'FUMBLE, RECOVERED');return;}
-  if(performance.now()-fumT>500&&ball.position.y<.35){let best=null,bd=1e9;for(const d of roster){const P=d.pel.position,dd=Math.hypot(P.x-ball.position.x,P.z-ball.position.z)-.5*E(d,'rea');if(dd<bd){bd=dd;best=d;}}
-   if(best&&bd<1.4){const me=curD;use(best);grabBall();use(me);}}return;}   // the scramble: whoever gets there first (quick reactions help) falls on it
- if(car&&car.cur.side==='d'){flip=-Math.max(car.pel.position.z,-GOAL_Z+20*YD);playOver('INTERCEPTED!','#ff5a4a');return;}   // their ball where he picked it off (in the end zone: from their 20)
- if(car){const p=car.pel.position;
-  if(p.z>GOAL_Z){tally(car,p.z,1);SCORE[ot]+=7;flip=-25*YD;playOver('TOUCHDOWN '+ot.toUpperCase()+'!',hx(TEAM[ot][0]));}
+ if(fumT){if(car){fumT=0;if(car.cur.team!==POSS()){RET=car.cur.team===ot?null:{team:car.cur.team};toast('FUMBLE! '+car.cur.team.toUpperCase()+' BALL','#ff5a4a');hud();}else toast('RECOVERED');}   // loose ball: whoever falls on it has it, and the play goes on
+  else{if(performance.now()-fumT>500&&ball.position.y<.35){let best=null,bd=1e9;for(const d of roster){const P=d.pel.position,dd=Math.hypot(P.x-ball.position.x,P.z-ball.position.z)-.5*E(d,'rea');if(dd<bd){bd=dd;best=d;}}
+   if(best&&bd<1.4){const me=curD;use(best);grabBall();use(me);}}return;}}   // the scramble: whoever gets there first (quick reactions help) falls on it
+ if(car&&car.cur.team!==POSS()){RET={team:car.cur.team};toast('INTERCEPTED! '+car.cur.team.toUpperCase()+' BALL','#ff5a4a');hud();}   // a pick is live: he can run it back, everyone switches jobs on the spot
+ if(car){const p=car.pel.position,D=DIR(),tm=car.cur.team;
+  if(p.z*D>GOAL_Z){if(!RET)tally(car,p.z,1);SCORE[tm]+=7;flip=-25*YD;NEXT=tm===ot?null:ot;playOver(RET?'PICK SIX! '+tm.toUpperCase():'TOUCHDOWN '+tm.toUpperCase()+'!',hx(TEAM[tm][0]));}   // after a pick six the team that threw it gets it back
+  else if(RET&&(Math.abs(p.x)>FW/2||car.limp)){flip=p.z>GOAL_Z?-30*YD:-p.z;NEXT=tm;playOver((car.limp?'DOWNED':'OUT OF BOUNDS')+' · '+tm.toUpperCase()+' BALL','#ff5a4a');}   // return over: their ball where he went down (a pick downed in his own end zone is a touchback)
   else if(Math.abs(p.x)>FW/2){tally(car,p.z);downAt(p.z,'OUT OF BOUNDS');}
   else if(car.limp)tally(car,p.z),downAt(p.z,car.cur.role==='qb'&&p.z<LOS?'SACKED':'TACKLED');return;}
  if(!world.bodies.includes(ball))return;const q=roster.find(d=>d.cur.role==='qb');
- if(q&&!H(q)&&!fumT&&ball.position.y<.2&&!playTick.g)playTick.g=performance.now();if(playTick.g&&performance.now()-playTick.g>500)downAt(LOS,'INCOMPLETE');}   // thrown and it hit the turf: dead half a second later
+ if(q&&!H(q)&&!fumT&&!RET&&ball.position.y<.2&&!playTick.g)playTick.g=performance.now();if(playTick.g&&performance.now()-playTick.g>500)downAt(LOS,'INCOMPLETE');}   // thrown and it hit the turf: dead half a second later
 function playStart(){if(!playPre())return;playState='live';EVT=performance.now();PASS=null;for(const d of roster){if(d.cur.ai&&d.cur.role==='wr'){d.cur.st='route';d.cur.i=0;}if(d.cur.ai&&d.cur.side==='d')d.cur.st='cover';}routeVis=false;routeMesh.visible=false;}
 // R: everyone back to the line, the ball to the QB, a new route; nothing moves until 2
 // receiver split wide on the 50, QB 15 yd behind the line, defender 20 yd in front of the receiver
-function resetPlay(){if(!playOn)return;fumT=0;for(const d of roster)d.cur.stam=Math.min(1,(d.cur.stam??1)+.35);playTick.g=0;playEnd=0;resetT=performance.now();hud();losMesh.position.z=LOS;fdMesh.position.z=FD;losMesh.visible=fdMesh.visible=true;
+function resetPlay(){if(!playOn)return;RET=null;for(const d of roster)d.cur.tkd=0;fumT=0;for(const d of roster)d.cur.stam=Math.min(1,(d.cur.stam??1)+.35);playTick.g=0;playEnd=0;resetT=performance.now();hud();losMesh.position.z=LOS;fdMesh.position.z=FD;losMesh.visible=fdMesh.visible=true;
  for(const d of roster){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;limp=false;d.limpT=0;keys={};}use(player);
  const used=[];let q=null,rw=null;
  for(const d of roster){const c=d.cur;
@@ -987,9 +995,9 @@ function plan(){const oT=ORG.off,dT=oT==='blue'?'red':'blue',youO=ORG.you===oT,n
 function applyOrg(){for(const d of roster)if(d!==player)showDoll(d,false);use(player);held=false;aimOn=false;thr=-1;reset();looseBall();
  const P=player.cur;for(const k of['role','side','kind','mark','x0','z0','px','pz','half','you','lab','m'])delete P[k];
  roster=[player];playOn=!ORG.free;document.body.classList.toggle('play',playOn);let n=0,oT=ORG.you,dT;
- const add=(s,side)=>{const d=s.you?player:bot(n++);if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,s,{side,role:side==='o'?s.role:'df'});if(d!==player)d.cur.at=botAt(d.cur.role);return d;};
+ const add=(s,side)=>{const d=s.you?player:bot(n++);if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,s,{side,role:side==='o'?s.role:'df',team:side==='o'?oT:dT});if(d!==player)d.cur.at=botAt(d.cur.role);return d;};
  if(playOn){const p=plan();oT=p.oT;dT=p.dT;const os=p.O.map(s=>add(s,'o'));for(const s of p.D){const d=add(s,'d');if(s.m)d.cur.mark=os[s.m];}}
- else{P.side='o';}
+ else{P.side='o';P.team=ORG.you;}
  for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
  if(playOn)resetPlay();else{routeMesh.visible=false;losMesh.visible=fdMesh.visible=false;playState='live';}}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
@@ -1020,6 +1028,17 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
  // ball in the air: plant and cut hard. Any velocity he doesn't want (overshooting, wrong direction) is braked at up to 2 g -
  // a sprint stops in ~0.3 s. shortcut: braking only, never adds speed, so it can't make him faster than his legs
  if(c.st==='ball')plantCut(tx===null?null:[tx,tz],sprint,19.6);else if(c.st==='route'&&AT('rte')>0)plantCut(tx===null?null:[tx,tz],sprint,24*AT('rte'));}
+// live return brain: carrier runs for the other end zone around tacklers; his teammates get between him and the nearest chaser;
+// the team that lost it pursues with a lead and dives at him (Tackling vs Strength / Ball Handling, never guaranteed)
+function liveThink(dt){const c=cur,P=pel.position;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;catchOn=false;aimOn=false;const car=roster.find(H),D=DIR();let T=null;
+ if(!car)T=[ball.position.x,ball.position.z];
+ else if(car===curD){let ax=0,az=D;for(const d of roster){if(d.cur.team===c.team)continue;const Q=d.pel.position,dx=Q.x-P.x,dz=Q.z-P.z,dd=Math.hypot(dx,dz)||1;if(dd>12||dz*D<-2)continue;ax-=dx/dd*3/dd;az-=dz/dd*1.5/dd;}
+  const ex=Math.abs(P.x)>FW/2-3?-Math.sign(P.x)*.8:0;T=[P.x+(ax+ex)*4,P.z+D*Math.max(.6,az*D)*6];}
+ else if(car.cur.team===c.team){const C=car.pel.position;let e=null,ed=1e9;for(const d of roster){if(d.cur.team===c.team)continue;const x=d.pel.position.distanceTo(C);if(x<ed){ed=x;e=d;}}   // escort: wall off the closest chaser
+  T=e?[(C.x+e.pel.position.x*2)/3,(C.z+e.pel.position.z*2)/3]:[C.x+3,C.z+D*4];}
+ else{const C=car.pel.position,V=car.pel.velocity,dd=Math.hypot(C.x-P.x,C.z-P.z);T=[C.x+V.x*Math.min(.6,dd/8),C.z+V.z*Math.min(.6,dd/8)];   // pursue with a lead that shrinks as he closes
+  if(dd<1.3*(1+.15*AT('tak'))&&dv===0&&c.t>(c.tkT||0)){camYaw=Math.atan2(C.x-P.x,C.z-P.z)+Math.PI;startDive();c.tkT=c.t+1.4;tackleTry(car,curD);return;}}
+ const dx=T[0]-P.x,dz=T[1]-P.z;camYaw=Math.atan2(dx,dz)+Math.PI;keys.w=Math.hypot(dx,dz)>.4;keys.shift=true;if(dv===0)plantCut(T,true,29.4);}
 // plant and cut: brake away any velocity the doll doesn't want (overshoot, wrong direction) at up to cap m/s^2.
 // shortcut: braking only, never adds speed, so it can't outrun the legs
 function plantCut(T,sprint,cap){cap*=1+.3*AT('agi');if(!contact())return;const P=pel.position,v=pel.velocity,wl=T?(sprint?6:2.6):0;let wx=0,wz=0;
@@ -1260,14 +1279,14 @@ function frame(now){
  const D=active();
  for(const d of D){use(d);sense();}
  while(acc>=DT){
-  for(const d of D){use(d);if(cur.ai)(cur.role==='wr'?wrThink:cur.role==='df'?defThink:qbThink)(DT);control(DT);for(const k in joints)drive(joints[k]);}
+  for(const d of D){use(d);if(cur.ai)(RET?liveThink:cur.role==='wr'?wrThink:cur.role==='df'?defThink:qbThink)(DT);control(DT);for(const k in joints)drive(joints[k]);}
   world.step(DT);acc-=DT;
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}
  {const rd=(now-(frame.pt||now))/1000,fd=Math.min(.05,rd);frame.pt=now;for(const d of D){use(d);cleats(d,fd);}turfTick(fd,rd);}
  for(const d of D)if(d.limpT&&performance.now()>d.limpT){use(d);limp=false;d.limpT=0;}   // tackled: back on his feet
- use(player);playTick();
- if(player.cur.side==='d'&&dv>0){const c=roster.find(d=>d.cur.side==='o'&&d.held&&!d.limp);if(c&&!cur.tkd&&Math.min(...[pel,chest,head,parts.hand1,parts['hand-1']].map(b=>b.position.distanceTo(c.pel.position)))<1.05*(1+.15*AT('tak'))){cur.tkd=1;tackleTry(c,player);}}else if(dv===0)cur.tkd=0;   // you on defence: a dive (Q) that gets your body or hands onto the ball carrier is a tackle
+ use(player);playTick();markTick();
+ if(playOn&&dv>0&&POSS()!==player.cur.team){const c=roster.find(d=>d!==player&&d.held&&d.cur.team!==player.cur.team&&!d.limp);if(c&&!cur.tkd&&Math.min(...[pel,chest,head,parts.hand1,parts['hand-1']].map(b=>b.position.distanceTo(c.pel.position)))<1.05*(1+.15*AT('tak'))){cur.tkd=1;tackleTry(c,player);}}else if(dv===0)cur.tkd=0;   // you on defence: a dive (Q) that gets your body or hands onto the ball carrier is a tackle
  ballTick(now);aimTick();$m('cboost').hidden=catchBoost()===1;
  tgt.x+=(pel.position.x-tgt.x)*.45;tgt.z+=(pel.position.z-tgt.z)*.45;tgt.y+=(Math.max(.4,pel.position.y-.08)-tgt.y)*.1;   // follow the doll tightly (incl. height on platforms)
  const sh=.55,pvx=tgt.x+Math.cos(camYaw)*sh,pvy=tgt.y+.55,pvz=tgt.z-Math.sin(camYaw)*sh,cp=Math.cos(camPitch);   // pivot: over the doll's right shoulder

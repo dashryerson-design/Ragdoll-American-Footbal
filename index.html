@@ -589,6 +589,7 @@ function catchPoint(){const c=chest.position,b=ball.position,u=chest.velocity,v=
 // jump catch target: where the ball will come down through the top of a leaping receiver's reach (2.85 m); null if it's never that high
 function jumpAim(){const b=ball.position,v=ball.velocity,H=2.85,a=-4.91,c=b.y-H,disc=v.y*v.y-4*a*c;if(b.y<H&&v.y<=0||disc<0)return null;
  const t=(-v.y-Math.sqrt(disc))/(2*a);if(!(t>0)||t>2)return null;return{x:b.x+v.x*t,z:b.z+v.z*t,t};}
+const CATCH_ASSIST=.1;   // catch assist: 10 cm of extra wiggle room on every catch (hands and chest trap)
 function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(ball);let want=0,cp=null;
  if(live){cp=catchPoint();const near=Math.hypot(ball.position.x-chest.position.x,ball.position.y-chest.position.y,ball.position.z-chest.position.z);
   chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);want=near<15&&cp.d<4&&_cv.z>-.12?1:0;}   // receivers pick the ball up from far away   // only balls passing in front of or beside the body: arms can't reach behind the back
@@ -603,8 +604,8 @@ function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(bal
   const ax=cl(-Math.atan2(_cv.z,-_cv.y),-3,.3),az=cl(Math.asin(cl(_cv.x/L,-1,1)),sd>0?-.5:-1.4,sd>0?1.4:.5),M=(a,b)=>a+(b-a)*k;   // shoulder range: no reaching back past the body, limited reach across it
   J['shoulder'+sd].x=M(J['shoulder'+sd].x,ax);J['shoulder'+sd].z=M(J['shoulder'+sd].z,az);J['shoulder'+sd].y=0;J['elbow'+sd].x=M(J['elbow'+sd].x,cur.high>.2?-.03:-.2);J['wrist'+sd].x=M(J['wrist'+sd].x,0);}
  // the catch itself: a reaching hand gets to the ball (checked every physics step, so fast passes can't skip past)
- for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<.36){grabBall();catchK=0;return;}}
- if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<.42){grabBall();catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
+ for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<.36+CATCH_ASSIST){grabBall();catchK=0;return;}}
+ if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<.42+CATCH_ASSIST){grabBall();catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
 function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);catchOn=false;}
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);

@@ -12,6 +12,7 @@
 #ed{position:fixed;z-index:12;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:#000c;border:1px solid #d8a24a;border-radius:12px;padding:8px 10px;font:600 13px system-ui,sans-serif;color:#fff;white-space:nowrap}
 #ed[hidden]{display:none}#ed button{font:700 15px system-ui,sans-serif;color:#fff;background:#1a1a1a;border:1px solid #666;border-radius:8px;min-width:40px;height:36px;padding:0 10px}
 #ed #edone{border-color:#d8a24a;background:#2a2112}.esel{outline:3px solid #d8a24a;outline-offset:3px}
+.wrb{display:none}body.wr .wrb{display:flex}
 #tpause{width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:15px}
 .ov{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;overflow-y:auto;padding:24px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;color:#fff;user-select:none;-webkit-user-select:none}
 .ov[hidden]{display:none}
@@ -34,7 +35,7 @@
 <button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="#fff" stroke-width="4"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="#fff" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#d8a24a" stroke-width="4"/><path d="M103 18v14" stroke="#d8a24a" stroke-width="4"/></svg>KEYBOARD &amp; MOUSE</button></div></div>
 <div class="tb" id="brst" title="Reset the QB with the ball (R)">&#x21bb;</div>
 <div id="cboost" hidden style="position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3;font:800 13px system-ui,sans-serif;letter-spacing:.12em;color:#111;background:#ffd23f;border-radius:999px;padding:6px 14px;pointer-events:none">CATCH BOOST +20%</div>
-<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
+<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bwr">WIDE RECEIVER AI: OFF</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
 <div id="ed" hidden><span id="edtxt">Drag to move · tap to select</span><button id="edm">−</button><button id="edp">+</button><button id="edr">RESET</button><button id="edone">DONE</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
 <div class="tb" id="bbig"></div>
@@ -42,6 +43,8 @@
 <div class="tb sm" id="bjump" style="right:calc(158px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))">JUMP</div>
 <div class="tb sm" id="bdrop" style="right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px))">DROP</div>
 <div class="tb" id="tpause">II</div>
+<div class="tb sm wrb" id="broute" style="left:calc(28px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px))">ROUTE</div>
+<div class="tb sm wrb" id="bgo" style="left:calc(96px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px))">GO</div>
 <div class="tb sm" id="bdive" style="right:calc(228px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))">DIVE</div>
 <div class="tb" id="bsprint" style="width:72px;height:72px;right:calc(118px + env(safe-area-inset-right,0px));bottom:calc(196px + env(safe-area-inset-bottom,0px))">SPRINT</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -273,7 +276,8 @@ function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z
 function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
- if(k==='r')refreshQB();if(k==='q')startDive();   // Q: dive the way the camera pointsif(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();   // T: drop the ball   // F: go limp / get up
+ // R: reset (QB / receiver drill), Q: dive the way the camera points, F: go limp / get up, T: drop the ball, 1: show the receiver's route, 2: receiver goes
+ if(k==='r'){if(wrMode)resetPlay();else refreshQB();}if(k==='q')startDive();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')toggleRoute();if(k==='2')wrGo();
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()&&catchOn){startJump();return;}   // going up for a catch: always a vertical leap
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
@@ -688,6 +692,7 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
  tap($('bsprint'),()=>{keys.shift=!keys.shift;});   // sprint toggles (a held button + joystick + look is too many fingers)
  tap($('bdive'),()=>startDive());
+ tap($('broute'),toggleRoute);tap($('bgo'),wrGo);
  tap(aimB,()=>{aimOn=!aimOn&&held;});
  tap(big,primaryDown);big.addEventListener('touchend',e=>{e.preventDefault();primaryUp();});
  tap($('bjump'),()=>key(' ','keydown'));$('bjump').addEventListener('touchend',()=>key(' ','keyup'));
@@ -717,9 +722,55 @@ const QB_Z=-10,qbD={};
  yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
  saveTo(qbD);loadFrom(player);curD=player;
  for(const b of qbD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of qbD.cons)world.removeConstraint(c);}
-let teammate=false,qbClock=0,callReq=null;
-const active=()=>teammate?[player,qbD]:[player];
-function setTeammate(on){if(on===teammate)return;teammate=on;document.body.classList.toggle('qb',on);$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
+// the wide receiver: a third doll on the same ragdoll + controller, in green
+const wrD={};
+{saveTo(player);buildDoll(0x1e7a3a,0x0d2a14);
+ limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,role:'wr',st:'set'};
+ yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
+ saveTo(wrD);loadFrom(player);curD=player;
+ for(const b of wrD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of wrD.cons)world.removeConstraint(c);}
+let teammate=false,wrMode=false,qbClock=0,callReq=null;
+const active=()=>teammate?[player,qbD]:wrMode?[player,wrD]:[player];
+function showDoll(d,on){for(const b of d.list){if(on)world.addBody(b);else world.removeBody(b);b.mesh.visible=on;}for(const c of d.cons)if(on)world.addConstraint(c);else world.removeConstraint(c);if(!on){use(d);for(const k in pins)unpin(k);held=false;use(player);}}
+// stand a doll at (x, z) facing downfield (+z)
+function placeAt(d,x,z){use(d);reset();const dz=z-pel.home[2];for(const b of list){b.position.x+=x;b.position.z+=dz;}}   // pelvis home x is 0
+// realistic NFL route tree, in yards from the receiver's spot: +x = toward his sideline, +z = downfield
+const ROUTES={GO:[[0,40]],SLANT:[[0,3],[-8,11]],OUT:[[0,10],[8,10]],IN:[[0,12],[-14,12]],POST:[[0,12],[-10,26]],CORNER:[[0,12],[9,23]],CURL:[[0,12],[-1.5,10]],COMEBACK:[[0,15],[3,12]],HITCH:[[0,5],[0,4]]};
+const WR_X=12,QB_Zs=-4.6;let route=null,routeName='',routeVis=false;
+const routeMesh=new THREE.Group(),rtCore=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial({color:0xff1e12,transparent:true,opacity:.95,depthWrite:false,side:THREE.DoubleSide})),rtGlow=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial({color:0xff3020,transparent:true,opacity:.28,depthWrite:false,side:THREE.DoubleSide}));
+routeMesh.add(rtGlow,rtCore);routeMesh.visible=false;scene.add(routeMesh);   // solid red core + soft red glow (additive turned it yellow on the grass)
+function pickRoute(){const ks=Object.keys(ROUTES);routeName=ks[Math.random()*ks.length|0];const out=Math.sign(WR_X);route=ROUTES[routeName].map(([x,z])=>[WR_X+out*x*YD,z*YD]);
+ // the hint: the first leg, then just the start of the break with an arrowhead (not the whole route)
+ const P=[[WR_X,0],route[0]];if(route[1]){const a=route[0],b=route[1],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,k=Math.min(1,4.5/L);P.push([a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]);}else P[1]=[WR_X,Math.min(route[0][1],18)];
+ const ribbon=(w,y)=>{const pos=[];for(let i=0;i<P.length-1;i++){const[a,b]=[P[i],P[i+1]],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,nx=-(b[1]-a[1])/L*w,nz=(b[0]-a[0])/L*w,e=i===P.length-2?.9:0,bx=b[0]-(b[0]-a[0])/L*e,bz=b[1]-(b[1]-a[1])/L*e;
+  pos.push(a[0]+nx,y,a[1]+nz,a[0]-nx,y,a[1]-nz,bx+nx,y,bz+nz, a[0]-nx,y,a[1]-nz,bx-nx,y,bz-nz,bx+nx,y,bz+nz);
+  if(e){pos.push(bx+nx*3,y,bz+nz*3,bx-nx*3,y,bz-nz*3,b[0]+(b[0]-a[0])/L*w,y,b[1]+(b[1]-a[1])/L*w);}}return pos;};   // arrowhead
+ for(const[m,w,y]of[[rtCore,.2,.04],[rtGlow,.55,.035]]){m.geometry.dispose();m.geometry=new THREE.BufferGeometry();m.geometry.setAttribute('position',new THREE.Float32BufferAttribute(ribbon(w,y),3));}}
+function toggleRoute(){if(!wrMode)return;routeVis=!routeVis;routeMesh.visible=routeVis;}
+function wrGo(){if(!wrMode||wrD.cur.st!=='set')return;wrD.cur.st='route';wrD.cur.i=0;routeVis=false;routeMesh.visible=false;}
+// a fresh play: you at QB with the ball, the receiver split wide on the 50, a new random route
+function resetPlay(){if(!wrMode)return;for(const d of[player,wrD]){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;}
+ placeAt(player,0,QB_Zs);placeAt(wrD,WR_X,-.4);use(wrD);cur.st='set';cur.i=0;cur.t=0;keys={};use(player);
+ looseBall();use(player);grabBall();pickRoute();routeVis=false;routeMesh.visible=false;}
+function setWR(on){if(on===wrMode)return;if(on&&teammate)setTeammate(false);wrMode=on;document.body.classList.toggle('wr',on);$m('bwr').textContent='WIDE RECEIVER AI: '+(on?'ON':'OFF');
+ showDoll(wrD,on);if(on)resetPlay();else{routeMesh.visible=false;use(player);if(held){held=false;}looseBall();use(player);reset();}}
+// receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
+function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
+ const P=pel.position,inAir=world.bodies.includes(ball)&&!player.held&&ball.velocity.norm()>3&&ball.position.y>.25;
+ if(held&&c.st!=='caught'){c.st='caught';c.t=0;}
+ if((c.st==='route'||c.st==='after')&&inAir){c.st='ball';catchOn=true;cur.catchT0=performance.now();}
+ if(c.st==='route'){const W=route[c.i];if(Math.hypot(W[0]-P.x,W[1]-P.z)<1.1){if(c.i<route.length-1)c.i++;else c.st='after';}else{tx=W[0];tz=W[1];}}
+ if(c.st==='after'){const a=route[route.length-2]||[WR_X,0],b=route[route.length-1],stop=/CURL|HITCH|COMEBACK/.test(routeName);   // breaking routes settle and face the QB; the rest keep running
+  if(!stop){const L=Math.hypot(b[0]-a[0],b[1]-a[1])||1;tx=P.x+(b[0]-a[0])/L*5;tz=P.z+(b[1]-a[1])/L*5;}}
+ if(c.st==='ball'){if(!world.bodies.includes(ball)&&!held){c.st='after';catchOn=false;}
+  else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);   // where it comes down through catch height
+   for(let t=0;t<5&&!(vy<0&&y<1.3)&&y>.09;t+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}
+   if(Math.hypot(x-P.x,z-P.z)>.7){tx=x;tz=z;sprint=Math.hypot(x-P.x,z-P.z)>2.5;}else{camYaw=Math.atan2(ball.position.x-P.x,ball.position.z-P.z)+Math.PI;}   // there: face the ball
+   if(ball.position.y<.15&&ball.velocity.norm()<2){c.st='done';catchOn=false;}}}
+ if(c.st==='caught'){if(c.t<1){tx=P.x+Math.sin(yaw)*4;tz=P.z+Math.cos(yaw)*4;sprint=c.t<.4;}}   // ease down to a stop with the ball
+ if(c.st==='set'){camYaw=Math.PI;}   // lined up, looking downfield
+ if(tx!==null){camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=sprint;}}
+function setTeammate(on){if(on===teammate)return;if(on&&wrMode)setWR(false);teammate=on;document.body.classList.toggle('qb',on);$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
  if(on){for(const b of qbD.list){world.addBody(b);b.mesh.visible=true;}for(const c of qbD.cons)world.addConstraint(c);use(qbD);reset();held=false;use(player);if(!held)giveQB();}
  else{use(qbD);for(const k in pins)unpin(k);const had=held;held=false;aimOn=false;thr=-1;use(player);for(const b of qbD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of qbD.cons)world.removeConstraint(c);if(had)looseBall();}}
 function looseBall(){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=3;}
@@ -763,7 +814,7 @@ $m('edm').onclick=()=>resize(-10);$m('edp').onclick=()=>resize(10);
 $m('edr').onclick=()=>{lay={};saveLay();selectCtl(null);applyLay();};
 $m('bedit').onclick=()=>{editing=true;$m('pm').hidden=true;$m('ed').hidden=false;};
 $m('edone').onclick=()=>{editing=false;saveLay();selectCtl(null);$m('ed').hidden=true;$m('pm').hidden=false;};
-$m('bres').onclick=togglePause;$m('bqb').onclick=()=>setTeammate(!teammate);
+$m('bres').onclick=togglePause;$m('bqb').onclick=()=>setTeammate(!teammate);$m('bwr').onclick=()=>setWR(!wrMode);
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
@@ -777,7 +828,7 @@ function frame(now){
  const D=active();
  for(const d of D){use(d);sense();}
  while(acc>=DT){
-  for(const d of D){use(d);if(cur.ai)qbThink(DT);control(DT);for(const k in joints)drive(joints[k]);}
+  for(const d of D){use(d);if(cur.ai)(cur.role==='wr'?wrThink:qbThink)(DT);control(DT);for(const k in joints)drive(joints[k]);}
   world.step(DT);acc-=DT;
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}

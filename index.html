@@ -850,7 +850,10 @@ function setTeammate(on){if(on===teammate)return;if(on&&wrMode)setWR(false);team
  showDoll(qbD,on);if(on)resetPlay();else modeOff();}
 function looseBall(){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=11;}
 // left click / big touch button: throw (charging) when aiming, call for the pass when the QB has it, otherwise catch (hold)
-function primaryDown(){if(playPre())return;if(held){startCharge();return;}if(teammate&&qbD.held&&qbD.cur.st==='idle')callReq={P:pel.position.clone(),V:new V(pel.velocity.x,0,pel.velocity.z)};catchOn=true;cur.catchT0=performance.now();}   // calling also starts holding catch: keep holding until the ball arrives
+// the pass is led where you're LOOKING to go: 85% facing (camera) direction, 15% current drift; speed = what you're doing now, or what you'll reach
+function callVel(){const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw),vx=pel.velocity.x,vz=pel.velocity.z,sp=Math.hypot(vx,vz),ux=sp>.3?vx/sp:fx,uz=sp>.3?vz/sp:fz;
+ let dx=.85*fx+.15*ux,dz=.85*fz+.15*uz;const L=Math.hypot(dx,dz)||1,s2=Math.max(sp,keys.shift?6:keys.w||joy.on?2.4:sp);return new V(dx/L*s2,0,dz/L*s2);}
+function primaryDown(){if(playPre())return;if(held){startCharge();return;}if(teammate&&qbD.held&&qbD.cur.st==='idle')callReq={P:pel.position.clone(),V:callVel()};catchOn=true;cur.catchT0=performance.now();}   // calling also starts holding catch: keep holding until the ball arrives
 function primaryUp(){releaseCharge();catchOn=false;cur.catchT0=0;}
 // QB brain (runs with the QB swapped in): face the receiver; on a call, lead him (where he'll be, at the speed he had when he called), aim, throw
 function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;

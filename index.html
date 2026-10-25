@@ -634,9 +634,10 @@ const landC=document.createElement('canvas');landC.width=128;landC.height=48;con
 landS.scale.set(1.6,.6,1);landS.position.y=.6;landG.add(landS);landG.visible=false;scene.add(landG);let landTxt='';
 function landMarker(){if(!ballGlow.visible){landG.visible=false;return;}
  let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z,t=0;const dt=.02,k=Math.pow(.9,dt);
- for(;t<6&&y>.09;t+=dt){vx*=k;vy*=k;vz*=k;vy-=9.82*dt;x+=vx*dt;y+=vy*dt;z+=vz*dt;}
- landG.visible=true;landG.position.set(x,.02,z);{const d=cam.position.distanceTo(landG.position);landS.scale.set(d*.085,d*.032,1);landS.position.y=.3+d*.025;}   // label keeps a readable size at any distance
-const r=.35+t*2.2;landG.children[0].scale.set(r,r,1);   // ring radius ~ time left: shrinks onto the spot
+ for(;t<6&&y>.09;t+=dt){const py=y;vx*=k;vy*=k;vz*=k;vy-=9.82*dt;x+=vx*dt;y+=vy*dt;z+=vz*dt;if(y<=.09){const f=(py-.09)/(py-y||1);x-=vx*dt*(1-f);z-=vz*dt*(1-f);t+=dt*f-dt;}}   // exact crossing, not snapped to the 0.02 s step
+ const u=landG.userData,now=performance.now(),fd=Math.min(.1,(now-(u.t||now))/1000);u.t=now;const fresh=!landG.visible;
+ landG.visible=true;if(fresh)landG.position.set(x,.02,z);else{const a=1-Math.exp(-fd*14);landG.position.x+=(x-landG.position.x)*a;landG.position.z+=(z-landG.position.z)*a;}   // glide, no jitter{const d=cam.position.distanceTo(landG.position);landS.scale.set(d*.085,d*.032,1);landS.position.y=.3+d*.025;}   // label keeps a readable size at any distance
+const rt=.35+t*2.2;u.r=fresh?rt:u.r+(rt-u.r)*(1-Math.exp(-fd*10));landG.children[0].scale.set(u.r,u.r,1);   // ring radius ~ time left: shrinks onto the spot
  const yd=Math.round(Math.hypot(x-player.pel.position.x,z-player.pel.position.z)/.9144)+' yd';
  if(yd!==landTxt){landTxt=yd;const g=landC.getContext('2d');g.clearRect(0,0,128,48);g.font='800 30px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineWidth=6;g.strokeStyle='rgba(0,0,0,.7)';g.strokeText(yd,64,25);g.fillStyle='#ffd23f';g.fillText(yd,64,25);landT.needsUpdate=true;}}
 let restT=0;

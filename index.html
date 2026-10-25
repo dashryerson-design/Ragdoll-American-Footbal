@@ -747,7 +747,7 @@ let defOn=false;
 function setDef(on){defOn=on;$m('bdf').textContent='DEFENDER AI: '+(on?'ON':'OFF');showDoll(dfD,on);if(on)placeAt(dfD,wrMode?WR_X-2:-3,wrMode?8:6);}
 function defThink(){for(const k in keys)keys[k]=false;const T=(wrMode?wrD:player).pel,P=pel.position,air=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.3;
  catchOn=air;if(air&&!cur.catchT0)cur.catchT0=1e15;   // no catch boost
- const tx=T.position.x+T.velocity.x*.4,tz=T.position.z+T.velocity.z*.4;if(Math.hypot(tx-P.x,tz-P.z)>1){camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;}   // chase the receiver, jogging only
+ const tx=T.position.x+T.velocity.x*.4,tz=T.position.z+T.velocity.z*.4;if(Math.hypot(tx-P.x,tz-P.z)>1){camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=true;}   // chase the receiver at a sprint
  if(air&&js===0&&contact()&&cur.cp&&cur.cp.t<.45&&cur.cp.p.y>head.position.y)startJump();}   // go up for it
 let teammate=false,wrMode=false,qbClock=0,callReq=null;
 const active=()=>{const a=teammate?[player,qbD]:wrMode?[player,wrD]:[player];if(defOn)a.push(dfD);return a;};

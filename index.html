@@ -497,7 +497,8 @@ function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballT
  reachOn=reachPredict();
  if(!held&&reachK>.3){const h=handR().position,b=ball.position,hd=Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z),pd2=Math.hypot(pel.position.x-b.x,pel.position.z-b.z);
   if(hd<.3||(pd2<.45&&reachK>.6))grabBall();}                     // hand on it, or right underfoot with the arm already down
- if(held){const h=handR(),p=bpt(h,0,-.02,.07);ballMesh.position.set(p.x,p.y,p.z);ballMesh.quaternion.copy(parts['farm-1'].quaternion);}
+ // carrying: cradled along the inside of the forearm, nose in the palm (not resting on top of the hand)
+ if(held){const h=handR(),p=aimOn?bpt(h,0,-.02,.07):bpt(parts['farm-1'],.085,-.1,0);ballMesh.position.set(p.x,p.y,p.z);ballMesh.quaternion.copy(parts['farm-1'].quaternion);}
  else{ballMesh.position.copy(ball.position);ballMesh.quaternion.copy(ball.quaternion);}}
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
 const DT=1/400;let acc=0,last=performance.now();

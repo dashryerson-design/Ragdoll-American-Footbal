@@ -266,6 +266,7 @@
 <div class="tb" id="tpause">II</div>
 <div class="tb sm wrb" id="broute" style="left:calc(28px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px))">ROUTE</div>
 <div class="tb sm wrb" id="bgo" style="left:calc(96px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px))">GO</div>
+<div class="tb sm" id="bhit" style="right:calc(228px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px))">HIT</div>
 <div class="tb sm" id="bdive" style="right:calc(228px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))">DIVE</div>
 <div class="tb" id="bsprint" style="width:72px;height:72px;right:calc(118px + env(safe-area-inset-right,0px));bottom:calc(196px + env(safe-area-inset-bottom,0px))">SPRINT</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -498,9 +499,9 @@ function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
  if(k===' '&&cur.runT>1){cur.boost=Math.min(.3,(cur.boost||0)+.06);return;}   // ball carrier in a long sprint: Space taps are a burst of speed, not a jump
- if(playPre()&&(k===' '||k==='q'||k==='e'))return;   // no jumping / diving before the snap
+ if(playPre()&&(k===' '||k==='q'||k==='e'||k==='x'))return;   // no jumping / diving before the snap
  // R: reset (QB / receiver drill), Q: dive the way the camera points, F: go limp / get up, T: drop the ball, 1: show the receiver's route, 2: receiver goes
- if(k==='r')resetPlay();if(k==='q')startDive();if(k==='e')juke();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')playStart();
+ if(k==='r')resetPlay();if(k==='q'){if(onD())playerTackle(false);else startDive();}if(k==='x'&&onD())playerTackle(true);if(k==='e')juke();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')playStart();
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()&&catchOn){startJump();return;}   // going up for a catch: always a vertical leap
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
@@ -630,6 +631,79 @@ function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy)
     if(dist<5&&Math.random()<.55*(1+.5*AT('bhd'))*(1-.5*E(d,'agi'))){d.limp=true;d.limpT=performance.now()+800+Math.random()*500;for(const b of d.list){b.velocity.x-=rx*3;b.velocity.z-=rz*3;}}}}}   // ...ankles broken: he stumbles over the wrong way
  else if(j.t<.45){cur.low=Math.max(0,(cur.low||0)-dt*2);const v=pel.velocity,a=Math.max(0,9-(v.x*j.nx+v.z*j.nz))*8;for(const b of list){b.force.x+=b.mass*j.nx*a;b.force.z+=b.mass*j.nz*a;}}   // rising out of it, still driving
  else{cur.jk=null;cur.low=0;}}
+// ================= TACKLING: its own state machine, postures and collision model (no longer the diving-catch dive) =================
+// 1 pick a technique from the geometry  2 lunge with a tackle posture  3 detect real body contact  4 resolve the collision from
+// masses, closing speed, angle, ratings and fatigue  5 transfer momentum to both players  6 controlled falls / stumbles, then recovery
+// [lunge speed m/s, lift, window s, base hold, tackler-strength weight, impact scale, stamina cost]
+const TK={wrap:[2.4,.35,.42,.12,.15,.55,.05],side:[2.6,.3,.42,.1,.12,.75,.05],rear:[3.2,.35,.45,.04,.12,.5,.06],low:[3,.15,.42,.08,.08,.6,.06],
+ shoulder:[3.2,.3,.36,.0,.1,1,.06],power:[4.2,.35,.32,-.1,.18,1.15,.1],dive:[4.4,.6,.7,-.06,.05,.45,.08]};
+const TNAME={wrap:'Wrap-up',side:'Side',rear:'Rear',low:'Low',shoulder:'Shoulder',power:'BIG HIT',dive:'Dive'};
+const kgOf=d=>(d===player&&player.cur.bio?player.cur.bio.w:205)*.4536,inOf=d=>d===player&&player.cur.bio?player.cur.bio.h:72;
+// technique from the situation: power is your choice (hit stick); a runner pulling away gets a last-resort dive; otherwise angle and height decide
+function tkType(car,power){const P=pel.position,C=car.pel.position,dx=C.x-P.x,dz=C.z-P.z,d=Math.hypot(dx,dz)||1,V=car.pel.velocity,vs=Math.hypot(V.x,V.z),cosA=vs>.5?-(V.x*dx+V.z*dz)/(d*vs):1,my=Math.hypot(pel.velocity.x,pel.velocity.z);
+ if(power)return my>3.5?'power':'shoulder';if(d>2.4)return'dive';if(cosA<-.45)return'rear';if(Math.abs(cosA)<.45)return'side';if(inOf(curD)<inOf(car)-2||vs>6.2)return'low';return'wrap';}
+function startTackle(car,type){if(cur.tkS||dv>0||limp||cs>0||js)return false;const c=TK[type];for(const k in pins)unpin(k);jp=0;
+ const P=pel.position;let ux=-Math.sin(camYaw),uz=-Math.cos(camYaw);if(car){const C=car.pel.position,V=car.pel.velocity,lead=.22;ux=C.x+V.x*lead-P.x;uz=C.z+V.z*lead-P.z;const L=Math.hypot(ux,uz)||1;ux/=L;uz/=L;}   // aim where he'll be a beat from now
+ yaw=Math.atan2(ux,uz);camYaw=yaw+Math.PI;const v=pel.velocity,along=v.x*ux+v.z*uz,add=Math.max(0,Math.min(c[0],9-along));   // the lunge adds speed toward the target, never past ~9 m/s
+ for(const b of list){b.velocity.x+=ux*add;b.velocity.z+=uz*add;b.velocity.y+=c[1];}cur.stam=Math.max(0,(cur.stam??1)-c[6]*(1-.45*AT('sta')));
+ cur.tkS={type,car,t:0,ux,uz,hit:0};return true;}
+// tackle postures (joint targets): each technique holds its own body shape through the lunge
+function tkPose(S){const J=joints,T=S.type,set=(sd,sh,sz,el,hp,kn)=>{J['shoulder'+sd].x=sh;J['shoulder'+sd].z=sd*sz;J['shoulder'+sd].y=0;J['elbow'+sd].x=el;J['wrist'+sd].x=0;J['hip'+sd].x=hp;J['knee'+sd].x=kn;J['ankle'+sd].x=-(hp*.6);J['toe'+sd].x=0;};
+ if(T==='wrap'||T==='side'){torso(.75,0,-.1);for(const sd of[1,-1])set(sd,-1.45,.6,-1.5,.55,.7);}   // chest low, arms wide and bent to wrap
+ else if(T==='rear'){torso(.5,0,0);for(const sd of[1,-1])set(sd,-2.5,.28,-.8,.4,.5);}   // reaching up for the shoulders
+ else if(T==='low'){torso(1.05,0,-.15);for(const sd of[1,-1])set(sd,-2,.32,-.5,1,1.2);}   // sunk hips, arms at the legs
+ else if(T==='dive'){torso(1.25,0,.15);for(const sd of[1,-1])set(sd,-2.2,.45,-.9,.1,.1);}   // flat out, head DOWN, arms wide at the legs (the catch dive is chest-up, arms together)
+ else{torso(T==='power'?.6:.5,0,0);set(1,-.35,.2,-2.1,.5,.6);set(-1,.55,.15,-.6,.5,.6);}}   // lead shoulder tucked, other arm cocked back
+function tackleMove(dt){const S=cur.tkS,c=TK[S.type];S.t+=dt;yaw=Math.atan2(S.ux,S.uz);mv=0;tkPose(S);
+ if(!limp&&S.type!=='dive'){const ty=(S.hit?.95:S.type==='low'?.6:.84)+gs,v=pel.velocity,al=v.x*S.ux+v.z*S.uz,want=c[0]+3;pel.force.y+=totalMass*(25*(ty-pel.position.y)-6*v.y)+totalMass*9.82*.55;   // legs hold the low, driving posture until contact (no faceplant before the hit)
+  if(!S.hit){const f=totalMass*Math.max(0,Math.min(8,(want-al)*6));pel.force.x+=S.ux*f;pel.force.z+=S.uz*f;}}   // and keep driving through the target
+ if(!S.hit&&S.car&&!S.car.limp){const Cp=[S.car.pel,S.car.parts.chest,S.car.parts.abdomen,S.car.parts.thigh1,S.car.parts['thigh-1']].map(b=>b.position),mine=S.type==='low'||S.type==='dive'?[chest,head,parts.hand1,parts['hand-1'],pel]:[chest,parts.hand1,parts['hand-1'],abd,head],
+  r=(.42+(S.type==='dive'?.14:0))*(curD===player&&player.cur.bm?player.cur.bm.tkReach:1);let best=9;for(const a of mine)for(const b of Cp)best=Math.min(best,a.position.distanceTo(b));
+  if(best<r)resolveHit(curD,S.car,S);}   // contact = real body overlap, not a radius around the pelvis
+ if(!S.hit&&S.t>c[2]){S.hit=-1;S.res='miss';tkAfter(curD,S,false);}
+ if(S.hit&&S.t>S.endT)cur.tkS=null;}
+// after the attempt: who falls, who stumbles, how long until control returns
+function tkAfter(d,S,ok){const now=performance.now(),fall=S.type==='dive'||S.type==='power'&&!ok||(ok&&/wrap|side|rear|low/.test(S.type));S.endT=S.t+(fall?.18:0);   // staying up: hand balance straight back to the legs
+ if(fall){d.limp=true;d.limpT=now+(ok?950:S.type==='dive'?1200:900);}else d.cur.stmb=now+(ok?450:750);   // committed techniques go to the ground; a whiffed shoulder only stumbles
+ if(d===curD)limp=d.limp;}
+function resolveHit(tk,car,S){S.hit=1;const now=performance.now(),c=TK[S.type];
+ if(now-(car.cur.hitT||0)<300){S.res='pile';tkAfter(tk,S,true);return;}car.cur.hitT=now;   // one collision resolves per moment: others pile on, they don't double the force
+ const Pt=tk.pel.position,Pc=car.pel.position;let ux=Pc.x-Pt.x,uz=Pc.z-Pt.z;const L=Math.hypot(ux,uz)||1;ux/=L;uz/=L;
+ const vt=tk.pel.velocity,vc=car.pel.velocity,vtu=vt.x*ux+vt.z*uz,vcu=vc.x*ux+vc.z*uz,vcs=Math.hypot(vc.x,vc.z),cosA=vcs>.5?-vcu/vcs:1,closing=Math.max(0,vtu-vcu);
+ const mT=kgOf(tk),mC=kgOf(car),Jm=mT*mC/(mT+mC)*closing*1.2,dV=Math.min(6,Jm/mC)*c[5],sev=dV;   // impulse from reduced mass x closing speed (restitution ~0.2)
+ const momT=mT*Math.max(0,vtu),momC=mC*Math.max(0,-vcu);   // head-on: the runner's momentum INTO the tackler fights back
+ let p=.56+c[3]+.3*E(tk,'tak')+c[4]*E(tk,'str')-.25*E(car,'str')-.18*E(car,'bhd')+.12*Math.tanh((momT-momC)/450);
+ if(cosA<-.4)p+=vtu>vcs+.3?.02:-.22;   // from behind: only works if you're actually gaining
+ else if(Math.abs(cosA)<.45)p+=.05;   // side-on leverage
+ if(S.type==='low')p+=.03*cl((inOf(car)-inOf(tk))/4,-1,1);   // getting under a taller runner
+ if(car.cur.ai&&cosA>.4&&E(car,'str')>0)p-=.06*E(car,'str');   // a strong runner lowers his shoulder into it
+ p=cl(p*(.85+.15*Math.min(1,(tk.cur.stam??1)/.4))-.03*BT(car,'brk')+.03*BT(tk,'tkl'),.08,.94);
+ const ok=Math.random()<p,up=(b,f)=>{b.velocity.y+=f;};S.res=ok?'down':'broken';car.cur.lastTk={ok,by:tk,t:now,type:S.type,sev};
+ const legs=n=>/thigh|shin|foot|toe/.test(n),upper=n=>/chest|abdomen|head|neck|uarm/.test(n),fx=ux*dV,fz=uz*dV;
+ if(ok){
+  for(const[n,b]of Object.entries(car.parts)){let k=1;
+   if(S.type==='low'){k=legs(n)?-.3:upper(n)?1.35:1;}   // legs taken out, upper body keeps going: he trips over the tackler
+   else if(S.type==='power'||S.type==='shoulder'){k=upper(n)?1.3:.8;if(upper(n))up(b,Math.min(1.4,.18*sev));}   // hit high: the top half goes first
+   else if(S.type==='rear'){k=.5;}   // dragged down from behind
+   b.velocity.x+=fx*k;b.velocity.z+=fz*k;}
+  if(S.type==='power'&&sev>2.5){const ax=-uz,az=ux;car.parts.chest.angularVelocity.x+=ax*sev*.9;car.parts.chest.angularVelocity.z+=az*sev*.9;}   // a real collision spins him over
+  for(const b of tk.list){b.velocity.x-=ux*Jm/mT*.6;b.velocity.z-=uz*Jm/mT*.6;}   // equal and opposite (part of it soaked up by the wrap)
+  car.limp=true;car.limpT=now+1300+Math.min(1300,sev*330);tkAfter(tk,S,true);
+  if(MATCH&&tk===player){MATCH.st.tak++;if(!RET&&Pc.z-LOS<=3*YD)MATCH.st.stop++;}
+  if(playOn&&H(car)&&Math.random()<cl(.05-.06*E(car,'car')+.04*E(tk,'tak')+.03*E(tk,'str'),.01,.18)*(1-.2*BT(car,'sec'))*(S.type==='power'&&sev>3?1.8:1)){const me=curD;use(car);dropBall();ball.velocity.x+=fx*.6+(Math.random()-.5)*3;ball.velocity.z+=fz*.6+(Math.random()-.5)*3;ball.velocity.y+=2;use(me);fumT=now;}   // a big hit can jar it loose
+  if(playOn&&S.type==='power'&&sev>3)toast(sev>4.2?'BLOWN UP!':'BIG HIT!','#ff5a4a');}
+ else{const k=.62+.22*E(car,'str');for(const b of car.list){const f=b.velocity.x*ux+b.velocity.z*uz;b.velocity.x=(b.velocity.x-ux*f)*k+ux*f*.85+fx*.35;b.velocity.z=(b.velocity.z-uz*f)*k+uz*f*.85+fz*.35;}   // broken: knocked off line and slowed, still on his feet
+  car.cur.stmb=now+500+Math.min(500,sev*120);for(const b of tk.list){b.velocity.x*=.35;b.velocity.z*=.35;}tkAfter(tk,S,false);if(playOn&&car.held)toast('BROKEN TACKLE','#ffd23f');}}
+// player trigger: Q tackles on defence (technique chosen for you), X is the hit stick (power hit)
+function playerTackle(power){const P=pel.position;let best=null,bd=4.2;for(const d of roster){if(d===player||!H(d)||d.cur.team===player.cur.team||d.limp)continue;const x=d.pel.position.distanceTo(P);if(x<bd){bd=x;best=d;}}
+ if(!best){if(power){return startTackle(null,'shoulder');}return startTackle(null,'dive');}   // nothing in range: a whiff
+ const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw),C=best.pel.position;if(((C.x-P.x)*fx+(C.z-P.z)*fz)/bd<-.2)camYaw=Math.atan2(C.x-P.x,C.z-P.z)+Math.PI;   // turn toward him if he's behind your aim
+ return startTackle(best,tkType(best,power));}
+const onD=()=>(playOn&&POSS()!==player.cur.team&&roster.some(d=>H(d)))||(DRILL&&DRILL.d.id==='tack');
+// AI: trigger distance depends on technique timing (Tackling) and is never perfect; hit stick chosen by Tackling + Strength + Awareness
+const aiTrig=()=>1.75*(1+.12*AT('tak'))+(Math.random()-.5)*.9*(1-(AT('tak')+1)/2);
+function aiType(car){const C=car.pel.position,P=pel.position,V=car.pel.velocity,my=Math.hypot(pel.velocity.x,pel.velocity.z),d=Math.hypot(C.x-P.x,C.z-P.z);
+ if(my>4&&AT('tak')+AT('str')>.4&&Math.random()<.3*(.5+.5*AT('awr')))return'power';return tkType(car,false);}
 function startDive(){if(dv>0||limp||cs>0)return;cur.stam=Math.max(0,(cur.stam??1)-.06*(1-.45*AT('sta')));const sp=Math.hypot(pel.velocity.x,pel.velocity.z);dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);
  for(const k in pins)unpin(k);js=0;jp=0;dv=1e-4;yaw=Math.atan2(dvx,dvz);const push=Math.max(0,Math.min(4.5,8-sp));   // the dive adds speed the way you aim, capped
  for(const b of list){b.velocity.x+=dvx*push;b.velocity.z+=dvz*push;b.velocity.y+=2.3;}}
@@ -649,7 +723,8 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
 function control(dt){if(cur.jk)jukeTick(dt);if(!cur.ai&&!limp&&dv===0&&js===0&&!cur.jk)cutAssist();if(held&&cur.team!==player.cur.team&&player.cur.stance&&curD!==player){const P=player.pel.position,dx=pel.position.x-P.x,dz=pel.position.z-P.z;   // ball carrier running into a defender's stance (E): held up and stopped, Strength vs Strength
  if(dx*dx+dz*dz<2.1){const k=Math.exp(-14*cl(.6+.3*(E(player,'str')-AT('str')),.2,.95)*dt);for(const b of list){b.velocity.x*=k;b.velocity.z*=k;}const k2=Math.exp(-10*dt);for(const b of player.list){b.velocity.x*=k2;b.velocity.z*=k2;}}}   // the defender stays planted too
-if(!cur.ai){const st=playOn&&POSS()!==cur.team&&!!keys.e;if(st)cur.low=.3;else if(cur.stance)cur.low=0;cur.stance=st;}   // holding E on defence: sink into a wide, low defensive stancecur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
+if(!cur.ai){const st=playOn&&POSS()!==cur.team&&!!keys.e;if(st)cur.low=.3;else if(cur.stance)cur.low=0;cur.stance=st;}   // holding E on defence: sink into a wide, low defensive stance
+cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
  let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;   // locked on the line until the snap (2)
  let dx=-s*f+c*r,dz=-c*f-s*r;const len=Math.hypot(dx,dz);
@@ -658,7 +733,7 @@ if(!cur.ai){const st=playOn&&POSS()!==cur.team&&!!keys.e;if(st)cur.low=.3;else i
  if(ccool>0)ccool-=dt;
  if(cs===0&&keys[' ']&&!limp&&js===0&&jp<2&&ccool<=0&&contact()){cscan-=dt;if(cscan<=0){cscan=.06;const L=findLedge();if(L)startClimb(L);}}
  if(cs>0){climb(dt);if(cs>0)return;}
- if(dv>0){dive(dt);updatePins(dt);return;}
+ if(cur.tkS){tackleMove(dt);updatePins(dt);return;}if(dv>0){dive(dt);updatePins(dt);return;}
  if(len>0){dx/=len;dz/=len;if(js>0&&!limp){jdx=dx;jdz=dz;}}
  // moving against the way the body faces: step backwards (mirrored gait, no sprinting, a bit slower)
  if(moving){const fw=dx*Math.sin(yaw)+dz*Math.cos(yaw);gdir+=((fw<-.25?-1:1)-gdir)*Math.min(1,dt*8);}
@@ -670,7 +745,7 @@ if(!cur.ai){const st=playOn&&POSS()!==cur.team&&!!keys.e;if(st)cur.low=.3;else i
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
  if(held&&keys.shift&&mv>.5)cur.runT=(cur.runT||0)+dt;else{cur.runT=0;cur.boost=0;}cur.boost=Math.max(0,(cur.boost||0)-.12*dt);   // the burst fades unless you keep tapping
- const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(cur.stance?.6:1)*(performance.now()<(cur.yacT||0)?1+.03*BT(curD,'yac'):1)*(1+(cur.jkB||0))*(1+.13*AT('spd'))*defStick()*(.85+.15*Math.min(1,(cur.stam??1)/.4))*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
+ const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(cur.stance?.6:1)*(performance.now()<(cur.stmb||0)?.6:1)*(performance.now()<(cur.yacT||0)?1+.03*BT(curD,'yac'):1)*(1+(cur.jkB||0))*(1+.13*AT('spd'))*defStick()*(.85+.15*Math.min(1,(cur.stam??1)/.4))*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
@@ -945,7 +1020,7 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
  const jEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.on=false;joy.x=joy.y=0;K.style.transform='';}};J.addEventListener('touchend',jEnd);J.addEventListener('touchcancel',jEnd);
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
  tap($('bsprint'),()=>{keys.shift=!keys.shift;});   // sprint toggles (a held button + joystick + look is too many fingers)
- tap($('bdive'),()=>startDive());
+ tap($('bdive'),()=>{if(onD())playerTackle(false);else startDive();});tap($('bhit'),()=>{if(onD())playerTackle(true);});
  tap($('broute'),()=>{keys['1']=true;showRoute();});$('broute').addEventListener('touchend',()=>{keys['1']=false;});tap($('bgo'),playStart);
  tap(aimB,()=>{aimOn=!aimOn&&held;});
  tap(big,primaryDown);big.addEventListener('touchend',e=>{e.preventDefault();primaryUp();});
@@ -998,7 +1073,7 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
   else{face(x,z);keys.w=true;keys.shift=run&&d>1.5;}};
  if(c.st==='pre'){if(c.mark)face(RP.x,RP.z);else face(P.x,P.z-5);return;}
  if(fumT&&!car){goTo(ball.position.x,ball.position.z,true,null);if(dv===0)plantCut(want,wantRun,29.4);return;}   // loose ball: dive on it
- if(c.st==='down'){if(dv===0)c.st='cover';return;}
+ if(c.st==='down'){if(dv===0&&!cur.tkS&&!limp)c.st='cover';return;}
  const hist=c.hist||(c.hist=[]);hist.push([c.t,RP.x,RP.z,RV.x,RV.z]);while(hist.length>2&&hist[1][0]<c.t-c.rd)hist.shift();const S=hist[0];   // what he "sees": the receiver c.rd seconds ago
  const inAir=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.3;
  if(!inAir)c.seen=0;else if(!c.seen)c.seen=c.t;if(inAir&&c.st!=='ball'&&!held&&c.t-c.seen>.1*(1-AT('rea'))){c.st='ball';c.canInt=Math.random()<cl(.3*(1+1.2*AT('int')),.05,.75);catchOn=true;cur.catchT0=1e15;}   // no catch boost for him
@@ -1008,7 +1083,7 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
    for(let t=0;t<5&&!(vy<0&&y<1.6)&&y>.09;t+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}   // where it comes down through a defender's reach
    goTo(x,z,true,null);if(js===0&&contact()&&cur.cp&&cur.cp.t<.45&&cur.cp.p.y>head.position.y)startJump();}}   // go up for it
  if(c.st==='cover'&&car)c.st='chase';
- if(c.st==='cover'&&c.kind==='rush'){const q=roster.find(d=>d.cur.role==='qb');if(q){const Q=q.pel.position,dx=Q.x-P.x,dz=Q.z-P.z,dd=Math.hypot(dx,dz);goTo(Q.x,Q.z,true,null);if(dd<1.3&&dv===0&&H(q)){startDive();q.limp=true;q.limpT=performance.now()+2600;c.st='down';}}}   // blitz: straight at the QB, sack him
+ if(c.st==='cover'&&c.kind==='rush'){const q=roster.find(d=>d.cur.role==='qb');if(q){const Q=q.pel.position,dx=Q.x-P.x,dz=Q.z-P.z,dd=Math.hypot(dx,dz);goTo(Q.x,Q.z,true,null);if(dd<aiTrig()&&dv===0&&!cur.tkS&&H(q)&&!q.limp){if(startTackle(q,aiType(q)))c.st='down';}}}   // blitz: straight at the QB, sack him
  if(c.st==='cover'&&(c.kind==='deep'||c.kind==='rob')){let T=null,bz=-1e9;   // help: deep = over the top of the deepest receiver in his half; robber = under the nearest one in the middle
   for(const d of roster){if(d.cur.role!=='wr')continue;const p=d.pel.position;if(c.half&&Math.sign(p.x||1)!==Math.sign(c.px))continue;const sc=c.kind==='deep'?p.z:-Math.hypot(p.x-P.x,p.z-P.z);if(sc>bz){bz=sc;T=p;}}
   if(T){if(c.kind==='deep')goTo(c.px*.4+T.x*.6,Math.min(GOAL_Z+4,Math.max(LOS+c.pz,T.z+7)),true,T);else goTo(T.x*.7,cl(T.z-2,LOS+8,LOS+14),true,T);}}
@@ -1023,7 +1098,7 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
   if(dd<1.1&&c.t<3.5&&c.t>(c.pushT||0)){c.pushT=c.t+1.2+Math.random();const kk=(1.2+Math.random())*(1+.4*AT('str'))*(1-.3*E(Rc,'str'));for(const b of Rc.list){b.velocity.x+=dx/dd*kk;b.velocity.z+=dz/dd*kk;}}}
  if(c.st==='chase'){if(!car){c.st='cover';}if(c.t<c.biteEnd)goTo(P.x+c.biteV[0],P.z+c.biteV[1],true,null);else goTo(RP.x+RV.x*.5,RP.z+RV.z*.5,true,null);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);
-  if(dd<1.3*(1+.15*AT('tak'))&&dv===0&&!(c.t<c.biteEnd)){face(RP.x,RP.z);startDive();for(const b of Rc.list){b.velocity.x+=dx/dd*3;b.velocity.z+=dz/dd*3;}tackleTry(Rc,curD);c.st='down';}}   // tackle: dive into him, he goes limp for a moment
+  if(dd<aiTrig()&&dv===0&&!cur.tkS&&!(c.t<c.biteEnd)&&!Rc.limp){if(startTackle(Rc,aiType(Rc)))c.st='down';}}   // tackle: dive into him, he goes limp for a moment
  if(c.st==='int'&&c.t-c.intT<1.5)goTo(P.x,P.z-6,true,null);   // picked it off: a few strides back the other way
  if(dv===0)plantCut(want,wantRun,29.4);}   // plants and changes direction hard (3 g)
 const active=()=>roster;
@@ -1163,11 +1238,12 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
 function liveThink(dt){const c=cur,P=pel.position;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;catchOn=false;aimOn=false;const car=roster.find(H),D=DIR();let T=null;
  if(!car)T=[ball.position.x,ball.position.z];
  else if(car===curD){let ax=0,az=D;for(const d of roster){if(d.cur.team===c.team)continue;const Q=d.pel.position,dx=Q.x-P.x,dz=Q.z-P.z,dd=Math.hypot(dx,dz)||1;if(dd>12||dz*D<-2)continue;ax-=dx/dd*3/dd;az-=dz/dd*1.5/dd;}
-  const ex=Math.abs(P.x)>FW/2-3?-Math.sign(P.x)*.8:0;T=[P.x+(ax+ex)*4,P.z+D*Math.max(.6,az*D)*6];}
+  const ex=Math.abs(P.x)>FW/2-3?-Math.sign(P.x)*.8:0;T=[P.x+(ax+ex)*4,P.z+D*Math.max(.6,az*D)*6];
+  {let e=null,ed=3.2;for(const d of roster)if(d.cur.team!==c.team){const x=d.pel.position.distanceTo(P);if(x<ed){ed=x;e=d;}}if(e&&!cur.jk&&dv===0&&js===0&&performance.now()>(c.jkCool||0)){c.jkCool=performance.now()+1300;if(Math.random()<.55*(.5+.5*AT('bhd'))){const cy=camYaw,Q=e.pel.position,rs=(Q.x-P.x)*Math.cos(cy)-(Q.z-P.z)*Math.sin(cy);cur.jk={t:0,sd:rs>0?-1:1,cut:false};}}}}
  else if(car.cur.team===c.team){const C=car.pel.position;let e=null,ed=1e9;for(const d of roster){if(d.cur.team===c.team)continue;const x=d.pel.position.distanceTo(C);if(x<ed){ed=x;e=d;}}   // escort: wall off the closest chaser
   T=e?[(C.x+e.pel.position.x*2)/3,(C.z+e.pel.position.z*2)/3]:[C.x+3,C.z+D*4];}
  else{const C=car.pel.position,V=car.pel.velocity,dd=Math.hypot(C.x-P.x,C.z-P.z);T=[C.x+V.x*Math.min(.6,dd/8),C.z+V.z*Math.min(.6,dd/8)];   // pursue with a lead that shrinks as he closes
-  if(dd<1.3*(1+.15*AT('tak'))&&dv===0&&c.t>(c.tkT||0)){camYaw=Math.atan2(C.x-P.x,C.z-P.z)+Math.PI;startDive();c.tkT=c.t+1.4;tackleTry(car,curD);return;}}
+  if(dd<aiTrig()&&dv===0&&!cur.tkS&&!car.limp&&c.t>(c.tkT||0)){c.tkT=c.t+1.4;startTackle(car,aiType(car));return;}}
  const dx=T[0]-P.x,dz=T[1]-P.z;camYaw=Math.atan2(dx,dz)+Math.PI;keys.w=Math.hypot(dx,dz)>.4;keys.shift=true;if(dv===0)plantCut(T,true,29.4);}
 // plant and cut: brake away any velocity the doll doesn't want (overshoot, wrong direction) at up to cap m/s^2.
 // shortcut: braking only, never adds speed, so it can't outrun the legs
@@ -1202,7 +1278,7 @@ function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
 function refreshQB(){if(mode&&!paused)resetPlay();}
 $m('brst').addEventListener('click',refreshQB);$m('brst').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();refreshQB();},{passive:false});
 // ---------- touch layout editor: drag controls to move them, tap + -/+ to resize; saved on this device ----------
-const LAY_IDS=['joy','bbig','baim','bjump','bdrop','bsprint','tpause','bdive'],LAY_KEY='rafTouchLayout',layOrig={};
+const LAY_IDS=['joy','bbig','baim','bjump','bdrop','bsprint','tpause','bdive','bhit'],LAY_KEY='rafTouchLayout',layOrig={};
 for(const id of LAY_IDS)layOrig[id]=$m(id).getAttribute('style')||'';
 let lay={},editing=false,selId=null,drag=null;try{lay=JSON.parse(localStorage.getItem(LAY_KEY)||'{}')||{};}catch(e){}
 function applyLay(){for(const id of LAY_IDS){const el=$m(id),L=lay[id];el.setAttribute('style',layOrig[id]);if(id==='joy')$m('knob').removeAttribute('style');if(!L)continue;   // saved as a fraction of the screen, so it survives rotation / other screens
@@ -1647,7 +1723,7 @@ const DRILLS=[{id:'dash',kind:'SPEED',name:'40-Yard Dash',inst:'Sprint (Shift + 
  {id:'shut',kind:'AGILITY',name:'5-10-5 Shuttle',inst:'Touch the RIGHT cone, then the LEFT cone, then cut back through the middle.'},
  {id:'pass',kind:'PASSING',name:'Target Passing',inst:'Aim (right click / AIM) and throw at the lit target. 5 throws.'},
  {id:'jugs',kind:'CATCHING',name:'Jugs Machine',inst:'Hold CATCH (left click) and get under each ball. 6 balls.'},
- {id:'tack',kind:'DEFENCE',name:'Open-Field Tackle',inst:'Close on the ball carrier and dive (Q) to bring him down. 3 reps.'}];
+ {id:'tack',kind:'DEFENCE',name:'Open-Field Tackle',inst:'Close on the ball carrier: Q to tackle, X for a big hit. 3 reps.'}];
 const dMk=(g,c,x,y,z)=>{const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.9}));m.position.set(x,y,z);drillG.add(m);return m;};
 const dCone=(x,z,c=0xff7a1a)=>dMk(new THREE.ConeGeometry(.18,.45,12),c,x,.22,z),dRing=(x,z,r,c)=>{const m=dMk(new THREE.RingGeometry(r*.8,r,40),c,x,.03,z);m.rotation.x=-Math.PI/2;return m;};
 const dstat=t=>$m('dstat').innerHTML=t;
@@ -1675,7 +1751,7 @@ function drillTick(){const D=DRILL,now=performance.now(),dt=Math.min(.05,(now-(D
   if(D.ph==='fly'){if(held){D.c++;held=false;D.ph='gap';D.w=0;dstat(`CAUGHT · ${D.c} / 6`);}else if(ball.position.y<.15||D.w>4){D.ph='gap';D.w=0;dstat(`DROPPED · ${D.c} / 6`);}}
   if(D.ph==='gap'&&D.w>1){world.removeBody(ball);if(++D.rep>=6)return drillDone(D.c/6*100,`${D.c} / 6 caught`);D.ph='set';D.w=0;}}
  if(id==='tack'){const r=D.run,R0=r.pel.position;D.w+=dt;
-  if(D.ph==='rep'){if(dv===0)D.tkd=0;if(dv>0&&!D.tkd&&Math.min(...[pel,chest,head,parts.hand1,parts['hand-1']].map(b=>b.position.distanceTo(R0)))<1.05*(1+.15*AT('tak'))*(player.cur.bm?player.cur.bm.tkReach:1)){D.tkd=1;if(tackleTry(r,player)){D.made++;D.ph='gap';D.w=0;dstat(`TACKLE! · ${D.made} / ${D.rep+1}`);}else dstat('BROKEN TACKLE');}
+  if(D.ph==='rep'){const L=r.cur.lastTk;if(L&&L.by===player&&L.t>(D.lt0||0)){D.lt0=L.t;if(L.ok){D.made++;D.ph='gap';D.w=0;dstat(`${TNAME[L.type].toUpperCase()} TACKLE! · ${D.made} / ${D.rep+1}`);}else dstat('BROKEN TACKLE');}
    if(D.ph==='rep'&&(R0.z<DR_Z-6||D.w>9)){D.ph='gap';D.w=0;dstat(`MISSED · ${D.made} / ${D.rep+1}`);}}
   if(D.ph==='gap'&&D.w>2){if(++D.rep>=3)return drillDone(D.made/3*100,`${D.made} / 3 tackles`);tackRep();}}}
 function drillDone(sc,label){const D=DRILL;D.ph='done';sc=Math.round(cl(sc,0,100));const C=PROF.combine=PROF.combine||{};if(C[D.d.id]==null){C[D.d.id]={s:sc,l:label};saveProf(PROF);}   // first result stands: no re-rolls
@@ -1794,7 +1870,7 @@ function frame(now){
  {const rd=(now-(frame.pt||now))/1000,fd=Math.min(.05,rd);frame.pt=now;for(const d of D){use(d);cleats(d,fd);}turfTick(fd,rd);}
  for(const d of D)if(d.limpT&&performance.now()>d.limpT){use(d);limp=false;d.limpT=0;}   // tackled: back on his feet
  use(player);playTick();markTick();if(DRILL)drillTick();
- if(playOn&&dv>0&&POSS()!==player.cur.team){const c=roster.find(d=>d!==player&&d.held&&d.cur.team!==player.cur.team&&!d.limp);if(c&&!cur.tkd&&Math.min(...[pel,chest,head,parts.hand1,parts['hand-1']].map(b=>b.position.distanceTo(c.pel.position)))<1.05*(1+.15*AT('tak'))*(player.cur.bm?player.cur.bm.tkReach:1)){cur.tkd=1;tackleTry(c,player);}}else if(dv===0)cur.tkd=0;   // you on defence: a dive (Q) that gets your body or hands onto the ball carrier is a tackle
+
  ballTick(now);aimTick();$m('cboost').hidden=catchBoost()===1;
  tgt.x+=(pel.position.x-tgt.x)*.45;tgt.z+=(pel.position.z-tgt.z)*.45;tgt.y+=(Math.max(.4,pel.position.y-.08)-tgt.y)*.1;   // follow the doll tightly (incl. height on platforms)
  const sh=.55,pvx=tgt.x+Math.cos(camYaw)*sh,pvy=tgt.y+.55,pvz=tgt.z-Math.sin(camYaw)*sh,cp=Math.cos(camPitch);   // pivot: over the doll's right shoulder

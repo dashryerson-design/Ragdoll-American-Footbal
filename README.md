@@ -1,6 +1,6 @@
-# Physics Based Boxing (PBB)
+# Ragdoll American Football
 
-Starting point: the ragdoll movement system from Ragdoll Shooters, on its own in `index.html`.
+Starting point (formerly Physics Based Boxing): the ragdoll movement system from Ragdoll Shooters, on its own in `index.html`.
 
 It keeps the original's body parts and masses, per-joint muscle strengths, PD muscle controllers, joint limits, limp muscle tone, gait controller, foot planting, jumping, bounding, crouching and climbing. There are no guns, sounds or menus.
 

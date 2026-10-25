@@ -430,7 +430,7 @@ function control(dt){
  // per-limb weakness (wk, 1 = healthy) slows the gait and makes the body sag onto that leg
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
- const speed=(run?7.2:qbMove?(keys.shift?1.6:1.1):2.3)*(cur.spd||1)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
+ const speed=(run?7.2:qbMove?(keys.shift?1.6:1.1):2.3)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
@@ -738,9 +738,10 @@ const wrD={};
 // defender: fourth doll (group 8, collides with players and the ball), slow on purpose so he's easy to beat
 const dfD={};
 {saveTo(player);buildDoll(0x222222,0x111111);
- limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,role:'df',spd:.93};
+ limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,role:'df'};
  yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
- for(const b of list){b.collisionFilterGroup=8;b.collisionFilterMask=15;}saveTo(dfD);loadFrom(player);curD=player;
+ for(const b of list){b.collisionFilterGroup=8;b.collisionFilterMask=7;   // world, players, ball - not his own limbs
+ }saveTo(dfD);loadFrom(player);curD=player;
  for(const b of dfD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of dfD.cons)world.removeConstraint(c);}
 for(const d of[player,qbD,wrD])for(const b of d.list)b.collisionFilterMask|=8;
 let defOn=false,playState='live';
@@ -751,10 +752,10 @@ function setDef(on){defOn=on;$m('bdf').textContent='DEFENDER AI: '+(on?'ON':'OFF
 // jams early, plays the ball in the air (deflects, sometimes intercepts), and tackles the ball carrier ----------
 function defThink(dt){const c=cur,Rc=teammate?player:wrMode?wrD:player,P=pel.position,RP=Rc.pel.position,RV=Rc.pel.velocity;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;
  const face=(x,z)=>{camYaw=Math.atan2(x-P.x,z-P.z)+Math.PI;};
- // move to (x,z): near the receiver keep eyes on him and backpedal / shuffle (slower), otherwise turn and run
+ // move to (x,z) running exactly like the player (face the way he runs, sprint unless it's a short adjustment); only tiny last-metre fixes are a shuffle facing the receiver
  const goTo=(x,z,run,look)=>{const mx=x-P.x,mz=z-P.z,d=Math.hypot(mx,mz);if(d<.45){if(look)face(look.x,look.z);return;}
-  if(look&&d<2.5){face(look.x,look.z);const cy=camYaw,f=-(mx*Math.sin(cy)+mz*Math.cos(cy))/d,r=(mx*Math.cos(cy)-mz*Math.sin(cy))/d;keys.w=f>.3;keys.s=f<-.3;keys.d=r>.3;keys.a=r<-.3;keys.shift=run&&f>.3;}
-  else{face(x,z);keys.w=true;keys.shift=run;}};
+  if(look&&d<1){face(look.x,look.z);const cy=camYaw,f=-(mx*Math.sin(cy)+mz*Math.cos(cy))/d,r=(mx*Math.cos(cy)-mz*Math.sin(cy))/d;keys.w=f>.3;keys.s=f<-.3;keys.d=r>.3;keys.a=r<-.3;}
+  else{face(x,z);keys.w=true;keys.shift=run&&d>1.5;}};
  if(c.st==='pre'){face(RP.x,RP.z);return;}
  if(c.st==='down'){if(dv===0)c.st='cover';return;}
  const hist=c.hist||(c.hist=[]);hist.push([c.t,RP.x,RP.z,RV.x,RV.z]);while(hist.length>2&&hist[1][0]<c.t-c.rd)hist.shift();const S=hist[0];   // what he "sees": the receiver c.rd seconds ago

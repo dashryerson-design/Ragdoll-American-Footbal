@@ -35,6 +35,7 @@
 <button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="#fff" stroke-width="4"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="#fff" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#d8a24a" stroke-width="4"/><path d="M103 18v14" stroke="#d8a24a" stroke-width="4"/></svg>KEYBOARD &amp; MOUSE</button></div></div>
 <div class="tb" id="brst" title="Reset the QB with the ball (R)">&#x21bb;</div>
 <div id="cboost" hidden style="position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3;font:800 13px system-ui,sans-serif;letter-spacing:.12em;color:#111;background:#ffd23f;border-radius:999px;padding:6px 14px;pointer-events:none">CATCH BOOST +20%</div>
+<div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
 <div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bwr">WIDE RECEIVER AI: OFF</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
 <div id="ed" hidden><span id="edtxt">Drag to move · tap to select</span><button id="edm">−</button><button id="edp">+</button><button id="edr">RESET</button><button id="edone">DONE</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
@@ -616,6 +617,11 @@ function catchPoint(){const c=chest.position,b=ball.position,u=chest.velocity,v=
 // jump catch target: where the ball will come down through the top of a leaping receiver's reach (2.85 m); null if it's never that high
 function jumpAim(){const b=ball.position,v=ball.velocity,H=2.85,a=-4.91,c=b.y-H,disc=v.y*v.y-4*a*c;if(b.y<H&&v.y<=0||disc<0)return null;
  const t=(-v.y-Math.sqrt(disc))/(2*a);if(!(t>0)||t>2)return null;return{x:b.x+v.x*t,z:b.z+v.z*t,t};}
+// catch effect: a gold burst where the ball was caught + a quick CATCH! pop
+const cfxS=new THREE.Sprite(new THREE.SpriteMaterial({map:ballGlow.children[1].material.map,color:0xffd23f,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,transparent:true}));cfxS.visible=false;scene.add(cfxS);
+function catchFx(){const b=ball.position;cfxS.position.set(b.x,b.y,b.z);const t0=performance.now();cfxS.visible=true;
+ const tick=()=>{const u=(performance.now()-t0)/450;if(u>=1){cfxS.visible=false;return;}const r=.4+2.4*u;cfxS.scale.set(r,r,1);cfxS.material.opacity=1-u;requestAnimationFrame(tick);};tick();
+ document.getElementById('cfx').animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.15)',offset:.2},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.7},{opacity:0,transform:'translate(-50%,-60%) scale(1)'}],{duration:900,easing:'ease-out'});}
 const CATCH_ASSIST=.1;
 // held catch for 1.2 s+ (an early, set receiver): +20% reach, range and reaction
 const catchBoost=()=>catchOn&&cur.catchT0&&performance.now()-cur.catchT0>1200?1.2:1;
@@ -645,8 +651,8 @@ function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(bal
   const ax=cl(-Math.atan2(_cv.z,-_cv.y),-3,.3),az=cl(Math.asin(cl(_cv.x/L,-1,1)),sd>0?-.5:-1.4,sd>0?1.4:.5),M=(a,b)=>a+(b-a)*k;   // shoulder range: no reaching back past the body, limited reach across it
   J['shoulder'+sd].x=M(J['shoulder'+sd].x,ax);J['shoulder'+sd].z=M(J['shoulder'+sd].z,az);J['shoulder'+sd].y=0;J['elbow'+sd].x=M(J['elbow'+sd].x,cur.high>.2?-.03:-.2);J['wrist'+sd].x=M(J['wrist'+sd].x,0);}
  // the catch itself: a reaching hand gets to the ball (checked every physics step, so fast passes can't skip past)
- for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<(.36+CATCH_ASSIST)*catchBoost()){grabBall();catchK=0;return;}}
- if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<(.42+CATCH_ASSIST)*catchBoost()){grabBall();catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
+ for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<(.36+CATCH_ASSIST)*catchBoost()){catchFx();grabBall();catchK=0;return;}}
+ if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<(.42+CATCH_ASSIST)*catchBoost()){catchFx();grabBall();catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
 function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);catchOn=false;}
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);

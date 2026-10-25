@@ -465,12 +465,12 @@ function control(dt){
     th.torque.x+=260*ax;th.torque.z+=260*az;pel.torque.x-=260*ax;pel.torque.z-=260*az;
     sh.torque.x-=240*ax;sh.torque.z-=240*az;th.torque.x+=240*ax;th.torque.z+=240*az;}}
   if(js===1&&jt>.15&&(flat()||jt>.3)){js=2;jt=0;}
-  else if(js===2&&(jt>.22||(jt>.08&&!contact()))){js=3;jt=0;let up=1.1,gx=0,gz=0;const C=cur.cp;   // stronger leg drive at take-off: a higher jump
-   const A=catchOn&&C?jumpAim():null;if(A){up+=.9;const T=Math.max(.3,A.t);gx=cl((A.x-pel.position.x)/T-pel.velocity.x,-2.5,2.5);gz=cl((A.z-pel.position.z)/T-pel.velocity.z,-2.5,2.5);}   // jump catch: extra spring + launch toward the catch point
+  else if(js===2&&(jt>.22||(jt>.08&&!contact()))){js=3;jt=0;let up=.6,gx=0,gz=0;const C=cur.cp;   // stronger leg drive at take-off: a higher jump
+   const A=catchOn&&C?jumpAim():null;if(A){up+=.5;const T=Math.max(.3,A.t);gx=cl((A.x-pel.position.x)/T-pel.velocity.x,-4.5,4.5);gz=cl((A.z-pel.position.z)/T-pel.velocity.z,-4.5,4.5);}   // lower spring, stronger launch toward the catch point   // jump catch: extra spring + launch toward the catch point
    for(const b of list){b.velocity.y+=up;b.velocity.x+=gx;b.velocity.z+=gz;}}
   else if(js===3&&jt>.08&&contact()){js=4;jt=0;}
   else if(js===4&&jt>.15){js=0;}
-  if(js===3&&catchOn&&cur.cp){const C=jumpAim();if(C)for(const b of list){b.force.x+=b.mass*cl(6*(C.x-pel.position.x)-2*pel.velocity.x,-6,6);b.force.z+=b.mass*cl(6*(C.z-pel.position.z)-2*pel.velocity.z,-6,6);}}   // in the air: steer toward the catch point
+  if(js===3&&catchOn&&cur.cp){const C=jumpAim();if(C)for(const b of list){b.force.x+=b.mass*cl(12*(C.x-pel.position.x)-3.5*pel.velocity.x,-14,14);b.force.z+=b.mass*cl(12*(C.z-pel.position.z)-3.5*pel.velocity.z,-14,14);}}   // in the air: steer toward the catch point
   if(js===5||js===3||js===4){const hs=Math.hypot(pel.velocity.x,pel.velocity.z),cap=Math.min(7,(cur.runV||4)*1.3+.2);if(hs>cap){const k=cap/hs;for(const b of list){b.velocity.x*=k;b.velocity.z*=k;}}}   // hard speed cap through the whole jump
   if(js===0&&mv>.3&&contact()){const f=pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw);cur.runV=(cur.runV==null?f:cur.runV*.995+f*.005);}   // remember normal ground speed: a bound only beats it by ~20%
   if(cur.bufB&&(js===4||js===0)&&contact()&&!limp){if(performance.now()-cur.bufB<400){jpt=.2;startBound();}cur.bufB=0;}   // space pressed just before landing: chain straight into the next bound

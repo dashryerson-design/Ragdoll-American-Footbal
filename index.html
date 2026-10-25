@@ -494,8 +494,8 @@ function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));c
   return;}
  thTw=0;thLean=0;
  if(held&&aimOn){sh.x=pc-1.6;sh.z=-1.05;el.x=-2.05;wr.x=.3;return;}     // ball up by the ear, elbow out at shoulder height
- if(held&&keys.shift&&mv>.3){sh.x=pc-.2+.3*Math.sin(phase+Math.PI)*mv;sh.z=.2;el.x=-1.45;wr.x=.1;joints.shoulder1.z=.35;return;}   // sprinting: ball arm pumps a little, free arm swings wide
- if(held){sh.x=pc+.12;sh.z=.3;el.x=-1.55;wr.x=.15;return;}   // jogging: tucked tight at the hip, forearm along the side   // tucked: upper arm down at the side, forearm across the belly (arm angle in the world = chest pitch - shoulder x)
+ // carrying: same rhythm as the free arm but half the swing, and the backswing is capped so the ball never trails behind the torso
+ if(held){const run=keys.shift&&mv>.3;sh.x=pc+(run?-.3:-.15)+Math.min(sh.x*.5,.12);sh.z=run?.22:.3;el.x=run?-1.45:-1.55;wr.x=.12;if(run)joints.shoulder1.z=.35;return;}
  if(reachK<.01)return;
  const S=bpt(chest,-.27,.12,0),dx=ball.position.x-S.x,dz=ball.position.z-S.z,fw=Math.max(.05,dx*Math.sin(yaw)+dz*Math.cos(yaw)),dn=Math.max(.2,S.y-ball.position.y);
  const a=cl(Math.atan2(fw,dn),.1,1.2),L=(x,y)=>x+(y-x)*reachK;   // forward angle of the arm from straight down
@@ -514,6 +514,11 @@ function throwBall(){if(!held||limp)return;const p=bpt(handR(),0,-.02,.07),v=thr
  chest.velocity.x-=v.x*.42/15.7;chest.velocity.y-=v.y*.42/15.7;chest.velocity.z-=v.z*.42/15.7;   // the ball's momentum pushes back on the thrower
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.velocity.copy(v);const d=v.unit();ball.quaternion.setFromVectors(new V(0,1,0),d);
  ball.angularVelocity.set(d.x*25,d.y*25,d.z*25);world.addBody(ball);ball.wakeUp();}   // nose-first spiral
+// the carried ball is pinned to the forearm, not simulated: push it out of the torso boxes so it can't sink into the body
+const _lp=new V();
+function keepOut(p){for(const b of[pel,abd,chest]){const h=b.shapes[0].halfExtents,r=.085;b.pointToLocalFrame(p,_lp);
+ const o=[h.x+r-Math.abs(_lp.x),h.y+r-Math.abs(_lp.y),h.z+r-Math.abs(_lp.z)];if(o[0]<=0||o[1]<=0||o[2]<=0)continue;
+ const i=o.indexOf(Math.min(...o)),k=['x','y','z'][i];_lp[k]+=Math.sign(_lp[k]||1)*o[i];b.pointToWorldFrame(_lp,p);}}
 function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);}
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);
@@ -523,7 +528,7 @@ function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballT
  if(!held&&reachK>.3){const h=handR().position,b=ball.position,hd=Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z),pd2=Math.hypot(pel.position.x-b.x,pel.position.z-b.z);
   if(hd<.3||(pd2<.45&&reachK>.6))grabBall();}                     // hand on it, or right underfoot with the arm already down
  // carrying: cradled along the inside of the forearm, nose in the palm (not resting on top of the hand)
- if(held){const h=handR(),p=aimOn?bpt(h,0,-.02,.07):bpt(parts['farm-1'],.085,-.1,0);ballMesh.position.set(p.x,p.y,p.z);ballMesh.quaternion.copy(parts['farm-1'].quaternion);}
+ if(held){const h=handR(),p=aimOn?bpt(h,0,-.02,.07):bpt(parts['farm-1'],.085,-.1,0);if(!aimOn)keepOut(p);ballMesh.position.set(p.x,p.y,p.z);ballMesh.quaternion.copy(parts['farm-1'].quaternion);}
  else{ballMesh.position.copy(ball.position);ballMesh.quaternion.copy(ball.quaternion);}}
 // ---------- touch: joystick (push to the edge to sprint), drag the right side to look, AIM toggles, the big button throws while aiming ----------
 const joy={on:false,x:0,y:0,id:null};

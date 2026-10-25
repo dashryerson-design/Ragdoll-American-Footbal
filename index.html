@@ -393,7 +393,9 @@ function startDive(){if(dv>0||limp||cs>0)return;const sp=Math.hypot(pel.velocity
 function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  if(T<DIVE_UP){torso(1.35,0,-.25);   // laid out flat toward the dive, chest lifted a touch so the eyes stay forward
   for(const sd of[1,-1]){J['hip'+sd].x=.25;J['knee'+sd].x=.15;J['ankle'+sd].x=.35;J['toe'+sd].x=0;J['shoulder'+sd].x=-2.9;J['shoulder'+sd].z=sd*.15;J['elbow'+sd].x=-.1;J['wrist'+sd].x=0;}
-  ballArm();return;}
+  ballArm();
+  if(held)for(const sd of[1,-1]){J['shoulder'+sd].x=-2.95;J['shoulder'+sd].z=-sd*.22;J['shoulder'+sd].y=0;J['elbow'+sd].x=-.05;J['wrist'+sd].x=0;}   // ball carrier: both hands out front holding the ball, for extra yards
+  return;}
  // get up: pelvis lifted along an eased path to standing height ("physics magic" as in climbing), legs from kneeling to standing
  if(!dvY){dvY=pel.position.y;cdx=dvx;cdz=dvz;cex=pel.position.x;cez=pel.position.z;cl0=0;}
  const u=cl((T-DIVE_UP)/(DIVE_END-DIVE_UP),0,1),su=sm3(u);
@@ -422,14 +424,14 @@ function control(dt){
  // per-limb weakness (wk, 1 = healthy) slows the gait and makes the body sag onto that leg
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
- const speed=(run?7.2:qbMove?(keys.shift?1.6:1.1):2.3)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,w=Math.PI*(run?.38:.5)*speed/S;
+ const speed=(run?7.2:qbMove?(keys.shift?1.6:1.1):2.3)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
   const k=sd+'',ph=phase+(sd>0?0:Math.PI);
   const t=tnorm(ph);let fx,lift=0;
   let rel=0;if(t<.5){const sw=t*2,sm=sw*sw*sw*(10-15*sw+6*sw*sw);fx=-S+2*S*sm;lift=Math.sin(Math.PI*sw);rel=((fh[sd]-fh[-sd])*(1-sm)+LH[sd]*sm)*gm;}else{fx=S-4*S*(t-.5);}
-  fx=(fx*gm+(run?.22:.03)*gm)*gdir;const L0=.87-gm*(run?.15:.07)-.33*crK,fy=L0-(run?.26:.13)*lift*gm-rel-Math.max(0,rel)*.6*lift,dd=Math.min(.868,Math.max(.35,Math.hypot(fx,fy)));
+  fx=(fx*gm+(run?.3:.03)*gm)*gdir;const L0=.87-gm*(run?.15:.07)-.33*crK,fy=L0-(run?.26:.13)*lift*gm-rel-Math.max(0,rel)*.6*lift,dd=Math.min(.868,Math.max(.35,Math.hypot(fx,fy)));
   const hip=-(Math.atan2(fx,fy)+Math.acos(Math.min(1,dd/.88))),knee=Math.PI-Math.acos(Math.max(-1,Math.min(1,(.3872-dd*dd)/.3872)));
   const PM=run?.6:.35,RR=(a,b,x)=>Math.min(1,Math.max(0,(x-a)/(b-a)));
   const adj=Math.max(0,gdir)*gm*(PM*RR(.78,1,t)+PM*(1-RR(0,.12,t))*(t<.5?1:0)-.16*(t<.5?RR(.35,.5,t):(1-RR(.5,.6,t))));
@@ -468,12 +470,12 @@ function control(dt){
   if(cur.bufB&&(js===4||js===0)&&contact()&&!limp){if(performance.now()-cur.bufB<400){jpt=.2;startBound();}cur.bufB=0;}   // space pressed just before landing: chain straight into the next bound
  }
  ballArm();
- const lean=thLean-.08*qbK+.95*reachK+.85*(cur.low||0)+.18*crK+mv*(run?.28:.1)*(1-qbK)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
+ const lean=thLean-.08*qbK+.95*reachK+.85*(cur.low||0)+.18*crK+mv*(run?.14+.16*cl((speed-vf)/3,0,1):.1)*(1-qbK)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
  if(!limp){
   // balance: keep pelvis and chest facing the heading, upright
   const tw=.12*Math.sin(phase)*mv;
   qa.setFromAxisAngle(Y,yaw-tw-.3*qbK+.6*thTw);qb.setFromAxisAngle(X,lean);qa.mult(qb,des);pd(pel,null,2.2,false);
-  qb.setFromAxisAngle(X,lean+(run?.18:.03)*mv);qa.setFromAxisAngle(Y,yaw+tw-.55*qbK+thTw);qa.mult(qb,des);pd(chest,null,1.8,false);   // aiming: right shoulder turned back
+  qb.setFromAxisAngle(X,lean+(run?.06:.03)*mv);qa.setFromAxisAngle(Y,yaw+tw-.55*qbK+thTw);qa.mult(qb,des);pd(chest,null,1.8,false);   // aiming: right shoulder turned back
   if(cur.look){const L=cur.look,dx=L.x-head.position.x,dy=L.y-head.position.y,dz=L.z-head.position.z;let dy2=Math.atan2(dx,dz)-yaw;dy2=Math.atan2(Math.sin(dy2),Math.cos(dy2));   // track the ball: turn and tilt the head (neck limits)
    qb.setFromAxisAngle(X,cl(-Math.atan2(dy,Math.hypot(dx,dz)),-.9,.6));qa.setFromAxisAngle(Y,yaw+cl(dy2,-1.1,1.1));}
   else{qb.setFromAxisAngle(X,run?.1*mv:0);qa.setFromAxisAngle(Y,yaw);}qa.mult(qb,des);pd(neck,null,2.2,false);pd(head,null,2.2,false);
@@ -666,6 +668,7 @@ function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballT
   if(!held&&reachK>.3){const h=handR().position,b=ball.position,hd=Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z),pd2=Math.hypot(pel.position.x-b.x,pel.position.z-b.z);
    if(hd<.3||(pd2<.45&&reachK>.6))grabBall();}                     // hand on it, or right underfoot with the arm already down
   // carrying: cradled along the inside of the forearm, nose in the palm (not resting on top of the hand)
+  if(held&&dv>0&&dv<DIVE_UP){carrier=d;const a=parts.hand1.position,b2=parts['hand-1'].position;ballMesh.position.set((a.x+b2.x)/2,(a.y+b2.y)/2,(a.z+b2.z)/2);ballMesh.quaternion.copy(chest.quaternion);continue;}   // diving: out in both hands
   if(held){carrier=d;const h=handR(),p=aimOn?bpt(h,0,-.02,.07):bpt(parts['farm-1'],.085,-.1,0);if(!aimOn){keepOut(p);const f=parts['farm-1'];f.pointToLocalFrame(p,_lp);carryOff.x+=(_lp.x-carryOff.x)*.2;carryOff.y+=(_lp.y-carryOff.y)*.2;carryOff.z+=(_lp.z-carryOff.z)*.2;f.pointToWorldFrame(carryOff,p);}   // glide, never teleport
    ballMesh.position.set(p.x,p.y,p.z);ballMesh.quaternion.copy(parts['farm-1'].quaternion);}}
  use(player);

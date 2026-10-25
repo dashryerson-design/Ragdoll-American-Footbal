@@ -281,7 +281,7 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.
  if(k===' '&&cur.runT>1){cur.boost=Math.min(.3,(cur.boost||0)+.06);return;}   // ball carrier in a long sprint: Space taps are a burst of speed, not a jump
  if(playPre()&&(k===' '||k==='q'))return;   // no jumping / diving before the snap
  // R: reset (QB / receiver drill), Q: dive the way the camera points, F: go limp / get up, T: drop the ball, 1: show the receiver's route, 2: receiver goes
- if(k==='r')resetPlay();if(k==='q')startDive();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')playStart();
+ if(k==='r')resetPlay();if(k==='q')jukeOrDive();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')playStart();
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()&&catchOn){startJump();return;}   // going up for a catch: always a vertical leap
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
@@ -395,6 +395,20 @@ function climb(dt){
 }
 // ---------- diving: launch the way the camera points, fly / slide laid out (the catch keeps working), then get back up ----------
 const DIVE_UP=1.15,DIVE_END=2.0;
+// ---------- juke: a direction + Q. Like a real one: a hard jab step and dropped shoulder / head snap the wrong way (sells the fake),
+// then plant off that foot and burst out low the other way, half sideways, half upfield. Defenders reading you can bite on the fake and
+// chase the wrong way for a moment; one caught close and flat-footed can stumble over. Q with no direction is still the dive ----------
+function jukeOrDive(){let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
+ if(sd&&dv===0&&!limp&&cs===0&&contact()&&mv>.2){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100;}return;}startDive();}
+function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the way you're juking, -r = the fake
+ if(j.t<.16){for(const b of[chest,head,neck,abd]){b.force.x-=b.mass*rx*38;b.force.z-=b.mass*rz*38;}pel.force.x-=pel.mass*rx*14;pel.force.z-=pel.mass*rz*14;pel.force.y-=pel.mass*6;}   // jab: shoulders and head thrown to the fake side, sinking hips
+ else if(!j.cut){j.cut=true;const v=pel.velocity,sp=Math.hypot(v.x,v.z),T=Math.min(9,Math.max(sp,3.5)*1.1+1.5),L=Math.hypot(rx*1.4+fx,rz*1.4+fz),nx=(rx*1.4+fx)/L,nz=(rz*1.4+fz)/L;
+  for(const b of list){b.velocity.x+=nx*T-v.x;b.velocity.z+=nz*T-v.z;}cur.jkB=.25;   // plant and explode out: new direction, a little faster than before
+  const P=pel.position;for(const d of roster){if(!d.cur.ai||d.cur.side==='d'===(cur.side==='d'))continue;const Q=d.pel.position,dist=Math.hypot(Q.x-P.x,Q.z-P.z);if(dist>7)continue;
+   if(Math.random()<.9-dist*.09){d.cur.biteEnd=(d.cur.t||0)+.45+Math.random()*.45;d.cur.biteV=[-rx*4,-rz*4];   // bit on the fake
+    if(dist<4.5&&Math.random()<.4){d.limp=true;d.limpT=performance.now()+650+Math.random()*400;for(const b of d.list){b.velocity.x-=rx*2.2;b.velocity.z-=rz*2.2;}}}}}   // ...and stumbled
+ else if(j.t<.32){for(const b of[chest,head]){b.force.x+=b.mass*rx*30;b.force.z+=b.mass*rz*30;}}   // lean into the cut
+ else cur.jk=null;}
 function startDive(){if(dv>0||limp||cs>0)return;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);
  for(const k in pins)unpin(k);js=0;jp=0;dv=1e-4;yaw=Math.atan2(dvx,dvz);const push=Math.max(0,Math.min(4.5,8-sp));   // the dive adds speed the way you aim, capped
  for(const b of list){b.velocity.x+=dvx*push;b.velocity.z+=dvz*push;b.velocity.y+=2.3;}}
@@ -412,7 +426,7 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  follow(t=>[0,dvY+(1.07+gs-dvY)*sm3(cl(t/(DIVE_END-DIVE_UP),0,1))],T-DIVE_UP,.9,70,16,35);
  ballArm();
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
-function control(dt){
+function control(dt){if(cur.jk)jukeTick(dt);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
  let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;   // locked on the line until the snap (2)
  let dx=-s*f+c*r,dz=-c*f-s*r;const len=Math.hypot(dx,dz);
@@ -433,7 +447,7 @@ function control(dt){
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
  if(held&&keys.shift&&mv>.5)cur.runT=(cur.runT||0)+dt;else{cur.runT=0;cur.boost=0;}cur.boost=Math.max(0,(cur.boost||0)-.12*dt);   // the burst fades unless you keep tapping
- const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
+ const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(1+(cur.jkB||0))*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
@@ -701,7 +715,7 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
  const jEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.on=false;joy.x=joy.y=0;K.style.transform='';}};J.addEventListener('touchend',jEnd);J.addEventListener('touchcancel',jEnd);
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
  tap($('bsprint'),()=>{keys.shift=!keys.shift;});   // sprint toggles (a held button + joystick + look is too many fingers)
- tap($('bdive'),()=>startDive());
+ tap($('bdive'),jukeOrDive);
  tap($('broute'),()=>{keys['1']=true;showRoute();});$('broute').addEventListener('touchend',()=>{keys['1']=false;});tap($('bgo'),playStart);
  tap(aimB,()=>{aimOn=!aimOn&&held;});
  tap(big,primaryDown);big.addEventListener('touchend',e=>{e.preventDefault();primaryUp();});
@@ -776,9 +790,9 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
   goTo(tx,tz,true,RP);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);   // jam: hands on him early in the route
   if(dd<1.1&&c.t<3.5&&c.t>(c.pushT||0)){c.pushT=c.t+1.2+Math.random();const kk=1.2+Math.random();for(const b of Rc.list){b.velocity.x+=dx/dd*kk;b.velocity.z+=dz/dd*kk;}}}
- if(c.st==='chase'){if(!car){c.st='cover';}goTo(RP.x+RV.x*.5,RP.z+RV.z*.5,true,null);
+ if(c.st==='chase'){if(!car){c.st='cover';}if(c.t<c.biteEnd)goTo(P.x+c.biteV[0],P.z+c.biteV[1],true,null);else goTo(RP.x+RV.x*.5,RP.z+RV.z*.5,true,null);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);
-  if(dd<1.3&&dv===0){face(RP.x,RP.z);startDive();for(const b of Rc.list){b.velocity.x+=dx/dd*3;b.velocity.z+=dz/dd*3;}Rc.limp=true;Rc.limpT=performance.now()+2600;c.st='down';}}   // tackle: dive into him, he goes limp for a moment
+  if(dd<1.3&&dv===0&&!(c.t<c.biteEnd)){face(RP.x,RP.z);startDive();for(const b of Rc.list){b.velocity.x+=dx/dd*3;b.velocity.z+=dz/dd*3;}Rc.limp=true;Rc.limpT=performance.now()+2600;c.st='down';}}   // tackle: dive into him, he goes limp for a moment
  if(c.st==='int'&&c.t-c.intT<1.5)goTo(P.x,P.z-6,true,null);   // picked it off: a few strides back the other way
  if(dv===0)plantCut(want,wantRun,29.4);}   // plants and changes direction hard (3 g)
 const active=()=>roster;

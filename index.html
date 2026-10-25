@@ -9,16 +9,13 @@ const C=CANNON,V=C.Vec3,Q=C.Quaternion;
 // ---------- render ----------
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.shadowMap.enabled=true;document.body.appendChild(renderer.domElement);
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x000000);
-const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,500);
-scene.add(new THREE.HemisphereLight(0xffffff,0xaaaaaa,.9));
-const sun=new THREE.DirectionalLight(0xffffff,.7);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
+renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;
+const scene=new THREE.Scene();scene.fog=new THREE.Fog(0x141c30,160,480);
+const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,600);
+scene.add(new THREE.HemisphereLight(0xc4d2ff,0x2b3b22,.6));
+const sun=new THREE.DirectionalLight(0xfff6e8,1.25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);   // the stadium floodlights; shadow box follows the doll
 Object.assign(sun.shadow.camera,{left:-6,right:6,top:6,bottom:-6,near:1,far:40});scene.add(sun,sun.target);
-const cv=document.createElement('canvas');cv.width=cv.height=256;const cx=cv.getContext('2d');
-cx.fillStyle='#7d7a73';cx.fillRect(0,0,256,256);cx.fillStyle='#716e68';cx.fillRect(0,0,128,128);cx.fillRect(128,128,128,128);
-const tex=new THREE.CanvasTexture(cv);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(100,100);tex.anisotropy=8;
-const plate=new THREE.Mesh(new THREE.BoxGeometry(200,1,200),new THREE.MeshStandardMaterial({map:tex,roughness:1}));
-plate.position.y=-.5;plate.receiveShadow=true;scene.add(plate);
+const fillL=new THREE.DirectionalLight(0xdfe6ff,.4);fillL.position.set(-30,40,-50);scene.add(fillL);
 // ---------- physics ----------
 const world=new C.World();world.gravity.set(0,-9.82,0);world.solver.iterations=30;world.broadphase=new C.SAPBroadphase(world);world.allowSleep=true;
 const gm=new C.Material('g'),bm=new C.Material('b');
@@ -111,10 +108,102 @@ function solid(hx,hy,hz,x,y,z,o={}){
  const q1=new Q();q1.setFromAxisAngle(new V(0,1,0),o.ry||0);b.quaternion.copy(q1);
  b.collisionFilterGroup=1;b.collisionFilterMask=-1;world.addBody(b);
  const m=new THREE.Mesh(new THREE.BoxGeometry(hx*2,hy*2,hz*2),new THREE.MeshStandardMaterial({color:o.c||0x888888,roughness:.8}));
- m.castShadow=m.receiveShadow=true;scene.add(m);m.position.copy(b.position);m.quaternion.copy(b.quaternion);
+ m.castShadow=m.receiveShadow=true;m.visible=!o.hide;scene.add(m);m.position.copy(b.position);m.quaternion.copy(b.quaternion);
  terr.push({b,hx,hy,hz,r:Math.hypot(hx,hy,hz)});return b;}
-// a few plain blocks to step on, jump on and climb (climbing needs a stomach-to-chest-high ledge)
-solid(1,.4,1,4,.4,4,{c:0x8a8d92});solid(1,.6,1,-4,.6,5,{c:0x7a7d82});solid(1.2,.75,1.2,0,.75,8,{c:0x6e7176});
+// ---------- stadium: regulation field (long axis along z) inside a two-deck bowl with a roof ring, floodlights and video boards ----------
+// kept cheap: all static, the bowl is ~10 big meshes, unlit materials for screens / LED boards, only the doll casts a shadow
+const YD=.9144,FL=120*YD,FW=160/3*YD,AX=FW/2+6,AZ=FL/2+9,CR=12;   // field length / width (end zones included), half-size of the grass to the wall, bowl corner radius
+const ANI=renderer.capabilities.getMaxAnisotropy();
+function ctex(w,h,draw,rep){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);
+ const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=ANI;if(rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1]);}return t;}
+function grain(g,w,h,a){const d=g.getImageData(0,0,w,h),p=d.data;for(let i=0;i<p.length;i+=4){const n=(Math.random()-.5)*a;p[i]+=n*.7;p[i+1]+=n;p[i+2]+=n*.5;}g.putImageData(d,0,0);}
+function stat(m){m.matrixAutoUpdate=false;m.updateMatrix();scene.add(m);return m;}
+const lam=(o)=>new THREE.MeshLambertMaterial(o),basic=(o)=>new THREE.MeshBasicMaterial(Object.assign({fog:false},o));
+// the field: one canvas in metres (x across, y along): 5-yard mowing stripes, end zones, every line, hash and number
+const fieldTex=ctex(1536,Math.round(1536*FL/FW),(g,w,h)=>{const k=w/FW;
+ for(let i=0;i<24;i++){g.fillStyle=i%2?'#1f5420':'#275f26';g.fillRect(0,Math.floor(i*5*YD*k),w,Math.ceil(5*YD*k)+1);}
+ grain(g,w,h,26);g.scale(k,k);
+ const ez=(y,col,txt,flip)=>{g.globalAlpha=.88;g.fillStyle=col;g.fillRect(0,y,FW,10*YD);g.globalAlpha=1;g.save();g.translate(FW/2,y+5*YD);g.rotate(flip?Math.PI:0);
+  g.fillStyle='#f4f4ee';g.strokeStyle='#111';g.lineWidth=.12;g.font='900 5.2px Impact,"Arial Black",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,0,.2);g.strokeText(txt,0,.2);g.restore();};
+ ez(0,'#7a1420','RAGDOLL',true);ez(FL-10*YD,'#13306e','FOOTBALL',false);
+ g.fillStyle='#f4f4ee';const W=(x,y,ww,hh)=>g.fillRect(x,y,ww,hh);
+ W(0,0,.15,FL);W(FW-.15,0,.15,FL);W(0,0,FW,.15);W(0,FL-.15,FW,.15);                        // field border
+ for(const y of[10*YD,110*YD])W(0,y-.1,FW,.2);                                          // goal lines (8 in)
+ for(let yd=15;yd<=105;yd+=5)W(.2,yd*YD-.05,FW-.4,.1);                                   // yard lines every 5
+ for(let yd=11;yd<110;yd++){if(yd%5===0)continue;const y=yd*YD-.05;
+  for(const x of[.2,FW-.81,21.56-.61/2+0,FW-21.56-.61/2])W(x,y,.61,.1);}                    // sideline + inbound hash marks (70'9" from each sideline)
+ for(const y of[12*YD,108*YD])W(FW/2-.46,y-.05,.92,.1);                                   // try lines
+ g.font='700 1.83px "Arial Narrow","Helvetica Neue",Arial,sans-serif';g.textAlign='center';g.textBaseline='middle';
+ for(let n=1;n<=9;n++){const y=(10+n*10)*YD,v=String((n<=5?n:10-n)*10);
+  for(const[x,r]of[[8.23+.92,Math.PI/2],[FW-8.23-.92,-Math.PI/2]]){g.save();g.translate(x,y);g.rotate(r);g.fillText(v[0],-.75,0);g.fillText(v[1],.75,0);
+   if(n!==5){const s=n<5?-1:1;g.beginPath();g.moveTo(s*(1.5+.55),0);g.lineTo(s*1.5,-.32);g.lineTo(s*1.5,.32);g.closePath();g.fill();}g.restore();}}
+ g.save();g.translate(FW/2,FL/2);g.globalAlpha=.9;g.fillStyle='#13306e';g.beginPath();g.arc(0,0,4.2,0,7);g.fill();g.strokeStyle='#f4f4ee';g.lineWidth=.25;g.stroke();
+ g.fillStyle='#f4f4ee';g.font='900 2.6px Impact,"Arial Black",sans-serif';g.fillText('RAF',0,.1);g.restore();});
+{const f=new THREE.Mesh(new THREE.PlaneGeometry(FW,FL),new THREE.MeshStandardMaterial({map:fieldTex,roughness:.95}));f.rotation.x=-Math.PI/2;f.position.y=.004;f.receiveShadow=true;stat(f);}
+const apronTex=ctex(256,256,(g,w,h)=>{g.fillStyle='#1d4a1d';g.fillRect(0,0,w,h);grain(g,w,h,30);},[AX/2,AZ/2]);
+{const a=stat(new THREE.Mesh(new THREE.PlaneGeometry(AX*2+4,AZ*2+4),new THREE.MeshStandardMaterial({map:apronTex,roughness:1})));a.rotation.x=-Math.PI/2;a.receiveShadow=true;a.updateMatrix();}
+{const wm=lam({color:0xf4f4ee});for(const[x,z,w,d]of[[FW/2+.92,0,1.83,FL+3.66],[-FW/2-.92,0,1.83,FL+3.66],[0,FL/2+.92,FW,1.83],[0,-FL/2-.92,FW,1.83]]){   // 6-ft white boundary band
+ const m=stat(new THREE.Mesh(new THREE.PlaneGeometry(w,d),wm));m.rotation.x=-Math.PI/2;m.position.set(x,.003,z);m.receiveShadow=true;m.updateMatrix();}}
+// rounded-rectangle rings around the grass, d metres out from the wall; every ring has the same vertex count so bands join cleanly
+function ring(d){const pts=[],cx=AX-CR,cz=AZ-CR,r=CR+d;
+ for(const[sx,sz,a0]of[[1,1,0],[-1,1,Math.PI/2],[-1,-1,Math.PI],[1,-1,1.5*Math.PI]])for(let i=0;i<=8;i++){const a=a0+i/8*Math.PI/2;pts.push([sx*cx+Math.cos(a)*r,sz*cz+Math.sin(a)*r]);}
+ pts.push(pts[0]);return pts;}
+function band(d0,y0,d1,y1,mat,uLen=8,vRep=1){const A=ring(d0),B=ring(d1),pos=[],uv=[],idx=[];let u=0;
+ for(let i=0;i<A.length;i++){if(i)u+=Math.hypot(A[i][0]-A[i-1][0],A[i][1]-A[i-1][1])/2+Math.hypot(B[i][0]-B[i-1][0],B[i][1]-B[i-1][1])/2;
+  pos.push(A[i][0],y0,A[i][1],B[i][0],y1,B[i][1]);uv.push(u/uLen,0,u/uLen,vRep);if(i)idx.push(2*i-2,2*i-1,2*i,2*i-1,2*i+1,2*i);}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();
+ mat.side=THREE.DoubleSide;return stat(new THREE.Mesh(g,mat));}
+// crowd: 32 seats x 12 rows per tile (0.5 m seats, 0.85 m rows), ~90% full, mostly home/away colours
+const SKIN=['#f1c9a5','#e0ac69','#c68642','#8d5524','#5c3a21','#ffdbac'],SHIRT=['#7a1420','#a01c2a','#13306e','#1d4596','#f4f4ee','#222','#7a1420','#13306e','#c9a227','#555'];
+function crowdTex(seat){return ctex(1024,512,(g,w,h)=>{const rh=h/12,sw=w/32;
+ for(let r=0;r<12;r++){const y=r*rh;g.fillStyle='#4b4d52';g.fillRect(0,y,w,rh);g.fillStyle='#3a3c40';g.fillRect(0,y+rh*.78,w,rh*.22);
+  for(let s=0;s<32;s++){const x=s*sw;g.fillStyle=seat;g.fillRect(x+2,y+rh*.38,sw-4,rh*.38);
+   if(Math.random()<.9){const sh=SHIRT[Math.random()*SHIRT.length|0],sk=SKIN[Math.random()*SKIN.length|0],jx=(Math.random()-.5)*4,up=Math.random()<.15?-6:0;
+    g.fillStyle=sh;g.fillRect(x+sw*.22+jx,y+rh*.3+up,sw*.56,rh*.5);g.fillStyle=sk;g.beginPath();g.arc(x+sw/2+jx,y+rh*.2+up,sw*.17,0,7);g.fill();
+    if(up&&Math.random()<.6){g.fillStyle=sk;g.fillRect(x+sw*.15+jx,y+up-2,3,rh*.3);g.fillRect(x+sw*.8+jx,y+up-2,3,rh*.3);}}}}   // some fans stand with arms up
+ grain(g,w,h,14);},[1,1]);}
+const ledTex=ctex(2048,64,(g,w,h)=>{g.fillStyle='#05070c';g.fillRect(0,0,w,h);const items=['RAGDOLL AMERICAN FOOTBALL','★','FIRST DOWN','★','HOME OF THE RAGDOLLS','★'];
+ g.font='900 40px Impact,"Arial Black",sans-serif';g.textBaseline='middle';let x=20,i=0;while(x<w){const t=items[i++%items.length];g.fillStyle=t==='★'?'#ffd23f':i%4<2?'#ff3b30':'#3ab0ff';g.fillText(t,x,h/2+2);x+=g.measureText(t).width+40;}},[1,1]);
+const suiteTex=ctex(256,64,(g,w,h)=>{g.fillStyle='#1b1d22';g.fillRect(0,0,w,h);for(let i=0;i<8;i++){const l=40+Math.random()*50;g.fillStyle=`hsl(38,60%,${l}%)`;g.fillRect(i*32+3,8,26,44);g.fillStyle='#0d0e10';g.fillRect(i*32+14,8,3,44);}},[1,1]);
+const padTex=ctex(512,64,(g,w,h)=>{g.fillStyle='#13306e';g.fillRect(0,0,w,h);g.fillStyle='#f4f4ee';g.font='900 34px Impact,"Arial Black",sans-serif';g.textBaseline='middle';g.fillText('RAGDOLL',20,h/2+2);g.fillText('FOOTBALL',290,h/2+2);},[1,1]);
+const concrete=lam({color:0x6d6f74}),steel=lam({color:0x2a2d33}),dark=lam({color:0x16181c});
+band(0,0,0,1.4,lam({map:padTex}),12);                                       // padded wall around the field
+band(0,1.4,2,1.4,concrete);                                                 // front walkway
+band(2,1.4,36,19.5,lam({map:crowdTex('#7a1420')}),16,40/10.2);                // lower bowl
+band(36,19.5,36,21.5,basic({map:ledTex}),60);                               // ribbon board
+band(36,21.5,40,21.5,concrete);band(40,21.5,40,26,basic({map:suiteTex}),8);  // club level + suites
+band(37,26,37,28,basic({map:ledTex}),60);band(37,28,37,28.3,concrete);      // upper fascia ribbon board
+band(37,28.3,68,50,lam({map:crowdTex('#13306e')}),16,38/10.2);               // upper deck
+band(68,50,68,57,dark);                                                     // back wall
+band(68,57,42,61,steel);                                                    // roof canopy (underside)
+band(42,60.4,41,61.2,basic({color:0xffffff}));                              // floodlight strip under the roof edge
+// floodlight glare: additive sprites along the roof edge
+{const gt=ctex(64,64,(g)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.25,'rgba(255,248,225,.55)');r.addColorStop(1,'rgba(255,240,210,0)');g.fillStyle=r;g.fillRect(0,0,64,64);});
+ const sm=new THREE.SpriteMaterial({map:gt,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}),R=ring(41.5);let acc=0;
+ for(let i=1;i<R.length;i++){const[a,b]=[R[i-1],R[i]],L=Math.hypot(b[0]-a[0],b[1]-a[1]);for(let t=(9-acc)%9;t<L;t+=9){const s=new THREE.Sprite(sm);s.position.set(a[0]+(b[0]-a[0])*t/L,60.4,a[1]+(b[1]-a[1])*t/L);s.scale.set(9,9,1);stat(s);}acc=(acc+L)%9;}}
+// video boards above both end zones
+const boardTex=ctex(1024,512,(g,w,h)=>{g.fillStyle='#04060a';g.fillRect(0,0,w,h);g.fillStyle='#0c1a3a';g.fillRect(16,16,w-32,h-32);
+ g.textAlign='center';g.textBaseline='middle';g.fillStyle='#ffd23f';g.font='900 64px Impact,"Arial Black",sans-serif';g.fillText('RAGDOLL AMERICAN FOOTBALL',w/2,80);
+ g.font='900 150px Impact,"Arial Black",sans-serif';g.fillStyle='#ff4a4a';g.fillText('0',w*.27,270);g.fillStyle='#4aa8ff';g.fillText('0',w*.73,270);
+ g.fillStyle='#f4f4ee';g.font='700 48px Arial,sans-serif';g.fillText('HOME',w*.27,390);g.fillText('AWAY',w*.73,390);g.fillText('1ST  15:00',w/2,270);g.font='700 36px Arial,sans-serif';g.fillText('1st & 10',w/2,440);});
+for(const s of[1,-1]){const z=s*(AZ+63);const f=stat(new THREE.Mesh(new THREE.BoxGeometry(46,24,2),steel));f.position.set(0,64,z+s*1.1);f.updateMatrix();
+ const p=stat(new THREE.Mesh(new THREE.PlaneGeometry(44,22),basic({map:boardTex})));p.position.set(0,64,z);p.rotation.y=s>0?Math.PI:0;p.updateMatrix();}
+// goalposts (gooseneck, 18'6" wide, crossbar 10 ft, uprights 35 ft above it), end zone pylons, team benches
+{const ym=lam({color:0xf2c200}),cyl=(r,l)=>new THREE.CylinderGeometry(r,r,l,12);
+ for(const s of[1,-1]){const ze=s*FL/2,zb=s*(FL/2+1.8),cb=3.05;
+  const add=(geo,x,y,z,rx=0,rz=0)=>{const m=new THREE.Mesh(geo,ym);m.position.set(x,y,z);m.rotation.set(rx,0,rz);m.castShadow=true;stat(m);};
+  add(cyl(.16,cb+1),0,(cb+1)/2,zb);add(cyl(.12,Math.abs(zb-ze)),0,cb+1,(zb+ze)/2,Math.PI/2);add(cyl(.12,1),0,cb+.5,ze);
+  add(cyl(.08,5.64),0,cb,ze,0,Math.PI/2);for(const x of[-2.82,2.82])add(cyl(.06,10.67),x,cb+10.67/2,ze);
+  solid(.35,1,.35,0,1,zb,{c:0x13306e});                                        // padded base
+  for(const x of[-FW/2,FW/2])for(const z of[s*FL/2,s*(FL/2-10*YD)]){const m=new THREE.Mesh(new THREE.BoxGeometry(.1,.45,.1),lam({color:0xff7a00}));m.position.set(x,.225,z);stat(m);}}
+ for(const s of[1,-1]){solid(.35,.25,22,s*(FW/2+4.2),.25,0,{c:0x3a3d44});solid(.06,.4,22,s*(FW/2+4.55),.65,0,{c:0x2a2d33});}}
+// the walls are tall invisible colliders (not climbable, so nobody walks into the crowd); straight sides plus a tangent wall across each corner
+for(const s of[1,-1]){solid(.3,2,AZ-CR,s*(AX+.3),2,0,{hide:1});solid(AX-CR,2,.3,0,2,s*(AZ+.3),{hide:1});
+ for(const t of[1,-1])solid(8.5,2,.3,s*(AX-3.51+.2),2,t*(AZ-3.51+.2),{ry:s*t*Math.PI/4,hide:1});}
+// night sky: a big gradient dome
+stat(new THREE.Mesh(new THREE.SphereGeometry(520,24,12),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
+ vertexShader:'varying float h;void main(){h=normalize(position).y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+ fragmentShader:'varying float h;void main(){vec3 a=vec3(.09,.12,.2),b=vec3(.01,.015,.04);gl_FragColor=vec4(mix(a,b,smoothstep(0.,.5,h)),1.);}'})));
 // ---------- foot planting: a planted foot is pinned to the floor so it cannot slide ----------
 const anchor=new C.Body({mass:0});world.addBody(anchor);let pins={};
 function unpin(k){if(pins[k]){world.removeConstraint(pins[k].c);delete pins[k];}}

@@ -24,9 +24,9 @@
 .ch{width:min(42vw,230px);padding:min(22px,3vh) 14px min(18px,3vh);border:2px solid #333;border-radius:14px;background:#0d0d0d;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:14px;font:700 15px system-ui,sans-serif;letter-spacing:.08em;transition:border-color .15s,transform .15s,background .15s}
 .ch:hover,.ch:focus-visible{border-color:#d8a24a;background:#17130c;transform:translateY(-3px);outline:none}
 .ch svg{width:70%;height:auto;max-width:130px;max-height:18vh}
-#pm{background:#000c}#pm h2{margin:0;font:900 40px Impact,"Arial Black",sans-serif;letter-spacing:.08em}
-#pm button{font:700 16px system-ui,sans-serif;letter-spacing:.08em;color:#fff;background:#111;border:2px solid #d8a24a;border-radius:10px;padding:14px 28px;cursor:pointer}
-#pm button:hover,#pm button:focus-visible{background:#2a2112;outline:none}
+#pm,#org{background:#000c}#org{gap:1.4vh}#osum{font:700 13px system-ui,sans-serif;letter-spacing:.06em;color:#d8a24a;text-align:center}#pm h2{margin:0;font:900 40px Impact,"Arial Black",sans-serif;letter-spacing:.08em}
+#pm button,#org button{font:700 16px system-ui,sans-serif;letter-spacing:.08em;color:#fff;background:#111;border:2px solid #d8a24a;border-radius:10px;padding:14px 28px;cursor:pointer}
+#pm button:hover,#pm button:focus-visible,#org button:hover,#org button:focus-visible{background:#2a2112;outline:none}
 </style></head><body>
 <div id="mm" class="ov"><div id="logo"><svg viewBox="0 0 120 70" aria-hidden="true"><ellipse cx="60" cy="35" rx="56" ry="31" fill="#7a3a16"/><ellipse cx="60" cy="35" rx="56" ry="31" fill="none" stroke="#4a210a" stroke-width="3"/>
 <path d="M17 20q6 15 0 30M103 20q-6 15 0 30" stroke="#f4efe6" stroke-width="4" fill="none"/><path d="M38 35h44" stroke="#f4efe6" stroke-width="4"/><path d="M45 29v12M52 29v12M60 29v12M68 29v12M75 29v12" stroke="#f4efe6" stroke-width="3"/></svg>
@@ -36,7 +36,8 @@
 <div class="tb" id="brst" title="Reset the QB with the ball (R)">&#x21bb;</div>
 <div id="cboost" hidden style="position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3;font:800 13px system-ui,sans-serif;letter-spacing:.12em;color:#111;background:#ffd23f;border-radius:999px;padding:6px 14px;pointer-events:none">CATCH BOOST +20%</div>
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
-<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bwr">WIDE RECEIVER AI: OFF</button><button id="bdf">DEFENDER AI: OFF</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
+<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="borg">GAME ORGANISER</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
+<div id="org" class="ov" hidden><h2>GAME ORGANISER</h2><button id="oyou"></button><button id="ooff"></button><button id="opos"></button><button id="oos"></button><button id="ods"></button><div id="osum"></div><button id="ogo">START</button><button id="oback">BACK</button></div>
 <div id="ed" hidden><span id="edtxt">Drag to move · tap to select</span><button id="edm">−</button><button id="edp">+</button><button id="edr">RESET</button><button id="edone">DONE</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
 <div class="tb" id="bbig"></div>
@@ -626,7 +627,7 @@ function catchFx(){const b=ball.position;cfxS.position.set(b.x,b.y,b.z);const t0
  const tick=()=>{const u=(performance.now()-t0)/450;if(u>=1){cfxS.visible=false;return;}const r=.4+2.4*u;cfxS.scale.set(r,r,1);cfxS.material.opacity=1-u;requestAnimationFrame(tick);};tick();
  document.getElementById('cfx').animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.15)',offset:.2},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.7},{opacity:0,transform:'translate(-50%,-60%) scale(1)'}],{duration:900,easing:'ease-out'});}
 const CATCH_ASSIST=.1;
-function catchGrab(){if(cur.role==='df'&&!cur.canInt)return false;catchFx();grabBall();return true;}   // a defender who isn't going to hang on still gets his hands on it (a deflection)
+function catchGrab(){if(cur.ai&&cur.role==='df'&&!cur.canInt)return false;catchFx();grabBall();return true;}   // a defender who isn't going to hang on still gets his hands on it (a deflection)
 // held catch for 1.2 s+ (an early, set receiver): +20% reach, range and reaction
 const catchBoost=()=>catchOn&&cur.catchT0&&performance.now()-cur.catchT0>1200?1.2:1;
    // catch assist: 10 cm of extra wiggle room on every catch (hands and chest trap)
@@ -710,66 +711,63 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
  $('tc').addEventListener('touchstart',e=>{for(const t of e.changedTouches)if(t.target===$('tc'))look[t.identifier]=[t.clientX,t.clientY];});
  $('tc').addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches){const L=look[t.identifier];if(!L)continue;camYaw-=(t.clientX-L[0])*.008;camPitch=Math.max(-.6,Math.min(1.2,camPitch+(t.clientY-L[1])*.008));L[0]=t.clientX;L[1]=t.clientY;}},{passive:false});
  const lEnd=e=>{for(const t of e.changedTouches)delete look[t.identifier];};$('tc').addEventListener('touchend',lEnd);$('tc').addEventListener('touchcancel',lEnd);
- setInterval(()=>{if(!held&&document.body.classList.contains('touch'))aimOn=false;const lab=aimOn?'THROW':held?'':teammate&&qbD.held&&qbD.cur.st==='idle'?'CALL':'CATCH';big.textContent=lab;big.classList.toggle('on',!!lab&&(aimOn||catchOn||lab==='CALL'));aimB.classList.toggle('on',aimOn);$('bsprint').classList.toggle('on',!!keys.shift);},100);}
+ setInterval(()=>{if(!held&&document.body.classList.contains('touch'))aimOn=false;const q=aiQB(),lab=aimOn?'THROW':held?'':player.cur.role==='wr'&&q&&q.held&&q.cur.st==='idle'?'CALL':'CATCH';big.textContent=lab;big.classList.toggle('on',!!lab&&(aimOn||catchOn||lab==='CALL'));aimB.classList.toggle('on',aimOn);$('bsprint').classList.toggle('on',!!keys.shift);},100);}
 // ---------- menus: main menu (pick a control scheme) and the P pause menu ----------
 let mode=null,paused=false;const $m=id=>document.getElementById(id);
 function startGame(m){mode=m;document.body.classList.toggle('touch',m==='touch');$m('mm').hidden=true;last=performance.now();}
 function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
 function toMenu(){paused=false;$m('pm').hidden=true;mode=null;document.body.classList.remove('touch');
  for(const d of active()){use(d);held=false;thr=-1;aimOn=false;chargeT=-1;catchOn=false;reset();}use(player);   // a fresh start next time
- looseBall();if(teammate||wrMode||defOn)resetPlay();$m('mm').hidden=false;}
+ looseBall();resetPlay();$m('mm').hidden=false;}
 // ---------- dolls: the player and the QB run the exact same ragdoll + controller; each doll's state is swapped in with use(d) ----------
 const SWAP=['parts','list','joints','totalMass','pel','abd','chest','neck','head','cons','limp','gdir','crK','fh','LH','gs','keys','camYaw','camPitch','js','jt','jdx','jdz','jp','jpt','bsd','bchg','cur','yaw','phase','mv','airT','ab','cs','ct','ctt','ccool','cscan','cH','cdx','cdz','cex','cez','cl0','cs0','cy0','cyL','csL','cT','pins','qbK','held','reachK','reachOn','ballCool','aimOn','thr','thTw','thLean','chargeT','throwSpd','carryOff','spread','catchOn','catchK','catchSide'];
 function saveTo(d){d.parts=parts;d.list=list;d.joints=joints;d.totalMass=totalMass;d.pel=pel;d.abd=abd;d.chest=chest;d.neck=neck;d.head=head;d.cons=cons;d.limp=limp;d.gdir=gdir;d.crK=crK;d.fh=fh;d.LH=LH;d.gs=gs;d.keys=keys;d.camYaw=camYaw;d.camPitch=camPitch;d.js=js;d.jt=jt;d.jdx=jdx;d.jdz=jdz;d.jp=jp;d.jpt=jpt;d.bsd=bsd;d.bchg=bchg;d.cur=cur;d.yaw=yaw;d.phase=phase;d.mv=mv;d.airT=airT;d.ab=ab;d.cs=cs;d.ct=ct;d.ctt=ctt;d.ccool=ccool;d.cscan=cscan;d.cH=cH;d.cdx=cdx;d.cdz=cdz;d.cex=cex;d.cez=cez;d.cl0=cl0;d.cs0=cs0;d.cy0=cy0;d.cyL=cyL;d.csL=csL;d.cT=cT;d.pins=pins;d.qbK=qbK;d.held=held;d.reachK=reachK;d.reachOn=reachOn;d.ballCool=ballCool;d.aimOn=aimOn;d.thr=thr;d.thTw=thTw;d.thLean=thLean;d.chargeT=chargeT;d.throwSpd=throwSpd;d.carryOff=carryOff;d.spread=spread;d.catchOn=catchOn;d.catchK=catchK;d.catchSide=catchSide;d.dv=dv;d.dvx=dvx;d.dvz=dvz;d.dvY=dvY;}
 function loadFrom(d){parts=d.parts;list=d.list;joints=d.joints;totalMass=d.totalMass;pel=d.pel;abd=d.abd;chest=d.chest;neck=d.neck;head=d.head;cons=d.cons;limp=d.limp;gdir=d.gdir;crK=d.crK;fh=d.fh;LH=d.LH;gs=d.gs;keys=d.keys;camYaw=d.camYaw;camPitch=d.camPitch;js=d.js;jt=d.jt;jdx=d.jdx;jdz=d.jdz;jp=d.jp;jpt=d.jpt;bsd=d.bsd;bchg=d.bchg;cur=d.cur;yaw=d.yaw;phase=d.phase;mv=d.mv;airT=d.airT;ab=d.ab;cs=d.cs;ct=d.ct;ctt=d.ctt;ccool=d.ccool;cscan=d.cscan;cH=d.cH;cdx=d.cdx;cdz=d.cdz;cex=d.cex;cez=d.cez;cl0=d.cl0;cs0=d.cs0;cy0=d.cy0;cyL=d.cyL;csL=d.csL;cT=d.cT;pins=d.pins;qbK=d.qbK;held=d.held;reachK=d.reachK;reachOn=d.reachOn;ballCool=d.ballCool;aimOn=d.aimOn;thr=d.thr;thTw=d.thTw;thLean=d.thLean;chargeT=d.chargeT;throwSpd=d.throwSpd;carryOff=d.carryOff;spread=d.spread;catchOn=d.catchOn;catchK=d.catchK;catchSide=d.catchSide;dv=d.dv;dvx=d.dvx;dvz=d.dvz;dvY=d.dvY;}
 let curD=null;function use(d){if(curD===d)return;if(curD)saveTo(curD);loadFrom(d);curD=d;}
 const player={};saveTo(player);curD=player;
-// the QB: built like the player (same parts, masses, joints), in red, 10 m behind the 50; parked out of the world until switched on
-const QB_Z=-10,qbD={};
-{saveTo(player);buildDoll(0x8a1420,0x2a0a0e);for(const b of list){b.home[2]+=QB_Z;b.position.z+=QB_Z;}
- limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,st:'idle'};
+// ---------- bots: extra dolls on the same ragdoll + controller, built on demand and parked out of the world until a set needs them ----------
+const TEAM={blue:[0x2a6fdb,0x23304d],red:[0xb01e28,0x3a0d10]};
+function tagCols(d){for(const b of d.list){const h=b.mesh.material.color.getHex();b.mesh.userData.k=h===0x2a6fdb?0:h===0x23304d?1:-1;}}
+function paint(d,t){for(const b of d.list){const k=b.mesh.userData.k;if(k>=0)b.mesh.material.color.setHex(TEAM[t][k]);}}
+tagCols(player);const pool=[];
+function bot(i){if(pool[i])return pool[i];const d={};saveTo(player);buildDoll(0x2a6fdb,0x23304d);
+ limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true};
  yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
- saveTo(qbD);loadFrom(player);curD=player;
- for(const b of qbD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of qbD.cons)world.removeConstraint(c);}
-// the wide receiver: a third doll on the same ragdoll + controller, in green
-const wrD={};
-{saveTo(player);buildDoll(0x1e7a3a,0x0d2a14);
- limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,role:'wr',st:'set'};
- yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
- saveTo(wrD);loadFrom(player);curD=player;
- for(const b of wrD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of wrD.cons)world.removeConstraint(c);}
-// defender: fourth doll (group 8, collides with players and the ball), slow on purpose so he's easy to beat
-const dfD={};
-{saveTo(player);buildDoll(0x222222,0x111111);
- limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,role:'df'};
- yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
- for(const b of list){b.collisionFilterGroup=8;b.collisionFilterMask=7;   // world, players, ball - not his own limbs
- }saveTo(dfD);loadFrom(player);curD=player;
- for(const b of dfD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of dfD.cons)world.removeConstraint(c);}
-for(const d of[player,qbD,wrD])for(const b of d.list)b.collisionFilterMask|=8;
-let defOn=false,playState='live';
+ saveTo(d);loadFrom(player);curD=player;tagCols(d);
+ for(const b of d.list){world.removeBody(b);b.mesh.visible=false;}for(const c of d.cons)world.removeConstraint(c);return pool[i]=d;}
+// offensive sets: receiver spots in metres (+x = left sideline, z = 0 on the line, slots 1 m off it); the QB is always 15 yd back
+const OSETS=[['FREE ROAM (NO PLAY)',null],['SINGLEBACK - 1 WR',[[12,0]]],['PRO SET - 2 WR',[[12,0],[-12,0]]],['SHOTGUN TWINS - 2 WR',[[13,0],[8,-1]]],['11 PERSONNEL 2x1 - 3 WR',[[14,0],[8.5,-1],[-14,0]]],['SHOTGUN TRIPS - 3 WR',[[15,0],[10.5,-1],[6,-1]]],['SPREAD 2x2 - 4 WR',[[15,0],[9,-1],[-15,0],[-9,-1]]],['EMPTY 3x2 - 5 WR',[[16,0],[11,-1],[6,-1],[-16,0],[-10,-1]]]];
+// defensive sets: a man on every receiver, plus [deep safeties, QB rushers, robbers]
+const DSETS=[['NO DEFENCE',null],['COVER 0 BLITZ',[0,1,0]],['COVER 1 MAN FREE',[1,0,0]],['COVER 1 ROBBER',[1,0,1]],['COVER 2 MAN',[2,0,0]],['NICKEL COVER 1 BLITZ',[1,1,0]],['DIME 2 MAN UNDER',[2,0,1]]];
+const ORG={you:'blue',off:'blue',pos:'qb',os:0,ds:0};
+let playState='live',playOn=false,roster=[player],qbClock=0,callReq=null;
 const QB_DEPTH=-15*YD,DEF_Z=20*YD;
-const playPre=()=>(teammate||wrMode)&&playState==='pre';
-function setDef(on){defOn=on;$m('bdf').textContent='DEFENDER AI: '+(on?'ON':'OFF');showDoll(dfD,on);if(on)resetPlay();}
+const playPre=()=>playOn&&playState==='pre';
+const H=d=>d===curD?held:d.held;   // the swapped-in doll's live state is in the globals
 // ---------- defender: reads the receiver with a reaction delay, mirrors with a cushion, sometimes bites on cuts,
 // jams early, plays the ball in the air (deflects, sometimes intercepts), and tackles the ball carrier ----------
-function defThink(dt){const c=cur,Rc=teammate?player:wrMode?wrD:player,P=pel.position,RP=Rc.pel.position,RV=Rc.pel.velocity;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;
+function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d.cur.role==='qb'&&d.pel.position.z<0)),Rc=car||c.mark||player,P=pel.position,RP=Rc.pel.position,RV=Rc.pel.velocity;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;
  const face=(x,z)=>{camYaw=Math.atan2(x-P.x,z-P.z)+Math.PI;};
  // move to (x,z) running exactly like the player (face the way he runs, sprint unless it's a short adjustment); only tiny last-metre fixes are a shuffle facing the receiver
  let want=null,wantRun=false;const goTo=(x,z,run,look)=>{const mx=x-P.x,mz=z-P.z,d=Math.hypot(mx,mz);want=d<.45?null:[x,z];wantRun=run&&d>1.5;if(d<.45){if(look)face(look.x,look.z);return;}
   if(look&&d<1){face(look.x,look.z);const cy=camYaw,f=-(mx*Math.sin(cy)+mz*Math.cos(cy))/d,r=(mx*Math.cos(cy)-mz*Math.sin(cy))/d;keys.w=f>.3;keys.s=f<-.3;keys.d=r>.3;keys.a=r<-.3;}
   else{face(x,z);keys.w=true;keys.shift=run&&d>1.5;}};
- if(c.st==='pre'){face(RP.x,RP.z);return;}
+ if(c.st==='pre'){if(c.mark)face(RP.x,RP.z);else face(P.x,P.z-5);return;}
  if(c.st==='down'){if(dv===0)c.st='cover';return;}
  const hist=c.hist||(c.hist=[]);hist.push([c.t,RP.x,RP.z,RV.x,RV.z]);while(hist.length>2&&hist[1][0]<c.t-c.rd)hist.shift();const S=hist[0];   // what he "sees": the receiver c.rd seconds ago
  const inAir=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.3;
  if(inAir&&c.st!=='ball'&&!held){c.st='ball';c.canInt=Math.random()<.3;catchOn=true;cur.catchT0=1e15;}   // no catch boost for him
  if(held&&c.st!=='int'){c.st='int';c.intT=c.t;}
- if(c.st==='ball'){if(!inAir){catchOn=false;c.st=Rc.held?'chase':'cover';}
+ if(c.st==='ball'){if(!inAir){catchOn=false;c.st=car?'chase':'cover';}
   else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);
    for(let t=0;t<5&&!(vy<0&&y<1.6)&&y>.09;t+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}   // where it comes down through a defender's reach
    goTo(x,z,true,null);if(js===0&&contact()&&cur.cp&&cur.cp.t<.45&&cur.cp.p.y>head.position.y)startJump();}}   // go up for it
- if(c.st==='cover'){if(Rc.held){c.st='chase';}
+ if(c.st==='cover'&&car)c.st='chase';
+ if(c.st==='cover'&&c.kind==='rush'){const q=roster.find(d=>d.cur.role==='qb');if(q){const Q=q.pel.position,dx=Q.x-P.x,dz=Q.z-P.z,dd=Math.hypot(dx,dz);goTo(Q.x,Q.z,true,null);if(dd<1.3&&dv===0&&H(q)){startDive();q.limp=true;q.limpT=performance.now()+2600;c.st='down';}}}   // blitz: straight at the QB, sack him
+ if(c.st==='cover'&&(c.kind==='deep'||c.kind==='rob')){let T=null,bz=-1e9;   // help: deep = over the top of the deepest receiver in his half; robber = under the nearest one in the middle
+  for(const d of roster){if(d.cur.role!=='wr')continue;const p=d.pel.position;if(c.half&&Math.sign(p.x||1)!==Math.sign(c.px))continue;const sc=c.kind==='deep'?p.z:-Math.hypot(p.x-P.x,p.z-P.z);if(sc>bz){bz=sc;T=p;}}
+  if(T){if(c.kind==='deep')goTo(c.px*.4+T.x*.6,Math.max(c.pz,T.z+7),true,T);else goTo(T.x*.7,cl(T.z-2,8,14),true,T);}}
+ if(c.st==='cover'&&c.kind==='man'){
   const vx=S[3],vz=S[4],sp=Math.hypot(vx,vz);
   if(c.pv&&sp>2){const pv=c.pv,cs2=(pv[0]*vx+pv[1]*vz)/((Math.hypot(pv[0],pv[1])||1)*sp);if(cs2<.6&&c.t>(c.biteEnd||0)&&Math.random()<.45){c.biteEnd=c.t+.35+Math.random()*.3;c.biteV=pv;}}   // a hard cut: sometimes he bites and keeps going
   if(sp>.5)c.pv=[vx,vz];
@@ -778,13 +776,12 @@ function defThink(dt){const c=cur,Rc=teammate?player:wrMode?wrD:player,P=pel.pos
   goTo(tx,tz,true,RP);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);   // jam: hands on him early in the route
   if(dd<1.1&&c.t<3.5&&c.t>(c.pushT||0)){c.pushT=c.t+1.2+Math.random();const kk=1.2+Math.random();for(const b of Rc.list){b.velocity.x+=dx/dd*kk;b.velocity.z+=dz/dd*kk;}}}
- if(c.st==='chase'){if(!Rc.held){c.st='cover';}goTo(RP.x+RV.x*.5,RP.z+RV.z*.5,true,null);
+ if(c.st==='chase'){if(!car){c.st='cover';}goTo(RP.x+RV.x*.5,RP.z+RV.z*.5,true,null);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);
   if(dd<1.3&&dv===0){face(RP.x,RP.z);startDive();for(const b of Rc.list){b.velocity.x+=dx/dd*3;b.velocity.z+=dz/dd*3;}Rc.limp=true;Rc.limpT=performance.now()+2600;c.st='down';}}   // tackle: dive into him, he goes limp for a moment
  if(c.st==='int'&&c.t-c.intT<1.5)goTo(P.x,P.z-6,true,null);   // picked it off: a few strides back the other way
  if(dv===0)plantCut(want,wantRun,29.4);}   // plants and changes direction hard (3 g)
-let teammate=false,wrMode=false,qbClock=0,callReq=null;
-const active=()=>{const a=teammate?[player,qbD]:wrMode?[player,wrD]:[player];if(defOn)a.push(dfD);return a;};
+const active=()=>roster;
 function showDoll(d,on){for(const b of d.list){if(on)world.addBody(b);else world.removeBody(b);b.mesh.visible=on;}for(const c of d.cons)if(on)world.addConstraint(c);else world.removeConstraint(c);if(!on){use(d);for(const k in pins)unpin(k);held=false;use(player);}}
 // stand a doll at (x, z) facing downfield (+z)
 function placeAt(d,x,z){use(d);reset();const dz=z-pel.home[2];for(const b of list){b.position.x+=x;b.position.z+=dz;}}   // pelvis home x is 0
@@ -792,42 +789,58 @@ function placeAt(d,x,z){use(d);reset();const dz=z-pel.home[2];for(const b of lis
 // deeper, field-stretching routes in yards from the receiver's spot (+x = toward his own sideline, the left; -x = inside, toward the middle / right side)
 const ROUTES={DEEP_POST:[[0,15],[-14,36]],DIG:[[0,18],[-22,18]],DEEP_CROSS:[[0,8],[-30,22]],LONG_SLANT:[[0,4],[-16,18]],SHALLOW_CROSS:[[0,5],[-28,8]],CURL:[[0,15],[-2,13]],SEAM:[[0,10],[-6,40]],GO:[[0,45]],CORNER:[[0,14],[8,30]],COMEBACK:[[0,18],[4,15]]};
 const ROUTE_W=[['DEEP_POST',3],['DIG',3],['DEEP_CROSS',3],['LONG_SLANT',2],['SHALLOW_CROSS',2],['CURL',.6],['SEAM',2],['GO',.5],['CORNER',.3],['COMEBACK',.3]];   // mostly ending in the middle or on the right
-const WR_X=12,QB_Zs=-4.6;let route=null,routeName='',routeVis=false,routeFull=false,routeDownT=0,birdK=0;
+const WR_X=12,QB_Zs=-4.6;let routeX=WR_X,route=null,routeName='',routeVis=false,routeFull=false,routeDownT=0,birdK=0;
 const routeMesh=new THREE.Group(),rtCore=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial({color:0xff1e12,transparent:true,opacity:.95,depthWrite:false,side:THREE.DoubleSide})),rtGlow=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial({color:0xff3020,transparent:true,opacity:.28,depthWrite:false,side:THREE.DoubleSide}));
 routeMesh.add(rtGlow,rtCore);routeMesh.visible=false;scene.add(routeMesh);   // solid red core + soft red glow (additive turned it yellow on the grass)
 // each play: a weighted random route (mostly breaking inside, toward the middle / far side), then the hint mesh
-function pickRoute(){let r=Math.random()*ROUTE_W.reduce((a,b)=>a+b[1],0),n=ROUTE_W[0][0];for(const[k,w]of ROUTE_W){if((r-=w)<0){n=k;break;}}routeName=n;
- const out=Math.sign(WR_X);route=ROUTES[n].map(([x,z])=>[WR_X+out*x*YD,z*YD]);routeShape(false);}
+// (receivers in the same play don't repeat a route)
+function pickRoute(x0,used){let n;for(let t=0;t<12;t++){let r=Math.random()*ROUTE_W.reduce((a,b)=>a+b[1],0);n=ROUTE_W[0][0];for(const[k,w]of ROUTE_W){if((r-=w)<0){n=k;break;}}if(!used.includes(n))break;}used.push(n);
+ const out=Math.sign(x0);return[ROUTES[n].map(([x,z])=>[x0+out*x*YD,z*YD]),n];}
 // vague = the first leg plus just the start of the break; full = the whole route (shown in the bird's-eye view)
-function routeShape(full){if(!route)return;let P=[[WR_X,0],...route];
- if(!full){P=[[WR_X,0],route[0]];if(route[1]){const a=route[0],b=route[1],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,k=Math.min(1,4.5/L);P.push([a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]);}else P[1]=[WR_X,Math.min(route[0][1],18)];}
+function routeShape(full){if(!route)return;let P=[[routeX,0],...route];
+ if(!full){P=[[routeX,0],route[0]];if(route[1]){const a=route[0],b=route[1],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,k=Math.min(1,4.5/L);P.push([a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]);}else P[1]=[routeX,Math.min(route[0][1],18)];}
  const ribbon=(w,y)=>{const pos=[];for(let i=0;i<P.length-1;i++){const[a,b]=[P[i],P[i+1]],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,nx=-(b[1]-a[1])/L*w,nz=(b[0]-a[0])/L*w,e=i===P.length-2?.9:0,bx=b[0]-(b[0]-a[0])/L*e,bz=b[1]-(b[1]-a[1])/L*e;
   pos.push(a[0]+nx,y,a[1]+nz,a[0]-nx,y,a[1]-nz,bx+nx,y,bz+nz, a[0]-nx,y,a[1]-nz,bx-nx,y,bz-nz,bx+nx,y,bz+nz);
   if(e){pos.push(bx+nx*3,y,bz+nz*3,bx-nx*3,y,bz-nz*3,b[0]+(b[0]-a[0])/L*w,y,b[1]+(b[1]-a[1])/L*w);}}return pos;};   // arrowhead
  for(const[m,w,y]of[[rtCore,.2,.04],[rtGlow,.55,.035]]){m.geometry.dispose();m.geometry=new THREE.BufferGeometry();m.geometry.setAttribute('position',new THREE.Float32BufferAttribute(ribbon(w,y),3));}routeFull=full;}
 function showRoute(){if(!playPre())return;routeVis=true;routeMesh.visible=true;routeDownT=performance.now();}   // tap: the vague hint; hold: bird's-eye + full route
 // the snap: the receiver (AI or you) can go, the defender reads and reacts
-function playStart(){if(!playPre())return;playState='live';if(wrMode){wrD.cur.st='route';wrD.cur.i=0;}if(defOn)dfD.cur.st='cover';routeVis=false;routeMesh.visible=false;}
+function playStart(){if(!playPre())return;playState='live';for(const d of roster){if(d.cur.ai&&d.cur.role==='wr'){d.cur.st='route';d.cur.i=0;}if(d.cur.ai&&d.cur.side==='d')d.cur.st='cover';}routeVis=false;routeMesh.visible=false;}
 // R: everyone back to the line, the ball to the QB, a new route; nothing moves until 2
 // receiver split wide on the 50, QB 15 yd behind the line, defender 20 yd in front of the receiver
-function resetPlay(){const on=teammate||wrMode;if(!on&&!defOn)return;
- for(const d of active()){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;limp=false;d.limpT=0;keys={};}use(player);
- const qb=teammate?qbD:player,rc=teammate?player:wrMode?wrD:null;
- if(on){placeAt(qb,0,QB_DEPTH);placeAt(rc,WR_X,-.4);}
- if(defOn){placeAt(dfD,rc?WR_X-1.5:-3,rc?DEF_Z:8);Object.assign(dfD.cur,{st:on?'pre':'cover',t:0,hist:[],rd:.22+Math.random()*.2,biteEnd:0,pushT:0,pv:null});}
- if(wrMode)Object.assign(wrD.cur,{st:'set',i:0,t:0});if(teammate)Object.assign(qbD.cur,{st:'idle',T:null});
- looseBall();if(on){use(qb);grabBall();}use(player);
- if(on)pickRoute();routeVis=false;routeMesh.visible=false;playState=on?'pre':'live';callReq=null;}
-function modeOff(){routeMesh.visible=false;playState='live';use(player);held=false;aimOn=false;thr=-1;reset();use(player);looseBall();if(defOn)resetPlay();}
-function setWR(on){if(on===wrMode)return;if(on&&teammate)setTeammate(false);wrMode=on;document.body.classList.toggle('play',teammate||wrMode);$m('bwr').textContent='WIDE RECEIVER AI: '+(on?'ON':'OFF');
- showDoll(wrD,on);if(on)resetPlay();else modeOff();}
+function resetPlay(){if(!playOn)return;
+ for(const d of roster){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;limp=false;d.limpT=0;keys={};}use(player);
+ const used=[];let q=null,rw=null;
+ for(const d of roster){const c=d.cur;
+  if(c.role==='qb'){q=d;placeAt(d,0,QB_DEPTH);Object.assign(c,{st:'idle',T:null,wait:null,tg:null});}
+  if(c.role==='wr'){placeAt(d,c.x0,c.z0-.4);[c.route,c.rname]=pickRoute(c.x0,used);Object.assign(c,{st:'set',i:0,t:0});if(!rw||d===player)rw=d;}
+  if(c.side==='d'){placeAt(d,c.px,c.pz);if(d===player)camYaw=0;Object.assign(c,{st:'pre',t:0,hist:[],rd:.22+Math.random()*.2,biteEnd:0,pushT:0,pv:null});}}
+ looseBall();if(q){use(q);grabBall();}use(player);
+ route=rw&&rw.cur.route;routeName=rw?rw.cur.rname:'';routeX=rw?rw.cur.x0:WR_X;routeShape(false);   // the route shown on 1: yours, or the first receiver's when you're the QB
+ routeVis=false;routeMesh.visible=false;playState=q?'pre':'live';callReq=null;}
+// apply the game organiser: your team and spot, the offence's set, the defence's set; everyone else is a bot
+function applyOrg(){for(const d of roster)if(d!==player)showDoll(d,false);use(player);held=false;aimOn=false;thr=-1;reset();looseBall();
+ const youO=ORG.you===ORG.off,os=OSETS[ORG.os][1],ds=DSETS[ORG.ds][1],defT=ORG.off==='blue'?'red':'blue';let n=0;
+ const P=player.cur;for(const k of['role','side','kind','mark','x0','z0','px','pz','half'])delete P[k];
+ roster=[player];playOn=!!os;document.body.classList.toggle('play',playOn);
+ const add=(d,o)=>{if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,o);return d;};
+ if(playOn){add(youO&&ORG.pos==='qb'?player:bot(n++),{role:'qb',side:'o'});
+  const wrs=os.map(([x,z],i)=>add(youO&&ORG.pos==='wr'&&!i?player:bot(n++),{role:'wr',side:'o',x0:x,z0:z}));
+  (ds||!youO?(ds?wrs:wrs.slice(0,1)):[]).forEach((w,i)=>add(!youO&&!i?player:bot(n++),{role:'df',side:'d',kind:'man',mark:w,px:w.cur.x0-Math.sign(w.cur.x0)*1.5,pz:Math.abs(w.cur.x0)>=12?DEF_Z:7}));   // outside corners off, slot defenders 7 m
+  if(ds){const[dp,ru,ro]=ds;for(let i=0;i<dp;i++)add(bot(n++),{role:'df',side:'d',kind:'deep',half:dp>1,px:dp>1?(i?-10:10):0,pz:DEF_Z+8});
+   for(let i=0;i<ru;i++)add(bot(n++),{role:'df',side:'d',kind:'rush',px:3,pz:2});for(let i=0;i<ro;i++)add(bot(n++),{role:'df',side:'d',kind:'rob',px:0,pz:10});}}
+ else{P.side='o';}
+ for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?ORG.off:defT);if(d===player&&!playOn)paint(d,ORG.you);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
+ if(playOn)resetPlay();else{routeMesh.visible=false;playState='live';}}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
 function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
- const P=pel.position,inAir=world.bodies.includes(ball)&&!player.held&&ball.velocity.norm()>3&&ball.position.y>.25;
+ const P=pel.position,inAir=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.25,route=c.route;
  if(held&&c.st!=='caught'){c.st='caught';c.t=0;}
- if((c.st==='route'||c.st==='after')&&inAir){c.st='ball';catchOn=true;cur.catchT0=performance.now();}
+ if((c.st==='route'||c.st==='after')&&inAir){let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);for(let t=0;t<5&&!(vy<0&&y<1.3)&&y>.09;t+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}
+  const me=Math.hypot(x-P.x,z-P.z);c.go=roster.every(d=>d===curD||d.cur.role!=='wr'||Math.hypot(d.pel.position.x-x,d.pel.position.z-z)>=me);}   // only the receiver nearest where it comes down goes for it
+ if((c.st==='route'||c.st==='after')&&inAir&&c.go){c.st='ball';catchOn=true;cur.catchT0=performance.now();}
  if(c.st==='route'){const W=route[c.i];if(Math.hypot(W[0]-P.x,W[1]-P.z)<1.1){if(c.i<route.length-1)c.i++;else c.st='after';}else{tx=W[0];tz=W[1];}}
- if(c.st==='after'){const a=route[route.length-2]||[WR_X,0],b=route[route.length-1],stop=/CURL|COMEBACK/.test(routeName);   // breaking routes settle and face the QB; the rest keep running
+ if(c.st==='after'){const a=route[route.length-2]||[c.x0,0],b=route[route.length-1],stop=/CURL|COMEBACK/.test(c.rname);   // breaking routes settle and face the QB; the rest keep running
   if(!stop){const L=Math.hypot(b[0]-a[0],b[1]-a[1])||1;tx=P.x+(b[0]-a[0])/L*5;tz=P.z+(b[1]-a[1])/L*5;}}
  if(c.st==='ball'){if(!world.bodies.includes(ball)&&!held){c.st='after';catchOn=false;}
   else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);   // where it comes down through catch height
@@ -849,18 +862,21 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
 function plantCut(T,sprint,cap){if(!contact())return;const P=pel.position,v=pel.velocity,wl=T?(sprint?6:2.6):0;let wx=0,wz=0;
  if(T){const L=Math.hypot(T[0]-P.x,T[1]-P.z)||1;wx=(T[0]-P.x)/L*wl;wz=(T[1]-P.z)/L*wl;}
  let ax=(wx-v.x)*10,az=(wz-v.z)*10;if(ax*v.x+az*v.z<0){const m=Math.hypot(ax,az);if(m>cap){ax*=cap/m;az*=cap/m;}for(const b of list){b.force.x+=b.mass*ax;b.force.z+=b.mass*az;}}}
-function setTeammate(on){if(on===teammate)return;if(on&&wrMode)setWR(false);teammate=on;document.body.classList.toggle('play',teammate||wrMode);$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
- showDoll(qbD,on);if(on)resetPlay();else modeOff();}
 function looseBall(){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=11;}
 // left click / big touch button: throw (charging) when aiming, call for the pass when the QB has it, otherwise catch (hold)
 // the pass is led where you're LOOKING to go: 85% facing (camera) direction, 15% current drift; speed = what you're doing now, or what you'll reach
 function callVel(){const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw),vx=pel.velocity.x,vz=pel.velocity.z,sp=Math.hypot(vx,vz),ux=sp>.3?vx/sp:fx,uz=sp>.3?vz/sp:fz;
  let dx=.85*fx+.15*ux,dz=.85*fz+.15*uz;const L=Math.hypot(dx,dz)||1,s2=Math.max(sp,keys.shift?6:keys.w||joy.on?2.4:sp);return new V(dx/L*s2,0,dz/L*s2);}
-function primaryDown(){if(playPre())return;if(held){startCharge();return;}if(teammate&&qbD.held&&qbD.cur.st==='idle')callReq={P:pel.position.clone(),V:callVel()};catchOn=true;cur.catchT0=performance.now();}   // calling also starts holding catch: keep holding until the ball arrives
+function primaryDown(){if(playPre())return;if(held){startCharge();return;}{const q=aiQB();if(q&&player.cur.role==='wr'&&q.held&&q.cur.st==='idle'){q.cur.tg=player;callReq={P:pel.position.clone(),V:callVel()};}}catchOn=true;cur.catchT0=performance.now();}   // calling also starts holding catch: keep holding until the ball arrives
+const aiQB=()=>roster.find(d=>d.cur.ai&&d.cur.role==='qb');
 function primaryUp(){releaseCharge();catchOn=false;cur.catchT0=0;}
 // QB brain (runs with the QB swapped in): face the receiver; on a call, lead him (where he'll be, at the speed he had when he called), aim, throw
 function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
- const P=player.pel.position;let fx=P.x,fz=P.z;
+ // throwing to bots (you're not a receiver): after a 2-3.5 s drop, the most open one (most room from any defender, a bit of credit for depth)
+ if(c.st==='idle'&&held&&!callReq&&playState==='live'&&player.cur.role!=='wr'&&(c.wait=(c.wait==null?2+Math.random()*1.5:c.wait)-dt)<0){let bs=-1e9;
+  for(const w of roster){if(w.cur.role!=='wr')continue;const p=w.pel.position;let sep=6;for(const d of roster)if(d.cur.side==='d')sep=Math.min(sep,Math.hypot(d.pel.position.x-p.x,d.pel.position.z-p.z));const sc=sep*2+Math.min(p.z,30)*.15;if(sc>bs){bs=sc;c.tg=w;}}
+  if(c.tg)callReq={P:c.tg.pel.position.clone(),V:c.tg.pel.velocity.clone()};}
+ const P=(c.tg||roster.find(d=>d.cur.role==='wr')||player).pel.position;let fx=P.x,fz=P.z;
  if(c.st==='idle'&&held&&callReq){const R=bpt(chest,-.2,.5,0),Q0=callReq.P,W=callReq.V,delay=.55;let tf=1;
   for(let i=0;i<4;i++){const tx=Q0.x+W.x*(delay+tf),tz=Q0.z+W.z*(delay+tf);tf=cl(Math.hypot(tx-R.x,tz-R.z)/17,.6,3);}   // flight time from distance, re-solved for where he'll be
   c.T=new V(Q0.x+W.x*(delay+tf),1.25,Q0.z+W.z*(delay+tf));
@@ -894,7 +910,17 @@ $m('edm').onclick=()=>resize(-10);$m('edp').onclick=()=>resize(10);
 $m('edr').onclick=()=>{lay={};saveLay();selectCtl(null);applyLay();};
 $m('bedit').onclick=()=>{editing=true;$m('pm').hidden=true;$m('ed').hidden=false;};
 $m('edone').onclick=()=>{editing=false;saveLay();selectCtl(null);$m('ed').hidden=true;$m('pm').hidden=false;};
-$m('bres').onclick=togglePause;$m('bqb').onclick=()=>setTeammate(!teammate);$m('bwr').onclick=()=>setWR(!wrMode);$m('bdf').onclick=()=>setDef(!defOn);
+$m('bres').onclick=togglePause;$m('borg').onclick=()=>{$m('pm').hidden=true;$m('org').hidden=false;orgUI();};
+// game organiser page: each button cycles its choice
+const cyc=(a,v)=>a[(a.indexOf(v)+1)%a.length];
+function orgUI(){const youO=ORG.you===ORG.off,os=OSETS[ORG.os][1],ds=DSETS[ORG.ds][1],nW=os?os.length:0,nD=!os?0:ds?nW+ds[0]+ds[1]+ds[2]:youO?0:1,dT=ORG.off==='blue'?'red':'blue';
+ $m('oyou').textContent='YOUR TEAM: '+ORG.you.toUpperCase();$m('ooff').textContent='ON OFFENCE: '+ORG.off.toUpperCase()+' (DEFENCE: '+dT.toUpperCase()+')';
+ $m('opos').textContent='YOUR POSITION: '+(!os?'FREE ROAM':youO?(ORG.pos==='qb'?'QUARTERBACK':'WIDE RECEIVER 1'):'DEFENDER (ON WR 1)');
+ $m('oos').textContent='OFFENCE SET: '+OSETS[ORG.os][0];$m('ods').textContent='DEFENCE SET: '+DSETS[ORG.ds][0];
+ $m('osum').textContent=os?ORG.off.toUpperCase()+': QB + '+nW+' WR ('+(youO?nW:nW+1)+' BOTS)  ·  '+dT.toUpperCase()+': '+nD+' DEFENDERS ('+(youO?nD:nD-1)+' BOTS)':'JUST YOU ON THE FIELD';}
+$m('oyou').onclick=()=>{ORG.you=cyc(['blue','red'],ORG.you);orgUI();};$m('ooff').onclick=()=>{ORG.off=cyc(['blue','red'],ORG.off);orgUI();};
+$m('opos').onclick=()=>{ORG.pos=cyc(['qb','wr'],ORG.pos);orgUI();};$m('oos').onclick=()=>{ORG.os=(ORG.os+1)%OSETS.length;orgUI();};$m('ods').onclick=()=>{ORG.ds=(ORG.ds+1)%DSETS.length;orgUI();};
+$m('ogo').onclick=()=>{$m('org').hidden=true;applyOrg();togglePause();};$m('oback').onclick=()=>{$m('org').hidden=true;$m('pm').hidden=false;};
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
@@ -913,16 +939,18 @@ function frame(now){
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}
  for(const d of D)if(d.limpT&&performance.now()>d.limpT){use(d);limp=false;d.limpT=0;}   // tackled: back on his feet
- use(player);ballTick(now);aimTick();$m('cboost').hidden=catchBoost()===1;
+ use(player);
+ if(player.cur.side==='d'&&dv>0){const c=roster.find(d=>d.cur.side==='o'&&d.held&&!d.limp);if(c&&c.pel.position.distanceTo(pel.position)<1.3){c.limp=true;c.limpT=performance.now()+2600;}}   // you on defence: dive into the ball carrier to tackle him
+ ballTick(now);aimTick();$m('cboost').hidden=catchBoost()===1;
  tgt.x+=(pel.position.x-tgt.x)*.45;tgt.z+=(pel.position.z-tgt.z)*.45;tgt.y+=(Math.max(.4,pel.position.y-.08)-tgt.y)*.1;   // follow the doll tightly (incl. height on platforms)
  const sh=.55,pvx=tgt.x+Math.cos(camYaw)*sh,pvy=tgt.y+.55,pvz=tgt.z-Math.sin(camYaw)*sh,cp=Math.cos(camPitch);   // pivot: over the doll's right shoulder
  const dx=Math.sin(camYaw)*cp,dy=Math.sin(camPitch),dz=Math.cos(camYaw)*cp,rc=castRay({x:pvx,y:pvy,z:pvz},{x:dx,y:dy,z:dz},camDist+.2);
  const cd=rc.hit?Math.max(.6,Math.hypot(rc.p.x-pvx,rc.p.y-pvy,rc.p.z-pvz)-.2):camDist;
  camCD+=(cd-camCD)*(cd<camCD?.5:.06);                   // move in quickly when blocked, ease back out slowly (no snapping)
  cam.position.set(pvx+dx*camCD,Math.max(.2,pvy+dy*camCD),pvz+dz*camCD);cam.lookAt(pvx,pvy,pvz);
- {const hold=(wrMode||teammate)&&routeVis&&keys['1']&&performance.now()-routeDownT>250&&route;if(hold!==routeFull)routeShape(!!hold);   // holding 1: rise to a bird's-eye view of the whole route
+ {const hold=playOn&&routeVis&&keys['1']&&performance.now()-routeDownT>250&&route;if(hold!==routeFull)routeShape(!!hold);   // holding 1: rise to a bird's-eye view of the whole route
   birdK+=((hold?1:0)-birdK)*Math.min(1,(now-(frame.lt||now))/1000*3.5);frame.lt=now;
-  if(birdK>.001&&route){const xs=[WR_X,...route.map(p=>p[0])],zs=[0,...route.map(p=>p[1])],cx=(Math.min(...xs)+Math.max(...xs))/2,cz=(Math.min(...zs)+Math.max(...zs))/2,span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs),20);
+  if(birdK>.001&&route){const xs=[routeX,...route.map(p=>p[0])],zs=[0,...route.map(p=>p[1])],cx=(Math.min(...xs)+Math.max(...xs))/2,cz=(Math.min(...zs)+Math.max(...zs))/2,span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs),20);
    const k=birdK*birdK*(3-2*birdK),bp=new THREE.Vector3(cx,span*1.15+8,cz-span*.35),lk=new THREE.Vector3(cx,0,cz);
    const look=new THREE.Vector3(pvx,pvy,pvz).lerp(lk,k);cam.position.lerp(bp,k);cam.lookAt(look);}}
  if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,.8,pel.position.z);}   // test hook: side view

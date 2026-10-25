@@ -11,7 +11,8 @@
 <div class="tb" id="bbig"></div>
 <div class="tb sm" id="baim" style="right:calc(49px + env(safe-area-inset-right,0px));bottom:calc(152px + env(safe-area-inset-bottom,0px))">AIM</div>
 <div class="tb sm" id="bjump" style="right:calc(138px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))">JUMP</div>
-<div class="tb sm" id="bdrop" style="right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px))">DROP</div></div>
+<div class="tb sm" id="bdrop" style="right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px))">DROP</div>
+<div class="tb sm" id="bsprint" style="right:calc(232px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px))">SPRINT</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
 <script>
@@ -531,15 +532,16 @@ function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballT
  if(held){const h=handR(),p=aimOn?bpt(h,0,-.02,.07):bpt(parts['farm-1'],.085,-.1,0);if(!aimOn)keepOut(p);ballMesh.position.set(p.x,p.y,p.z);ballMesh.quaternion.copy(parts['farm-1'].quaternion);}
  else{ballMesh.position.copy(ball.position);ballMesh.quaternion.copy(ball.quaternion);}}
 // ---------- touch: joystick (push to the edge to sprint), drag the right side to look, AIM toggles, the big button throws while aiming ----------
-const joy={on:false,x:0,y:0,id:null};
+const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles sprinting
 if('ontouchstart'in window||matchMedia('(pointer:coarse)').matches)document.body.classList.add('touch');
 {const $=id=>document.getElementById(id),J=$('joy'),K=$('knob'),big=$('bbig'),aimB=$('baim'),key=(k,t)=>dispatchEvent(new KeyboardEvent(t,{key:k}));
  const mvJ=t=>{const r=J.getBoundingClientRect(),x=(t.clientX-r.left-r.width/2)/(r.width/2),y=(t.clientY-r.top-r.height/2)/(r.height/2),l=Math.hypot(x,y),k=l>1?1/l:1;
-  joy.x=x*k;joy.y=y*k;keys.shift=l>.9;K.style.transform=`translate(${joy.x*44}px,${joy.y*44}px)`;};
+  joy.x=x*k;joy.y=y*k;K.style.transform=`translate(${joy.x*44}px,${joy.y*44}px)`;};
  J.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];joy.on=true;joy.id=t.identifier;mvJ(t);},{passive:false});
  J.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===joy.id)mvJ(t);},{passive:false});
- const jEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.on=false;joy.x=joy.y=0;keys.shift=false;K.style.transform='';}};J.addEventListener('touchend',jEnd);J.addEventListener('touchcancel',jEnd);
+ const jEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.on=false;joy.x=joy.y=0;K.style.transform='';}};J.addEventListener('touchend',jEnd);J.addEventListener('touchcancel',jEnd);
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
+ tap($('bsprint'),()=>{keys.shift=!keys.shift;});   // sprint toggles (a held button + joystick + look is too many fingers)
  tap(aimB,()=>{aimOn=!aimOn&&held;});
  tap(big,()=>{if(aimOn)startThrow();});
  tap($('bjump'),()=>key(' ','keydown'));$('bjump').addEventListener('touchend',()=>key(' ','keyup'));
@@ -548,7 +550,7 @@ if('ontouchstart'in window||matchMedia('(pointer:coarse)').matches)document.body
  $('tc').addEventListener('touchstart',e=>{for(const t of e.changedTouches)if(t.target===$('tc'))look[t.identifier]=[t.clientX,t.clientY];});
  $('tc').addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches){const L=look[t.identifier];if(!L)continue;camYaw-=(t.clientX-L[0])*.008;camPitch=Math.max(-.6,Math.min(1.2,camPitch+(t.clientY-L[1])*.008));L[0]=t.clientX;L[1]=t.clientY;}},{passive:false});
  const lEnd=e=>{for(const t of e.changedTouches)delete look[t.identifier];};$('tc').addEventListener('touchend',lEnd);$('tc').addEventListener('touchcancel',lEnd);
- setInterval(()=>{if(!held&&document.body.classList.contains('touch'))aimOn=false;big.textContent=aimOn?'THROW':'';big.classList.toggle('on',aimOn);aimB.classList.toggle('on',aimOn);},100);}
+ setInterval(()=>{if(!held&&document.body.classList.contains('touch'))aimOn=false;big.textContent=aimOn?'THROW':'';big.classList.toggle('on',aimOn);aimB.classList.toggle('on',aimOn);$('bsprint').classList.toggle('on',!!keys.shift);},100);}
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
 const DT=1/400;let acc=0,last=performance.now();
 const tgt=new THREE.Vector3(0,1,0);let camCD=3.6;

@@ -36,7 +36,7 @@
 <div class="tb" id="brst" title="Reset the QB with the ball (R)">&#x21bb;</div>
 <div id="cboost" hidden style="position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3;font:800 13px system-ui,sans-serif;letter-spacing:.12em;color:#111;background:#ffd23f;border-radius:999px;padding:6px 14px;pointer-events:none">CATCH BOOST +20%</div>
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
-<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bwr">WIDE RECEIVER AI: OFF</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
+<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bwr">WIDE RECEIVER AI: OFF</button><button id="bdf">DEFENDER AI: OFF</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
 <div id="ed" hidden><span id="edtxt">Drag to move · tap to select</span><button id="edm">−</button><button id="edp">+</button><button id="edr">RESET</button><button id="edone">DONE</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
 <div class="tb" id="bbig"></div>
@@ -526,7 +526,7 @@ const ballM=new C.Material('ball');world.addContactMaterial(new C.ContactMateria
 const ball=new C.Body({mass:.42,material:ballM,linearDamping:.1,angularDamping:.3});
 ball.addShape(new C.Sphere(.085),new V(0,.05,0));ball.addShape(new C.Sphere(.085),new V(0,-.05,0));   // two spheres = a rough prolate football
 // the ball hits the world and the doll
-ball.collisionFilterGroup=4;ball.collisionFilterMask=3;world.addContactMaterial(new C.ContactMaterial(ballM,bm,{friction:.4,restitution:.3}));ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);world.addBody(ball);
+ball.collisionFilterGroup=4;ball.collisionFilterMask=11;world.addContactMaterial(new C.ContactMaterial(ballM,bm,{friction:.4,restitution:.3}));ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);world.addBody(ball);
 const ballMesh=new THREE.Group();
 {const leather=new THREE.MeshStandardMaterial({color:0x6b3416,roughness:.7}),white=new THREE.MeshStandardMaterial({color:0xf2efe6,roughness:.6});
  const e=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),leather);e.scale.set(.085,.143,.085);e.castShadow=true;ballMesh.add(e);
@@ -673,7 +673,7 @@ const rt=.35+t*2.2;u.r=fresh?rt:u.r+(rt-u.r)*(1-Math.exp(-fd*10));landG.children
  if(yd!==landTxt){landTxt=yd;const g=landC.getContext('2d');g.clearRect(0,0,128,48);g.font='800 30px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineWidth=6;g.strokeStyle='rgba(0,0,0,.7)';g.strokeText(yd,64,25);g.fillStyle='#ffd23f';g.fillText(yd,64,25);landT.needsUpdate=true;}}
 let restT=0;
 function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballTick.t=now;let carrier=null;
- if(performance.now()>maskT)ball.collisionFilterMask=3;   // the thrower's own body is ignored for 0.25 s so the ball leaves the hand cleanly
+ if(performance.now()>maskT)ball.collisionFilterMask=11;   // the thrower's own body is ignored for 0.25 s so the ball leaves the hand cleanly
  for(const d of active()){use(d);ballCool=Math.max(0,ballCool-dt);reachOn=reachPredict();
   if(!held&&reachK>.3){const h=handR().position,b=ball.position,hd=Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z),pd2=Math.hypot(pel.position.x-b.x,pel.position.z-b.z);
    if(hd<.3||(pd2<.45&&reachK>.6))grabBall();}                     // hand on it, or right underfoot with the arm already down
@@ -735,8 +735,22 @@ const wrD={};
  yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
  saveTo(wrD);loadFrom(player);curD=player;
  for(const b of wrD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of wrD.cons)world.removeConstraint(c);}
+// defender: fourth doll (group 8, collides with players and the ball), slow on purpose so he's easy to beat
+const dfD={};
+{saveTo(player);buildDoll(0x222222,0x111111);
+ limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true,role:'df'};
+ yaw=phase=mv=airT=ab=0;cs=ct=ctt=ccool=cscan=0;pins={};qbK=0;held=false;reachK=0;reachOn=false;ballCool=0;aimOn=false;thr=-1;thTw=thLean=0;chargeT=-1;throwSpd=V_MIN;carryOff=carryOff0.clone();spread=0;catchOn=false;catchK=0;catchSide=0;dv=0;
+ for(const b of list){b.collisionFilterGroup=8;b.collisionFilterMask=15;}saveTo(dfD);loadFrom(player);curD=player;
+ for(const b of dfD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of dfD.cons)world.removeConstraint(c);}
+for(const d of[player,qbD,wrD])for(const b of d.list)b.collisionFilterMask|=8;
+let defOn=false;
+function setDef(on){defOn=on;$m('bdf').textContent='DEFENDER AI: '+(on?'ON':'OFF');showDoll(dfD,on);if(on)placeAt(dfD,wrMode?WR_X-2:-3,wrMode?8:6);}
+function defThink(){for(const k in keys)keys[k]=false;const T=(wrMode?wrD:player).pel,P=pel.position,air=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.3;
+ catchOn=air;if(air&&!cur.catchT0)cur.catchT0=1e15;   // no catch boost
+ const tx=T.position.x+T.velocity.x*.4,tz=T.position.z+T.velocity.z*.4;if(Math.hypot(tx-P.x,tz-P.z)>1){camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;}   // chase the receiver, jogging only
+ if(air&&js===0&&contact()&&cur.cp&&cur.cp.t<.45&&cur.cp.p.y>head.position.y)startJump();}   // go up for it
 let teammate=false,wrMode=false,qbClock=0,callReq=null;
-const active=()=>teammate?[player,qbD]:wrMode?[player,wrD]:[player];
+const active=()=>{const a=teammate?[player,qbD]:wrMode?[player,wrD]:[player];if(defOn)a.push(dfD);return a;};
 function showDoll(d,on){for(const b of d.list){if(on)world.addBody(b);else world.removeBody(b);b.mesh.visible=on;}for(const c of d.cons)if(on)world.addConstraint(c);else world.removeConstraint(c);if(!on){use(d);for(const k in pins)unpin(k);held=false;use(player);}}
 // stand a doll at (x, z) facing downfield (+z)
 function placeAt(d,x,z){use(d);reset();const dz=z-pel.home[2];for(const b of list){b.position.x+=x;b.position.z+=dz;}}   // pelvis home x is 0
@@ -792,7 +806,7 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
 function setTeammate(on){if(on===teammate)return;if(on&&wrMode)setWR(false);teammate=on;document.body.classList.toggle('qb',on);$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
  if(on){for(const b of qbD.list){world.addBody(b);b.mesh.visible=true;}for(const c of qbD.cons)world.addConstraint(c);use(qbD);reset();held=false;use(player);if(!held)giveQB();}
  else{use(qbD);for(const k in pins)unpin(k);const had=held;held=false;aimOn=false;thr=-1;use(player);for(const b of qbD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of qbD.cons)world.removeConstraint(c);if(had)looseBall();}}
-function looseBall(){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=3;}
+function looseBall(){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=11;}
 function giveQB(){use(player);if(held){use(player);return;}use(qbD);if(!held){if(!world.bodies.includes(ball))world.addBody(ball);grabBall();cur.st='idle';cur.T=null;}use(player);}
 // left click / big touch button: throw (charging) when aiming, call for the pass when the QB has it, otherwise catch (hold)
 function primaryDown(){if(held){startCharge();return;}if(teammate&&qbD.held&&qbD.cur.st==='idle')callReq={P:pel.position.clone(),V:new V(pel.velocity.x,0,pel.velocity.z)};catchOn=true;cur.catchT0=performance.now();}   // calling also starts holding catch: keep holding until the ball arrives
@@ -833,7 +847,7 @@ $m('edm').onclick=()=>resize(-10);$m('edp').onclick=()=>resize(10);
 $m('edr').onclick=()=>{lay={};saveLay();selectCtl(null);applyLay();};
 $m('bedit').onclick=()=>{editing=true;$m('pm').hidden=true;$m('ed').hidden=false;};
 $m('edone').onclick=()=>{editing=false;saveLay();selectCtl(null);$m('ed').hidden=true;$m('pm').hidden=false;};
-$m('bres').onclick=togglePause;$m('bqb').onclick=()=>setTeammate(!teammate);$m('bwr').onclick=()=>setWR(!wrMode);
+$m('bres').onclick=togglePause;$m('bqb').onclick=()=>setTeammate(!teammate);$m('bwr').onclick=()=>setWR(!wrMode);$m('bdf').onclick=()=>setDef(!defOn);
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
@@ -847,7 +861,7 @@ function frame(now){
  const D=active();
  for(const d of D){use(d);sense();}
  while(acc>=DT){
-  for(const d of D){use(d);if(cur.ai)(cur.role==='wr'?wrThink:qbThink)(DT);control(DT);for(const k in joints)drive(joints[k]);}
+  for(const d of D){use(d);if(cur.ai)(cur.role==='wr'?wrThink:cur.role==='df'?defThink:qbThink)(DT);control(DT);for(const k in joints)drive(joints[k]);}
   world.step(DT);acc-=DT;
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}

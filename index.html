@@ -192,6 +192,14 @@
 .prs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.prs button{font:700 16px "Barlow Condensed"!important;letter-spacing:.02em!important;text-transform:none;background:#1f1f23!important;border:1px solid #ffffff22!important;padding:10px 14px!important}.prs button:hover{border-color:#ffd23f!important}.tg{display:flex;gap:8px;align-items:center;font:600 15px "Barlow Condensed";color:#ddd}
 .cbr .pvbox{height:min(56vh,500px)}.cams{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:6px 0}.cams button{font:600 13px "Barlow Condensed"!important;letter-spacing:.06em!important;background:#1f1f23!important;border:1px solid #ffffff1a!important;padding:4px 10px!important}.cams .on{border-color:#ffd23f!important}
 .cbfoot{width:min(100%,1320px);display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;border-top:1px solid #ffffff1a;padding-top:10px}.cbfoot .mrow{font-size:18px!important;padding:9px 18px!important}#cerr{flex:1;color:#ff8a7a;font:600 15px "Barlow Condensed"}
+#sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;padding-bottom:50px}
+.slot{position:relative;text-align:left;display:flex!important;flex-direction:column;gap:8px;background:linear-gradient(110deg,color-mix(in srgb,var(--j,#222) 45%,#111),#141416 65%)!important;border:1px solid #ffffff18!important;border-left:4px solid var(--a,#555)!important;padding:12px 14px!important;letter-spacing:0!important;text-transform:none;color:#fff!important;min-height:120px;transition:transform .12s,box-shadow .12s}
+.slot:hover,.slot.hv{transform:translateY(-2px);box-shadow:0 0 0 2px #ffd23f}.slot>small{font:700 11px "Barlow Condensed";letter-spacing:.3em;color:#ffffff99}
+.slot.empty{background:#101012!important;border:1px dashed #ffffff33!important;align-items:center;justify-content:center}.slot.empty b{font:800 22px "Barlow Condensed";color:#ccc}.slot.empty span{color:#666;font:600 13px "Barlow Condensed"}
+.sh{display:grid;grid-template-columns:46px 1fr auto;gap:10px;align-items:center}.ic3{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:26px;background:var(--j);box-shadow:inset 0 0 0 3px var(--a)}.sh b{display:block;font:800 21px/1.05 "Barlow Condensed";text-transform:uppercase}.sh span{font:500 14px "Barlow Condensed";color:#ccc}
+.sh em{font:800 32px/1 "Barlow Condensed";text-align:center}.sh em small{display:block;font:700 11px "Barlow Condensed";color:#3ee07a;letter-spacing:.1em}
+.ss{display:flex;flex-wrap:wrap;gap:4px 10px;font:600 13px "Barlow Condensed";color:#bbb}.ss b{color:#fff}
+.del{position:absolute;top:8px;right:10px;font-style:normal;color:#888;font-size:14px;padding:2px 6px;border-radius:2px}.del:hover{color:#fff;background:#e8321e}
 #stam{position:fixed;left:calc(14px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:3;width:110px;height:6px;background:#0008;border:1px solid #fff4;border-radius:3px;pointer-events:none}#stam i{display:block;height:100%;width:100%;border-radius:2px}
 </style></head><body>
 <div id="mm" class="ov"><div id="logo"><svg viewBox="0 0 120 70" aria-hidden="true"><ellipse cx="60" cy="35" rx="56" ry="31" fill="#7a3a16"/><ellipse cx="60" cy="35" rx="56" ry="31" fill="none" stroke="#4a210a" stroke-width="3"/>
@@ -241,6 +249,9 @@
 <div class="brow"><div class="otc" id="dotc"></div><div class="prev" id="dprev"></div></div></div>
 <div id="dreveal" hidden><div class="rk" id="drk"></div><div class="rgrid"><div class="pvbox" id="pvd"></div><div class="rinfo" id="dinfo"></div></div><button class="mrow pri2" id="dgo">Begin Your Career</button></div>
 <button id="dskip">Skip to my pick ›</button></div>
+<div id="slots" class="ov scr mad" hidden><div class="vt">//CAREER · PLAYERS</div><div class="cbtop"><h1>Select Player</h1><div class="sub" style="font:600 14px 'Barlow Condensed';letter-spacing:.2em;color:#aaa">10 SLOTS · EACH WITH ITS OWN CAREER</div></div>
+<div class="cbgrid"><div id="sgrid"></div><div class="cbr"><div class="pvbox" id="pvsl"></div><div class="pvi" id="spvi"></div></div></div>
+<div class="hints"><button id="sback"><i>◯</i> Back</button></div></div>
 <canvas id="pv3"></canvas>
 <div id="stam"><i></i></div>
 <div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="borg">GAME ORGANISER</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
@@ -1296,8 +1307,11 @@ function styleAt(i){const[, ,up,dn]=STYLES[i],two=i===7,a={};for(const k of AK)a
 const ovr=(a,st)=>{let t=0,w=0;for(const k of AK){const x=STYLES[st][2].includes(k)?3:1;t+=a[k]*x;w+=x;}return Math.round(t/w);};   // weighted to what the playstyle is for
 // ---------- the saved player (localStorage; version field so career progression can extend it) ----------
 const PKEY='rafCareerPlayer',SKC=[0xf1c9a5,0xe0b48a,0xc68642,0x8d5524,0x5c3a21,0x3b2414],GLC=[null,0xffffff,0x111111,0xffd23f,0xff5a1f],CLC=[0x111111,0xffffff,0xff5a1f,0x2a6fdb];
-function loadProf(){try{const p=JSON.parse(localStorage.getItem(PKEY)||'null');if(p&&p.v===1&&p.att&&AK.every(k=>p.att[k]>=A_MIN&&p.att[k]<=100))return normProf(p);}catch(e){}return null;}
-function saveProf(p){try{localStorage.setItem(PKEY,JSON.stringify(p));return true;}catch(e){return false;}}
+// ---------- 10 player slots: every slot is its own storage key; a profile always saves back into the slot it came from ----------
+const NSLOT=10,skey=i=>PKEY+'#'+i;let SLOT=0;
+function loadProf(i=SLOT){try{const p=JSON.parse(localStorage.getItem(skey(i))||'null');if(p)p.slot=i;if(p&&p.v===1&&p.att&&AK.every(k=>p.att[k]>=A_MIN&&p.att[k]<=100))return normProf(p);}catch(e){}return null;}
+function saveProf(p){try{const i=p.slot??SLOT;p.slot=i;localStorage.setItem(skey(i),JSON.stringify(p));return true;}catch(e){return false;}}
+function migrateSlots(){try{const old=localStorage.getItem(PKEY);if(old){if(!localStorage.getItem(skey(0)))localStorage.setItem(skey(0),old);localStorage.removeItem(PKEY);}}catch(e){}}   // the old single save becomes slot 1
 let PROF=null;
 // in the match: ratings onto the player's doll, skin / gloves / cleats onto its parts, number and name onto the jersey
 // ================= BUILD MODEL: biometrics, caps, badges, equipment (one place for every calculation) =================
@@ -1379,7 +1393,7 @@ function jersey(d,num,name){for(const m of d.decals||[]){m.parent.remove(m);m.ma
 function applyProf(p){const P=player.cur;P.at=p?{...p.att}:null;P.look=p?migLook(p.look):{...DEFLOOK};P.bio=p?bioOf(p):null;P.bm=p?bioMods(P.bio):null;P.bd=p?Object.fromEntries((p.badges||[]).map(id=>[id,btier(p,id)])):{};kit(player,P.look,null);shape(player,P.bio);jersey(player,p?p.num:null,p&&p.last);}
 // ---------- menus: control pick -> QUICK PLAY / CAREER MODE -> career hub -> creator ----------
 let pendMode=null,ED=null,TAB='bio';
-const show=id=>{for(const x of['mm','mode','car','cre','pre','fin','upg','teams','comb','dft'])$m(x).hidden=x!==id;};
+const show=id=>{for(const x of['mm','mode','car','cre','pre','fin','upg','teams','comb','dft','slots'])$m(x).hidden=x!==id;};
 // ---------- the 3D preview: a second, tiny renderer showing the actual ragdoll's parts in their standing pose, in your gear ----------
 const PVW={r:null};
 function pvInit(){if(PVW.r)return;const r=PVW.r=new THREE.WebGLRenderer({canvas:$m('pv3'),antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio));
@@ -1391,7 +1405,7 @@ function pvInit(){if(PVW.r)return;const r=PVW.r=new THREE.WebGLRenderer({canvas:
  PVW.yaw=-.35;let dr=null;const cv=$m('pv3');cv.addEventListener('pointerdown',e=>{dr=e.clientX;cv.setPointerCapture(e.pointerId);});cv.addEventListener('pointermove',e=>{if(dr!=null){PVW.yaw+=(e.clientX-dr)*.012;dr=e.clientX;PVW.t=performance.now();}});cv.addEventListener('pointerup',()=>dr=null);
  const loop=()=>{requestAnimationFrame(loop);const host=$m('pv3').parentElement;if(!host||host.closest('[hidden]')||host.id==='')return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;
   if(PVW.w!==w||PVW.h!==h){PVW.w=w;PVW.h=h;r.setSize(w,h,false);PVW.cam.aspect=w/h;PVW.cam.updateProjectionMatrix();}if(performance.now()-(PVW.t||0)>2500)PVW.yaw+=.004;g.rotation.y=PVW.yaw;r.render(sc,PVW.cam);};loop();}
-function pvShow(host,p){pvInit();const cv=$m('pv3');$m(host).appendChild(cv);cv.style.cssText='position:static;width:100%;height:100%;display:block';const c=p.draft?club(p.team):null;paint(PVW.d,'blue');kit(PVW.d,p.look,c?[c.jer,c.pant]:null);shape(PVW.d,bioOf(p));jersey(PVW.d,p.num>=0&&p.num<=99?p.num:'',p.last);}
+function pvShow(host,p){pvInit();if(host!=='pvc'&&PVW.cam&&(PVW.cam.position.y>1.5||PVW.t>performance.now()))pvCam('spin');const cv=$m('pv3');$m(host).appendChild(cv);cv.style.cssText='position:static;width:100%;height:100%;display:block';const c=p.draft?club(p.team):null;paint(PVW.d,'blue');kit(PVW.d,p.look,c?[c.jer,c.pant]:null);shape(PVW.d,bioOf(p));jersey(PVW.d,p.num>=0&&p.num<=99?p.num:'',p.last);}
 const tcase=t=>t.toLowerCase().replace(/(^|[\s-])\w/g,c=>c.toUpperCase());
 const GROUPS=[['Offense',['thp','tha','cth','rte','car','bhd']],['Defense',['cov','int','tak','rea','awr']],['Athletic',['spd','acc','agi','str','sta']]];
 // max potential (for career progression later): an archetype's strengths can reach 99, everything else grows ~24 past its archetype default
@@ -1472,14 +1486,27 @@ function bracket(p,S){const P=S.po;return`<div class="brk">${[0,1,2,3].map(r=>`<
 function carUI_old(){}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 {$m('ctouch').onclick=()=>{pendMode='touch';show('mode');};$m('ckb').onclick=()=>{pendMode='kb';show('mode');};
- $m('mquick').onclick=()=>{useClubs(null);show(null);applyProf(null);startGame(pendMode);};$m('mcar').onclick=()=>{show('car');carUI();};$m('mback').onclick=()=>show('mm');
+ $m('mquick').onclick=()=>{useClubs(null);show(null);applyProf(null);startGame(pendMode);};$m('mcar').onclick=slotsUI;$m('mback').onclick=()=>show('mm');
  $m('cplay').onclick=preMatch;$m('pback').onclick=()=>{show('car');carUI();};$m('pgo').onclick=kickOff;$m('fagain').onclick=preMatch;$m('fagain').textContent='Next Match';$m('fhub').onclick=()=>{show('car');carUI();};
- $m('cedit').onclick=()=>openCre(false);$m('cnew').onclick=()=>{if(PROF&&!confirm('Start a new career? '+PROF.first+' '+PROF.last+' (level '+PROF.lvl+(PROF.season?', season '+PROF.season.year:'')+') and all progress will be deleted.'))return;HTAB='over';openCre(true);};$m('cback').onclick=()=>show('mode');
+ $m('cedit').onclick=()=>openCre(false);$m('cnew').onclick=()=>{if(PROF&&!confirm('Start a new career? '+PROF.first+' '+PROF.last+' (level '+PROF.lvl+(PROF.season?', season '+PROF.season.year:'')+') and all progress will be deleted.'))return;HTAB='over';openCre(true);};$m('cback').onclick=slotsUI;
  }
+// ================= PLAYER SLOTS SCREEN =================
+function slotsUI(){show('slots');const L=[...Array(NSLOT).keys()].map(i=>[i,loadProf(i)]);
+ $m('sgrid').innerHTML=L.map(([i,p])=>{if(!p)return`<button class="slot empty" data-i="${i}"><small>SLOT ${i+1}</small><b>+ New Player</b><span>Empty</span></button>`;
+  const c=p.draft?club(p.team):null,S=p.season,rec=S?standings(S).find(x=>x.i===p.team):null,C=p.career;
+  return`<button class="slot" data-i="${i}" style="--j:${c?hx(c.jer):'#2a2a2e'};--a:${c?hx(c.acc):'#555'}"><small>SLOT ${i+1}</small><div class="sh"><span class="ic3">${c?c.ic:'?'}</span><div><b>${esc(p.first)} ${esc(p.last)}</b><span>#${p.num} · ${tcase(STYLES[p.style][0])}</span></div><em>${ovr(p.att,p.style)}<small>OVR</small></em></div>
+   <div class="ss"><span>LVL <b>${p.lvl}</b></span><span>${c?c.ab:'UNDRAFTED'}</span><span>${S?`S${S.year} ${S.week<20?'WK '+(S.week+1):S.champ!=null?'FINAL':'PO'}`:'—'}</span><span>${rec?`${rec.w}-${rec.l}${rec.t?'-'+rec.t:''}`:'0-0'}</span><span>${C.gp} GP</span><span>${(C.pyd|0)+(C.rush|0)+(C.recy|0)} YDS</span><span>${(C.ptd|0)+(C.rtd|0)+(C.rectd|0)+(C.dtd|0)} TD</span><span>${p.titles?'🏆 '+p.titles:''}</span></div><i class="del" data-del="${i}" title="Delete this player">✕</i></button>`;}).join('');
+ const first=L.find(x=>x[1]);slotPrev(first?first[0]:-1,first&&first[1]);}
+function slotPrev(i,p){if(!p){$m('spvi').innerHTML='<p class="mutd">Pick an empty slot to create a player. Every slot keeps its own career, club, season and progress.</p>';$m('pvsl').innerHTML='';return;}
+ $m('spvi').innerHTML=pviHTML(p);pvShow('pvsl',p);for(const b of document.querySelectorAll('.slot'))b.classList.toggle('hv',+b.dataset.i===i);}
+{$m('sgrid').addEventListener('pointerover',e=>{const b=e.target.closest('.slot');if(b&&!b.classList.contains('empty')&&!b.classList.contains('hv'))slotPrev(+b.dataset.i,loadProf(+b.dataset.i));});
+ $m('sgrid').onclick=e=>{const del=e.target.closest('[data-del]');if(del){const i=+del.dataset.del,p=loadProf(i);if(p&&confirm(`Delete ${p.first} ${p.last} (slot ${i+1})? This cannot be undone.`)){try{localStorage.removeItem(skey(i));}catch(x){}if(PROF&&PROF.slot===i)PROF=null;slotsUI();}return;}
+  const b=e.target.closest('.slot');if(!b)return;SLOT=+b.dataset.i;PROF=loadProf(SLOT);HTAB='over';if(PROF){show('car');carUI();}else openCre(true);};   // each slot opens its own save
+ $m('sback').onclick=()=>show('mode');}
 // ================= THREE-STAGE CREATOR: 1 Biometrics · 2 Build (playstyle, ratings, badges) · 3 Equipment · Review =================
 let STG=1,SUB='style',GCAT='presets',PVTEAM=false;
 const STAGES=['','Biometrics','Attributes & Badges','Equipment & Appearance','Review'];
-function newED(){return recompute({v:1,first:'',last:'',num:88,style:2,base:styleAt(2),ups:{},bio:{...BIO0},badges:[],look:{...DEFLOOK}});}
+function newED(){return recompute({v:1,slot:SLOT,first:'',last:'',num:88,style:2,base:styleAt(2),ups:{},bio:{...BIO0},badges:[],look:{...DEFLOOK}});}
 function openCre(fresh){ED=fresh||!PROF?newED():JSON.parse(JSON.stringify(PROF));ED.bio=bioOf(ED);ED.look=migLook(ED.look);ED.badges=ED.badges||[];ED.ups=ED.ups||{};recompute(ED);STG=1;SUB='style';GCAT='presets';show('cre');creUI();pvShow('pvc',ED);pvCam('front');}
 const freePts=()=>BUDGET-AK.reduce((t,k)=>t+ED.base[k],0);
 function creUI(){const e=ED;recompute(e);
@@ -1540,7 +1567,7 @@ function stage4(e){const L=e.look;return`<section class="card wide"><h3>Review</
  ${tblHTML(e,false)}${e.ups&&AK.some(k=>e.base[k]+(bioMods(e.bio).now[k]||0)+(e.ups[k]||0)>e.pot[k])?'<p class="note">Some of your upgrades now sit above a lowered cap. They are kept, and count again if the cap rises.</p>':''}</section>`;}
 function validate(){const e=ED,nm=/^[A-Za-z][A-Za-z' .-]{0,13}$/;if(!nm.test((e.first||'').trim()))return[1,'Enter a first name (letters, up to 14).'];if(!nm.test((e.last||'').trim()))return[1,'Enter a last name (letters, up to 14).'];
  if(!(Number.isInteger(e.num)&&e.num>=0&&e.num<=99))return[1,'Jersey number must be 0-99.'];const fp=freePts();if(fp)return[2,fp>0?`Spend your remaining ${fp} attribute points.`:`You are ${-fp} points over budget.`];if(e.badges.length>bslots(e))return[2,'Too many badges equipped.'];return[0,''];}
-function saveCre(){ED.first=ED.first.trim();ED.last=ED.last.trim();const[st,er]=validate();if(er){STG=st;if(st===2)SUB='attr';creUI();$m('cerr').textContent=er;return;}ED.created=ED.created||Date.now();
+function saveCre(){ED.slot=SLOT;ED.first=ED.first.trim();ED.last=ED.last.trim();const[st,er]=validate();if(er){STG=st;if(st===2)SUB='attr';creUI();$m('cerr').textContent=er;return;}ED.created=ED.created||Date.now();
  const nw=JSON.parse(JSON.stringify(ED));if(!nw.xp&&!nw.lvl){nw.xp=nw.lxp=nw.paid=nw.up=0;nw.lvl=1;nw.ups={};}
  if(PROF&&PROF.created===nw.created&&PROF.style!==nw.style){nw.up+=nw.paid;nw.paid=0;nw.ups={};}   // new playstyle: upgrades refunded, not lost
  normProf(nw);PROF=nw;if(!saveProf(PROF))$m('cerr').textContent='Saved for this session only (storage is blocked).';show('car');carUI();}
@@ -1726,7 +1753,7 @@ function develop(){const p=PROF,k=USEL,v=p.att[k],c=upCost(v);if(v>=p.pot[k]||p.
 function resetUps(){const p=PROF;if(!p.paid||!confirm(`Reset all upgrades? You get all ${p.paid} upgrade points back.`))return;p.up+=p.paid;p.paid=0;p.ups={};recompute(p);saveProf(p);upgUI();}   // a full refund, never a loss
 {$m('fup').onclick=$m('cupg').onclick=()=>{if(!PROF)return;show('upg');upgUI();pvShow('pvu',PROF);};$m('uback').onclick=()=>{show('car');carUI();};$m('udev').onclick=develop;$m('ureset').onclick=resetUps;
  $m('ulist').onclick=e=>{const b=e.target.closest('.ur');if(b){USEL=b.dataset.k;upgUI();}};}
-PROF=loadProf();
+migrateSlots();PROF=null;
 // stamina meter
 // stamina meter (yours)
 {const st=$m('stam').firstElementChild;setInterval(()=>{const v=player.cur.stam??1;st.style.width=v*100+'%';st.style.background=v<.4?'#ff5a4a':'#fff';},120);}

@@ -839,18 +839,18 @@ function downAt(z,what){z=cl(z,-49*YD,GOAL_Z-YD);const g=Math.round((z-LOS)/YD);
  playOver(what==='INCOMPLETE'?what:what+'  '+(g>=0?'+':'')+g+' YD');}
 function playTick(){if(!playOn)return;if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){ORG.off=ORG.off==='blue'?'red':'blue';LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else resetPlay();}return;}   // possession change: rebuild both teams on their new sides
  if(playState==='pre'&&player.cur.side==='d'&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
- if(playState!=='live')return;const car=roster.find(H),ot=ORG.off;
+ if(playState!=='live')return;const car=roster.find(H),ot=ORG.off;if(car)playTick.g=0;
  if(car&&car.cur.side==='d'){flip=-Math.max(car.pel.position.z,-GOAL_Z+20*YD);playOver('INTERCEPTED!','#ff5a4a');return;}   // their ball where he picked it off (in the end zone: from their 20)
  if(car){const p=car.pel.position;
   if(p.z>GOAL_Z){SCORE[ot]+=7;flip=-25*YD;playOver('TOUCHDOWN '+ot.toUpperCase()+'!',hx(TEAM[ot][0]));}
   else if(Math.abs(p.x)>FW/2)downAt(p.z,'OUT OF BOUNDS');
   else if(car.limp)downAt(p.z,car.cur.role==='qb'&&p.z<LOS?'SACKED':'TACKLED');return;}
  if(!world.bodies.includes(ball))return;const q=roster.find(d=>d.cur.role==='qb');
- if(q&&!H(q)&&ball.position.y<.2&&ball.velocity.norm()<3)downAt(LOS,'INCOMPLETE');}   // thrown and it hit the turf
+ if(q&&!H(q)&&ball.position.y<.2&&!playTick.g)playTick.g=performance.now();if(playTick.g&&performance.now()-playTick.g>500)downAt(LOS,'INCOMPLETE');}   // thrown and it hit the turf: dead half a second later
 function playStart(){if(!playPre())return;playState='live';for(const d of roster){if(d.cur.ai&&d.cur.role==='wr'){d.cur.st='route';d.cur.i=0;}if(d.cur.ai&&d.cur.side==='d')d.cur.st='cover';}routeVis=false;routeMesh.visible=false;}
 // R: everyone back to the line, the ball to the QB, a new route; nothing moves until 2
 // receiver split wide on the 50, QB 15 yd behind the line, defender 20 yd in front of the receiver
-function resetPlay(){if(!playOn)return;playEnd=0;resetT=performance.now();hud();losMesh.position.z=LOS;fdMesh.position.z=FD;losMesh.visible=fdMesh.visible=true;
+function resetPlay(){if(!playOn)return;playTick.g=0;playEnd=0;resetT=performance.now();hud();losMesh.position.z=LOS;fdMesh.position.z=FD;losMesh.visible=fdMesh.visible=true;
  for(const d of roster){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;limp=false;d.limpT=0;keys={};}use(player);
  const used=[];let q=null,rw=null;
  for(const d of roster){const c=d.cur;

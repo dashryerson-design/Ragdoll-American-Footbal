@@ -249,8 +249,8 @@ addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key===' '&&jp=
 addEventListener('blur',()=>{keys={};});
 const lockEl=renderer.domElement;
 addEventListener('contextmenu',e=>e.preventDefault());
-addEventListener('mouseup',e=>{if(e.button===2)aimOn=false;});
-lockEl.addEventListener('mousedown',e=>{if(e.button===2)aimOn=true;if(e.button===0&&aimOn)startThrow();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
+addEventListener('mouseup',e=>{if(e.button===2)aimOn=false;if(e.button===0)releaseCharge();});
+lockEl.addEventListener('mousedown',e=>{if(e.button===2)aimOn=true;if(e.button===0)startCharge();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
 addEventListener('mousemove',e=>{if(document.pointerLockElement!==lockEl)return;camYaw-=e.movementX*.006;camPitch=Math.max(-.6,Math.min(1.2,camPitch+e.movementY*.006));});
 addEventListener('wheel',e=>{camDist=Math.max(1.8,Math.min(8,camDist+e.deltaY*.003));});
 addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
@@ -496,7 +496,8 @@ function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));c
   const J=joints,w=sm(cl((t-.1)/.15,0,1));J.hip1.x+=(-.25-J.hip1.x)*w;J['hip-1'].x+=(.35-J['hip-1'].x)*w;J['knee-1'].x+=(.45-J['knee-1'].x)*w;   // drive off the back leg onto the front
   return;}
  thTw=0;thLean=0;
- if(held&&aimOn){sh.x=pc-1.6;sh.z=-1.05;el.x=-2.05;wr.x=.3;return;}     // ball up by the ear, elbow out at shoulder height
+ if(held&&aimOn){const ch=chargeT<0?0:(throwSpeed()-V_MIN)/(V_MAX-V_MIN);sh.x=pc-1.6-.35*ch;   // charging: the arm loads further back
+  sh.z=-1.05;el.x=-2.05;wr.x=.3;return;}     // ball up by the ear, elbow out at shoulder height
  // carrying: same rhythm as the free arm but half the swing, and the backswing is capped so the ball never trails behind the torso
  if(held){const run=keys.shift&&mv>.3,back=Math.max(0,sh.x*.5);sh.x=pc+(run?-.3:-.15)+Math.min(sh.x*.5,.12);
   const pn=torsoPen(bpt(parts['farm-1'],carryOff0.x,carryOff0.y,carryOff0.z));spread=cl(spread+(pn>0?pn*150:-.8)*DT,0,.4);   // ball about to touch the torso: open the arm out; clear: ease back in
@@ -507,11 +508,15 @@ function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));c
  const a=cl(Math.atan2(fw,dn),.1,1.2),L=(x,y)=>x+(y-x)*reachK;   // forward angle of the arm from straight down
  sh.x=L(sh.x,pc-a);sh.z=L(sh.z,.12);el.x=L(el.x,-.12);wr.x=L(wr.x,-.3);}
 // throwing: right mouse aims (trajectory preview), left mouse throws along the camera's aim, launched a little above the crosshair
-const THROW_V=19;
-function throwVel(){const e=cl(.3-camPitch,-.3,1.2),c=Math.cos(e);return new V(-Math.sin(camYaw)*c*THROW_V+pel.velocity.x,Math.sin(e)*THROW_V,-Math.cos(camYaw)*c*THROW_V+pel.velocity.z);}
+// hold to charge: 10 m/s tap (a soft toss) up to 27 m/s after 1.2 s (about the hardest NFL throws, ~60 mph)
+const V_MIN=10,V_MAX=27,CHARGE_MS=1200;let chargeT=-1,throwSpd=V_MIN;
+const throwSpeed=()=>chargeT<0?V_MIN:V_MIN+(V_MAX-V_MIN)*Math.min(1,(performance.now()-chargeT)/CHARGE_MS);
+function startCharge(){if(held&&aimOn&&thr<0&&!limp)chargeT=performance.now();}
+function releaseCharge(){if(chargeT<0)return;throwSpd=throwSpeed();chargeT=-1;startThrow();}
+function throwVel(){const THROW_V=thr>=0?throwSpd:throwSpeed(),e=cl(.3-camPitch,-.3,1.2),c=Math.cos(e);return new V(-Math.sin(camYaw)*c*THROW_V+pel.velocity.x,Math.sin(e)*THROW_V,-Math.cos(camYaw)*c*THROW_V+pel.velocity.z);}
 const aimLine=new THREE.Points(new THREE.BufferGeometry().setFromPoints(Array.from({length:60},()=>new THREE.Vector3())),new THREE.PointsMaterial({color:0xffe27a,size:.22,transparent:true,opacity:.9,depthWrite:false}));   // dotted arc (GL lines are 1 px)
 aimLine.frustumCulled=false;aimLine.visible=false;scene.add(aimLine);
-function aimTick(){aimLine.visible=held&&aimOn&&!limp;if(!aimLine.visible)return;
+function aimTick(){if(!held||!aimOn)chargeT=-1;aimLine.visible=held&&aimOn&&!limp;if(!aimLine.visible)return;
  const p=bpt(handR(),0,-.02,.07),v=throwVel(),a=aimLine.geometry.attributes.position,dt=.05,dmp=Math.pow(.9,dt);let x=p.x,y=p.y,z=p.z,vx=v.x,vy=v.y,vz=v.z,n=0;
  for(;n<60;n++){a.setXYZ(n,x,y,z);if(y<.09)break;vx*=dmp;vy*=dmp;vz*=dmp;vy-=9.82*dt;x+=vx*dt;y+=vy*dt;z+=vz*dt;}   // same gravity + damping as the ball body
  for(let i=n+1;i<60;i++)a.setXYZ(i,x,Math.max(.09,y),z);a.needsUpdate=true;}
@@ -552,7 +557,7 @@ if('ontouchstart'in window||matchMedia('(pointer:coarse)').matches)document.body
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
  tap($('bsprint'),()=>{keys.shift=!keys.shift;});   // sprint toggles (a held button + joystick + look is too many fingers)
  tap(aimB,()=>{aimOn=!aimOn&&held;});
- tap(big,()=>{if(aimOn)startThrow();});
+ tap(big,startCharge);big.addEventListener('touchend',e=>{e.preventDefault();releaseCharge();});
  tap($('bjump'),()=>key(' ','keydown'));$('bjump').addEventListener('touchend',()=>key(' ','keyup'));
  tap($('bdrop'),()=>{key('t','keydown');key('t','keyup');});
  const look={};   // any other finger on the screen drags the camera

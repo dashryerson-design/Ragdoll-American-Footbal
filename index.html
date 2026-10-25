@@ -235,7 +235,9 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(keys[k])return;key
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key===' '&&jp===1){jp=0;if(!limp&&js===0&&contact())startBound();}});
 addEventListener('blur',()=>{keys={};});
 const lockEl=renderer.domElement;
-lockEl.addEventListener('mousedown',()=>{if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
+addEventListener('contextmenu',e=>e.preventDefault());
+addEventListener('mouseup',e=>{if(e.button===2)aimOn=false;});
+lockEl.addEventListener('mousedown',e=>{if(e.button===2)aimOn=true;if(e.button===0&&aimOn)throwBall();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
 addEventListener('mousemove',e=>{if(document.pointerLockElement!==lockEl)return;camYaw-=e.movementX*.006;camPitch=Math.max(-.6,Math.min(1.2,camPitch+e.movementY*.006));});
 addEventListener('wheel',e=>{camDist=Math.max(1.8,Math.min(8,camDist+e.deltaY*.003));});
 addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
@@ -453,7 +455,7 @@ const ballMesh=new THREE.Group();
  for(let i=-2;i<=2;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(.03,.006,.01),white);c.position.set(0,i*.015,.085);ballMesh.add(c);}
  for(const y of[-.1,.1]){const r=new THREE.Mesh(new THREE.TorusGeometry(y>0?.062:.062,.005,6,20),white);r.rotation.x=Math.PI/2;r.position.y=y;ballMesh.add(r);}}
 scene.add(ballMesh);
-let held=false,reachK=0,reachOn=false,ballCool=0;
+let held=false,reachK=0,reachOn=false,ballCool=0,aimOn=false,thrT=0;
 const handR=()=>parts['hand-1'];
 // should the body start reaching? predict when the ball passes under us at the current velocity (in stride: no slowing down)
 function reachPredict(){if(held||limp||cs>0||js>0||ballCool>0||ball.position.y>.45)return false;
@@ -463,11 +465,25 @@ function reachPredict(){if(held||limp||cs>0||js>0||ballCool>0||ball.position.y>.
  return along>-.25&&along/sp<.38&&lat<.75&&d<2.6;}
 // right arm (side -1): swing down toward the ball while reaching; tucked across the belly while carrying
 function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));const pc=pitchOf(chest),sh=joints['shoulder-1'],el=joints['elbow-1'],wr=joints['wrist-1'];
+ if(thrT>0){thrT-=DT;sh.x=pc-.9;sh.z=-.1;el.x=-.15;wr.x=-.4;return;}   // follow-through after the throw
+ if(held&&aimOn){sh.x=pc-2.7;sh.z=-.35;el.x=-1.7;wr.x=.3;return;}       // cocked back over the shoulder
  if(held){sh.x=pc-.15;sh.z=.3;el.x=-1.65;wr.x=.1;return;}   // tucked: upper arm down at the side, forearm across the belly (arm angle in the world = chest pitch - shoulder x)
  if(reachK<.01)return;
  const S=bpt(chest,-.27,.12,0),dx=ball.position.x-S.x,dz=ball.position.z-S.z,fw=Math.max(.05,dx*Math.sin(yaw)+dz*Math.cos(yaw)),dn=Math.max(.2,S.y-ball.position.y);
  const a=cl(Math.atan2(fw,dn),.1,1.2),L=(x,y)=>x+(y-x)*reachK;   // forward angle of the arm from straight down
  sh.x=L(sh.x,pc-a);sh.z=L(sh.z,.12);el.x=L(el.x,-.12);wr.x=L(wr.x,-.3);}
+// throwing: right mouse aims (trajectory preview), left mouse throws along the camera's aim, launched a little above the crosshair
+const THROW_V=19;
+function throwVel(){const e=cl(.3-camPitch,-.3,1.2),c=Math.cos(e);return new V(-Math.sin(camYaw)*c*THROW_V+pel.velocity.x,Math.sin(e)*THROW_V,-Math.cos(camYaw)*c*THROW_V+pel.velocity.z);}
+const aimLine=new THREE.Points(new THREE.BufferGeometry().setFromPoints(Array.from({length:60},()=>new THREE.Vector3())),new THREE.PointsMaterial({color:0xffe27a,size:.22,transparent:true,opacity:.9,depthWrite:false}));   // dotted arc (GL lines are 1 px)
+aimLine.frustumCulled=false;aimLine.visible=false;scene.add(aimLine);
+function aimTick(){aimLine.visible=held&&aimOn&&!limp;if(!aimLine.visible)return;
+ const p=bpt(handR(),0,-.02,.07),v=throwVel(),a=aimLine.geometry.attributes.position,dt=.05,dmp=Math.pow(.9,dt);let x=p.x,y=p.y,z=p.z,vx=v.x,vy=v.y,vz=v.z,n=0;
+ for(;n<60;n++){a.setXYZ(n,x,y,z);if(y<.09)break;vx*=dmp;vy*=dmp;vz*=dmp;vy-=9.82*dt;x+=vx*dt;y+=vy*dt;z+=vz*dt;}   // same gravity + damping as the ball body
+ for(let i=n+1;i<60;i++)a.setXYZ(i,x,Math.max(.09,y),z);a.needsUpdate=true;}
+function throwBall(){if(!held||limp)return;const p=bpt(handR(),0,-.02,.07),v=throwVel();held=false;ballCool=.6;thrT=.3;
+ ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.velocity.copy(v);const d=v.unit();ball.quaternion.setFromVectors(new V(0,1,0),d);
+ ball.angularVelocity.set(d.x*25,d.y*25,d.z*25);world.addBody(ball);ball.wakeUp();}   // nose-first spiral
 function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);}
 function dropBall(){if(!held)return;held=false;ballCool=.6;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);
@@ -490,7 +506,7 @@ function frame(now){
   world.step(DT);acc-=DT;
   for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}
  for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}
- ballTick(now);
+ ballTick(now);aimTick();
  tgt.x+=(pel.position.x-tgt.x)*.45;tgt.z+=(pel.position.z-tgt.z)*.45;tgt.y+=(Math.max(.4,pel.position.y-.08)-tgt.y)*.1;   // follow the doll tightly (incl. height on platforms)
  const sh=.55,pvx=tgt.x+Math.cos(camYaw)*sh,pvy=tgt.y+.55,pvz=tgt.z-Math.sin(camYaw)*sh,cp=Math.cos(camPitch);   // pivot: over the doll's right shoulder
  const dx=Math.sin(camYaw)*cp,dy=Math.sin(camPitch),dz=Math.cos(camYaw)*cp,rc=castRay({x:pvx,y:pvy,z:pvz},{x:dx,y:dy,z:dz},camDist+.2);

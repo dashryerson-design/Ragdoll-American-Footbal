@@ -444,7 +444,8 @@ const DIVE_UP=1.15,DIVE_END=2.0;
 // ---------- juke: a direction + E. Like a real one: a hard jab step and dropped shoulder / head snap the wrong way (sells the fake),
 // then plant off that foot and burst out low the other way, half sideways, half upfield. Defenders reading you can bite on the fake and
 // chase the wrong way for a moment; one caught close and flat-footed can stumble over. E with no direction does nothing ----------
-function juke(){let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
+function juke(){if(cur.side==='d')return;   // on defence E is the stance, not a juke
+ let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
  if(sd&&dv===0&&!limp&&cs===0&&js===0){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100*(1-.3*AT('bhd'));}}}
 function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the side you pressed (the cut), -r = the side-step
  // all pushes go through every body part evenly (no twisting the torso), so the juke never knocks him off balance
@@ -473,11 +474,13 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  follow(t=>[0,dvY+(1.07+gs-dvY)*sm3(cl(t/(DIVE_END-DIVE_UP),0,1))],T-DIVE_UP,.9,70,16,35);
  ballArm();
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
-function control(dt){if(cur.jk)jukeTick(dt);cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
+function control(dt){if(cur.jk)jukeTick(dt);if(held&&cur.side==='o'&&player.cur.stance&&curD!==player){const P=player.pel.position,dx=pel.position.x-P.x,dz=pel.position.z-P.z;   // ball carrier running into a defender's stance (E): held up and stopped, Strength vs Strength
+ if(dx*dx+dz*dz<2.1){const k=Math.exp(-14*cl(.6+.3*(E(player,'str')-AT('str')),.2,.95)*dt);for(const b of list){b.velocity.x*=k;b.velocity.z*=k;}const k2=Math.exp(-10*dt);for(const b of player.list){b.velocity.x*=k2;b.velocity.z*=k2;}}}   // the defender stays planted too
+if(!cur.ai){const st=cur.side==='d'&&!!keys.e&&playOn;if(st)cur.low=.3;else if(cur.stance)cur.low=0;cur.stance=st;}   // holding E on defence: sink into a wide, low defensive stancecur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
  let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;   // locked on the line until the snap (2)
  let dx=-s*f+c*r,dz=-c*f-s*r;const len=Math.hypot(dx,dz);
- const moving=len>0&&!limp&&js===0;let run=!!keys.shift;
+ const moving=len>0&&!limp&&js===0;let run=!!keys.shift&&!cur.stance;
  const crouchOn=(keys.c||keys.control)&&!limp&&js===0&&cs===0;crK+=((crouchOn?1:0)-crK)*Math.min(1,dt*8);if(crK>.3)run=false;   // crouch: C (or Ctrl)
  if(ccool>0)ccool-=dt;
  if(cs===0&&keys[' ']&&!limp&&js===0&&jp<2&&ccool<=0&&contact()){cscan-=dt;if(cscan<=0){cscan=.06;const L=findLedge();if(L)startClimb(L);}}
@@ -494,7 +497,7 @@ function control(dt){if(cur.jk)jukeTick(dt);cur.stam=cl((cur.stam??1)+(keys.shif
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
  if(held&&keys.shift&&mv>.5)cur.runT=(cur.runT||0)+dt;else{cur.runT=0;cur.boost=0;}cur.boost=Math.max(0,(cur.boost||0)-.12*dt);   // the burst fades unless you keep tapping
- const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(1+(cur.jkB||0))*(1+.13*AT('spd'))*(.85+.15*Math.min(1,(cur.stam??1)/.4))*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
+ const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(cur.stance?.6:1)*(1+(cur.jkB||0))*(1+.13*AT('spd'))*(.85+.15*Math.min(1,(cur.stam??1)/.4))*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
@@ -1167,7 +1170,7 @@ function frame(now){
  {const rd=(now-(frame.pt||now))/1000,fd=Math.min(.05,rd);frame.pt=now;for(const d of D){use(d);cleats(d,fd);}turfTick(fd,rd);}
  for(const d of D)if(d.limpT&&performance.now()>d.limpT){use(d);limp=false;d.limpT=0;}   // tackled: back on his feet
  use(player);playTick();
- if(player.cur.side==='d'&&dv>0){const c=roster.find(d=>d.cur.side==='o'&&d.held&&!d.limp);if(c&&!cur.tkd&&c.pel.position.distanceTo(pel.position)<1.3*(1+.15*AT('tak'))){cur.tkd=1;tackleTry(c,player);}}else if(dv===0)cur.tkd=0;   // you on defence: dive into the ball carrier to tackle him
+ if(player.cur.side==='d'&&dv>0){const c=roster.find(d=>d.cur.side==='o'&&d.held&&!d.limp);if(c&&!cur.tkd&&Math.min(...[pel,chest,head,parts.hand1,parts['hand-1']].map(b=>b.position.distanceTo(c.pel.position)))<1.05*(1+.15*AT('tak'))){cur.tkd=1;tackleTry(c,player);}}else if(dv===0)cur.tkd=0;   // you on defence: a dive (Q) that gets your body or hands onto the ball carrier is a tackle
  ballTick(now);aimTick();$m('cboost').hidden=catchBoost()===1;
  tgt.x+=(pel.position.x-tgt.x)*.45;tgt.z+=(pel.position.z-tgt.z)*.45;tgt.y+=(Math.max(.4,pel.position.y-.08)-tgt.y)*.1;   // follow the doll tightly (incl. height on platforms)
  const sh=.55,pvx=tgt.x+Math.cos(camYaw)*sh,pvy=tgt.y+.55,pvz=tgt.z-Math.sin(camYaw)*sh,cp=Math.cos(camPitch);   // pivot: over the doll's right shoulder

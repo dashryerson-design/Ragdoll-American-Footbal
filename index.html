@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Ragdoll American Football</title>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Ragdoll American Football</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>html,body{margin:0;height:100%;background:#000;overflow:hidden}canvas{display:block}
 #tc{display:none;position:fixed;inset:0;z-index:2;touch-action:none;user-select:none;-webkit-user-select:none}body.touch #tc{display:block}
 #joy{position:absolute;left:calc(28px + env(safe-area-inset-left,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px));width:150px;height:150px;border-radius:50%;background:#ffffff14;border:2px solid #ffffff44}
@@ -60,6 +60,36 @@
 .bar{height:7px;background:#26262b;border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:#d9d9de;transition:width .2s}.bar i.hi{background:#7fe08a}.bar i.el{background:var(--ac)}.bar i.lo{background:#77777f}
 .lk{font:700 11px system-ui;letter-spacing:.24em;color:var(--mu);margin-bottom:16px}.lk div{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.sw{width:42px;height:42px;padding:0!important;border:2px solid var(--ln)!important}.sw.on{border-color:var(--ac)!important;box-shadow:0 0 0 2px #0a0a0b inset}
 .cbot{width:min(100%,1100px);display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;border-top:1px solid var(--ln);padding-top:12px}#cerr{flex:1;color:#ff8a7a;font:600 13px system-ui}
+.mad,#car.mad,#cre.mad{--rd:#e8321e;font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;justify-content:flex-start;padding:28px max(20px,env(safe-area-inset-left,0px)) 64px;gap:0;
+ background:radial-gradient(45% 55% at 82% 28%,#6b0f0a99,transparent 70%),radial-gradient(40% 45% at 18% 90%,#5a0c0866,transparent 70%),repeating-linear-gradient(90deg,#ff3b2a12 0 1px,transparent 1px 64px),repeating-linear-gradient(0deg,#ff3b2a0e 0 1px,transparent 1px 64px),linear-gradient(160deg,#141012,#070607 60%)}
+.mad .vt{position:absolute;left:8px;top:28px;writing-mode:vertical-rl;transform:rotate(180deg);font:600 12px/1 "Barlow Condensed",sans-serif;letter-spacing:.3em;color:#ffffff66}
+.mgrid{width:min(100%,1240px);display:grid;grid-template-columns:minmax(260px,380px) minmax(300px,1fr) minmax(220px,330px);gap:22px;align-items:start}
+@media(max-width:980px){.mgrid{grid-template-columns:1fr}.mright{order:-1}}
+.mad h1{margin:0 0 12px;font:500 34px "Barlow Condensed",sans-serif;letter-spacing:.01em}.mad .sub{font:600 14px "Barlow Condensed";letter-spacing:.2em;color:#ffffff88;margin:-8px 0 14px;text-transform:uppercase}
+#steps{display:flex;align-items:center;margin:0 0 18px}#steps button{width:26px;height:26px;border-radius:50%;padding:0!important;display:grid;place-items:center;font:700 13px "Barlow Condensed";background:#6b6b70!important;border:0!important;color:#111!important}
+#steps button.done{background:#55555a!important;color:#fff!important}#steps button.on{background:#fff!important;width:30px;height:30px}#steps i{flex:1;height:3px;background:#55555a;max-width:56px}#steps i.on{background:#fff}
+.fld{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;margin:0 0 9px;font:600 19px "Barlow Condensed"}.fld>span{color:#fff}
+#cre .fld input,.fld b{font:700 17px "Barlow Condensed";color:#111;background:#f2f2f2;border:0;border-radius:2px;padding:3px 10px;text-align:center;outline:none;min-width:0}#cre .fld input:focus{box-shadow:0 0 0 2px var(--rd)}
+.sec{border:1px solid transparent;border-radius:3px;padding:6px 8px;margin:0 -8px 8px;transition:border-color .2s,background .2s}.sec.act{border-color:#ffffff22;background:#ffffff08}
+#stc{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin-top:6px}
+.arc{display:flex!important;align-items:center;gap:10px;background:none!important;border:0!important;padding:6px 2px!important;text-align:left;font:600 16px "Barlow Condensed"!important;letter-spacing:.01em!important;color:#e6e6e6!important;text-transform:none}
+.arc i{width:24px;height:24px;flex:none;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#8a6a5a,#4a3a33);box-shadow:inset 0 0 0 2px #ffffff22}
+.arc.on i{background:linear-gradient(135deg,#fff3b0,#d7a52e 45%,#8a5a10);box-shadow:0 0 14px #ffcf4a88,inset 0 0 0 2px #fff6}.arc.on{color:#fff!important}.arc:hover i{box-shadow:inset 0 0 0 2px #fff8}
+.sw3>div{display:flex;gap:6px;flex-wrap:wrap}.sw3 .sw{width:30px;height:30px}
+.cont{width:100%;margin-top:8px;text-align:left;font:600 20px "Barlow Condensed"!important;letter-spacing:.01em!important;background:#3a0e0a99!important;border:2px solid var(--rd)!important;color:#fff!important;padding:9px 14px!important;text-transform:none}.cont:hover{background:#5a140d!important}
+#cerr{color:#ff8a7a;font:600 15px "Barlow Condensed";margin-top:8px;min-height:18px}
+.mmid{background:#1b1b1dee;border-radius:3px;padding:14px 16px;box-shadow:0 20px 50px #0008}.tbl .th{display:grid;grid-template-columns:1fr 92px 82px;font:700 14px "Barlow Condensed";letter-spacing:.06em;color:#fff;padding:8px 4px 6px;text-transform:uppercase}.tbl .th span+span{text-align:center}
+.tr{display:grid;grid-template-columns:34px 1fr 50px 52px 82px;align-items:center;gap:6px;padding:3px 4px;font:500 16px "Barlow Condensed";color:#c9c9ce}.tr:nth-child(odd){background:#ffffff07}
+.tr .v{font:800 17px "Barlow Condensed";color:#fff}.tr .v.up{color:#3ee07a}.tr .pt{font:800 16px "Barlow Condensed";color:#3ee07a;text-align:center}.tr .dots{display:flex;gap:3px;justify-content:center}.tr .dots i{width:8px;height:8px;border-radius:50%;background:#55555a}.tr .dots i.f{background:#3ee07a}
+.tr .pm{display:flex;gap:2px;justify-content:flex-end}.tr .pm button{width:22px;height:20px;padding:0!important;font:700 14px system-ui!important;background:#2a2a2e!important;border:1px solid #3a3a40!important;border-radius:2px!important}.tr .pm button:hover{border-color:#fff!important}
+.tr.key span{color:#fff}.tf{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #ffffff22;margin-top:12px;padding-top:10px;font:600 15px "Barlow Condensed"}.tf b{font-weight:800}.tf .dotr::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--rd);margin-right:6px}
+.mright{display:flex;flex-direction:column;align-items:stretch}.pvbox{height:min(62vh,520px);cursor:grab;touch-action:none}.pvbox canvas{width:100%!important;height:100%!important;display:block}
+.pvi h3{margin:0;font:700 28px "Barlow Condensed";letter-spacing:.01em}.pvi .nm{font:700 14px "Barlow Condensed";letter-spacing:.06em;color:#6fb4ff;text-transform:uppercase}.pvi p{margin:2px 0 0;font:500 16px/1.25 "Barlow Condensed";color:#e8e8e8}.pvi .ovr{font:800 40px/1 "Barlow Condensed";color:#fff;margin-bottom:4px}.pvi .ovr small{font-size:14px;color:#ffffff99}
+.mlist{display:flex;flex-direction:column;gap:6px}.mrow{text-align:left;font:600 22px "Barlow Condensed"!important;letter-spacing:.01em!important;text-transform:none;background:#ffffff08!important;border:1px solid #ffffff1a!important;border-left:3px solid transparent!important;padding:10px 14px!important;color:#fff!important}
+.mrow:hover:not(:disabled){border-left-color:var(--rd)!important;background:#ffffff12!important}.mrow.pri2{border:2px solid var(--rd)!important;background:#3a0e0a99!important}
+.hints{position:fixed;left:0;right:0;bottom:0;display:flex;gap:22px;align-items:center;padding:12px max(24px,env(safe-area-inset-left,0px));font:500 16px "Barlow Condensed";color:#ddd;background:linear-gradient(transparent,#000c)}
+.hints i{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#fff;color:#111;font:800 11px system-ui;font-style:normal;margin-right:6px}.hints button{background:none!important;border:0!important;padding:0!important;font:500 16px "Barlow Condensed"!important;letter-spacing:0!important;text-transform:none;color:#ddd!important}.hints button:hover{color:#fff!important}
+#pv3{position:fixed;left:-9999px;width:10px;height:10px}
 #stam{position:fixed;left:calc(14px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:3;width:110px;height:6px;background:#0008;border:1px solid #fff4;border-radius:3px;pointer-events:none}#stam i{display:block;height:100%;width:100%;border-radius:2px}
 </style></head><body>
 <div id="mm" class="ov"><div id="logo"><svg viewBox="0 0 120 70" aria-hidden="true"><ellipse cx="60" cy="35" rx="56" ry="31" fill="#7a3a16"/><ellipse cx="60" cy="35" rx="56" ry="31" fill="none" stroke="#4a210a" stroke-width="3"/>
@@ -72,15 +102,20 @@
 <div id="pbn" style="position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:3;font:900 min(10vw,64px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;text-shadow:0 3px 0 #000,0 0 22px #000;pointer-events:none;opacity:0;white-space:nowrap"></div><div id="score" class="wrb" style="position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:3;font:900 20px Impact,'Arial Black',sans-serif;letter-spacing:.08em;color:#fff;background:#000a;border:2px solid #ff5a1f;border-radius:8px;padding:4px 14px;pointer-events:none"></div>
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
 <div id="mode" class="ov scr" hidden><div class="crumb">// SELECT MODE</div><div class="mpick"><button class="mc" id="mquick"><b>QUICK PLAY</b><span>Jump straight onto the field. Set up teams and plays from the pause menu.</span></button><button class="mc acc" id="mcar"><b>CAREER MODE</b><span>Create your player, choose a playstyle and take them into real drives.</span></button></div><button class="ghost" id="mback">BACK</button></div>
-<div id="car" class="ov scr" hidden><div class="crumb">// CAREER</div><h2 class="ttl">YOUR PLAYER</h2><div id="ccard"></div><div class="row"><button class="ghost" id="cback">BACK</button><button class="ghost" id="cnew">NEW PLAYER</button><button class="ghost" id="cedit">EDIT PLAYER</button><button class="pri" id="cplay">PLAY MATCH</button></div></div>
-<div id="cre" class="ov scr" hidden><div class="ctop"><div class="crumb">// CAREER · CREATE PLAYER</div><div id="ctabs"><button data-t="bio">BIO</button><button data-t="style">PLAYSTYLE</button><button data-t="attr">ATTRIBUTES</button><button data-t="look">APPEARANCE</button></div></div>
-<div class="cbody"><div class="cl">
-<section data-p="bio"><label>FIRST NAME<input id="fn" maxlength="14" autocomplete="off"></label><label>LAST NAME<input id="ln" maxlength="14" autocomplete="off"></label><label>JERSEY NUMBER<input id="jn" type="number" min="0" max="99" inputmode="numeric"></label><p class="note">Height and weight aren't offered: every ragdoll shares one physics body tuned for balance, so changing its size would change how it runs, not just how it looks.</p></section>
-<section data-p="style"><div id="stc"></div></section>
-<section data-p="attr"><div class="fp">POINTS TO SPEND <b id="fpts"></b><small>Every playstyle has the same rating budget. Move points between attributes with − / +.</small></div><div id="atl"></div></section>
-<section data-p="look"><div class="lk">SKIN TONE<div id="skw"></div></div><div class="lk">GLOVES<div id="glw"></div></div><div class="lk">CLEATS<div id="clw"></div></div></section>
-</div><div class="cr"><div id="pv"></div><div id="pvi"></div></div></div>
-<div class="cbot"><span id="cerr"></span><button class="ghost" id="ccan">CANCEL</button><button class="pri" id="csave">SAVE PLAYER</button></div></div>
+<div id="car" class="ov scr mad" hidden><div class="vt">//CAREER</div><div class="mgrid">
+<div class="mleft"><h1>Career</h1><div class="sub">Your player</div><div class="mlist"><button class="mrow pri2" id="cplay">Play Match</button><button class="mrow" id="cedit">Edit Player</button><button class="mrow" id="cnew">Create New Player</button><button class="mrow" id="cback">Back</button></div><div id="cempty" class="note"></div></div>
+<div class="mmid" id="ctbl"></div><div class="mright"><div class="pvbox" id="pvh"></div><div class="pvi" id="pvih"></div></div></div>
+<div class="hints"><span><i>✕</i> Select</span><span><i>◯</i> Back</span><span><i>⟲</i> Drag to rotate</span></div></div>
+<div id="cre" class="ov scr mad" hidden><div class="vt">//CAREER</div><div class="mgrid">
+<div class="mleft"><h1>Customize your Player</h1><div id="steps"></div>
+<div class="sec" data-s="1"><div class="fld"><span>First Name</span><input id="fn" maxlength="14" autocomplete="off" placeholder="First"></div><div class="fld"><span>Last Name</span><input id="ln" maxlength="14" autocomplete="off" placeholder="Last"></div><div class="fld"><span>Number</span><input id="jn" type="number" min="0" max="99" inputmode="numeric"></div></div>
+<div class="sec" data-s="2"><div class="fld"><span>Archetype</span><b id="arch"></b></div><div id="stc"></div></div>
+<div class="sec" data-s="4"><div class="fld sw3"><span>Skin Tone</span><div id="skw"></div></div><div class="fld sw3"><span>Gloves</span><div id="glw"></div></div><div class="fld sw3"><span>Cleats</span><div id="clw"></div></div></div>
+<button class="cont" id="cnext">Continue</button><div id="cerr"></div></div>
+<div class="mmid sec" data-s="3" id="etbl"></div>
+<div class="mright"><div class="pvbox" id="pvc"></div><div class="pvi" id="pvi"></div></div></div>
+<div class="hints"><span><i>✕</i> Select</span><button id="ccan"><i>◯</i> Back</button><span><i>⟲</i> Drag to rotate</span><button id="csave"><i>△</i> Save Player</button></div></div>
+<canvas id="pv3"></canvas>
 <div id="stam"><i></i></div>
 <div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="borg">GAME ORGANISER</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
 <div id="org" class="ov" hidden><div id="obox"><h3>GAME ORGANISER</h3><button id="omode"></button><button id="oyou"></button><button id="ooff"></button><button id="opos"></button><div class="cnt"><b>BLUE PLAYERS</b><button id="mblue">−</button><span id="nblue"></span><button id="pblue">+</button></div><div class="cnt"><b>RED PLAYERS</b><button id="mred">−</button><span id="nred"></span><button id="pred">+</button></div><button id="oos"></button><button id="ods"></button></div><div id="oline"></div><div class="obtn"><button id="oback">BACK</button><button id="ogo">START</button></div></div>
@@ -1113,27 +1148,43 @@ function applyProf(p){player.cur.at=p?{...p.att}:null;dress(player,p&&p.look);je
 // ---------- menus: control pick -> QUICK PLAY / CAREER MODE -> career hub -> creator ----------
 let pendMode=null,ED=null,TAB='bio';
 const show=id=>{for(const x of['mm','mode','car','cre'])$m(x).hidden=x!==id;};
-function prevSVG(p,big){const lk=p.look,sk=hx(SKC[lk.skin]),gl=GLC[lk.glove]!=null?hx(GLC[lk.glove]):sk,cl2=hx(CLC[lk.cleat]),B=hx(TEAM.blue[0]),D=hx(TEAM.blue[1]);   // the ragdoll itself, block for block, in your gear
- return`<svg viewBox="0 0 200 330" class="pvs"><defs><radialGradient id="pg" cx=".5" cy=".95" r=".6"><stop offset="0" stop-color="#fff2"/><stop offset="1" stop-color="#fff0"/></radialGradient></defs><ellipse cx="100" cy="318" rx="70" ry="10" fill="url(#pg)"/>
- <rect x="74" y="210" width="22" height="98" fill="${D}"/><rect x="104" y="210" width="22" height="98" fill="${D}"/><rect x="70" y="306" width="30" height="12" rx="2" fill="${cl2}"/><rect x="100" y="306" width="30" height="12" rx="2" fill="${cl2}"/>
- <rect x="66" y="190" width="68" height="34" fill="${D}"/><rect x="68" y="150" width="64" height="42" fill="${B}"/><rect x="60" y="92" width="80" height="62" fill="${B}"/>
- <rect x="40" y="94" width="20" height="44" fill="${B}"/><rect x="140" y="94" width="20" height="44" fill="${B}"/><rect x="42" y="136" width="16" height="44" fill="${sk}"/><rect x="142" y="136" width="16" height="44" fill="${sk}"/><rect x="41" y="178" width="18" height="20" fill="${gl}"/><rect x="141" y="178" width="18" height="20" fill="${gl}"/>
- <rect x="89" y="78" width="22" height="16" fill="${sk}"/><rect x="78" y="36" width="44" height="44" fill="${sk}"/><text x="100" y="${big?140:140}" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="40" fill="#fff">${p.num}</text></svg>`;}
-function carUI(){const p=PROF;$m('cplay').disabled=!p;$m('cedit').hidden=!p;
- $m('ccard').innerHTML=p?`<div class="pvw">${prevSVG(p)}</div><div class="ci"><div class="ovr">${ovr(p.att,p.style)}<small>OVR</small></div><h3>${esc(p.first)} <b>${esc(p.last)}</b></h3><div class="tag">#${p.num} · ${STYLES[p.style][0]}</div>
-  <div class="mini">${AK.map(k=>[k,p.att[k]]).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`<div><span>${ANAME[k]}</span><i style="width:${v}%"></i><b>${v}</b></div>`).join('')}</div></div>`:'<div class="empty">No player yet. Create one to start your career.</div>';}
+// ---------- the 3D preview: a second, tiny renderer showing the actual ragdoll's parts in their standing pose, in your gear ----------
+const PVW={r:null};
+function pvInit(){if(PVW.r)return;const r=PVW.r=new THREE.WebGLRenderer({canvas:$m('pv3'),antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio));
+ const sc=PVW.sc=new THREE.Scene();sc.add(new THREE.HemisphereLight(0xffffff,0x221010,.75));const k=new THREE.DirectionalLight(0xffffff,.9);k.position.set(2,4,3);sc.add(k);const rim=new THREE.DirectionalLight(0xff3b2a,1.1);rim.position.set(-3,2,-3);sc.add(rim);
+ PVW.cam=new THREE.PerspectiveCamera(26,1,.1,50);PVW.cam.position.set(0,1.05,5);PVW.cam.lookAt(0,.98,0);
+ const g=PVW.g=new THREE.Group();sc.add(g);const d=PVW.d={parts:{},list:[],decals:[]};
+ for(const[n,b]of Object.entries(player.parts)){const m=new THREE.Mesh(b.mesh.geometry,new THREE.MeshStandardMaterial({color:b.mesh.material.color.clone(),roughness:.5}));m.userData.k=b.mesh.userData.k;const h0=player.parts.pelvis.home;m.position.set(b.home[0]-h0[0],b.home[1],b.home[2]-h0[2]);g.add(m);d.parts[n]={mesh:m};d.list.push({mesh:m});}
+ const fl=new THREE.Mesh(new THREE.CircleGeometry(.9,48),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.5}));fl.rotation.x=-Math.PI/2;g.add(fl);
+ PVW.yaw=-.35;let dr=null;const cv=$m('pv3');cv.addEventListener('pointerdown',e=>{dr=e.clientX;cv.setPointerCapture(e.pointerId);});cv.addEventListener('pointermove',e=>{if(dr!=null){PVW.yaw+=(e.clientX-dr)*.012;dr=e.clientX;PVW.t=performance.now();}});cv.addEventListener('pointerup',()=>dr=null);
+ const loop=()=>{requestAnimationFrame(loop);const host=$m('pv3').parentElement;if(!host||host.closest('[hidden]')||host.id==='')return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;
+  if(PVW.w!==w||PVW.h!==h){PVW.w=w;PVW.h=h;r.setSize(w,h,false);PVW.cam.aspect=w/h;PVW.cam.updateProjectionMatrix();}if(performance.now()-(PVW.t||0)>2500)PVW.yaw+=.004;g.rotation.y=PVW.yaw;r.render(sc,PVW.cam);};loop();}
+function pvShow(host,p){pvInit();const cv=$m('pv3');$m(host).appendChild(cv);cv.style.cssText='position:static;width:100%;height:100%;display:block';paint(PVW.d,'blue');dress(PVW.d,p.look);jersey(PVW.d,p.num>=0&&p.num<=99?p.num:'',p.last);}
+const tcase=t=>t.toLowerCase().replace(/(^|[\s-])\w/g,c=>c.toUpperCase());
+const SKILL=['cth','rte','car','bhd','thp','tha','cov','int','tak'],PHYS=['spd','acc','agi','str','sta','awr','rea'];
+// max potential (for career progression later): an archetype's strengths can reach 99, everything else grows ~24 past its archetype default
+const potOf=(p,k)=>{const b=styleAt(p.style)[k];return STYLES[p.style][2].includes(k)?99:Math.min(99,b+(STYLES[p.style][3].includes(k)?18:24));};
+function tblHTML(p,edit){const base=styleAt(p.style),key=STYLES[p.style][2],row=k=>{const v=p.att[k],up=v-base[k],f=Math.max(0,Math.min(3,Math.ceil(up/2)));
+  return`<div class="tr${key.includes(k)?' key':''}"><b class="v${up>0||key.includes(k)?' up':''}">${v}</b><span>${ANAME[k]}</span><b class="pt">${p.pot?p.pot[k]:potOf(p,k)}</b><div class="dots">${[0,1,2].map(i=>`<i class="${i<f?'f':''}"></i>`).join('')}</div><div class="pm">${edit?`<button data-k="${k}" data-d="-1">−</button><button data-k="${k}" data-d="1">+</button>`:''}</div></div>`;};
+ const spent=AK.reduce((t,k)=>t+Math.max(0,p.att[k]-base[k]),0),rem=BUDGET-AK.reduce((t,k)=>t+p.att[k],0);
+ return`<div class="tbl"><div class="th"><span>Skill Ratings</span><span>Max Potential</span><span>Point Slots</span></div>${SKILL.map(row).join('')}<div class="th" style="margin-top:10px"><span>Physical Ratings</span><span></span><span></span></div>${PHYS.map(row).join('')}
+ <div class="tf"><span>${edit?'Move points between ratings with − / +':`Overall <b>${ovr(p.att,p.style)}</b>`}</span><span><span class="dotr">Spent: <b>${spent}</b></span>&nbsp;&nbsp;<span class="dotr">Remaining: <b>${rem}</b></span></span></div></div>`;}
+const pviHTML=p=>{const st=STYLES[p.style];return`<div class="ovr">${ovr(p.att,p.style)} <small>OVR</small></div><h3>${esc(tcase(st[0]))}</h3><div class="nm">${esc(p.first||'First')} ${esc(p.last||'Last')} · #${p.num>=0?p.num:''}</div><p>${st[1]}</p>`;};
+function carUI(){const p=PROF;$m('cplay').disabled=!p;$m('cedit').hidden=!p;$m('cempty').textContent=p?'':'No player yet. Create one to start your career.';
+ $m('ctbl').hidden=!p;$m('pvih').innerHTML=p?pviHTML(p):'';if(p){$m('ctbl').innerHTML=tblHTML(p,false);pvShow('pvh',p);}}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function openCre(fresh){ED=fresh||!PROF?{v:1,first:'',last:'',num:88,style:2,att:styleAt(2),look:{skin:1,glove:0,cleat:0}}:JSON.parse(JSON.stringify(PROF));TAB='bio';show('cre');creUI();}
+let STEP=1;
+function openCre(fresh){ED=fresh||!PROF?{v:1,first:'',last:'',num:88,style:2,att:styleAt(2),look:{skin:1,glove:0,cleat:0}}:JSON.parse(JSON.stringify(PROF));STEP=1;show('cre');creUI();pvShow('pvc',ED);}
 const freePts=()=>BUDGET-AK.reduce((t,k)=>t+ED.att[k],0);
 function creUI(){const e=ED,st=STYLES[e.style];
- for(const b of document.querySelectorAll('#ctabs button'))b.classList.toggle('on',b.dataset.t===TAB);for(const x of document.querySelectorAll('#cre section'))x.hidden=x.dataset.p!==TAB;
- $m('fn').value=e.first;$m('ln').value=e.last;$m('jn').value=e.num;
- $m('stc').innerHTML=STYLES.map((s,i)=>`<button class="sty${i===e.style?' on':''}" data-i="${i}"><b>${s[0]}</b><span>${s[1]}</span><em>+ ${s[2].map(k=>ANAME[k]).join(' · ')}</em><em class="dn">– ${s[3].map(k=>ANAME[k]).join(' · ')}</em><u>${ovr(styleAt(i),i)} OVR · ${s[4]==='qb'?'PLAYS QB':'PLAYS WR'}</u></button>`).join('');
- const fp=freePts();$m('fpts').textContent=fp;$m('fpts').className=fp?'warn':'';
- $m('atl').innerHTML=AK.map(k=>{const v=e.att[k],c=v>=90?'el':v>=75?'hi':v>=50?'':'lo';return`<div class="ar${st[2].includes(k)?' key':''}"><span>${ANAME[k]}</span><button data-k="${k}" data-d="-1">−</button><div class="bar"><i class="${c}" style="width:${(v-A_MIN)/(100-A_MIN)*100}%"></i></div><b>${v}</b><button data-k="${k}" data-d="1">+</button></div>`;}).join('');
- const sw=(id,arr,key)=>{$m(id).innerHTML=arr.map((c,i)=>`<button class="sw${e.look[key]===i?' on':''}" data-k="${key}" data-i="${i}" style="background:${c==null?'repeating-linear-gradient(45deg,#444 0 4px,#222 4px 8px)':hx(c)}" title="${c==null?'None':''}"></button>`).join('');};
- sw('skw',SKC,'skin');sw('glw',GLC,'glove');sw('clw',CLC,'cleat');
- $m('pv').innerHTML=prevSVG(e,1);$m('pvi').innerHTML=`<div class="ovr">${ovr(e.att,e.style)}<small>OVR</small></div><h3>${esc(e.first||'FIRST')} <b>${esc(e.last||'LAST')}</b></h3><div class="tag">#${e.num} · ${st[0]}</div><p>${st[1]}</p>`;}
+ $m('steps').innerHTML=[1,2,3,4].map(i=>`<button data-s="${i}" class="${i===STEP?'on':i<STEP?'done':''}" title="${['','Bio','Archetype','Ratings','Appearance'][i]}">${i<STEP?'✓':i}</button>`).join('<i></i>');
+ for(const x of document.querySelectorAll('#cre .sec'))x.classList.toggle('act',+x.dataset.s===STEP);$m('cnext').textContent=STEP<4?'Continue':'Save Player';
+ if(document.activeElement!==$m('fn'))$m('fn').value=e.first;if(document.activeElement!==$m('ln'))$m('ln').value=e.last;if(document.activeElement!==$m('jn'))$m('jn').value=e.num>=0?e.num:'';
+ $m('arch').textContent=tcase(st[0]);
+ $m('stc').innerHTML=STYLES.map((s,i)=>`<button class="arc${i===e.style?' on':''}" data-i="${i}" title="${s[1]}"><i></i>${tcase(s[0])}</button>`).join('');
+ $m('etbl').innerHTML=tblHTML(e,true);
+ const sw=(id,arr,key)=>{$m(id).innerHTML=arr.map((c,i)=>`<button class="sw${e.look[key]===i?' on':''}" data-k="${key}" data-i="${i}" style="background:${c==null?'repeating-linear-gradient(45deg,#444 0 4px,#222 4px 8px)':hx(c)}"></button>`).join('');};
+ sw('skw',SKC,'skin');sw('glw',GLC,'glove');sw('clw',CLC,'cleat');$m('pvi').innerHTML=pviHTML(e);}
 function validate(){const e=ED,nm=/^[A-Za-z][A-Za-z' .-]{0,13}$/;if(!nm.test(e.first.trim()))return'Enter a first name (letters, up to 14).';if(!nm.test(e.last.trim()))return'Enter a last name (letters, up to 14).';
  if(!(Number.isInteger(e.num)&&e.num>=0&&e.num<=99))return'Jersey number must be 0-99.';const fp=freePts();if(fp)return fp>0?`Spend your remaining ${fp} attribute points.`:`You are ${-fp} points over budget.`;return'';}
 {$m('ctouch').onclick=()=>{pendMode='touch';show('mode');};$m('ckb').onclick=()=>{pendMode='kb';show('mode');};
@@ -1141,15 +1192,16 @@ function validate(){const e=ED,nm=/^[A-Za-z][A-Za-z' .-]{0,13}$/;if(!nm.test(e.f
  $m('cplay').onclick=()=>{if(!PROF)return;show(null);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,you:'blue',off:'blue',pos:STYLES[PROF.style][4],n:{blue:3,red:3}});newGame();applyOrg();};
  $m('cedit').onclick=()=>openCre(false);$m('cnew').onclick=()=>openCre(true);$m('cback').onclick=()=>show('mode');
  $m('ccan').onclick=()=>{show('car');carUI();};
- $m('csave').onclick=()=>{ED.first=ED.first.trim();ED.last=ED.last.trim();const er=validate();$m('cerr').textContent=er;if(er)return;ED.created=ED.created||Date.now();PROF=JSON.parse(JSON.stringify(ED));
+ const save=()=>{ED.first=ED.first.trim();ED.last=ED.last.trim();const er=validate();$m('cerr').textContent=er;if(er)return;ED.created=ED.created||Date.now();ED.pot=Object.fromEntries(AK.map(k=>[k,potOf(ED,k)]));PROF=JSON.parse(JSON.stringify(ED));
   if(!saveProf(PROF))$m('cerr').textContent='Saved for this session only (storage is blocked).';show('car');carUI();};
- $m('ctabs').onclick=e=>{const t=e.target.dataset.t;if(t){TAB=t;creUI();}};
- $m('fn').oninput=e=>{ED.first=e.target.value;$m('pvi').querySelector('h3').innerHTML=`${esc(ED.first||'FIRST')} <b>${esc(ED.last||'LAST')}</b>`;};
- $m('ln').oninput=e=>{ED.last=e.target.value;$m('pvi').querySelector('h3').innerHTML=`${esc(ED.first||'FIRST')} <b>${esc(ED.last||'LAST')}</b>`;};
- $m('jn').oninput=e=>{const n=parseInt(e.target.value,10);ED.num=isNaN(n)?-1:n;if(n>=0&&n<=99){$m('pv').innerHTML=prevSVG(ED,1);}};
- $m('stc').onclick=e=>{const b=e.target.closest('.sty');if(!b)return;ED.style=+b.dataset.i;ED.att=styleAt(ED.style);creUI();};   // a new playstyle starts from its own distribution
- $m('atl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k,d=+b.dataset.d,v=ED.att[k]+d;if(v<A_MIN||v>A_MAX0||(d>0&&freePts()<=0))return;ED.att[k]=v;creUI();};   // points move between attributes; the budget never grows
- $m('cre').addEventListener('click',e=>{const b=e.target.closest('.sw');if(!b)return;ED.look[b.dataset.k]=+b.dataset.i;creUI();});}
+ $m('csave').onclick=save;$m('cnext').onclick=()=>{if(STEP<4){STEP++;creUI();}else save();};
+ $m('steps').onclick=e=>{const b=e.target.closest('button');if(b){STEP=+b.dataset.s;creUI();}};
+ const nm=()=>{$m('pvi').innerHTML=pviHTML(ED);jersey(PVW.d,ED.num>=0&&ED.num<=99?ED.num:'',ED.last);};
+ $m('fn').oninput=e=>{ED.first=e.target.value;nm();};$m('ln').oninput=e=>{ED.last=e.target.value;nm();};
+ $m('jn').oninput=e=>{const n=parseInt(e.target.value,10);ED.num=isNaN(n)?-1:n;nm();};
+ $m('stc').onclick=e=>{const b=e.target.closest('.arc');if(!b)return;ED.style=+b.dataset.i;ED.att=styleAt(ED.style);STEP=Math.max(STEP,2);creUI();};   // a new archetype starts from its own distribution
+ $m('etbl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k,d=+b.dataset.d,v=ED.att[k]+d;if(v<A_MIN||v>A_MAX0||(d>0&&freePts()<=0))return;ED.att[k]=v;creUI();};   // points move between ratings; the budget never grows
+ $m('cre').addEventListener('click',e=>{const b=e.target.closest('.sw');if(!b)return;ED.look[b.dataset.k]=+b.dataset.i;creUI();dress(PVW.d,ED.look);});}
 // stamina meter (yours)
 {const st=$m('stam').firstElementChild;setInterval(()=>{const v=player.cur.stam??1;st.style.width=v*100+'%';st.style.background=v<.4?'#ff5a4a':'#fff';},120);}
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------

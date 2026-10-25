@@ -1205,7 +1205,7 @@ function applyOrg(){ORG.wi=Math.random()*5|0;for(const d of roster)if(d!==player
  const add=(s,side)=>{const d=s.you?player:bot(n++);if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,s,{side,role:side==='o'?s.role:'df',team:side==='o'?oT:dT});if(d!==player)d.cur.at=botAt(d.cur.role,d.cur.team);return d;};
  if(playOn){const p=plan();oT=p.oT;dT=p.dT;const os=p.O.map(s=>add(s,'o'));for(const s of p.D){const d=add(s,'d');if(s.m)d.cur.mark=os[s.m];}lgAssign();}
  else{P.side='o';P.team=ORG.you;}
- for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);kit(d,d===player?player.cur.app:(d.cur.app||DEFLOOK),d===player&&!playOn?null:TEAM[o?oT:dT]);shape(d,d.cur.bio||null);if(d!==player){jersey(d,d.cur.num??null,d.cur.nm);showDoll(d,true);}}   // teams collide with each other, never with themselves
+ for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);kit(d,d===player?player.cur.app:(d.cur.app||DEFLOOK),d===player&&!playOn?null:TEAM[o?oT:dT]);shape(d,d.cur.bio||null);jersey(d,d.cur.num??null,d.cur.nm,d===player&&!playOn?null:TEAM[o?oT:dT][0]);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
  if(playOn)resetPlay();else{routeMesh.visible=false;losMesh.visible=fdMesh.visible=false;playState='live';}}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
 function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
@@ -1533,11 +1533,15 @@ function kit(d,L,T){L=migLook(L);for(const m of d.kitM||[]){m.parent.remove(m);m
   if(!L.sock&&!side(L.leg,s))kmesh(d,'shin'+s,KB(.07,.05,.07),L.c_sock,0,-.19,0);   // low socks: a band at the ankle
   if(L.cstyle>=1)kmesh(d,'foot'+s,KB(.085,L.cstyle===2?.08:.045,.09),L.c_cleat,0,.06,-.01);}}   // mid / high-top cleats
 
-function jersey(d,num,name){for(const m of d.decals||[]){m.parent.remove(m);m.material.map.dispose();}d.decals=[];if(num==null)return;
- for(const[z,ry,nm]of[[.1115,0,''],[-.1115,Math.PI,name||'']]){const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');g.fillStyle='#fff';g.textAlign='center';
-  g.font='900 80px Impact,"Arial Black",sans-serif';g.fillText(String(num),64,nm?116:100);if(nm){g.font='800 22px system-ui,sans-serif';g.fillText(nm.toUpperCase().slice(0,12),64,26);}
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(.3,.28),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false}));m.position.z=z;m.rotation.y=ry;d.parts.chest.mesh.add(m);d.decals.push(m);}}
-function applyProf(p){const P=player.cur;P.at=p?{...p.att}:null;P.app=p?migLook(p.look):{...DEFLOOK};P.bio=p?bioOf(p):null;P.bm=p?bioMods(P.bio):null;P.bd=p?Object.fromEntries((p.badges||[]).map(id=>[id,btier(p,id)])):{};kit(player,P.app,null);shape(player,P.bio);jersey(player,p?p.num:null,p&&p.last);}
+// jersey lettering: number on the front; surname over the number on the back (traditional layout), in white or black, whichever reads on the jersey colour
+function jersey(d,num,name,bg){for(const m of d.decals||[]){m.parent.remove(m);m.material.map.dispose();}d.decals=[];if(num==null||num==='')return;
+ const c=new THREE.Color(bg??d.parts.chest.mesh.material.color.getHex()),lum=.2126*c.r+.7152*c.g+.0722*c.b,ink=lum>.5?'#111':'#fff',edge=lum>.5?'#ffffffaa':'#000000aa';
+ for(const[z,ry,nm]of[[.1115,0,''],[-.1115,Math.PI,(name||'').toUpperCase().replace(/[^A-Z' .-]/g,'').slice(0,18)]]){const cv=document.createElement('canvas');cv.width=cv.height=256;const g=cv.getContext('2d');g.textAlign='center';g.fillStyle=ink;g.strokeStyle=edge;g.lineJoin='round';
+  g.lineWidth=8;g.font='900 168px Impact,"Arial Black",sans-serif';g.strokeText(String(num),128,nm?238:206);g.fillText(String(num),128,nm?238:206);
+  if(nm){let fs=46;g.font=`800 ${fs}px "Barlow Condensed",Impact,sans-serif`;const w=g.measureText(nm).width;if(w>236){fs=Math.max(24,fs*236/w);g.font=`800 ${fs}px "Barlow Condensed",Impact,sans-serif`;}   // long names shrink to fit the shoulders
+   g.lineWidth=5;g.save();g.translate(128,52);const w2=g.measureText(nm).width;if(w2>236)g.scale(236/w2,1);g.strokeText(nm,0,0);g.fillText(nm,0,0);g.restore();}
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(.3,.28),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}));m.position.z=z;m.rotation.y=ry;d.parts.chest.mesh.add(m);d.decals.push(m);}}
+function applyProf(p){const P=player.cur;P.at=p?{...p.att}:null;P.app=p?migLook(p.look):{...DEFLOOK};P.bio=p?bioOf(p):null;P.bm=p?bioMods(P.bio):null;P.bd=p?Object.fromEntries((p.badges||[]).map(id=>[id,btier(p,id)])):{};kit(player,P.app,null);shape(player,P.bio);P.num=p&&p.num>=0?p.num:null;P.nm=p&&p.last;jersey(player,P.num,P.nm);}
 // ---------- menus: control pick -> QUICK PLAY / CAREER MODE -> career hub -> creator ----------
 let pendMode=null,ED=null,TAB='bio';
 const show=id=>{for(const x of['mm','mode','car','cre','pre','fin','upg','teams','comb','dft','slots'])$m(x).hidden=x!==id;};

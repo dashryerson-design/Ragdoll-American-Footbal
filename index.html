@@ -655,7 +655,8 @@ function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(bal
  // the catch itself: a reaching hand gets to the ball (checked every physics step, so fast passes can't skip past)
  for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<(.36+CATCH_ASSIST)*catchBoost()&&catchGrab()){catchK=0;return;}}
  if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<(.42+CATCH_ASSIST)*catchBoost()&&catchGrab()){catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
-function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);catchOn=false;}
+function grabBall(){held=true;world.removeBody(ball);cur.low=cur.high=0;cur.look=cur.cp=null;   // catch made: stop bending / reaching, stand back up into running form
+ reachK=Math.max(reachK,.5);catchOn=false;}
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);
  ball.velocity.set(pel.velocity.x,pel.velocity.y,pel.velocity.z);ball.angularVelocity.set(0,0,0);world.addBody(ball);ball.wakeUp();}   // it was asleep on the turf before the pickup

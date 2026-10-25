@@ -366,12 +366,13 @@ function control(dt){
  // moving against the way the body faces: step backwards (mirrored gait, no sprinting, a bit slower)
  if(moving){const fw=dx*Math.sin(yaw)+dz*Math.cos(yaw);gdir+=((fw<-.25?-1:1)-gdir)*Math.min(1,dt*8);}
  if(gdir<0)run=false;
+ const qbMove=held&&aimOn;if(qbMove)run=false;   // aiming: no sprint gait; Shift gives a slower jog, otherwise a walk
  if(!limp){let d=camYaw+Math.PI-yaw;d=Math.atan2(Math.sin(d),Math.cos(d));yaw+=d*Math.min(1,dt*(js>0?14:9));}
  mv+=((moving?1:0)-mv)*Math.min(1,dt*6);
  // per-limb weakness (wk, 1 = healthy) slows the gait and makes the body sag onto that leg
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
- const speed=(run?4.8:1.7)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.6:.37,w=Math.PI*(run?.38:.5)*speed/S;
+ const speed=(run?4.8:qbMove?(keys.shift?2.4:1.1):1.7)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.6:.37,w=Math.PI*(run?.38:.5)*speed/S;
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
@@ -413,7 +414,7 @@ function control(dt){
   if(cur.bufB&&(js===4||js===0)&&contact()&&!limp){if(performance.now()-cur.bufB<400){jpt=.2;startBound();}cur.bufB=0;}   // space pressed just before landing: chain straight into the next bound
  }
  ballArm();
- const lean=thLean-.08*qbK+.95*reachK+.18*crK+mv*(run?.28:.1)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
+ const lean=thLean-.08*qbK+.95*reachK+.18*crK+mv*(run?.28:.1)*(1-qbK)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
  if(!limp){
   // balance: keep pelvis and chest facing the heading, upright
   const tw=.12*Math.sin(phase)*mv;
@@ -480,7 +481,7 @@ function reachPredict(){if(held||limp||cs>0||js>0||ballCool>0||ball.position.y>.
 // right arm (side -1): swing down toward the ball while reaching; tucked across the belly while carrying
 function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));const pc=pitchOf(chest),sh=joints['shoulder-1'],el=joints['elbow-1'],wr=joints['wrist-1'];
  qbK+=((held&&aimOn&&!limp&&js===0?1:0)-qbK)*Math.min(1,DT*8);
- if(qbK>.01){const L=(x,y)=>x+(y-x)*qbK,J=joints;   // quarterback set: left foot forward, right foot back, free arm points at the target
+ if(qbK>.01){const L=(x,y)=>x+(y-x)*qbK*(1-mv),J=joints;   // the planted QB stance fades out while walking / jogging   // quarterback set: left foot forward, right foot back, free arm points at the target
   J.hip1.x=L(J.hip1.x,-.38);J.knee1.x=L(J.knee1.x,.3);J.ankle1.x=-(J.hip1.x+J.knee1.x);J['hip-1'].x=L(J['hip-1'].x,.22);J['knee-1'].x=L(J['knee-1'].x,.28);J['ankle-1'].x=-(J['hip-1'].x+J['knee-1'].x);
   J.shoulder1.x=L(J.shoulder1.x,pc-1.3);J.shoulder1.z=L(J.shoulder1.z,-.2);J.elbow1.x=L(J.elbow1.x,-.5);}
  if(thr>=0){thr+=DT;const t=thr,sm=x=>x*x*(3-2*x),mix=(A,B,u)=>A.map((x,i)=>x+(B[i]-x)*u);

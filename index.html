@@ -496,7 +496,10 @@ function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));c
  thTw=0;thLean=0;
  if(held&&aimOn){sh.x=pc-1.6;sh.z=-1.05;el.x=-2.05;wr.x=.3;return;}     // ball up by the ear, elbow out at shoulder height
  // carrying: same rhythm as the free arm but half the swing, and the backswing is capped so the ball never trails behind the torso
- if(held){const run=keys.shift&&mv>.3;sh.x=pc+(run?-.3:-.15)+Math.min(sh.x*.5,.12);sh.z=run?.1:.14;el.x=run?-1.45:-1.55;wr.x=.12;if(run)joints.shoulder1.z=.35;return;}
+ if(held){const run=keys.shift&&mv>.3,back=Math.max(0,sh.x*.5);sh.x=pc+(run?-.3:-.15)+Math.min(sh.x*.5,.12);
+  const pn=torsoPen(bpt(parts['farm-1'],carryOff0.x,carryOff0.y,carryOff0.z));spread=cl(spread+(pn>0?pn*150:-.8)*DT,0,.4);   // ball about to touch the torso: open the arm out; clear: ease back in
+  sh.z=(run?0:.08)-spread-back*1.1;   // backswing also opens the arm, so the ball passes beside the hip, not into it
+ el.x=run?-1.45:-1.55;wr.x=.12;if(run)joints.shoulder1.z=.35;return;}
  if(reachK<.01)return;
  const S=bpt(chest,-.27,.12,0),dx=ball.position.x-S.x,dz=ball.position.z-S.z,fw=Math.max(.05,dx*Math.sin(yaw)+dz*Math.cos(yaw)),dn=Math.max(.2,S.y-ball.position.y);
  const a=cl(Math.atan2(fw,dn),.1,1.2),L=(x,y)=>x+(y-x)*reachK;   // forward angle of the arm from straight down
@@ -516,7 +519,10 @@ function throwBall(){if(!held||limp)return;const p=bpt(handR(),0,-.02,.07),v=thr
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.velocity.copy(v);const d=v.unit();ball.quaternion.setFromVectors(new V(0,1,0),d);
  ball.angularVelocity.set(d.x*25,d.y*25,d.z*25);world.addBody(ball);ball.wakeUp();}   // nose-first spiral
 // the carried ball is pinned to the forearm, not simulated: push it out of the torso boxes so it can't sink into the body
-const _lp=new V(),carryOff=new V(.085,-.1,0);
+const _lp=new V(),carryOff0=new V(.085,-.1,0),carryOff=carryOff0.clone();let spread=0;
+// how deep (m) a ball at p would sink into the torso, with a 2 cm margin; 0 = clear
+function torsoPen(p){let m=0;for(const b of[pel,abd,chest]){const h=b.shapes[0].halfExtents,r=.125;b.pointToLocalFrame(p,_lp);
+ const o=Math.min(h.x+r-Math.abs(_lp.x),h.y+r-Math.abs(_lp.y),h.z+r-Math.abs(_lp.z));if(o>m)m=o;}return m;}
 function keepOut(p){for(const b of[pel,abd,chest]){const h=b.shapes[0].halfExtents,r=.085;b.pointToLocalFrame(p,_lp);
  const o=[h.x+r-Math.abs(_lp.x),h.y+r-Math.abs(_lp.y),h.z+r-Math.abs(_lp.z)];if(o[0]<=0||o[1]<=0||o[2]<=0)continue;
  _lp.x=-(h.x+r);b.pointToWorldFrame(_lp,p);}}   // always out to the doll's right (the ball side): a fixed direction can't flip-flop frame to frame

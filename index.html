@@ -27,7 +27,7 @@
 <span class="r">Ragdoll</span><span class="a">American Football</span></div>
 <div id="pick"><button class="ch" id="ctouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="#fff" stroke-width="4"/><circle cx="40" cy="84" r="4" fill="#fff"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#d8a24a"/></svg>TOUCH CONTROLS</button>
 <button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="#fff" stroke-width="4"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="#fff" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#d8a24a" stroke-width="4"/><path d="M103 18v14" stroke="#d8a24a" stroke-width="4"/></svg>KEYBOARD &amp; MOUSE</button></div></div>
-<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bqb">TEAMMATE QB: OFF</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
+<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
 <div class="tb" id="bbig"></div>
 <div class="tb sm" id="baim" style="right:calc(49px + env(safe-area-inset-right,0px));bottom:calc(152px + env(safe-area-inset-bottom,0px))">AIM</div>
@@ -660,7 +660,7 @@ function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
  camYaw=Math.atan2(fx-pel.position.x,fz-pel.position.z)+Math.PI;      // the body turns to face camYaw + 180°
  if(c.st==='aim'&&(c.t+=dt)>.35){startThrow();c.st='throw';}
  if(c.st==='throw'&&thr<0){c.st='idle';}}
-$m('bqb').onclick=()=>setTeammate(!teammate);
+$m('bres').onclick=togglePause;$m('bqb').onclick=()=>setTeammate(!teammate);
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------

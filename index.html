@@ -8,6 +8,10 @@
 #bbig{width:96px;height:96px;right:calc(30px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px));font-size:16px}
 .sm{width:58px;height:58px}
 #brst{position:fixed;z-index:3;display:none;width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:22px;cursor:pointer}body.qb #brst{display:flex}body.qb.touch #brst{right:calc(70px + env(safe-area-inset-right,0px))}
+#bedit{display:none}body.touch #bedit{display:inline-block}
+#ed{position:fixed;z-index:12;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:#000c;border:1px solid #d8a24a;border-radius:12px;padding:8px 10px;font:600 13px system-ui,sans-serif;color:#fff;white-space:nowrap}
+#ed[hidden]{display:none}#ed button{font:700 15px system-ui,sans-serif;color:#fff;background:#1a1a1a;border:1px solid #666;border-radius:8px;min-width:40px;height:36px;padding:0 10px}
+#ed #edone{border-color:#d8a24a;background:#2a2112}.esel{outline:3px solid #d8a24a;outline-offset:3px}
 #tpause{width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:15px}
 .ov{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;overflow-y:auto;padding:24px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;color:#fff;user-select:none;-webkit-user-select:none}
 .ov[hidden]{display:none}
@@ -29,7 +33,8 @@
 <div id="pick"><button class="ch" id="ctouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="#fff" stroke-width="4"/><circle cx="40" cy="84" r="4" fill="#fff"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#d8a24a"/></svg>TOUCH CONTROLS</button>
 <button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="#fff" stroke-width="4"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="#fff" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#d8a24a" stroke-width="4"/><path d="M103 18v14" stroke="#d8a24a" stroke-width="4"/></svg>KEYBOARD &amp; MOUSE</button></div></div>
 <div class="tb" id="brst" title="Reset the QB with the ball (R)">&#x21bb;</div>
-<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
+<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
+<div id="ed" hidden><span id="edtxt">Drag to move · tap to select</span><button id="edm">−</button><button id="edp">+</button><button id="edr">RESET</button><button id="edone">DONE</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
 <div class="tb" id="bbig"></div>
 <div class="tb sm" id="baim" style="right:calc(49px + env(safe-area-inset-right,0px));bottom:calc(152px + env(safe-area-inset-bottom,0px))">AIM</div>
@@ -607,7 +612,7 @@ function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballT
 const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles sprinting
 {const $=id=>document.getElementById(id),J=$('joy'),K=$('knob'),big=$('bbig'),aimB=$('baim'),key=(k,t)=>dispatchEvent(new KeyboardEvent(t,{key:k}));
  const mvJ=t=>{const r=J.getBoundingClientRect(),x=(t.clientX-r.left-r.width/2)/(r.width/2),y=(t.clientY-r.top-r.height/2)/(r.height/2),l=Math.hypot(x,y),k=l>1?1/l:1;
-  joy.x=x*k;joy.y=y*k;K.style.transform=`translate(${joy.x*44}px,${joy.y*44}px)`;};
+  joy.x=x*k;joy.y=y*k;K.style.transform=`translate(${joy.x*r.width*.29}px,${joy.y*r.width*.29}px)`;};
  J.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];joy.on=true;joy.id=t.identifier;mvJ(t);},{passive:false});
  J.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===joy.id)mvJ(t);},{passive:false});
  const jEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.on=false;joy.x=joy.y=0;K.style.transform='';}};J.addEventListener('touchend',jEnd);J.addEventListener('touchcancel',jEnd);
@@ -665,6 +670,27 @@ function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
 // refresh: QB back on his spot with the ball (for a missed catch)
 function refreshQB(){if(!teammate||!mode||paused)return;use(player);if(held){held=false;aimOn=false;thr=-1;}use(qbD);reset();held=false;aimOn=false;thr=-1;cur.st='idle';cur.T=null;use(player);callReq=null;giveQB();}
 $m('brst').addEventListener('click',refreshQB);$m('brst').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();refreshQB();},{passive:false});
+// ---------- touch layout editor: drag controls to move them, tap + -/+ to resize; saved on this device ----------
+const LAY_IDS=['joy','bbig','baim','bjump','bdrop','bsprint','tpause'],LAY_KEY='rafTouchLayout',layOrig={};
+for(const id of LAY_IDS)layOrig[id]=$m(id).getAttribute('style')||'';
+let lay={},editing=false,selId=null,drag=null;try{lay=JSON.parse(localStorage.getItem(LAY_KEY)||'{}')||{};}catch(e){}
+function applyLay(){for(const id of LAY_IDS){const el=$m(id),L=lay[id];el.setAttribute('style',layOrig[id]);if(id==='joy')$m('knob').removeAttribute('style');if(!L)continue;   // saved as a fraction of the screen, so it survives rotation / other screens
+ Object.assign(el.style,{left:(L.x*innerWidth-L.s/2)+'px',top:(L.y*innerHeight-L.s/2)+'px',right:'auto',bottom:'auto',width:L.s+'px',height:L.s+'px',fontSize:Math.max(10,L.s*.19)+'px'});
+ if(id==='joy'){const k=L.s*.41;Object.assign($m('knob').style,{width:k+'px',height:k+'px',margin:(-k/2)+'px 0 0 '+(-k/2)+'px'});}}}
+function layOf(id){const r=$m(id).getBoundingClientRect();return lay[id]||{x:(r.left+r.width/2)/innerWidth,y:(r.top+r.height/2)/innerHeight,s:r.width};}
+function selectCtl(id){if(selId)$m(selId).classList.remove('esel');selId=id;if(id)$m(id).classList.add('esel');}
+function saveLay(){try{localStorage.setItem(LAY_KEY,JSON.stringify(lay));}catch(e){}}
+applyLay();addEventListener('resize',applyLay);
+addEventListener('touchstart',e=>{if(!editing)return;const t=e.changedTouches[0],el=t.target.closest&&t.target.closest('#joy,.tb');if(!el||!LAY_IDS.includes(el.id))return;
+ e.preventDefault();e.stopPropagation();selectCtl(el.id);const L=layOf(el.id);drag={id:el.id,ox:t.clientX-L.x*innerWidth,oy:t.clientY-L.y*innerHeight,s:L.s,tid:t.identifier};},{capture:true,passive:false});   // capture: the control's own action never fires while editing
+addEventListener('touchmove',e=>{if(!editing||!drag)return;e.preventDefault();e.stopPropagation();for(const t of e.changedTouches){if(t.identifier!==drag.tid)continue;const h=drag.s/2;
+ lay[drag.id]={x:cl(t.clientX-drag.ox,h,innerWidth-h)/innerWidth,y:cl(t.clientY-drag.oy,h,innerHeight-h)/innerHeight,s:drag.s};applyLay();}},{capture:true,passive:false});
+addEventListener('touchend',e=>{if(editing){drag=null;e.stopPropagation();}},{capture:true});
+const resize=d=>{if(!selId)return;const L=layOf(selId);lay[selId]={...L,s:cl(L.s+d,40,200)};applyLay();};
+$m('edm').onclick=()=>resize(-10);$m('edp').onclick=()=>resize(10);
+$m('edr').onclick=()=>{lay={};saveLay();selectCtl(null);applyLay();};
+$m('bedit').onclick=()=>{editing=true;$m('pm').hidden=true;$m('ed').hidden=false;};
+$m('edone').onclick=()=>{editing=false;saveLay();selectCtl(null);$m('ed').hidden=true;$m('pm').hidden=false;};
 $m('bres').onclick=togglePause;$m('bqb').onclick=()=>setTeammate(!teammate);
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});

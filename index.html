@@ -277,7 +277,7 @@ function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
  // R: reset (QB / receiver drill), Q: dive the way the camera points, F: go limp / get up, T: drop the ball, 1: show the receiver's route, 2: receiver goes
- if(k==='r'){if(wrMode)resetPlay();else refreshQB();}if(k==='q')startDive();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')toggleRoute();if(k==='2')wrGo();
+ if(k==='r'){if(wrMode)resetPlay();else refreshQB();}if(k==='q')startDive();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')wrGo();
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()&&catchOn){startJump();return;}   // going up for a catch: always a vertical leap
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
@@ -692,7 +692,7 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
  tap($('bsprint'),()=>{keys.shift=!keys.shift;});   // sprint toggles (a held button + joystick + look is too many fingers)
  tap($('bdive'),()=>startDive());
- tap($('broute'),toggleRoute);tap($('bgo'),wrGo);
+ tap($('broute'),()=>{keys['1']=true;showRoute();});$('broute').addEventListener('touchend',()=>{keys['1']=false;});tap($('bgo'),wrGo);
  tap(aimB,()=>{aimOn=!aimOn&&held;});
  tap(big,primaryDown);big.addEventListener('touchend',e=>{e.preventDefault();primaryUp();});
  tap($('bjump'),()=>key(' ','keydown'));$('bjump').addEventListener('touchend',()=>key(' ','keyup'));
@@ -735,18 +735,23 @@ function showDoll(d,on){for(const b of d.list){if(on)world.addBody(b);else world
 // stand a doll at (x, z) facing downfield (+z)
 function placeAt(d,x,z){use(d);reset();const dz=z-pel.home[2];for(const b of list){b.position.x+=x;b.position.z+=dz;}}   // pelvis home x is 0
 // realistic NFL route tree, in yards from the receiver's spot: +x = toward his sideline, +z = downfield
-const ROUTES={GO:[[0,40]],SLANT:[[0,3],[-8,11]],OUT:[[0,10],[8,10]],IN:[[0,12],[-14,12]],POST:[[0,12],[-10,26]],CORNER:[[0,12],[9,23]],CURL:[[0,12],[-1.5,10]],COMEBACK:[[0,15],[3,12]],HITCH:[[0,5],[0,4]]};
-const WR_X=12,QB_Zs=-4.6;let route=null,routeName='',routeVis=false;
+// deeper, field-stretching routes in yards from the receiver's spot (+x = toward his own sideline, the left; -x = inside, toward the middle / right side)
+const ROUTES={DEEP_POST:[[0,15],[-14,36]],DIG:[[0,18],[-22,18]],DEEP_CROSS:[[0,8],[-30,22]],LONG_SLANT:[[0,4],[-16,18]],SHALLOW_CROSS:[[0,5],[-28,8]],CURL:[[0,15],[-2,13]],SEAM:[[0,10],[-6,40]],GO:[[0,45]],CORNER:[[0,14],[8,30]],COMEBACK:[[0,18],[4,15]]};
+const ROUTE_W=[['DEEP_POST',3],['DIG',3],['DEEP_CROSS',3],['LONG_SLANT',2],['SHALLOW_CROSS',2],['CURL',.6],['SEAM',2],['GO',.5],['CORNER',.3],['COMEBACK',.3]];   // mostly ending in the middle or on the right
+const WR_X=12,QB_Zs=-4.6;let route=null,routeName='',routeVis=false,routeFull=false,routeDownT=0,birdK=0;
 const routeMesh=new THREE.Group(),rtCore=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial({color:0xff1e12,transparent:true,opacity:.95,depthWrite:false,side:THREE.DoubleSide})),rtGlow=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial({color:0xff3020,transparent:true,opacity:.28,depthWrite:false,side:THREE.DoubleSide}));
 routeMesh.add(rtGlow,rtCore);routeMesh.visible=false;scene.add(routeMesh);   // solid red core + soft red glow (additive turned it yellow on the grass)
-function pickRoute(){const ks=Object.keys(ROUTES);routeName=ks[Math.random()*ks.length|0];const out=Math.sign(WR_X);route=ROUTES[routeName].map(([x,z])=>[WR_X+out*x*YD,z*YD]);
- // the hint: the first leg, then just the start of the break with an arrowhead (not the whole route)
- const P=[[WR_X,0],route[0]];if(route[1]){const a=route[0],b=route[1],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,k=Math.min(1,4.5/L);P.push([a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]);}else P[1]=[WR_X,Math.min(route[0][1],18)];
+// each play: a weighted random route (mostly breaking inside, toward the middle / far side), then the hint mesh
+function pickRoute(){let r=Math.random()*ROUTE_W.reduce((a,b)=>a+b[1],0),n=ROUTE_W[0][0];for(const[k,w]of ROUTE_W){if((r-=w)<0){n=k;break;}}routeName=n;
+ const out=Math.sign(WR_X);route=ROUTES[n].map(([x,z])=>[WR_X+out*x*YD,z*YD]);routeShape(false);}
+// vague = the first leg plus just the start of the break; full = the whole route (shown in the bird's-eye view)
+function routeShape(full){if(!route)return;let P=[[WR_X,0],...route];
+ if(!full){P=[[WR_X,0],route[0]];if(route[1]){const a=route[0],b=route[1],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,k=Math.min(1,4.5/L);P.push([a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]);}else P[1]=[WR_X,Math.min(route[0][1],18)];}
  const ribbon=(w,y)=>{const pos=[];for(let i=0;i<P.length-1;i++){const[a,b]=[P[i],P[i+1]],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,nx=-(b[1]-a[1])/L*w,nz=(b[0]-a[0])/L*w,e=i===P.length-2?.9:0,bx=b[0]-(b[0]-a[0])/L*e,bz=b[1]-(b[1]-a[1])/L*e;
   pos.push(a[0]+nx,y,a[1]+nz,a[0]-nx,y,a[1]-nz,bx+nx,y,bz+nz, a[0]-nx,y,a[1]-nz,bx-nx,y,bz-nz,bx+nx,y,bz+nz);
   if(e){pos.push(bx+nx*3,y,bz+nz*3,bx-nx*3,y,bz-nz*3,b[0]+(b[0]-a[0])/L*w,y,b[1]+(b[1]-a[1])/L*w);}}return pos;};   // arrowhead
- for(const[m,w,y]of[[rtCore,.2,.04],[rtGlow,.55,.035]]){m.geometry.dispose();m.geometry=new THREE.BufferGeometry();m.geometry.setAttribute('position',new THREE.Float32BufferAttribute(ribbon(w,y),3));}}
-function toggleRoute(){if(!wrMode)return;routeVis=!routeVis;routeMesh.visible=routeVis;}
+ for(const[m,w,y]of[[rtCore,.2,.04],[rtGlow,.55,.035]]){m.geometry.dispose();m.geometry=new THREE.BufferGeometry();m.geometry.setAttribute('position',new THREE.Float32BufferAttribute(ribbon(w,y),3));}routeFull=full;}
+function showRoute(){if(!wrMode||wrD.cur.st!=='set')return;routeVis=true;routeMesh.visible=true;routeDownT=performance.now();}   // tap: the vague hint; hold: bird's-eye + full route
 function wrGo(){if(!wrMode||wrD.cur.st!=='set')return;wrD.cur.st='route';wrD.cur.i=0;routeVis=false;routeMesh.visible=false;}
 // a fresh play: you at QB with the ball, the receiver split wide on the 50, a new random route
 function resetPlay(){if(!wrMode)return;for(const d of[player,wrD]){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;}
@@ -760,7 +765,7 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
  if(held&&c.st!=='caught'){c.st='caught';c.t=0;}
  if((c.st==='route'||c.st==='after')&&inAir){c.st='ball';catchOn=true;cur.catchT0=performance.now();}
  if(c.st==='route'){const W=route[c.i];if(Math.hypot(W[0]-P.x,W[1]-P.z)<1.1){if(c.i<route.length-1)c.i++;else c.st='after';}else{tx=W[0];tz=W[1];}}
- if(c.st==='after'){const a=route[route.length-2]||[WR_X,0],b=route[route.length-1],stop=/CURL|HITCH|COMEBACK/.test(routeName);   // breaking routes settle and face the QB; the rest keep running
+ if(c.st==='after'){const a=route[route.length-2]||[WR_X,0],b=route[route.length-1],stop=/CURL|COMEBACK/.test(routeName);   // breaking routes settle and face the QB; the rest keep running
   if(!stop){const L=Math.hypot(b[0]-a[0],b[1]-a[1])||1;tx=P.x+(b[0]-a[0])/L*5;tz=P.z+(b[1]-a[1])/L*5;}}
  if(c.st==='ball'){if(!world.bodies.includes(ball)&&!held){c.st='after';catchOn=false;}
   else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);   // where it comes down through catch height
@@ -839,6 +844,11 @@ function frame(now){
  const cd=rc.hit?Math.max(.6,Math.hypot(rc.p.x-pvx,rc.p.y-pvy,rc.p.z-pvz)-.2):camDist;
  camCD+=(cd-camCD)*(cd<camCD?.5:.06);                   // move in quickly when blocked, ease back out slowly (no snapping)
  cam.position.set(pvx+dx*camCD,Math.max(.2,pvy+dy*camCD),pvz+dz*camCD);cam.lookAt(pvx,pvy,pvz);
+ {const hold=wrMode&&routeVis&&keys['1']&&performance.now()-routeDownT>250&&route;if(hold!==routeFull)routeShape(!!hold);   // holding 1: rise to a bird's-eye view of the whole route
+  birdK+=((hold?1:0)-birdK)*Math.min(1,(now-(frame.lt||now))/1000*3.5);frame.lt=now;
+  if(birdK>.001&&route){const xs=[WR_X,...route.map(p=>p[0])],zs=[0,...route.map(p=>p[1])],cx=(Math.min(...xs)+Math.max(...xs))/2,cz=(Math.min(...zs)+Math.max(...zs))/2,span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs),20);
+   const k=birdK*birdK*(3-2*birdK),bp=new THREE.Vector3(cx,span*1.15+8,cz-span*.35),lk=new THREE.Vector3(cx,0,cz);
+   const look=new THREE.Vector3(pvx,pvy,pvz).lerp(lk,k);cam.position.lerp(bp,k);cam.lookAt(look);}}
  if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,.8,pel.position.z);}   // test hook: side view
  sun.position.set(pel.position.x+5,12,pel.position.z+4);sun.target.position.set(pel.position.x,0,pel.position.z);
  renderer.render(scene,cam);

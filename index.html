@@ -200,6 +200,7 @@
 .sh em{font:800 32px/1 "Barlow Condensed";text-align:center}.sh em small{display:block;font:700 11px "Barlow Condensed";color:#3ee07a;letter-spacing:.1em}
 .ss{display:flex;flex-wrap:wrap;gap:4px 10px;font:600 13px "Barlow Condensed";color:#bbb}.ss b{color:#fff}
 .del{position:absolute;top:8px;right:10px;font-style:normal;color:#888;font-size:14px;padding:2px 6px;border-radius:2px}.del:hover{color:#fff;background:#e8321e}
+#uinfo .fx{flex-direction:column;gap:2px;border-bottom:1px solid #ffffff14;padding-bottom:6px}#uinfo .fx b{font-weight:600}
 #stam{position:fixed;left:calc(14px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:3;width:110px;height:6px;background:#0008;border:1px solid #fff4;border-radius:3px;pointer-events:none}#stam i{display:block;height:100%;width:100%;border-radius:2px}
 </style></head><body>
 <div id="mm" class="ov"><div id="logo"><svg viewBox="0 0 120 70" aria-hidden="true"><ellipse cx="60" cy="35" rx="56" ry="31" fill="#7a3a16"/><ellipse cx="60" cy="35" rx="56" ry="31" fill="none" stroke="#4a210a" stroke-width="3"/>
@@ -618,7 +619,7 @@ const DIVE_UP=1.15,DIVE_END=2.0;
 // chase the wrong way for a moment; one caught close and flat-footed can stumble over. E with no direction does nothing ----------
 function juke(){if(playOn&&POSS()!==cur.team)return;   // on defence E is the stance, not a juke
  let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
- if(sd&&dv===0&&!limp&&cs===0&&js===0){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100*(1-.3*AT('bhd'))*(1-.08*BT(curD,'esc'));}}}
+ if(sd&&dv===0&&!limp&&cs===0&&js===0){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.stam=Math.max(0,(cur.stam??1)-.08*(1-.45*AT('sta')));cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100*(1-.3*AT('bhd'))*(1-.08*BT(curD,'esc'));}}}
 function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the side you pressed (the cut), -r = the side-step
  // all pushes go through every body part evenly (no twisting the torso), so the juke never knocks him off balance
  if(j.t<.2){const v=pel.velocity,lat=v.x*rx+v.z*rz,k=Math.max(0,lat+2.4)*Math.min(1,dt*20);for(const b of list){b.velocity.x-=rx*k;b.velocity.z-=rz*k;}cur.low=Math.min(.35,(cur.low||0)+dt*3);}   // side-step the other way, sinking low on that leg
@@ -629,7 +630,7 @@ function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy)
     if(dist<5&&Math.random()<.55*(1+.5*AT('bhd'))*(1-.5*E(d,'agi'))){d.limp=true;d.limpT=performance.now()+800+Math.random()*500;for(const b of d.list){b.velocity.x-=rx*3;b.velocity.z-=rz*3;}}}}}   // ...ankles broken: he stumbles over the wrong way
  else if(j.t<.45){cur.low=Math.max(0,(cur.low||0)-dt*2);const v=pel.velocity,a=Math.max(0,9-(v.x*j.nx+v.z*j.nz))*8;for(const b of list){b.force.x+=b.mass*j.nx*a;b.force.z+=b.mass*j.nz*a;}}   // rising out of it, still driving
  else{cur.jk=null;cur.low=0;}}
-function startDive(){if(dv>0||limp||cs>0)return;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);
+function startDive(){if(dv>0||limp||cs>0)return;cur.stam=Math.max(0,(cur.stam??1)-.06*(1-.45*AT('sta')));const sp=Math.hypot(pel.velocity.x,pel.velocity.z);dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);
  for(const k in pins)unpin(k);js=0;jp=0;dv=1e-4;yaw=Math.atan2(dvx,dvz);const push=Math.max(0,Math.min(4.5,8-sp));   // the dive adds speed the way you aim, capped
  for(const b of list){b.velocity.x+=dvx*push;b.velocity.z+=dvz*push;b.velocity.y+=2.3;}}
 function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
@@ -646,7 +647,7 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  follow(t=>[0,dvY+(1.07+gs-dvY)*sm3(cl(t/(DIVE_END-DIVE_UP),0,1))],T-DIVE_UP,.9,70,16,35);
  ballArm();
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
-function control(dt){if(cur.jk)jukeTick(dt);if(held&&cur.team!==player.cur.team&&player.cur.stance&&curD!==player){const P=player.pel.position,dx=pel.position.x-P.x,dz=pel.position.z-P.z;   // ball carrier running into a defender's stance (E): held up and stopped, Strength vs Strength
+function control(dt){if(cur.jk)jukeTick(dt);if(!cur.ai&&!limp&&dv===0&&js===0&&!cur.jk)cutAssist();if(held&&cur.team!==player.cur.team&&player.cur.stance&&curD!==player){const P=player.pel.position,dx=pel.position.x-P.x,dz=pel.position.z-P.z;   // ball carrier running into a defender's stance (E): held up and stopped, Strength vs Strength
  if(dx*dx+dz*dz<2.1){const k=Math.exp(-14*cl(.6+.3*(E(player,'str')-AT('str')),.2,.95)*dt);for(const b of list){b.velocity.x*=k;b.velocity.z*=k;}const k2=Math.exp(-10*dt);for(const b of player.list){b.velocity.x*=k2;b.velocity.z*=k2;}}}   // the defender stays planted too
 if(!cur.ai){const st=playOn&&POSS()!==cur.team&&!!keys.e;if(st)cur.low=.3;else if(cur.stance)cur.low=0;cur.stance=st;}   // holding E on defence: sink into a wide, low defensive stancecur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
@@ -733,7 +734,7 @@ if(!cur.ai){const st=playOn&&POSS()!==cur.team&&!!keys.e;if(st)cur.low=.3;else i
     hy=gs-dip-.36*crK-.42*reachK-.45*(cur.low||0)+.07*(cur.high||0)+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55;
    pel.force.y+=Math.max(0,Math.min(fy,totalMass*9.82*1.0));
    // sprinting pushes harder (bigger force cap + gain)
-   const vd=speed*mv;if(moving){const aK=(1+.35*AT('acc'))*defReact(),bf=Math.max(0,Math.min(totalMass*(run?6:3.5)*aK,totalMass*(run?7:4.5)*aK*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
+   const vd=speed*mv;if(moving){const aK=(1+.35*AT('acc'))*defReact()*(.8+.2*Math.min(1,(cur.stam??1)/.4)),bf=Math.max(0,Math.min(totalMass*(run?6:3.5)*aK,totalMass*(run?7:4.5)*aK*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
    const tau=gdir*(moving?Math.max(0,Math.min(run?650:420,totalMass*8*(vd-(pel.velocity.x*dx+pel.velocity.z*dz)))):0);
    const ax=Math.cos(yaw),az=-Math.sin(yaw);
    const sf=[];for(const sd of[-1,1]){const ft=parts['foot'+sd];if(tnorm(phase+(sd>0?0:Math.PI))>=.5&&low(ft)<.05)sf.push(parts['thigh'+sd]);}
@@ -866,6 +867,8 @@ const CATCH_ASSIST=.1;
 function catchGrab(){if(cur.ai&&cur.role==='df'&&!cur.canInt)return false;
  if(PASS&&cur.side!=='d'&&!PASS.contest){PASS.contest=1;const b=ball.position;let D=null,dd=1.4;for(const d of roster){if(d.cur.side!=='d')continue;const q=d.pel.position,x=Math.hypot(q.x-b.x,q.z-b.z)/RCH(d);if(x<dd){dd=x;D=d;}}   // a defender in reach at the catch point
   if(D&&Math.random()<cl(.22+.3*E(D,'cov')-.25*AT('cth')+(1.4-dd)*.15-.04*BT(curD,'hands')+.03*BT(D,'lock'),.04,.6)){knock();if(MATCH&&D===player)MATCH.st.pd++;return false;}}   // ...gets a hand in: pass broken up (Coverage vs Catching)
+ if(PASS&&cur.side!=='d'&&!PASS.drop){PASS.drop=1;const v=ball.velocity,rel=Math.hypot(v.x-pel.velocity.x,v.y-pel.velocity.y,v.z-pel.velocity.z),diff=Math.max(0,(rel-12)/10)+Math.max(0,(catchGrab.d||0)-.65)*1.6+(dv>0?.35:0);
+  if(Math.random()<A.drop(AT('cth'),diff)){knock();ball.velocity.scale(.5,ball.velocity);toast('DROPPED','#ff8a7a');return false;}}   // a hard catch can still go through your hands
  if(PASS&&!cur.ai&&cur.side==='d'){if(PASS.int)return false;PASS.int=1;if(Math.random()>cl(.55+.4*AT('int')+.04*BT(player,'hawk'),.2,.93)){knock();if(MATCH)MATCH.st.pd++;return false;}}   // your pick: Interceptions decides if you hang on or just bat it away
  catchFx();grabBall();return true;}
 function knock(){const v=ball.velocity;ball.velocity.set(-v.x*.25+(Math.random()-.5)*3,2+Math.random()*2,-v.z*.25+(Math.random()-.5)*3);ballCool=.4;catchK=0;}   // a defender who isn't going to hang on still gets his hands on it (a deflection)
@@ -897,8 +900,8 @@ function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(bal
   const ax=cl(-Math.atan2(_cv.z,-_cv.y),-3,.3),az=cl(Math.asin(cl(_cv.x/L,-1,1)),sd>0?-.5:-1.4,sd>0?1.4:.5),M=(a,b)=>a+(b-a)*k;   // shoulder range: no reaching back past the body, limited reach across it
   J['shoulder'+sd].x=M(J['shoulder'+sd].x,ax);J['shoulder'+sd].z=M(J['shoulder'+sd].z,az);J['shoulder'+sd].y=0;J['elbow'+sd].x=M(J['elbow'+sd].x,cur.high>.2?-.03:-.2);J['wrist'+sd].x=M(J['wrist'+sd].x,0);}
  // the catch itself: a reaching hand gets to the ball (checked every physics step, so fast passes can't skip past)
- for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)<(.36+CATCH_ASSIST)*catchBoost()*handsK()&&catchGrab()){catchK=0;return;}}
- if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)<(.42+CATCH_ASSIST)*catchBoost()*handsK()&&catchGrab()){catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
+ for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&(catchGrab.d=Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)/((.36+CATCH_ASSIST)*catchBoost()*handsK()))<1&&catchGrab()){catchK=0;return;}}
+ if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&(catchGrab.d=Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)/((.42+CATCH_ASSIST)*catchBoost()*handsK())*.6)<1&&catchGrab()){catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
 function grabBall(){held=true;world.removeBody(ball);cur.low=cur.high=0;cur.look=cur.cp=null;   // catch made: stop bending / reaching, stand back up into running form
  reachK=Math.max(reachK,.5);catchOn=false;}
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;const h=handR(),p=bpt(h,0,-.02,.06);
@@ -1072,7 +1075,11 @@ function readTick(){const P=player.cur,tg=PASS&&PASS.tg,on=playOn&&P.side==='d'&
 // markers: a ring at your feet in your team colour, and a gold chevron over whoever has the ball
 const youRing=new THREE.Mesh(new THREE.RingGeometry(.42,.52,36),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.85,depthWrite:false}));youRing.rotation.x=-Math.PI/2;youRing.visible=false;scene.add(youRing);
 const carMark=new THREE.Mesh(new THREE.ConeGeometry(.08,.16,4),new THREE.MeshBasicMaterial({color:0xffd23f}));carMark.rotation.x=Math.PI;carMark.visible=false;scene.add(carMark);
-function markTick(){const on=playOn&&mode;youRing.visible=on;carMark.visible=false;if(!on)return;const P=player.pel.position;youRing.position.set(P.x,.025,P.z);youRing.material.color.setHex(TEAM[player.cur.team||ORG.you][0]);
+const oRings=[0,1,2,3,4].map(()=>{const m=new THREE.Mesh(new THREE.RingGeometry(.5,.62,32),new THREE.MeshBasicMaterial({color:0x3ee07a,transparent:true,opacity:.75,depthWrite:false}));m.rotation.x=-Math.PI/2;m.visible=false;scene.add(m);return m;});
+function readOpen(){const on=playOn&&player.cur.role==='qb'&&player.cur.side==='o'&&!RET&&playState==='live'&&H(player),now=performance.now();
+ const W=on?roster.filter(d=>d.cur.role==='wr'):[];oRings.forEach((m,i)=>{m.visible=!!W[i];if(W[i])m.position.set(W[i].pel.position.x,.03,W[i].pel.position.z);});
+ if(on&&now>(readOpen.t||0)){readOpen.t=now+1000*A.read(E(player,'awr'));W.forEach((w,i)=>{let sep=99;for(const d of roster)if(d.cur.side==='d')sep=Math.min(sep,d.pel.position.distanceTo(w.pel.position));oRings[i].material.color.setHex(sep>3?0x3ee07a:sep>1.6?0xffd23f:0xff5a4a);});}}   // green open · yellow tight · red covered (stale between refreshes)
+function markTick(){readOpen();const on=playOn&&mode;youRing.visible=on;carMark.visible=false;if(!on)return;const P=player.pel.position;youRing.position.set(P.x,.025,P.z);youRing.material.color.setHex(TEAM[player.cur.team||ORG.you][0]);
  const car=roster.find(H);if(car){const h=car.parts.head.position;carMark.visible=true;carMark.position.set(h.x,h.y+.42+Math.sin(performance.now()/160)*.05,h.z);}}
 function playTick(){if(!playOn)return;readTick();const tn=performance.now();if(MATCH){MATCH.clock=Math.max(0,MATCH.clock-Math.min(.5,(tn-(playTick.t||tn))/1000));if((MATCH.clock|0)!==playTick.c){playTick.c=MATCH.clock|0;hud();}}playTick.t=tn;   // the game clock runs whenever the match isn't paused
  if(MATCH&&MATCH.clock<=0&&(playState==='pre'||playEnd&&tn>playEnd)){flip=null;endMatch();return;}   // time's up: the play in progress finishes, then the final whistle
@@ -1281,9 +1288,21 @@ const eff=r=>Math.tanh(((r??60)-60)/28),AT=k=>eff(cur.at&&cur.at[k]),E=(d,k)=>ef
 // Coverage = up to a few % extra top speed while you're within 4 m of a receiver (mirroring him), less if it's low
 const defReact=()=>cur.ai||cur.side!=='d'||performance.now()-EVT>600?1:1+.45*(.5+.5*AT('rea'));
 const defStick=()=>{if(cur.ai||cur.side!=='d')return 1;const P=pel.position;for(const d of roster)if(d.cur.side==='o'&&d.cur.role==='wr'&&Math.hypot(d.pel.position.x-P.x,d.pel.position.z-P.z)<4)return 1+.06*AT('cov')+.01*BT(curD,'lock');return 1;};
+// ================= ATTRIBUTE FORMULAS (one place). e = eff(rating): 0 at 60, about ±0.85 at the ends, flattening near 25 and 100 =================
+const A={spread:e=>.045*(1-(e+1)/2),cut:e=>6+10*(.5+.5*e),drop:(e,diff)=>cl(diff*(.25-.2*e),0,.5),read:e=>cl(.75-.6*e,.12,1.3)};
+const AEFF={spd:e=>`Top speed ${(7.2*(1+.13*e)).toFixed(2)} m/s sprinting`,acc:e=>`Drive force ×${(1+.35*e).toFixed(2)} until top speed`,agi:e=>`Turn rate ×${(1+.35*e).toFixed(2)} · cut braking ${A.cut(e).toFixed(1)} m/s²`,
+ str:e=>`Tackle break ${Math.round(18*e)}% shift · jams ×${(1+.4*e).toFixed(2)}`,sta:e=>`Sprint drain ${(7*(1-.5*e)).toFixed(1)}%/s · recover ${(12*(1+.5*e)).toFixed(1)}%/s`,awr:e=>`Reads refresh ${A.read(e).toFixed(2)} s · bite on fakes ×${(1-.6*e).toFixed(2)}`,
+ rea:e=>`First step ×${(1+.45*(.5+.5*e)).toFixed(2)} · reaction delay ${(300-120*e).toFixed(0)} ms`,thp:e=>`Max throw ${(27*(1+.12*e)).toFixed(1)} m/s`,tha:e=>`Spread ${(A.spread(e)*57.3).toFixed(2)}° (×1.6 at full power)`,
+ cth:e=>`Catch reach ×${(1+.18*e).toFixed(2)} · hard-catch drop ${Math.round(A.drop(e,1)*100)}%`,rte:e=>`Route cut ${Math.max(0,24*e).toFixed(0)} m/s² · bite ×${(1+.8*e).toFixed(2)}`,car:e=>`Fumble on tackle ${(cl(.05-.06*e+.03*eff(60),.01,.18)*100).toFixed(1)}%`,
+ bhd:e=>`Juke burst ×${(1+.15*e).toFixed(2)} · cooldown ${(1.1*(1-.3*e)).toFixed(2)} s`,cov:e=>`Cushion ×${(1-.3*e).toFixed(2)} · break-up ${Math.round(cl(.22+.3*e,.04,.6)*100)}%`,int:e=>`Hold a pick ${Math.round(cl(.55+.4*e,.2,.93)*100)}%`,tak:e=>`Tackle vs average runner ${Math.round(cl(.72+.3*e,.15,.95)*100)}% · reach ×${(1+.15*e).toFixed(2)}`};
 const handsK=()=>(1+.18*AT(cur.side==='d'?'int':'cth'))*RCH(curD);   // hands radius: Catching for the offence, Interceptions for defenders
 // manual throws: Throw Accuracy sets the spread (a 90 is near-perfect, a 40 sprays ~3°); AI throws use their own miss model above
-function aimErr(v){const sg=Math.max(0,.03*(1-1.15*AT('tha')))*(1-.12*BT(player,'prec'));if(!sg)return;const a=(Math.random()-.5)*2*sg,c=Math.cos(a),s=Math.sin(a),x=v.x*c-v.z*s;v.z=v.x*s+v.z*c;v.x=x;v.y*=1+(Math.random()-.5)*sg*2;}
+// Throw Accuracy: a bell-curve spread (most throws near the target, a few wide), never perfect, wider when you throw at full power
+function aimErr(v){const ch=thr>=0?cl((throwSpd-V_MIN)/(VMX()-V_MIN),0,1):0,sg=A.spread(AT('tha'))*(1+.6*ch)*(1-.12*BT(player,'prec')),a=gauss()/1.4*sg,c=Math.cos(a),s=Math.sin(a),x=v.x*c-v.z*s;v.z=v.x*s+v.z*c;v.x=x;v.y*=1+gauss()/1.4*sg*1.5;}
+// Agility (you): when your input points away from where you're moving, the planted foot brakes the old direction (6-16 m/s² by Agility)
+function cutAssist(){if(!contact())return;let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!f&&!r)return;
+ const cy=camYaw,dx=-Math.sin(cy)*f+Math.cos(cy)*r,dz=-Math.cos(cy)*f-Math.sin(cy)*r,L=Math.hypot(dx,dz),v=pel.velocity,sp=Math.hypot(v.x,v.z);if(sp<1.5||(v.x*dx+v.z*dz)/(L*sp)>.7)return;
+ const P=pel.position;plantCut([P.x+dx/L*5,P.z+dz/L*5],!!keys.shift,A.cut(AT('agi')));}
 // a tackle attempt: the tackler's Tackling against the runner's Strength (power) and Ball Handling (elusiveness); Carrying decides fumbles
 function tackleTry(car,tk){const p=cl(.72+.3*(E(tk,'tak')-.6*E(car,'str')-.4*E(car,'bhd'))-.03*BT(car,'brk')+.03*BT(tk,'tkl'),.15,.95);
  if(Math.random()>p){for(const b of car.list){b.velocity.x*=.8;b.velocity.z*=.8;}return false;}   // broken tackle: slowed, still up
@@ -1538,7 +1557,7 @@ const sPlay=e=>`<h3>Playstyle</h3><p class="mutd">Every playstyle plays both way
 function sAttr(e){const bm=bioMods(e.bio),st=STYLES[e.style],fp=freePts();
  return`<h3>Attributes <span class="pts ${fp?'warn':''}">${fp} pts left</span></h3><p class="mutd">Rating = playstyle base + your points + body. Bar shows rating against its cap. ▲ / ▼ = playstyle strength / weakness. Body column shows the Stage 1 modifier.</p>
  <table class="gt at"><tr><th>Attribute</th><th></th><th>Body</th><th></th><th style="text-align:right">Rating / Cap</th><th></th></tr>${GROUPS.map(([g,ks])=>`<tr class="gh"><td colspan="6">${g}</td></tr>`+ks.map(k=>{const v=e.att[k],c=e.pot[k],bmv=bm.now[k]||0;
-  return`<tr><td>${ANAME[k]} ${st[2].includes(k)?'<em class="up">▲</em>':st[3].includes(k)?'<em class="dn">▼</em>':''}</td><td><button data-k="${k}" data-d="-1">−</button></td><td>${bmv?`<em class="${bmv>0?'up':'dn'}">${bmv>0?'+':''}${bmv}</em>`:''}</td><td style="width:40%"><div class="bar2"><i style="width:${(v-A_MIN)/(100-A_MIN)*100}%"></i><u style="left:${(c-A_MIN)/(100-A_MIN)*100}%"></u></div></td><td class="n"><b>${v}</b> / ${c}</td><td><button data-k="${k}" data-d="1">+</button></td></tr>`;}).join('')).join('')}</table>`;}
+  return`<tr title="${AEFF[k](eff(v))}"><td>${ANAME[k]} ${st[2].includes(k)?'<em class="up">▲</em>':st[3].includes(k)?'<em class="dn">▼</em>':''}</td><td><button data-k="${k}" data-d="-1">−</button></td><td>${bmv?`<em class="${bmv>0?'up':'dn'}">${bmv>0?'+':''}${bmv}</em>`:''}</td><td style="width:40%"><div class="bar2"><i style="width:${(v-A_MIN)/(100-A_MIN)*100}%"></i><u style="left:${(c-A_MIN)/(100-A_MIN)*100}%"></u></div></td><td class="n"><b>${v}</b> / ${c}</td><td><button data-k="${k}" data-d="1">+</button></td></tr>`;}).join('')).join('')}</table>`;}
 function sBadge(e){const n=bslots(e);return`<h3>Badges <span class="pts">${e.badges.length} / ${n} slots</span></h3><p class="mutd">Badges add a small, situational edge on top of your ratings. Equipped badges start Bronze and rise to Silver, Gold and Elite from your career stats. Slots: 3, +1 at level 5 and level 10.</p>
  <div class="bgrid">${BADGES.map(([id,nm,ic,ds,s,th,lab])=>{const on=e.badges.includes(id),t=btier(e,id);return`<button class="bdg${on?' on':''}" data-bd="${id}"><span class="bic" style="--t:${BCOL[t]}">${ic}</span><b>${nm}</b><small style="color:${BCOL[t]}">${on?BTIER[t]:'Not equipped'}</small><span>${ds}</span><em>Silver ${th[0]} · Gold ${th[1]} · Elite ${th[2]} ${lab} (you: ${bstat(e,s)})</em></button>`;}).join('')}</div>`;}
 function sSum(e){const st=STYLES[e.style],ks=AK.map(k=>[k,e.att[k]]).sort((a,b)=>b[1]-a[1]),bm=bioMods(e.bio),capd=AK.filter(k=>bm.cap[k]).map(k=>`${ANAME[k]} ${bm.cap[k]>0?'+':''}${bm.cap[k]}`);
@@ -1745,7 +1764,7 @@ function upgUI(){const p=PROF,k=USEL,v=p.att[k],pot=Math.min(100,p.pot[k]),c=upC
  const steps=[];for(let i=Math.max(p.base[k]+1,v-2);i<=Math.min(pot,v+7);i++)steps.push(i);
  $m('utitle').textContent=ANAME[k];$m('udesc').textContent=ADESC[k]+'.';
  $m('utrack').innerHTML=`<span class="b0">${p.base[k]}</span>`+steps.map(n=>`<div class="hx${n<=v?' got':n===v+1?' nx':''}"><b>${n<=v?'✓':n}</b><small>${n>v?upCost(n-1):''}</small></div>`).join('')+(v>=pot?'<span class="b0">MAX</span>':'');
- $m('uinfo').innerHTML=`<div><span>Current</span><b>${v}</b></div><div><span>Next</span><b>${v<pot?v+1:'—'}</b></div><div><span>Potential</span><b>${pot}</b></div><div><span>Upgrades bought</span><b>${p.ups[k]||0}</b></div>`;
+ $m('uinfo').innerHTML=`<div class="fx"><span>Now</span><b>${AEFF[k](eff(v))}</b></div>${v<pot?`<div class="fx"><span>After +1</span><b class="up">${AEFF[k](eff(v+1))}</b></div>`:''}<div><span>Current</span><b>${v}</b></div><div><span>Next</span><b>${v<pot?v+1:'—'}</b></div><div><span>Potential</span><b>${pot}</b></div><div><span>Upgrades bought</span><b>${p.ups[k]||0}</b></div>`;
  $m('uovr').innerHTML=`<b>${o1}</b>${o1>o0?`<em>+${o1-o0}</em>`:''}<i><u style="width:${o1}%"></u></i><small>OVR</small>`;
  $m('ucost').innerHTML=v>=pot?'<span class="mx">Reached potential</span>':`Total Cost: <b>${c}</b> <small>${p.up<c?'<span class="no">Not enough upgrade points</span>':''}</small>`;
  $m('udev').disabled=!can;}

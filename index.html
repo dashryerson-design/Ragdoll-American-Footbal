@@ -625,6 +625,19 @@ function grabBall(){held=true;world.removeBody(ball);reachK=Math.max(reachK,.5);
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);
  ball.velocity.set(pel.velocity.x,pel.velocity.y,pel.velocity.z);ball.angularVelocity.set(0,0,0);world.addBody(ball);ball.wakeUp();}   // it was asleep on the turf before the pickup
+// landing marker: where the ball will come down (same gravity + damping as the ball), a ring that shrinks as it gets close, and the distance in yards
+const landG=new THREE.Group();
+{const m=(g,o)=>{const x=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:o,depthWrite:false}));x.rotation.x=-Math.PI/2;return x;};
+ landG.add(m(new THREE.RingGeometry(.88,1,56),.6),m(new THREE.CircleGeometry(.07,20),.9));}
+const landC=document.createElement('canvas');landC.width=128;landC.height=48;const landT=new THREE.CanvasTexture(landC),landS=new THREE.Sprite(new THREE.SpriteMaterial({map:landT,depthTest:false,transparent:true}));
+landS.scale.set(1.6,.6,1);landS.position.y=.6;landG.add(landS);landG.visible=false;scene.add(landG);let landTxt='';
+function landMarker(){if(!ballGlow.visible){landG.visible=false;return;}
+ let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z,t=0;const dt=.02,k=Math.pow(.9,dt);
+ for(;t<6&&y>.09;t+=dt){vx*=k;vy*=k;vz*=k;vy-=9.82*dt;x+=vx*dt;y+=vy*dt;z+=vz*dt;}
+ landG.visible=true;landG.position.set(x,.02,z);{const d=cam.position.distanceTo(landG.position);landS.scale.set(d*.085,d*.032,1);landS.position.y=.3+d*.025;}   // label keeps a readable size at any distance
+const r=.35+t*2.2;landG.children[0].scale.set(r,r,1);   // ring radius ~ time left: shrinks onto the spot
+ const yd=Math.round(Math.hypot(x-player.pel.position.x,z-player.pel.position.z)/.9144)+' yd';
+ if(yd!==landTxt){landTxt=yd;const g=landC.getContext('2d');g.clearRect(0,0,128,48);g.font='800 30px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineWidth=6;g.strokeStyle='rgba(0,0,0,.7)';g.strokeText(yd,64,25);g.fillStyle='#ffd23f';g.fillText(yd,64,25);landT.needsUpdate=true;}}
 let restT=0;
 function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballTick.t=now;let carrier=null;
  if(performance.now()>maskT)ball.collisionFilterMask=3;   // the thrower's own body is ignored for 0.25 s so the ball leaves the hand cleanly
@@ -637,6 +650,7 @@ function ballTick(now){const dt=Math.min(.05,(now-(ballTick.t||now))/1000);ballT
  use(player);
  if(!carrier){ballMesh.position.copy(ball.position);ballMesh.quaternion.copy(ball.quaternion);}
  const sp=ball.velocity.norm();ballGlow.visible=!carrier&&(ball.position.y>.3||sp>3);   // red outline while it's in the air
+ landMarker();
  // an incomplete pass that comes to rest goes back to the QB
  if(teammate&&!carrier&&sp<.4&&ball.position.y<.2){if((restT+=dt)>2.5){restT=0;giveQB();}}else restT=0;}
 // ---------- touch: joystick (push to the edge to sprint), drag the right side to look, AIM toggles, the big button throws while aiming ----------

@@ -372,7 +372,7 @@ function control(dt){
  // per-limb weakness (wk, 1 = healthy) slows the gait and makes the body sag onto that leg
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
- const speed=(run?4.8:qbMove?(keys.shift?2.4:1.1):1.7)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.6:.37,w=Math.PI*(run?.38:.5)*speed/S;
+ const speed=(run?4.8:qbMove?(keys.shift?1.6:1.1):1.7)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.6:.37,w=Math.PI*(run?.38:.5)*speed/S;
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){
@@ -483,7 +483,7 @@ function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));c
  qbK+=((held&&aimOn&&!limp&&js===0?1:0)-qbK)*Math.min(1,DT*8);
  if(qbK>.01){const L=(x,y)=>x+(y-x)*qbK*(1-mv),J=joints;   // the planted QB stance fades out while walking / jogging   // quarterback set: left foot forward, right foot back, free arm points at the target
   J.hip1.x=L(J.hip1.x,-.38);J.knee1.x=L(J.knee1.x,.3);J.ankle1.x=-(J.hip1.x+J.knee1.x);J['hip-1'].x=L(J['hip-1'].x,.22);J['knee-1'].x=L(J['knee-1'].x,.28);J['ankle-1'].x=-(J['hip-1'].x+J['knee-1'].x);
-  J.shoulder1.x=L(J.shoulder1.x,pc-1.3);J.shoulder1.z=L(J.shoulder1.z,-.2);J.elbow1.x=L(J.elbow1.x,-.5);}
+  const A=(x,y)=>x+(y-x)*qbK;J.shoulder1.x=A(J.shoulder1.x,pc-1.55);J.shoulder1.z=A(J.shoulder1.z,-.25);J.elbow1.x=A(J.elbow1.x,-.45);}   // free arm up, pointing at the target (kept while moving too)
  if(thr>=0){thr+=DT;const t=thr,sm=x=>x*x*(3-2*x),mix=(A,B,u)=>A.map((x,i)=>x+(B[i]-x)*u);
   // [shoulder x (from chest pitch), shoulder z, elbow, wrist, torso twist, lean]: load -> whip (hips + shoulders rotate, arm drives through) -> follow-through across the body
   const S0=[-1.6,-1.05,-2.05,.3,0,-.08],W=[-1.8,-1.2,-2.2,.35,-.3,-.14],Rl=[-1.2,-.5,-.85,0,.6,.25],F=[-.45,.45,-.7,-.5,.75,.42];
@@ -492,6 +492,7 @@ function ballArm(){reachK+=((reachOn?1:0)-reachK)*Math.min(1,DT*(reachOn?9:5));c
   if(held&&t>=.16)throwBall();                                     // release mid-whip, from wherever the hand really is
   if(t>=.45)thr=-1;
   sh.x=pc+a[0];sh.z=a[1];el.x=a[2];wr.x=a[3];thTw=a[4];thLean=a[5];
+  {const g=sm(cl((t-.08)/.12,0,1)),J=joints;J.shoulder1.x=pc-1.55+1.35*g;J.shoulder1.z=-.25+.1*g;J.elbow1.x=-.45-1.25*g;}   // free arm pulls down and in as the body rotates, like a real QB
   const J=joints,w=sm(cl((t-.1)/.15,0,1));J.hip1.x+=(-.25-J.hip1.x)*w;J['hip-1'].x+=(.35-J['hip-1'].x)*w;J['knee-1'].x+=(.45-J['knee-1'].x)*w;   // drive off the back leg onto the front
   return;}
  thTw=0;thLean=0;

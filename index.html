@@ -122,7 +122,7 @@
 <div class="mright"><div class="pvbox" id="pvc"></div><div class="pvi" id="pvi"></div></div></div>
 <div class="hints"><span><i>✕</i> Select</span><button id="ccan"><i>◯</i> Back</button><span><i>⟲</i> Drag to rotate</span><button id="csave"><i>△</i> Save Player</button></div></div>
 <div id="pre" class="ov scr mad" hidden><div class="vt">//CAREER · MATCHUP</div><div class="mgrid">
-<div class="mleft"><h1>Career Match</h1><div class="sub">4 v 4 · Blue vs Red · <span id="pdr"></span> drives</div><div class="note" style="color:#ddd;font:500 16px/1.4 'Barlow Condensed'">You start on offence at your own 25. When the ball changes hands both teams swap sides, so you play offence and defence. Most points after the last drive wins.</div>
+<div class="mleft"><h1>Career Match</h1><div class="sub">4 v 4 · Blue vs Red · 6:00 game clock</div><div class="note" style="color:#ddd;font:500 16px/1.4 'Barlow Condensed'">You start on offence at your own 25. When the ball changes hands both teams swap sides, so you play offence and defence. Most points when the 6-minute clock runs out wins.</div>
 <div class="mlist" style="margin-top:16px"><button class="mrow pri2" id="pgo">Kick Off</button><button class="mrow" id="pback">Back</button></div></div>
 <div class="mmid" id="pline"></div><div class="mright"><div class="pvbox" id="pvp"></div><div class="pvi" id="pvip"></div></div></div>
 <div class="hints"><span><i>✕</i> Select</span><span><i>◯</i> Back</span></div></div>
@@ -926,7 +926,7 @@ const GOAL_Z=50*YD,SCORE={blue:0,red:0};let playEnd=0,resetT=0,fumT=0,LOS=-25*YD
 const losMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0x3a7bff,transparent:true,opacity:.85,depthWrite:false})),fdMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.85,depthWrite:false}));
 for(const m of[losMesh,fdMesh]){m.rotation.x=-Math.PI/2;m.position.y=.03;m.visible=false;scene.add(m);}   // blue line of scrimmage, yellow first-down line
 const ORD=['','1ST','2ND','3RD','4TH'],spot=z=>{const y=Math.round(z/YD);return y<0?'OWN '+(50+y):y>0?'OPP '+(50-y):'50';};
-function hud(){const b=ORG.off,dd=ORD[DOWN]+' & '+(FD>=GOAL_Z?'GOAL':Math.max(1,Math.round((FD-LOS)/YD)));$m('score').innerHTML=`<span class="tm b${b==='blue'?' pos':''}">BLU<b>${SCORE.blue}</b></span><span class="tm r${b==='red'?' pos':''}">RED<b>${SCORE.red}</b></span><span class="dd">${dd}</span><span class="sp">${spot(LOS)}</span>${MATCH?`<span class="dr">DRIVE ${DRIVE}/${MATCH.drives}</span>`:''}`;}
+function hud(){const b=ORG.off,dd=ORD[DOWN]+' & '+(FD>=GOAL_Z?'GOAL':Math.max(1,Math.round((FD-LOS)/YD)));$m('score').innerHTML=`<span class="tm b${b==='blue'?' pos':''}">BLU<b>${SCORE.blue}</b></span><span class="tm r${b==='red'?' pos':''}">RED<b>${SCORE.red}</b></span><span class="dd">${dd}</span><span class="sp">${spot(LOS)}</span>${MATCH?`<span class="dr">${MATCH.clock>0?(Math.ceil(MATCH.clock)/60|0)+':'+String(Math.ceil(MATCH.clock)%60).padStart(2,'0'):'FINAL PLAY'}</span>`:''}`;}
 // your stat line: rushing / receiving yards and TDs when you carry it, passing yards and TDs when your pass is caught
 function tally(car,z,td){if(!MATCH)return;const S=MATCH.st,g=Math.round((Math.min(z,GOAL_Z)-LOS)/YD);if(car===player){S.yds+=g;if(td)S.td++;}else if(car.cur.side==='o'&&player.cur.role==='qb'&&player.cur.side==='o'&&playTick.lc===car&&car.cur.role==='wr'){S.pyd+=g;if(td)S.ptd++;}}
 function newGame(){SCORE.blue=SCORE.red=0;DRIVE=1;LOS=-25*YD;DOWN=1;FD=LOS+10*YD;flip=null;}
@@ -936,7 +936,9 @@ function downAt(z,what){z=cl(z,-49*YD,GOAL_Z-YD);const g=Math.round((z-LOS)/YD);
  if(z>=FD){LOS=z;DOWN=1;FD=Math.min(GOAL_Z,z+10*YD);playOver(what+'  '+(g>=0?'+':'')+g+' YD  ·  FIRST DOWN!');return;}
  if(what!=='INCOMPLETE')LOS=z;if(++DOWN>4){flip=-LOS;playOver(what+'  ·  TURNOVER ON DOWNS','#ff5a4a');return;}
  playOver(what==='INCOMPLETE'?what:what+'  '+(g>=0?'+':'')+g+' YD');}
-function playTick(){if(!playOn)return;if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){if(MATCH&&DRIVE>=MATCH.drives){flip=null;endMatch();return;}DRIVE++;ORG.off=ORG.off==='blue'?'red':'blue';LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
+function playTick(){if(!playOn)return;const tn=performance.now();if(MATCH){MATCH.clock=Math.max(0,MATCH.clock-Math.min(.5,(tn-(playTick.t||tn))/1000));if((MATCH.clock|0)!==playTick.c){playTick.c=MATCH.clock|0;hud();}}playTick.t=tn;   // the game clock runs whenever the match isn't paused
+ if(MATCH&&MATCH.clock<=0&&(playState==='pre'||playEnd&&tn>playEnd)){flip=null;endMatch();return;}   // time's up: the play in progress finishes, then the final whistle
+ if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){DRIVE++;ORG.off=ORG.off==='blue'?'red':'blue';LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
  if(playState==='pre'&&player.cur.side==='d'&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
  if(playState!=='live')return;const car=roster.find(H),ot=ORG.off;if(car)playTick.g=0;
  if(car&&car!==playTick.lc){if(MATCH&&playTick.lc){const S=MATCH.st;if(car===player)S[player.cur.side==='d'?'int':'rec']++;else if(playTick.lc===player&&car.cur.side==='o')S.comp++;}playTick.lc=car;}   // who caught it from whom
@@ -1219,11 +1221,11 @@ function validate(){const e=ED,nm=/^[A-Za-z][A-Za-z' .-]{0,13}$/;if(!nm.test(e.f
  $m('etbl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k,d=+b.dataset.d,v=ED.att[k]+d;if(v<A_MIN||v>A_MAX0||(d>0&&freePts()<=0))return;ED.att[k]=v;creUI();};   // points move between ratings; the budget never grows
  $m('cre').addEventListener('click',e=>{const b=e.target.closest('.sw');if(!b)return;ED.look[b.dataset.k]=+b.dataset.i;creUI();dress(PVW.d,ED.look);});}
 // ---------- career match: pre-match screen -> a real 4v4 drive game on the normal engine with your player in it -> final screen; stats saved to the profile ----------
-const MDRIVES=8;   // 4 drives each
-function preMatch(){if(!PROF)return;show('pre');$m('pdr').textContent=MDRIVES;pvShow('pvp',PROF);$m('pvip').innerHTML=pviHTML(PROF);
+const MLEN=360;   // 6-minute games
+function preMatch(){if(!PROF)return;show('pre');pvShow('pvp',PROF);$m('pvip').innerHTML=pviHTML(PROF);
  const pos=STYLES[PROF.style][4]==='qb'?'QB':'WR 1';$m('pline').innerHTML=`<div class="tbl"><div class="th"><span>Blue · your team</span><span></span><span></span></div>${[['YOU · '+esc(PROF.last.toUpperCase()),pos+' on offence · CB on defence'],['Bot',pos==='QB'?'WR':'QB'],['Bot','WR'],['Bot','WR']].map(([a,b])=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">${a}</span><span>${b}</span></div>`).join('')}
  <div class="th" style="margin-top:10px"><span>Red · opponents</span><span></span><span></span></div>${['QB / S','WR / CB','WR / CB','WR / CB'].map(r=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">Bot</span><span>${r}</span></div>`).join('')}</div>`;}
-function kickOff(){show(null);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:STYLES[PROF.style][4]});MATCH={drives:MDRIVES,st:{rec:0,yds:0,td:0,comp:0,pyd:0,ptd:0,tak:0,int:0}};newGame();applyOrg();
+function kickOff(){show(null);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:STYLES[PROF.style][4]});MATCH={clock:MLEN,st:{rec:0,yds:0,td:0,comp:0,pyd:0,ptd:0,tak:0,int:0}};newGame();applyOrg();
  $m('pcard').hidden=false;$m('pcard').innerHTML=`<span class="o">${ovr(PROF.att,PROF.style)}</span><span><span class="n">#${PROF.num} ${esc(PROF.last)}</span><small>${STYLES[PROF.style][0]}</small></span>`;}
 function endMatch(){const S=MATCH.st,me=ORG.you,op=me==='blue'?'red':'blue',r=SCORE[me]>SCORE[op]?'w':SCORE[me]<SCORE[op]?'l':'t';
  const C=PROF.career=PROF.career||{gp:0,w:0,l:0,t:0,rec:0,yds:0,td:0,comp:0,pyd:0,ptd:0,tak:0,int:0};C.gp++;C[r]++;for(const k in S)C[k]=(C[k]||0)+S[k];saveProf(PROF);   // career totals persist across matches

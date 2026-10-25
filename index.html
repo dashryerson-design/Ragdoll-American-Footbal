@@ -341,7 +341,7 @@ let limp=false,limpTone=.12;   // limpTone: muscle tone left when limp
 let gdir=1,crK=0;   // crK: 0 standing .. 1 fully crouched   // gdir: +1 stepping forwards, -1 stepping backwards
 function pd(c,p,s,react,KP=600,KD=30){
  c.quaternion.inverse(inv);des.mult(inv,er);
- const sg=er.w<0?-1:1,sc=(limp?limpTone:1)*(c.wk||1),Ie=p?c.I*p.I/(c.I+p.I):c.I,kp=18000*Ie*Math.min(1,s*.45)*sc,kd=Math.max(limp?.06*Ie/DT:0,Math.min(1.8*Math.sqrt(kp*Ie),.9*Ie/DT)),I=1;   // limp joints still have friction
+ const sg=er.w<0?-1:1,sc=(cur.tone??(limp?limpTone:1))*(c.wk||1),Ie=p?c.I*p.I/(c.I+p.I):c.I,kp=18000*Ie*Math.min(1,s*.45)*sc,kd=Math.max(limp?.06*Ie/DT:0,Math.min(1.8*Math.sqrt(kp*Ie),.9*Ie/DT)),I=1;   // limp joints still have friction
  let ex=2*sg*er.x,ey=2*sg*er.y,ez=2*sg*er.z;const el=Math.hypot(ex,ey,ez);if(el>1.5){const f=1.5/el;ex*=f;ey*=f;ez*=f;}
  const w=c.angularVelocity,pw=p?p.angularVelocity:{x:0,y:0,z:0};
  const tx=I*(kp*ex-kd*(w.x-pw.x)),ty=I*(kp*ey-kd*(w.y-pw.y)),tz=I*(kp*ez-kd*(w.z-pw.z));
@@ -481,13 +481,13 @@ function updatePins(dt){
  for(const sd of[-1,1]){
   const ft=parts['foot'+sd],ph=phase+(sd>0?0:Math.PI),key=ft.id,P=pins[key],tt=tnorm(ph);
   ft.cool=Math.max(0,(ft.cool||0)-dt);
-  let allow=!limp&&cs===0&&!dv&&(js===1||js===4||(js===0&&(mv<.15||(!keys.shift&&tt>=.5&&tt<.78))));
+  let allow=!limp&&cs===0&&!dv&&!cur.tkS&&!(performance.now()<(cur.free||0))&&(js===1||js===4||(js===0&&(mv<.15||(!keys.shift&&tt>=.5&&tt<.78))));
   if(P){P.age+=dt;const cur=new V();ft.pointToWorldFrame(P.loc,cur);if(cur.distanceTo(P.wp)>.08||P.age>.5){allow=false;ft.cool=.12;}}
   if(P&&!allow)unpin(key);
   else if(!P&&allow&&ft.cool<=0&&lowH(ft)<.04){
    let loc=new V(0,-.05,0),wp=new V();ft.pointToWorldFrame(loc,wp);
    if(wp.y-fh[ft===parts.foot1?1:-1]>.045){let bw=1e9;for(const cx of[-.08,.08])for(const cy of[-.05,.05])for(const cz of[-.1,.1]){const l=new V(cx,cy,cz),w=new V();ft.pointToWorldFrame(l,w);if(w.y<bw){bw=w.y;loc=l;wp=w;}}}
-   const c=new C.PointToPointConstraint(anchor,wp,ft,loc,js===0&&mv>=.15?600:1e6);world.addConstraint(c);pins[key]={c,loc,wp,age:0};
+   const c=new C.PointToPointConstraint(anchor,wp,ft,loc,js===0&&mv>=.15?600:2600);world.addConstraint(c);pins[key]={c,loc,wp,age:0};
   }
  }
 }
@@ -644,7 +644,7 @@ function tkType(car,power){const P=pel.position,C=car.pel.position,dx=C.x-P.x,dz
  if(power)return my>3.5?'power':'shoulder';if(d>2.4)return'dive';if(cosA<-.45)return'rear';if(Math.abs(cosA)<.45)return'side';if(inOf(curD)<inOf(car)-2||vs>6.2)return'low';return'wrap';}
 function startTackle(car,type){if(cur.tkS||dv>0||limp||cs>0||js)return false;const c=TK[type];for(const k in pins)unpin(k);jp=0;
  const P=pel.position;let ux=-Math.sin(camYaw),uz=-Math.cos(camYaw);if(car){const C=car.pel.position,V=car.pel.velocity,lead=.22;ux=C.x+V.x*lead-P.x;uz=C.z+V.z*lead-P.z;const L=Math.hypot(ux,uz)||1;ux/=L;uz/=L;}   // aim where he'll be a beat from now
- yaw=Math.atan2(ux,uz);camYaw=yaw+Math.PI;const v=pel.velocity,along=v.x*ux+v.z*uz,add=Math.max(0,Math.min(c[0],9-along));   // the lunge adds speed toward the target, never past ~9 m/s
+ yaw=Math.atan2(ux,uz);if(cur.ai)camYaw=yaw+Math.PI;const v=pel.velocity,along=v.x*ux+v.z*uz,add=Math.max(0,Math.min(c[0],9-along));   // the lunge adds speed toward the target, never past ~9 m/s
  for(const b of list){b.velocity.x+=ux*add;b.velocity.z+=uz*add;b.velocity.y+=c[1];}cur.stam=Math.max(0,(cur.stam??1)-c[6]*(1-.45*AT('sta')));
  cur.tkS={type,car,t:0,ux,uz,hit:0};return true;}
 // tackle postures (joint targets): each technique holds its own body shape through the lunge
@@ -666,7 +666,8 @@ function tackleMove(dt){const S=cur.tkS,c=TK[S.type];S.t+=dt;yaw=Math.atan2(S.ux
 function tkAfter(d,S,ok){const now=performance.now(),fall=S.type==='dive'||S.type==='power'&&!ok||(ok&&/wrap|side|rear|low/.test(S.type));S.endT=S.t+(fall?.18:0);   // staying up: hand balance straight back to the legs
  if(fall){d.limp=true;d.limpT=now+(ok?950:S.type==='dive'?1200:900);}else d.cur.stmb=now+(ok?450:750);   // committed techniques go to the ground; a whiffed shoulder only stumbles
  if(d===curD)limp=d.limp;}
-function resolveHit(tk,car,S){S.hit=1;const now=performance.now(),c=TK[S.type];
+function freeFeet(d,ms){const me=curD;use(d);for(const k in pins)unpin(k);d.cur.free=performance.now()+ms;use(me);}
+function resolveHit(tk,car,S){S.hit=1;const now=performance.now(),c=TK[S.type];freeFeet(car,700);freeFeet(tk,500);
  if(now-(car.cur.hitT||0)<300){S.res='pile';tkAfter(tk,S,true);return;}car.cur.hitT=now;   // one collision resolves per moment: others pile on, they don't double the force
  const Pt=tk.pel.position,Pc=car.pel.position;let ux=Pc.x-Pt.x,uz=Pc.z-Pt.z;const L=Math.hypot(ux,uz)||1;ux/=L;uz/=L;
  const vt=tk.pel.velocity,vc=car.pel.velocity,vtu=vt.x*ux+vt.z*uz,vcu=vc.x*ux+vc.z*uz,vcs=Math.hypot(vc.x,vc.z),cosA=vcs>.5?-vcu/vcs:1,closing=Math.max(0,vtu-vcu);
@@ -697,7 +698,7 @@ function resolveHit(tk,car,S){S.hit=1;const now=performance.now(),c=TK[S.type];
 // player trigger: Q tackles on defence (technique chosen for you), X is the hit stick (power hit)
 function playerTackle(power){const P=pel.position;let best=null,bd=4.2;for(const d of roster){if(d===player||!H(d)||d.cur.team===player.cur.team||d.limp)continue;const x=d.pel.position.distanceTo(P);if(x<bd){bd=x;best=d;}}
  if(!best){if(power){return startTackle(null,'shoulder');}return startTackle(null,'dive');}   // nothing in range: a whiff
- const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw),C=best.pel.position;if(((C.x-P.x)*fx+(C.z-P.z)*fz)/bd<-.2)camYaw=Math.atan2(C.x-P.x,C.z-P.z)+Math.PI;   // turn toward him if he's behind your aim
+ const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw),C=best.pel.position;   // turn toward him if he's behind your aim
  return startTackle(best,tkType(best,power));}
 const onD=()=>(playOn&&POSS()!==player.cur.team&&roster.some(d=>H(d)))||(DRILL&&DRILL.d.id==='tack');
 // AI: trigger distance depends on technique timing (Tackling) and is never perfect; hit stick chosen by Tackling + Strength + Awareness
@@ -721,7 +722,8 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  follow(t=>[0,dvY+(1.07+gs-dvY)*sm3(cl(t/(DIVE_END-DIVE_UP),0,1))],T-DIVE_UP,.9,70,16,35);
  ballArm();
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
-function control(dt){if(cur.jk)jukeTick(dt);if(!cur.ai&&!limp&&dv===0&&js===0&&!cur.jk)cutAssist();if(held&&cur.team!==player.cur.team&&player.cur.stance&&curD!==player){const P=player.pel.position,dx=pel.position.x-P.x,dz=pel.position.z-P.z;   // ball carrier running into a defender's stance (E): held up and stopped, Strength vs Strength
+function control(dt){{const tg=limp?limpTone:1,t0=cur.tone??tg;cur.tone=t0+(tg-t0)*Math.min(1,dt*(limp?12:1.8));}   // falling = tone drains over ~0.3 s; getting up = it returns over ~0.6 s
+ if(cur.jk)jukeTick(dt);if(!cur.ai&&!limp&&dv===0&&js===0&&!cur.jk)cutAssist();if(held&&cur.team!==player.cur.team&&player.cur.stance&&curD!==player){const P=player.pel.position,dx=pel.position.x-P.x,dz=pel.position.z-P.z;   // ball carrier running into a defender's stance (E): held up and stopped, Strength vs Strength
  if(dx*dx+dz*dz<2.1){const k=Math.exp(-14*cl(.6+.3*(E(player,'str')-AT('str')),.2,.95)*dt);for(const b of list){b.velocity.x*=k;b.velocity.z*=k;}const k2=Math.exp(-10*dt);for(const b of player.list){b.velocity.x*=k2;b.velocity.z*=k2;}}}   // the defender stays planted too
 if(!cur.ai){const st=playOn&&POSS()!==cur.team&&!!keys.e;if(st)cur.low=.3;else if(cur.stance)cur.low=0;cur.stance=st;}   // holding E on defence: sink into a wide, low defensive stance
 cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
@@ -806,7 +808,7 @@ cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT(
   // support + drive while feet are on the ground
   if(contact()&&(js===0||js===1||js===4)){
    const y=pel.position.y,uu=Math.min(1,jt/.13),dip=js===0?Math.max(...[-1,1].map(sd=>tnorm(phase+(sd>0?0:Math.PI))>=.5?(1-legW[sd])*.2*Math.max(.35,mv):0)):0,   // body sags onto a weak leg
-    hy=gs-dip-.36*crK-.42*reachK-.45*(cur.low||0)+.07*(cur.high||0)+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55;
+    hy=gs-dip-.36*crK-.42*reachK-.45*(cur.low||0)+.07*(cur.high||0)+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=(totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55)*(limp?Math.max(0,((cur.tone??1)-.6)/.4):Math.min(1,(cur.tone??1)*1.15));
    pel.force.y+=Math.max(0,Math.min(fy,totalMass*9.82*1.0));
    // sprinting pushes harder (bigger force cap + gain)
    const vd=speed*mv;if(moving){const aK=(1+.35*AT('acc'))*defReact()*(.8+.2*Math.min(1,(cur.stam??1)/.4)),bf=Math.max(0,Math.min(totalMass*(run?6:3.5)*aK,totalMass*(run?7:4.5)*aK*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
@@ -1922,11 +1924,11 @@ function frame(now){
  use(player);playTick();markTick();if(DRILL)drillTick();
 
  ballTick(now);aimTick();$m('cboost').hidden=catchBoost()===1;
- tgt.x+=(pel.position.x-tgt.x)*.45;tgt.z+=(pel.position.z-tgt.z)*.45;tgt.y+=(Math.max(.4,pel.position.y-.08)-tgt.y)*.1;   // follow the doll tightly (incl. height on platforms)
+ {const fdt=Math.min(.1,(now-(frame.ct||now))/1000);frame.ct=now;const busy=limp||cur.tkS||dv>0,fx=(pel.position.x+chest.position.x)/2,fz=(pel.position.z+chest.position.z)/2,kx=1-Math.exp(-fdt*(busy?7:22)),ky=1-Math.exp(-fdt*(busy?3:6));tgt.x+=(fx-tgt.x)*kx;tgt.z+=(fz-tgt.z)*kx;tgt.y+=(Math.max(.4,Math.max(pel.position.y,chest.position.y-.25)-.08)-tgt.y)*ky;frame.fdt=fdt;}   // follow the torso (not the tumbling pelvis), exponential damping: the same feel at any frame rate   // follow the doll tightly (incl. height on platforms)
  const sh=.55,pvx=tgt.x+Math.cos(camYaw)*sh,pvy=tgt.y+.55,pvz=tgt.z-Math.sin(camYaw)*sh,cp=Math.cos(camPitch);   // pivot: over the doll's right shoulder
  const dx=Math.sin(camYaw)*cp,dy=Math.sin(camPitch),dz=Math.cos(camYaw)*cp,rc=castRay({x:pvx,y:pvy,z:pvz},{x:dx,y:dy,z:dz},camDist+.2);
  const cd=rc.hit?Math.max(.6,Math.hypot(rc.p.x-pvx,rc.p.y-pvy,rc.p.z-pvz)-.2):camDist;
- camCD+=(cd-camCD)*(cd<camCD?.5:.06);                   // move in quickly when blocked, ease back out slowly (no snapping)
+ camCD+=(cd-camCD)*(1-Math.exp(-(frame.fdt||.016)*(cd<camCD?40:4)));                   // move in quickly when blocked, ease back out slowly (no snapping)
  cam.position.set(pvx+dx*camCD,Math.max(.2,pvy+dy*camCD),pvz+dz*camCD);cam.lookAt(pvx,pvy,pvz);
  {const hold=playOn&&routeVis&&keys['1']&&performance.now()-routeDownT>250&&route;if(hold!==routeFull)routeShape(!!hold);   // holding 1: rise to a bird's-eye view of the whole route
   birdK+=((hold?1:0)-birdK)*Math.min(1,(now-(frame.lt||now))/1000*3.5);frame.lt=now;

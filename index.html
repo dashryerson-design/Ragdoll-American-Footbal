@@ -405,7 +405,7 @@ function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy)
  // all pushes go through every body part evenly (no twisting the torso), so the juke never knocks him off balance
  if(j.t<.2){const v=pel.velocity,lat=v.x*rx+v.z*rz,k=Math.max(0,lat+2.4)*Math.min(1,dt*20);for(const b of list){b.velocity.x-=rx*k;b.velocity.z-=rz*k;}cur.low=Math.min(.35,(cur.low||0)+dt*3);}   // side-step the other way, sinking low on that leg
  else if(!j.cut){j.cut=true;const v=pel.velocity,sp=Math.hypot(v.x,v.z),T=Math.min(10,Math.max(sp,4)*1.15+2.5),L=Math.hypot(rx*1.8+fx,rz*1.8+fz),nx=(rx*1.8+fx)/L,nz=(rz*1.8+fz)/L;
-  for(const b of list){b.velocity.x+=nx*T-v.x;b.velocity.z+=nz*T-v.z;}cur.jkB=.4;j.nx=nx;j.nz=nz;   // push off that bent leg and explode out the way you pressed
+  for(const b of list){b.velocity.x+=nx*T-v.x;b.velocity.z+=nz*T-v.z;}cur.jkB=.4;for(const f of[parts.foot1,parts['foot-1']])kick(f.position.x,f.position.z,18,-nx,-nz,2.6,.6);j.nx=nx;j.nz=nz;   // push off that bent leg and explode out the way you pressed
   const P=pel.position;for(const d of roster){if(!d.cur.ai||d.cur.side==='d'===(cur.side==='d'))continue;const Q=d.pel.position,dist=Math.hypot(Q.x-P.x,Q.z-P.z);if(dist>8)continue;
    if(Math.random()<.95-dist*.08){d.cur.biteEnd=(d.cur.t||0)+.6+Math.random()*.5;d.cur.biteV=[-rx*6,-rz*6];   // bit on the side-step
     if(dist<5&&Math.random()<.55){d.limp=true;d.limpT=performance.now()+800+Math.random()*500;for(const b of d.list){b.velocity.x-=rx*3;b.velocity.z-=rz*3;}}}}}   // ...ankles broken: he stumbles over the wrong way
@@ -987,6 +987,23 @@ for(const t of['blue','red'])for(const[id,dd]of[['m',-1],['p',1]])$m(id+t).oncli
 $m('ogo').onclick=()=>{$m('org').hidden=true;newGame();applyOrg();togglePause();};$m('oback').onclick=()=>{$m('org').hidden=true;$m('pm').hidden=false;};
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});
+// ---------- turf kicked up by cleats: one fixed pool of points (a single draw call); bits fly, land, and vanish after ~3 s ----------
+const TN=700,tPos=new Float32Array(TN*3).fill(-50),tCol=new Float32Array(TN*3),tVel=new Float32Array(TN*3),tAge=new Float32Array(TN).fill(9);let tI=0;
+const tGeo=new THREE.BufferGeometry();tGeo.setAttribute('position',new THREE.BufferAttribute(tPos,3));tGeo.setAttribute('color',new THREE.BufferAttribute(tCol,3));
+const turf=new THREE.Points(tGeo,new THREE.PointsMaterial({size:.1,vertexColors:true}));turf.frustumCulled=false;scene.add(turf);
+const TC=[[.31,.54,.17],[.24,.43,.13],[.42,.64,.23],[.42,.29,.17],[.35,.24,.13]];   // grass greens, then dirt browns
+function kick(x,z,n,bx,bz,pw,dirt){for(let k=0;k<n;k++){const i=tI,j=i*3;tI=(tI+1)%TN;tAge[i]=0;   // bx,bz: the way the foot pushes; turf flies back off it
+ tPos[j]=x+(Math.random()-.5)*.15;tPos[j+1]=.03;tPos[j+2]=z+(Math.random()-.5)*.15;
+ tVel[j]=-bx*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;tVel[j+1]=pw*(.5+Math.random()*.8);tVel[j+2]=-bz*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;
+ const c=TC[Math.random()<dirt?3+(Math.random()*2|0):Math.random()*3|0];tCol[j]=c[0];tCol[j+1]=c[1];tCol[j+2]=c[2];}}
+function turfTick(dt,rdt){for(let i=0;i<TN;i++){if(tAge[i]>3)continue;const j=i*3;tAge[i]+=rdt;if(tAge[i]>3){tPos[j+1]=-50;continue;}   // gone after 3 s
+ if(tPos[j+1]>.012){tVel[j+1]-=9.8*dt;tPos[j]+=tVel[j]*dt;tPos[j+1]+=tVel[j+1]*dt;tPos[j+2]+=tVel[j+2]*dt;if(tPos[j+1]<.012)tPos[j+1]=.012;}}   // fly, then lie on the grass
+ tGeo.attributes.position.needsUpdate=true;tGeo.attributes.color.needsUpdate=true;}
+// per doll, per frame: sprinting strides flick up a little grass; braking hard (plants, stops) tears up grass and dirt in proportion
+function cleats(d,dt){const v=pel.velocity,sp=Math.hypot(v.x,v.z),dec=((d.psp??sp)-sp)/Math.max(dt,.001);d.psp=sp;if(!contact()||dt<=0)return;const ux=sp>.1?v.x/sp:0,uz=sp>.1?v.z/sp:0;
+ for(const f of[parts.foot1,parts['foot-1']]){if(f.position.y-groundH(f.position.x,f.position.z)>.13)continue;
+  if(keys.shift&&sp>4&&Math.random()<dt*14)kick(f.position.x,f.position.z,2+(Math.random()*3|0),ux,uz,1.6,.15);
+  if(dec>9&&Math.random()<dt*14)kick(f.position.x,f.position.z,Math.min(10,dec/3|0),-ux,-uz,2.2,.55);}}   // braking: the foot shoves forward, so it sprays ahead
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
 const DT=1/400;let acc=0,last=performance.now();
 const tgt=new THREE.Vector3(0,1,0);let camCD=3.6;
@@ -1002,6 +1019,7 @@ function frame(now){
   world.step(DT);acc-=DT;
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}
+ {const rd=(now-(frame.pt||now))/1000,fd=Math.min(.05,rd);frame.pt=now;for(const d of D){use(d);cleats(d,fd);}turfTick(fd,rd);}
  for(const d of D)if(d.limpT&&performance.now()>d.limpT){use(d);limp=false;d.limpT=0;}   // tackled: back on his feet
  use(player);playTick();
  if(player.cur.side==='d'&&dv>0){const c=roster.find(d=>d.cur.side==='o'&&d.held&&!d.limp);if(c&&c.pel.position.distanceTo(pel.position)<1.3){c.limp=true;c.limpT=performance.now()+2600;}}   // you on defence: dive into the ball carrier to tackle him

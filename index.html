@@ -1442,33 +1442,83 @@ const BT=(d,id)=>d===player&&player.cur.bd?player.cur.bd[id]||0:0;   // tier of 
 const RCH=d=>d===player&&player.cur.bm?player.cur.bm.reach:1;
 // ---------- equipment: real meshes on the ragdoll's parts (they move with it); geometry shared ----------
 const PAL=[0xffffff,0x111111,0x2a6fdb,0x23304d,0xb01e28,0xff5a1f,0xffd23f,0x1f5d3a,0x0aa3a3,0x4b2a7b,0x7a7a80,0xc0c6cc,0xd4af37,0x6b1f2a,0x3ee07a,0xff8ac2];
-const DEFLOOK={skin:1,eye:0,shell:0,mask:0,visor:0,hfin:0,decal:1,sleeve:0,fit:1,pads:1,comp:0,compLen:0,wrist:0,pfit:1,thighpad:1,leg:0,knee:0,sock:1,cstyle:0,
+const DEFLOOK={hv:2,skin:1,eye:0,shell:0,mask:0,visor:0,hfin:0,decal:1,sleeve:0,fit:1,pads:1,comp:0,compLen:0,wrist:0,pfit:1,thighpad:1,leg:0,knee:0,sock:1,cstyle:0,
  c_pri:0x2a6fdb,c_sec:0x23304d,c_acc:0xffd23f,c_helm:0x2a6fdb,c_mask:0xdddddd,c_glove:-1,c_cleat:0x111111,c_comp:0x111111,c_sock:0xffffff,c_strap:0xffffff};
-function migLook(l){if(!l)return{...DEFLOOK};if('shell'in l)return{...DEFLOOK,...l};return{...DEFLOOK,skin:l.skin??1,c_glove:GLC[l.glove]!=null?GLC[l.glove]:-1,c_cleat:CLC[l.cleat??0]};}   // older 3-option looks carry over
+function migLook(l){if(!l)return{...DEFLOOK};if('shell'in l){const o={...DEFLOOK,...l};if(l.hv!==2){o.shell=[0,1,3][l.shell]??0;o.mask=[0,3,1,2][l.mask]??0;o.hv=2;}return o;}return{...DEFLOOK,skin:l.skin??1,c_glove:GLC[l.glove]!=null?GLC[l.glove]:-1,c_cleat:CLC[l.cleat??0]};}   // older 3-option looks carry over
 const KG={},kg=(k,f)=>KG[k]||(KG[k]=f()),KB=(x,y,z)=>kg(`b${x},${y},${z}`,()=>new THREE.BoxGeometry(x,y,z));
 function kmesh(d,part,geo,col,x,y,z,o={}){const mat=new THREE.MeshStandardMaterial({color:col,roughness:o.r??.55,metalness:o.m??0,transparent:o.op!=null,opacity:o.op??1});const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);if(o.rx)m.rotation.x=o.rx;if(o.s)m.scale.set(...o.s);m.castShadow=true;d.parts[part].mesh.add(m);d.kitM.push(m);return m;}
 // body shape from biometrics: limb and torso meshes thicken / lengthen a little (the physics body stays the tuned one)
 function shape(d,b){const bm=b?bioMods(b):null,wF=bm?1+.075*bm.w:1,hF=bm?1+.045*bm.h:1,aF=bm?1+.05*bm.ape:1;
- for(const[n,P]of Object.entries(d.parts)){const arm=/uarm|farm|hand/.test(n),tor=/chest|abdomen|pelvis/.test(n);P.mesh.scale.set(tor||/thigh/.test(n)?wF*(d.fitK&&tor?d.fitK:1):1+(wF-1)*.6,(/head|neck|hand|foot|toe/.test(n)?1:hF)*(arm?aF:1),tor||/thigh/.test(n)?wF:1+(wF-1)*.6);}}
+ for(const[n,P]of Object.entries(d.parts)){if(n==='head')continue;const arm=/uarm|farm|hand/.test(n),tor=/chest|abdomen|pelvis/.test(n);P.mesh.scale.set(tor||/thigh/.test(n)?wF*(d.fitK&&tor?d.fitK:1):1+(wF-1)*.6,(/head|neck|hand|foot|toe/.test(n)?1:hF)*(arm?aF:1),tor||/thigh/.test(n)?wF:1+(wF-1)*.6);}}
 // kit(d, look, teamCols): team colours (jersey, pants, helmet) override the player's own in matches; personal gear never changes
-function kit(d,L,T){L=migLook(L);for(const m of d.kitM||[])m.parent.remove(m),m.material.dispose();d.kitM=[];const P=d.parts,sk=SKC[L.skin]??SKC[1],pri=T?T[0]:L.c_pri,sec=T?T[1]:L.c_sec,hel=T?T[0]:L.c_helm,acc=L.c_acc;
+// ================= HELMETS: four parametric shells (one continuous surface each, with real rim thickness),
+// faceguards built from swept tubes that mount on points ON each shell, chin cup + straps, curved visor =================
+// Head = the 0.22 m cube of the ragdoll (head mesh origin at its centre, +z = face, +y = up). Shells are designed around it:
+// superellipse sections round the cube's corners without ballooning; the head mesh is trimmed to 92% under a helmet so no corner pokes through.
+const HSPEC={// rh/ry: horizontal / vertical radius; nH/nV: superellipse exponents (2 = ellipse, higher = squarer); edge: lower-edge angle (deg from crown) at front, side, rear
+ classic:{rh:.150,ry:.156,nH:2.3,nV:2.15,cy:.026,cz:-.012,front:73,side:126,rear:111,brow:.004,flare:.005,panel:0,full:0,taper:0,ridge:0},
+ speed:{rh:.146,ry:.152,nH:2.2,nV:2.3,cy:.03,cz:-.02,front:71,side:121,rear:117,brow:.009,flare:.012,panel:0,full:0,taper:.09,ridge:.004},   // compact, swept-back rear, sculpted brow
+ angular:{rh:.149,ry:.154,nH:3,nV:2.45,cy:.027,cz:-.014,front:73,side:123,rear:109,brow:.011,flare:.006,panel:.007,full:0,taper:.03,ridge:0},   // squarer sections, raised side panels
+ defender:{rh:.156,ry:.159,nH:2.4,nV:2.1,cy:.025,cz:-.012,front:76,side:131,rear:114,brow:.008,flare:.009,panel:.004,full:.015,taper:0,ridge:0}};   // fuller jaw, deeper coverage
+const HKEYS=['classic','speed','angular','defender'],D2R=Math.PI/180,sm=t=>{t=cl(t,0,1);return t*t*(3-2*t);},spow=(v,e)=>Math.sign(v)*Math.pow(Math.abs(v),e);
+function hEdge(P,th){const a=Math.abs(Math.atan2(Math.sin(th),Math.cos(th)));return(a<1.13?P.front+(P.side-P.front)*sm(a/1.13):P.side+(P.rear-P.side)*sm((a-1.13)/(Math.PI-1.13)))*D2R;}   // the face opening and lower edge, as one designed outline
+// a point on the shell at (theta around, phi down from the crown); k = inner/outer scale (inner surface skips the styling features)
+function hPt(P,th,ph,k=1,out){const s=Math.sin(ph),c=Math.cos(ph),h=P.rh*Math.pow(Math.abs(s),2/P.nV),sT=Math.sin(th),cT=Math.cos(th);
+ let x=h*spow(sT,2/P.nH),y=P.ry*spow(c,2/P.nV),z=h*spow(cT,2/P.nH);if(z<0)z*=1+P.taper*sm(ph/1.6);   // swept rear
+ if(k===1){const a=Math.abs(Math.atan2(sT,cT)),e=hEdge(P,th);let o=0;
+  o+=P.brow*Math.exp(-(((e-ph)/.13)**2))*Math.max(0,Math.cos(a*1.3));   // brow lip above the face opening
+  o+=P.flare*sm((ph-1.55)/.5)*sm((a-1.7)/.9);   // lower rear flares out a touch
+  o+=P.panel*sm((ph-1.38)/.05)*sm((1.25-Math.abs(a-1.55))/.35);   // shallow raised side panel
+  o+=P.full*Math.exp(-(((ph-1.95)/.35)**2))*Math.abs(sT)**2;   // fuller jaw guards
+  o+=P.ridge*Math.exp(-((Math.abs(sT)/.07)**2))*sm((1.5-ph)/.4)*(cT<.3?1:sm((ph-.2)/.3));   // a low centre ridge (Speed)
+  const L=Math.hypot(x,y,z)||1;x+=x/L*o;y+=y/L*o;z+=z/L*o;}
+ out=out||new THREE.Vector3();return out.set(x*k,y*k+P.cy,z*k+P.cz);}
+function shellGeo(key){return kg('shell_'+key,()=>{const P=HSPEC[key],NU=72,NV=30,pos=[],idx=[],v=new THREE.Vector3(),T=.88;
+ for(const k of[1,T])for(let i=0;i<NU;i++){const th=i/NU*Math.PI*2,e=hEdge(P,th);for(let j=0;j<=NV;j++){hPt(P,th,Math.max(1e-3,e*j/NV),k,v);pos.push(v.x,v.y,v.z);}}
+ const id=(s,i,j)=>s*NU*(NV+1)+((i+NU)%NU)*(NV+1)+j;
+ for(let i=0;i<NU;i++)for(let j=0;j<NV;j++){const a=id(0,i,j),b=id(0,i+1,j),c=id(0,i,j+1),d=id(0,i+1,j+1);idx.push(a,c,b,b,c,d);}   // outer, facing out
+ const nOut=idx.length;for(let i=0;i<NU;i++){const a=id(0,i,NV),b=id(0,i+1,NV),c=id(1,i,NV),d=id(1,i+1,NV);idx.push(a,c,b,b,c,d);}   // the rim: real shell thickness
+ const nRim=idx.length-nOut;for(let i=0;i<NU;i++)for(let j=0;j<NV;j++){const a=id(1,i,j),b=id(1,i+1,j),c=id(1,i,j+1),d=id(1,i+1,j+1);idx.push(a,b,c,b,d,c);}   // inner padding, facing in
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();g.addGroup(0,nOut+nRim,0);g.addGroup(nOut+nRim,idx.length-nOut-nRim,1);return g;});}
+// faceguards: tube sweeps through points derived from the shell they're mounted on (so any guard fits any shell)
+const FMASK=['Classic 2-Bar','Speed','Angular 3-Bar','Defender Cage'];
+function maskBars(P,type){const V=(x,y,z)=>new THREE.Vector3(x,y,z),E=th=>hEdge(P,th),S=(th,dph=0,push=0)=>{const p=hPt(P,th,E(th)+dph*D2R),n=V(p.x,p.y-P.cy,p.z-P.cz).normalize();return p.addScaledVector(n,push);};
+ const mount=(y,sx)=>{let best=null,bd=9;for(let a=34;a<=112;a++){const p=S(sx*a*D2R,-3,.007),d=Math.abs(p.y-y);if(d<bd){bd=d;best=p;}}return best;};   // where the shell's edge sits at this bar's height: every bar ends ON the shell
+ const top=[];for(let a=-56;a<=56;a+=7)top.push(S(a*D2R,1.5,.013));   // top bar clipped along the brow edge
+ const zc=y=>.174+.016*(1-Math.min(1,Math.abs(y+.045)/.07)),mir=pts=>pts.concat(pts.slice(0,-1).reverse().map(p=>V(-p.x,p.y,p.z)));
+ const bar=(y,mid,dz=0)=>mir([mount(y,-1),...mid.map(([x,o])=>V(x,y,zc(y)+o+dz)),V(0,y,zc(y)+dz+.004)]);   // a bar from the left mount, around the front, to the right mount
+ const vert=(x,y0,y1)=>[V(x,y0,zc(y0)+.002),V(x,(y0+y1)/2,zc((y0+y1)/2)+.006),V(x,y1,zc(y1)+.002)];
+ const B=[top],ends=[top[0],top[top.length-1]];const add=(b,both)=>{B.push(b);if(both!==false)ends.push(b[0],b[b.length-1]);};
+ if(type===0){add(bar(-.035,[[-.1,-.032],[-.055,-.006]]));add(bar(-.086,[[-.085,-.038],[-.045,-.006]]));add(vert(.042,-.035,-.086),false);add(vert(-.042,-.035,-.086),false);}   // classic: two bars + two uprights
+ if(type===1){add(bar(-.03,[[-.098,-.028],[-.05,-.004]]));add(mir([mount(-.072,-1),V(-.075,-.08,.152),V(-.035,-.103,.176),V(0,-.11,.184)]));add(vert(0,-.03,-.108),false);
+  for(const sx of[1,-1])add([V(sx*-.098,-.031,.146),V(sx*-.066,-.068,.162),V(sx*-.038,-.1,.177)],false);}   // speed: V chin bar, centre upright, diagonal supports
+ if(type===2){const ang=(y,w)=>mir([mount(y,-1),V(-w,y,.156),V(-w*.42,y-.007,.185),V(0,y-.009,.19)]);add(ang(-.024,.1));add(ang(-.058,.096));add(ang(-.092,.072));add(vert(.07,-.025,-.094),false);add(vert(-.07,-.025,-.094),false);}   // angular: three bars with crisp bends
+ if(type===3){add(bar(-.02,[[-.1,-.03],[-.052,-.004]]));add(bar(-.056,[[-.1,-.03],[-.052,-.004]]));add(bar(-.094,[[-.082,-.036],[-.042,-.004]]));for(const x of[-.05,0,.05])add(vert(x,-.02,-.094),false);
+  add([top[Math.floor(top.length/2)],V(0,.025,.181),V(0,-.02,zc(-.02)+.004)],false);}   // defender cage with a nose bumper; eye openings stay clear
+ return{B,ends};}
+function maskGeo(key,type){return kg(`mask_${key}_${type}`,()=>{const{B,ends}=maskBars(HSPEC[key],type);return{gs:B.map(pts=>new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,false,'centripetal'),Math.max(16,pts.length*10),.0058,8,false)),ends};});}   // round steel rod, same gauge throughout
+const visorGeo=kg('visor',()=>new THREE.CylinderGeometry(.158,.158,.06,28,1,true,-.82,1.64));
+function helmet(d,L,col,fin){const key=HKEYS[L.shell]||'classic',P=HSPEC[key],g=new THREE.Group(),K=1/.92;g.scale.set(K,K,K);   // counter the trimmed head so the helmet keeps its true size
+ const sm2=new THREE.MeshStandardMaterial({color:col,roughness:fin.r,metalness:fin.m}),pad=new THREE.MeshStandardMaterial({color:0x1c1c1f,roughness:.9}),shell=new THREE.Mesh(shellGeo(key),[sm2,pad]);shell.castShadow=true;g.add(shell);
+ const mm=new THREE.MeshStandardMaterial({color:L.c_mask,roughness:.38,metalness:.55});const M=maskGeo(key,L.mask);for(const gg of M.gs){const m=new THREE.Mesh(gg,mm);m.castShadow=true;g.add(m);}
+ const hw=new THREE.MeshStandardMaterial({color:0x9a9aa0,roughness:.3,metalness:.8}),clip=kg('clip',()=>new THREE.SphereGeometry(.0085,10,8));for(const p of M.ends){const m=new THREE.Mesh(clip,hw);m.position.copy(p);g.add(m);}
+ const st=new THREE.MeshStandardMaterial({color:L.c_strap,roughness:.6}),cup=new THREE.Mesh(kg('cup',()=>{const g=new THREE.CylinderGeometry(.019,.019,.075,12);return g;}),st);cup.rotation.z=Math.PI/2;cup.position.set(0,-.128,.085);g.add(cup);   // chin cup under the chin
+ for(const sx of[1,-1]){const a=hPt(P,sx*96*D2R,hEdge(P,sx*96*D2R)-4*D2R),s=new THREE.Mesh(kg('strap'+key+sx,()=>new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(sx*.035,-.127,.085),new THREE.Vector3(sx*.085,-.11,.055),a]),12,.0045,6,false)),st);g.add(s);}   // straps up to the jaw of the shell
+ if(L.visor){const vm=new THREE.MeshStandardMaterial({color:[0,0xddeeff,0x111111,0xd4af37,0xff8a3d][L.visor],transparent:true,opacity:[0,.22,.78,.6,.55][L.visor],roughness:.05,metalness:L.visor>=3?.9:.2,side:THREE.DoubleSide,depthWrite:false}),v=new THREE.Mesh(visorGeo,vm);v.position.set(0,.03,P.cz);v.renderOrder=2;g.add(v);}   // curved, follows the opening, sits inside the guard
+ if(L.decal){const strips=L.decal===1?[[0,.016]]:[[-.026,.007],[.026,.007]];for(const[x0,hw2]of strips){const gg=kg(`stripe_${key}_${x0}`,()=>{const pos=[],idx=[],v=new THREE.Vector3(),n=30,eF=hEdge(P,0),eB=hEdge(P,Math.PI);
+   const c0=new THREE.Vector3(),q=new THREE.Vector3();for(let i=0;i<=n;i++){const u=i/n,back=u>.5,ph=Math.max(.02,back?(u*2-1)*(eB-.06):(1-u*2)*(eF-.05));hPt(P,back?Math.PI:0,ph,1,c0);
+    for(const sx of[-1,1]){q.set(c0.x+x0+sx*hw2,c0.y-P.cy,c0.z-P.cz);const r=q.length(),th=Math.atan2(q.x,q.z),phi=Math.acos(cl(q.y/r,-1,1));hPt(P,th,phi,1,v);v.y-=P.cy;v.z-=P.cz;v.multiplyScalar(1.012);v.y+=P.cy;v.z+=P.cz;pos.push(v.x,v.y,v.z);}}   // constant-width stripe: offset sideways, then projected back onto the shell
+   for(let i=0;i<n;i++){const a=i*2;idx.push(a,a+2,a+1,a+1,a+2,a+3);}const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));gg.setIndex(idx);gg.computeVertexNormals();return gg;});
+   g.add(new THREE.Mesh(gg,new THREE.MeshStandardMaterial({color:L.c_acc,roughness:fin.r,metalness:fin.m,side:THREE.DoubleSide})));}}   // stripes ride the crown, front edge to rear edge
+ return g;}
+function kit(d,L,T){L=migLook(L);for(const m of d.kitM||[]){m.parent.remove(m);m.traverse(o=>{if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>x.dispose());});}d.kitM=[];const P=d.parts,sk=SKC[L.skin]??SKC[1],pri=T?T[0]:L.c_pri,sec=T?T[1]:L.c_sec,hel=T?T[0]:L.c_helm,acc=L.c_acc;
  const col=(n,c)=>P[n]&&P[n].mesh.material.color.setHex(c);
  for(const n of['chest','abdomen'])col(n,pri);col('pelvis',sec);for(const s of['1','-1']){col('thigh'+s,sec);col('uarm'+s,L.sleeve===2?sk:pri);col('farm'+s,L.sleeve===1?pri:sk);col('hand'+s,L.c_glove<0?sk:L.c_glove);col('shin'+s,L.sock?L.c_sock:sk);col('foot'+s,L.c_cleat);col('toe'+s,L.cstyle===2?acc:L.c_cleat);}
  col('neck',sk);col('head',sk);
  d.fitK=[.95,1,1.06][L.fit];
  // helmet: three different shells, four facemasks, visor, chinstrap, finish, stripes
  const fin=[{r:.25,m:.2},{r:.85,m:0},{r:.08,m:.85}][L.hfin],H='head';
- if(L.shell===0)kmesh(d,H,KB(.25,.24,.25),hel,0,.03,-.02,fin);
- if(L.shell===1){kmesh(d,H,kg('sph',()=>new THREE.SphereGeometry(.145,20,14)),hel,0,.035,-.035,{...fin,s:[1,.98,1.08]});kmesh(d,H,KB(.03,.02,.2),hel,0,.18,-.04,fin);}   // rounded speed shell with a crown ridge
- if(L.shell===2){kmesh(d,H,KB(.24,.2,.24),hel,0,.02,-.015,fin);kmesh(d,H,KB(.27,.025,.27),hel,0,.125,-.015,fin);kmesh(d,H,KB(.26,.06,.06),hel,0,-.06,-.12,fin);}   // flat-top retro with a neck roll
- const mc=L.c_mask,bar=(w,h,y,x=0)=>kmesh(d,H,KB(w,h,.016),mc,x,y,.135,{r:.4,m:.4});
- if(L.mask===0){bar(.2,.016,-.03);bar(.2,.016,-.075);bar(.016,.07,-.05,.1);bar(.016,.07,-.05,-.1);}
- if(L.mask===1){for(const y of[0,-.04,-.08])bar(.2,.014,y);for(const x of[-.05,0,.05])bar(.014,.1,-.04,x);bar(.016,.12,-.04,.1);bar(.016,.12,-.04,-.1);}
- if(L.mask===2){bar(.2,.016,-.055);bar(.03,.03,-.02);}
- if(L.mask===3){for(const y of[.005,-.03,-.065,-.1])bar(.21,.015,y);bar(.016,.13,-.05);bar(.016,.13,-.05,.105);bar(.016,.13,-.05,-.105);}
- if(L.visor)kmesh(d,H,KB(.19,.06,.006),[0,0xddeeff,0x111111,0xd4af37,0xff8a3d][L.visor],0,.03,.128,{op:[0,.25,.82,.6,.55][L.visor],r:.05,m:L.visor>=3?.9:.2});
- kmesh(d,H,KB(.12,.018,.03),L.c_strap,0,-.11,.07);
- if(L.decal===1)kmesh(d,H,KB(.035,.006,.26),acc,0,L.shell===2?.14:.155,-.02);if(L.decal===2)for(const x of[-.03,.03])kmesh(d,H,KB(.014,.006,.26),acc,x,L.shell===2?.14:.155,-.02);
+ {const hg=helmet(d,L,hel,fin);P.head.mesh.add(hg);d.kitM.push(hg);P.head.mesh.scale.setScalar(.92);}   // the helmet; the head cube is trimmed slightly so its corners stay inside the shell
  if(L.eye)for(const x of[-.045,.045])kmesh(d,H,KB(.035,.012,.004),0x0a0a0a,x,.005,.111);
  // shoulder pads, compression, wristbands
  if(L.pads)for(const x of[-.19,.19])kmesh(d,'chest',KB(L.pads===2?.16:.12,L.pads===2?.07:.05,L.pads===2?.26:.23),pri,x,.14,0);
@@ -1641,15 +1691,15 @@ function sSum(e){const st=STYLES[e.style],ks=AK.map(k=>[k,e.att[k]]).sort((a,b)=
 function projection(e){const a=e.att,f=(x,y)=>(a[x]+a[y])/2;const tags=[[f('spd','acc'),'gets open deep and wins races'],[f('thp','tha'),'drives the ball downfield accurately'],[f('cth','rte'),'separates on routes and finishes catches'],[f('str','car'),'runs through contact and protects the ball'],[f('bhd','agi'),'makes tacklers miss in space'],[f('cov','int'),'blankets receivers and takes the ball away'],[f('tak','rea'),'closes fast and finishes tackles']].sort((x,y)=>y[0]-x[0]);
  return`Expected on the field: a player who ${tags[0][1]} and ${tags[1][1]}; weakest when asked to ${tags[6][1].replace('gets','get').replace('drives','drive').replace('separates','separate').replace('runs','run').replace('makes','make').replace('blankets','blanket').replace('closes','close')}.`;}
 // ---------- stage 3: equipment & appearance ----------
-const OPTS={helmet:[['shell','Shell',['Classic','Speed','Retro Flat-Top']],['mask','Facemask',['Two-Bar','Cage','Open','Lineman']],['visor','Visor',['None','Clear','Dark Tint','Gold Iridium','Amber']],['hfin','Finish',['Gloss','Matte','Chrome']],['decal','Stripes',['None','Centre','Double']]],
+const OPTS={helmet:[['shell','Shell',['Classic','Speed','Angular','Defender']],['mask','Facemask',FMASK],['visor','Visor',['None','Clear','Dark Tint','Gold Iridium','Amber']],['hfin','Finish',['Gloss','Matte','Chrome']],['decal','Stripes',['None','Centre','Double']]],
  upper:[['sleeve','Sleeves',['Short','Long','Sleeveless']],['fit','Jersey Fit',['Tight','Standard','Loose']],['pads','Shoulder Pads',['Slim','Standard','Big']],['comp','Arm Compression',['None','Left','Right','Both']],['compLen','Compression Length',['Forearm','Full Arm']],['wrist','Wristbands',['None','White','Accent','Black']]],
  lower:[['pfit','Pants Fit',['Tight','Standard','Loose']],['thighpad','Thigh Pads',['Hidden','Visible']],['leg','Leg Compression',['None','Left','Right','Both']],['legLen','Leg Sleeve',['Calf','Over the Knee']],['knee','Knee Pads',['None','Under Pants','External']],['sock','Socks',['Low','High']],['cstyle','Cleats',['Low','Mid','High-Top']]],
  colours:[['c_pri','Jersey (primary)'],['c_sec','Pants (secondary)'],['c_acc','Accent'],['c_helm','Helmet'],['c_mask','Facemask'],['c_strap','Chinstrap'],['c_glove','Gloves'],['c_cleat','Cleats'],['c_comp','Compression'],['c_sock','Socks']],
  look:[['eye','Eye Black',['None','Stripes']]]};
 const PRESETS={Classic:{shell:0,mask:0,visor:0,hfin:0,decal:1,sleeve:0,pads:1,comp:0,wrist:0,leg:0,knee:0,sock:1,cstyle:0,c_mask:0xdddddd,c_glove:-1,c_cleat:0x111111},
- 'Speed Demon':{shell:1,mask:2,visor:2,hfin:0,decal:0,sleeve:2,pads:0,comp:3,compLen:1,wrist:2,leg:3,legLen:0,sock:0,cstyle:0,c_mask:0x111111,c_glove:0xffffff,c_cleat:0xffd23f,c_comp:0x111111},
- Lockdown:{shell:1,mask:1,visor:3,hfin:1,decal:2,sleeve:1,pads:1,comp:0,wrist:3,leg:1,legLen:1,knee:1,sock:1,cstyle:1,c_mask:0x111111,c_glove:0x111111,c_cleat:0x111111,c_comp:0xffffff},
- 'Old School':{shell:2,mask:3,visor:0,hfin:1,decal:1,sleeve:0,pads:2,comp:0,wrist:1,leg:0,knee:2,sock:1,cstyle:2,c_mask:0x7a7a80,c_glove:-1,c_cleat:0x111111,c_sock:0xffffff}};
+ 'Speed Demon':{shell:1,mask:1,visor:2,hfin:0,decal:0,sleeve:2,pads:0,comp:3,compLen:1,wrist:2,leg:3,legLen:0,sock:0,cstyle:0,c_mask:0x111111,c_glove:0xffffff,c_cleat:0xffd23f,c_comp:0x111111},
+ Lockdown:{shell:2,mask:2,visor:3,hfin:1,decal:2,sleeve:1,pads:1,comp:0,wrist:3,leg:1,legLen:1,knee:1,sock:1,cstyle:1,c_mask:0x111111,c_glove:0x111111,c_cleat:0x111111,c_comp:0xffffff},
+ 'Old School':{shell:3,mask:3,visor:0,hfin:1,decal:1,sleeve:0,pads:2,comp:0,wrist:1,leg:0,knee:2,sock:1,cstyle:2,c_mask:0x7a7a80,c_glove:-1,c_cleat:0x111111,c_sock:0xffffff}};
 function stage3(e){const L=e.look,cats=[['presets','Presets'],['helmet','Helmet'],['upper','Upper Body'],['lower','Lower Body'],['colours','Colours'],['look','Appearance']];
  const seg=(k,l,o)=>`<div class="opt"><small>${l}</small><div class="seg">${o.map((t,i)=>`<button data-o="${k}" data-v="${i}" class="${L[k]===i?'on':''}">${t}</button>`).join('')}</div></div>`;
  const sw=(k,l)=>`<div class="opt"><small>${l}</small><div class="sws">${(k==='c_glove'?[-1,...PAL]:PAL).map(c=>`<button class="sw2${L[k]===c?' on':''}" data-c="${k}" data-v="${c}" style="background:${c<0?'repeating-linear-gradient(45deg,#666 0 4px,#333 4px 8px)':hx(c)}" title="${c<0?'Bare hands':''}"></button>`).join('')}</div></div>`;
@@ -1883,7 +1933,7 @@ function frame(now){
   if(birdK>.001&&route){const AR=roster.filter(d=>d.cur.route).flatMap(d=>[[d.cur.x0,LOS],...d.cur.route]),xs=AR.length?AR.map(p=>p[0]):[routeX],zs=AR.length?AR.map(p=>p[1]):[0],cx=(Math.min(...xs)+Math.max(...xs))/2,cz=(Math.min(...zs)+Math.max(...zs))/2,span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs),20);
    const k=birdK*birdK*(3-2*birdK),bp=new THREE.Vector3(cx,span*1.15+8,cz-span*.35),lk=new THREE.Vector3(cx,0,cz);
    const look=new THREE.Vector3(pvx,pvy,pvz).lerp(lk,k);cam.position.lerp(bp,k);cam.lookAt(look);}}
- if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,.8,pel.position.z);}   // test hook: side view
+ if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,window.DBGLY||.8,pel.position.z);}   // test hook: side view
  sun.position.set(pel.position.x+5,12,pel.position.z+4);sun.target.position.set(pel.position.x,0,pel.position.z);
  renderer.render(scene,cam);
 }

@@ -279,9 +279,9 @@ function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
  if(k===' '&&cur.runT>1){cur.boost=Math.min(.3,(cur.boost||0)+.06);return;}   // ball carrier in a long sprint: Space taps are a burst of speed, not a jump
- if(playPre()&&(k===' '||k==='q'))return;   // no jumping / diving before the snap
+ if(playPre()&&(k===' '||k==='q'||k==='e'))return;   // no jumping / diving before the snap
  // R: reset (QB / receiver drill), Q: dive the way the camera points, F: go limp / get up, T: drop the ball, 1: show the receiver's route, 2: receiver goes
- if(k==='r')resetPlay();if(k==='q')jukeOrDive();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')playStart();
+ if(k==='r')resetPlay();if(k==='q')startDive();if(k==='e')juke();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')playStart();
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()&&catchOn){startJump();return;}   // going up for a catch: always a vertical leap
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
@@ -395,11 +395,11 @@ function climb(dt){
 }
 // ---------- diving: launch the way the camera points, fly / slide laid out (the catch keeps working), then get back up ----------
 const DIVE_UP=1.15,DIVE_END=2.0;
-// ---------- juke: a direction + Q. Like a real one: a hard jab step and dropped shoulder / head snap the wrong way (sells the fake),
+// ---------- juke: a direction + E. Like a real one: a hard jab step and dropped shoulder / head snap the wrong way (sells the fake),
 // then plant off that foot and burst out low the other way, half sideways, half upfield. Defenders reading you can bite on the fake and
-// chase the wrong way for a moment; one caught close and flat-footed can stumble over. Q with no direction is still the dive ----------
-function jukeOrDive(){let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
- if(sd&&dv===0&&!limp&&cs===0&&contact()&&mv>.2){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100;}return;}startDive();}
+// chase the wrong way for a moment; one caught close and flat-footed can stumble over. E with no direction does nothing ----------
+function juke(){let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
+ if(sd&&dv===0&&!limp&&cs===0&&contact()&&mv>.2){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100;}}}
 function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the way you're juking, -r = the fake
  if(j.t<.16){for(const b of[chest,head,neck,abd]){b.force.x-=b.mass*rx*38;b.force.z-=b.mass*rz*38;}pel.force.x-=pel.mass*rx*14;pel.force.z-=pel.mass*rz*14;pel.force.y-=pel.mass*6;}   // jab: shoulders and head thrown to the fake side, sinking hips
  else if(!j.cut){j.cut=true;const v=pel.velocity,sp=Math.hypot(v.x,v.z),T=Math.min(9,Math.max(sp,3.5)*1.1+1.5),L=Math.hypot(rx*1.4+fx,rz*1.4+fz),nx=(rx*1.4+fx)/L,nz=(rz*1.4+fz)/L;
@@ -715,7 +715,7 @@ const joy={on:false,x:0,y:0,id:null};   // touch: joystick moves, SPRINT toggles
  const jEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.on=false;joy.x=joy.y=0;K.style.transform='';}};J.addEventListener('touchend',jEnd);J.addEventListener('touchcancel',jEnd);
  const tap=(el,fn)=>el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();fn();},{passive:false});
  tap($('bsprint'),()=>{keys.shift=!keys.shift;});   // sprint toggles (a held button + joystick + look is too many fingers)
- tap($('bdive'),jukeOrDive);
+ tap($('bdive'),()=>startDive());
  tap($('broute'),()=>{keys['1']=true;showRoute();});$('broute').addEventListener('touchend',()=>{keys['1']=false;});tap($('bgo'),playStart);
  tap(aimB,()=>{aimOn=!aimOn&&held;});
  tap(big,primaryDown);big.addEventListener('touchend',e=>{e.preventDefault();primaryUp();});

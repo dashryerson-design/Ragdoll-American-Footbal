@@ -277,6 +277,7 @@ function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z
 function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
+ if(k===' '&&cur.runT>1){cur.boost=Math.min(.3,(cur.boost||0)+.06);return;}   // ball carrier in a long sprint: Space taps are a burst of speed, not a jump
  if(playPre()&&(k===' '||k==='q'))return;   // no jumping / diving before the snap
  // R: reset (QB / receiver drill), Q: dive the way the camera points, F: go limp / get up, T: drop the ball, 1: show the receiver's route, 2: receiver goes
  if(k==='r')resetPlay();if(k==='q')startDive();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();if(k==='1')showRoute();if(k==='2')playStart();
@@ -430,7 +431,8 @@ function control(dt){
  // per-limb weakness (wk, 1 = healthy) slows the gait and makes the body sag onto that leg
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
- const speed=(run?7.2:qbMove?(keys.shift?1.6:1.1):2.3)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
+ if(held&&keys.shift&&mv>.5)cur.runT=(cur.runT||0)+dt;else{cur.runT=0;cur.boost=0;}cur.boost=Math.max(0,(cur.boost||0)-.12*dt);   // the burst fades unless you keep tapping
+ const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;
  for(const sd of[-1,1]){

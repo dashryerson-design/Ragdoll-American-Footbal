@@ -449,7 +449,7 @@ function control(dt){
   if(cur.bufB&&(js===4||js===0)&&contact()&&!limp){if(performance.now()-cur.bufB<400){jpt=.2;startBound();}cur.bufB=0;}   // space pressed just before landing: chain straight into the next bound
  }
  ballArm();
- const lean=thLean-.08*qbK+.95*reachK+.18*crK+mv*(run?.28:.1)*(1-qbK)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
+ const lean=thLean-.08*qbK+.95*reachK+.85*(cur.low||0)+.18*crK+mv*(run?.28:.1)*(1-qbK)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
  if(!limp){
   // balance: keep pelvis and chest facing the heading, upright
   const tw=.12*Math.sin(phase)*mv;
@@ -464,7 +464,7 @@ function control(dt){
   // support + drive while feet are on the ground
   if(contact()&&(js===0||js===1||js===4)){
    const y=pel.position.y,uu=Math.min(1,jt/.13),dip=js===0?Math.max(...[-1,1].map(sd=>tnorm(phase+(sd>0?0:Math.PI))>=.5?(1-legW[sd])*.2*Math.max(.35,mv):0)):0,   // body sags onto a weak leg
-    hy=gs-dip-.36*crK-.42*reachK+.07*(cur.high||0)+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55;
+    hy=gs-dip-.36*crK-.42*reachK-.45*(cur.low||0)+.07*(cur.high||0)+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55;
    pel.force.y+=Math.max(0,Math.min(fy,totalMass*9.82*1.0));
    // sprinting pushes harder (bigger force cap + gain)
    const vd=speed*mv;if(moving){const bf=Math.max(0,Math.min(totalMass*(run?6:3.5),totalMass*(run?7:4.5)*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
@@ -610,7 +610,8 @@ function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(bal
  if(want)ip=interceptPoint();const tp=ip?ip.p:cp&&cp.p;   // arms go to the intercept point; closest approach is only the fallback
  if(want&&(catchK<.05||ip&&catchK<.5)){if(ip)catchSide=ip.side;else{chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);catchSide=_cv.x>.3?1:_cv.x<-.3?-1:0;}}   // 1 or 2 hands, settled as the reach builds
  cur.look=live?ball.position:null;cur.cp=live&&want?cp:null;   // eyes on the ball while catch is held; cp also guides a jump catch
- cur.high=tp?catchK*cl((tp.y-chest.position.y-.35)/.6,0,1):0;   // ball passing above the shoulders: reach up tall
+ cur.high=tp?catchK*cl((tp.y-chest.position.y-.35)/.6,0,1):0;
+ cur.low=tp?Math.max(catchK,want*.6)*cl((pel.position.y-.15-tp.y)/.55,0,1):0;   // ball coming in below the hips: bend and drop to scoop it   // ball passing above the shoulders: reach up tall
  catchK+=(want-catchK)*Math.min(1,DT*(want?20*catchBoost():6));if(catchK<.05||!cp)return;
  if(cur.high>.01)for(const sd of[1,-1])joints['ankle'+sd].x+=.35*cur.high;   // up on the toes
  // high ball: elbows lock straight so the arms reach as high as they go

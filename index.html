@@ -7,6 +7,7 @@
 .tb.on{background:#ffd23fcc;color:#111;border-color:#ffd23f}
 #bbig{width:96px;height:96px;right:calc(30px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px));font-size:16px}
 .sm{width:58px;height:58px}
+#brst{position:fixed;z-index:3;display:none;width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:22px;cursor:pointer}body.qb #brst{display:flex}body.qb.touch #brst{right:calc(70px + env(safe-area-inset-right,0px))}
 #tpause{width:46px;height:46px;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:15px}
 .ov{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;overflow-y:auto;padding:24px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;color:#fff;user-select:none;-webkit-user-select:none}
 .ov[hidden]{display:none}
@@ -27,6 +28,7 @@
 <span class="r">Ragdoll</span><span class="a">American Football</span></div>
 <div id="pick"><button class="ch" id="ctouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="#fff" stroke-width="4"/><circle cx="40" cy="84" r="4" fill="#fff"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#d8a24a"/></svg>TOUCH CONTROLS</button>
 <button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="#fff" stroke-width="4"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="#fff" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#d8a24a" stroke-width="4"/><path d="M103 18v14" stroke="#d8a24a" stroke-width="4"/></svg>KEYBOARD &amp; MOUSE</button></div></div>
+<div class="tb" id="brst" title="Reset the QB with the ball (R)">&#x21bb;</div>
 <div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="bqb">TEAMMATE QB: OFF</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
 <div class="tb" id="bbig"></div>
@@ -264,7 +266,7 @@ function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z
 function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
- if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();   // T: drop the ball   // F: go limp / get up
+ if(k==='r')refreshQB();if(k==='f'){limp=!limp;js=0;}if(k==='t')dropBall();   // T: drop the ball   // F: go limp / get up
  if(k===' '&&!limp&&(js===3||js===4||(js===5&&jt>.1)||(js===0&&!contact()))){cur.bufB=performance.now();return;}   // still in the air / landing: queue the next bound
  if(k===' '&&!limp&&js===0&&contact()){if(ccool<=0&&cs===0){const L=findLedge();if(L){startClimb(L);return;}}if(mv>.3&&jp===0){jp=1;jpt=0;}else startJump();}});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key===' '&&jp===1){jp=0;if(!limp&&js===0&&contact())startBound();}});
@@ -642,7 +644,7 @@ const QB_Z=-10,qbD={};
  for(const b of qbD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of qbD.cons)world.removeConstraint(c);}
 let teammate=false,qbClock=0,callReq=null;
 const active=()=>teammate?[player,qbD]:[player];
-function setTeammate(on){if(on===teammate)return;teammate=on;$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
+function setTeammate(on){if(on===teammate)return;teammate=on;document.body.classList.toggle('qb',on);$m('bqb').textContent='TEAMMATE QB: '+(on?'ON':'OFF');
  if(on){for(const b of qbD.list){world.addBody(b);b.mesh.visible=true;}for(const c of qbD.cons)world.addConstraint(c);use(qbD);reset();held=false;use(player);if(!held)giveQB();}
  else{use(qbD);for(const k in pins)unpin(k);const had=held;held=false;aimOn=false;thr=-1;use(player);for(const b of qbD.list){world.removeBody(b);b.mesh.visible=false;}for(const c of qbD.cons)world.removeConstraint(c);if(had)looseBall();}}
 function looseBall(){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.set(0,.09,0);ball.quaternion.setFromAxisAngle(Z,Math.PI/2);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);ball.collisionFilterMask=3;}
@@ -660,6 +662,9 @@ function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
  camYaw=Math.atan2(fx-pel.position.x,fz-pel.position.z)+Math.PI;      // the body turns to face camYaw + 180°
  if(c.st==='aim'&&(c.t+=dt)>.35){startThrow();c.st='throw';}
  if(c.st==='throw'&&thr<0){c.st='idle';}}
+// refresh: QB back on his spot with the ball (for a missed catch)
+function refreshQB(){if(!teammate||!mode||paused)return;use(player);if(held){held=false;aimOn=false;thr=-1;}use(qbD);reset();held=false;aimOn=false;thr=-1;cur.st='idle';cur.T=null;use(player);callReq=null;giveQB();}
+$m('brst').addEventListener('click',refreshQB);$m('brst').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();refreshQB();},{passive:false});
 $m('bres').onclick=togglePause;$m('bqb').onclick=()=>setTeammate(!teammate);
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});

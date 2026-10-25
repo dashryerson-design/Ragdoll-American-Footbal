@@ -729,7 +729,9 @@ function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
  const P=player.pel.position;let fx=P.x,fz=P.z;
  if(c.st==='idle'&&held&&callReq){const R=bpt(chest,-.2,.5,0),Q0=callReq.P,W=callReq.V,delay=.55;let tf=1;
   for(let i=0;i<4;i++){const tx=Q0.x+W.x*(delay+tf),tz=Q0.z+W.z*(delay+tf);tf=cl(Math.hypot(tx-R.x,tz-R.z)/17,.6,3);}   // flight time from distance, re-solved for where he'll be
-  c.T=new V(Q0.x+W.x*(delay+tf),1.25,Q0.z+W.z*(delay+tf));c.arrive=qbClock+delay+tf;c.st='aim';c.t=0;aimOn=true;callReq=null;}
+  c.T=new V(Q0.x+W.x*(delay+tf),1.25,Q0.z+W.z*(delay+tf));
+  {const dx=c.T.x-R.x,dz=c.T.z-R.z,L=Math.hypot(dx,dz)||1,fx=dx/L,fz=dz/L,r=Math.random();   // the QB isn't perfect: usually a little off, about 1 in 3 sails 1.5-3 m long (dive for it)
+   const long=r<.33?1.5+Math.random()*1.5:(Math.random()-.5)*.8,side=(Math.random()-.5)*(r<.33?1.6:.8);c.T.x+=fx*long-fz*side;c.T.z+=fz*long+fx*side;}c.arrive=qbClock+delay+tf;c.st='aim';c.t=0;aimOn=true;callReq=null;}
  if(c.T&&c.st!=='idle'){fx=c.T.x;fz=c.T.z;}
  camYaw=Math.atan2(fx-pel.position.x,fz-pel.position.z)+Math.PI;      // the body turns to face camYaw + 180°
  if(c.st==='aim'&&(c.t+=dt)>.35){startThrow();c.st='throw';}

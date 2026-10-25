@@ -778,7 +778,9 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
    let tA=0;for(;tA<5&&!(vy<0&&y<1.3)&&y>.09;tA+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}
    const mx=x-P.x,mz=z-P.z,d=Math.hypot(mx,mz),need=d/Math.max(tA,.15),behind=mx*pel.velocity.x+mz*pel.velocity.z<0;   // need = the speed that arrives just as the ball does
    if(d<.5){camYaw=Math.atan2(ball.position.x-P.x,ball.position.z-P.z)+Math.PI;}   // there: plant and face the ball
-   else{tx=x;tz=z;sprint=need>2||behind;}   // run at it; sprint only when the timing needs it (or to turn back for a short ball), otherwise jog so he doesn't overrun it
+   else{tx=x;tz=z;const sp=Math.hypot(pel.velocity.x,pel.velocity.z),carry=sp*Math.min(tA,.8);   // carry: how far his momentum takes him before the ball gets there
+    sprint=need>2&&!behind&&carry<d+.5;                       // sprint only when the timing needs it and it won't run him past the spot
+    if(!behind&&carry>d+1.5)tx=null;}                          // well ahead of the pass: ease off completely and let it come to him
    if(ball.position.y<.15&&ball.velocity.norm()<2){c.st='done';catchOn=false;}}}
  if(c.st==='caught'){if(c.t<1){tx=P.x+Math.sin(yaw)*4;tz=P.z+Math.cos(yaw)*4;sprint=c.t<.4;}}   // ease down to a stop with the ball
  if(c.st==='set'){camYaw=Math.PI;}   // lined up, looking downfield

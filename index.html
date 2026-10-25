@@ -399,15 +399,16 @@ const DIVE_UP=1.15,DIVE_END=2.0;
 // then plant off that foot and burst out low the other way, half sideways, half upfield. Defenders reading you can bite on the fake and
 // chase the wrong way for a moment; one caught close and flat-footed can stumble over. E with no direction does nothing ----------
 function juke(){let sd=(keys.d?1:0)-(keys.a?1:0);if(!sd&&joy.on&&Math.abs(joy.x)>.45)sd=Math.sign(joy.x);
- if(sd&&dv===0&&!limp&&cs===0&&contact()&&mv>.2){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd,cut:false};cur.jkCool=performance.now()+1100;}}}
-function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the way you're juking, -r = the fake
- if(j.t<.16){for(const b of[chest,head,neck,abd]){b.force.x-=b.mass*rx*38;b.force.z-=b.mass*rz*38;}pel.force.x-=pel.mass*rx*14;pel.force.z-=pel.mass*rz*14;pel.force.y-=pel.mass*6;}   // jab: shoulders and head thrown to the fake side, sinking hips
- else if(!j.cut){j.cut=true;const v=pel.velocity,sp=Math.hypot(v.x,v.z),T=Math.min(9,Math.max(sp,3.5)*1.1+1.5),L=Math.hypot(rx*1.4+fx,rz*1.4+fz),nx=(rx*1.4+fx)/L,nz=(rz*1.4+fz)/L;
-  for(const b of list){b.velocity.x+=nx*T-v.x;b.velocity.z+=nz*T-v.z;}cur.jkB=.25;   // plant and explode out: new direction, a little faster than before
-  const P=pel.position;for(const d of roster){if(!d.cur.ai||d.cur.side==='d'===(cur.side==='d'))continue;const Q=d.pel.position,dist=Math.hypot(Q.x-P.x,Q.z-P.z);if(dist>7)continue;
-   if(Math.random()<.9-dist*.09){d.cur.biteEnd=(d.cur.t||0)+.45+Math.random()*.45;d.cur.biteV=[-rx*4,-rz*4];   // bit on the fake
-    if(dist<4.5&&Math.random()<.4){d.limp=true;d.limpT=performance.now()+650+Math.random()*400;for(const b of d.list){b.velocity.x-=rx*2.2;b.velocity.z-=rz*2.2;}}}}}   // ...and stumbled
- else if(j.t<.32){for(const b of[chest,head]){b.force.x+=b.mass*rx*30;b.force.z+=b.mass*rz*30;}}   // lean into the cut
+ if(sd&&dv===0&&!limp&&cs===0&&contact()&&mv>.2){if(!cur.jk&&performance.now()>(cur.jkCool||0)){cur.jk={t:0,sd:-sd,cut:false};cur.jkM=sd;cur.jkCool=performance.now()+1100;}}}
+function jukeTick(dt){const j=cur.jk,cy=camYaw,fx=-Math.sin(cy),fz=-Math.cos(cy),rx=Math.cos(cy)*j.sd,rz=-Math.sin(cy)*j.sd;j.t+=dt;   // r = the way you cut, -r = the fake (the side you pressed)
+ if(j.t<.22){const v=pel.velocity,lat=v.x*rx+v.z*rz,k=Math.max(0,lat+3.2)*Math.min(1,dt*25);for(const b of list){b.velocity.x-=rx*k;b.velocity.z-=rz*k;}   // big jab step: the whole body really moves ~0.5 m to the fake side
+  for(const b of[chest,head,neck,abd]){b.force.x-=b.mass*rx*70;b.force.z-=b.mass*rz*70;}pel.force.y-=pel.mass*10;}   // shoulders and head thrown hard that way, hips sink low
+ else if(!j.cut){j.cut=true;for(const k in pins)unpin(k);const v=pel.velocity,sp=Math.hypot(v.x,v.z),T=Math.min(10,Math.max(sp,4)*1.2+2.5),L=Math.hypot(rx*2.2+fx,rz*2.2+fz),nx=(rx*2.2+fx)/L,nz=(rz*2.2+fz)/L;
+  for(const b of list){b.velocity.x+=nx*T-v.x;b.velocity.z+=nz*T-v.z;b.velocity.y+=1.6;}cur.jkB=.4;yaw=Math.atan2(nx,nz);j.nx=nx;j.nz=nz;   // jump cut (Barry Sanders): a little hop off the plant foot that redirects him hard, mostly sideways, faster than before
+  const P=pel.position;for(const d of roster){if(!d.cur.ai||d.cur.side==='d'===(cur.side==='d'))continue;const Q=d.pel.position,dist=Math.hypot(Q.x-P.x,Q.z-P.z);if(dist>8)continue;
+   if(Math.random()<.95-dist*.08){d.cur.biteEnd=(d.cur.t||0)+.6+Math.random()*.5;d.cur.biteV=[-rx*6,-rz*6];   // bit on the fake
+    if(dist<5&&Math.random()<.55){d.limp=true;d.limpT=performance.now()+800+Math.random()*500;for(const b of d.list){b.velocity.x-=rx*3;b.velocity.z-=rz*3;}}}}}   // ...ankles broken: he stumbles over the wrong way
+ else if(j.t<.5){for(const b of[chest,head,neck]){b.force.x+=b.mass*rx*55;b.force.z+=b.mass*rz*55;}const v=pel.velocity,a=Math.max(0,9-(v.x*j.nx+v.z*j.nz))*10;for(const b of list){b.force.x+=b.mass*j.nx*a;b.force.z+=b.mass*j.nz*a;}}   // and keep driving out of it   // leaning hard into the cut, then back up into the sprint
  else cur.jk=null;}
 function startDive(){if(dv>0||limp||cs>0)return;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);
  for(const k in pins)unpin(k);js=0;jp=0;dv=1e-4;yaw=Math.atan2(dvx,dvz);const push=Math.max(0,Math.min(4.5,8-sp));   // the dive adds speed the way you aim, capped
@@ -428,7 +429,7 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
 function control(dt){if(cur.jk)jukeTick(dt);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
- let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;   // locked on the line until the snap (2)
+ let f=(keys.w?1:0)-(keys.s?1:0),r=(keys.d?1:0)-(keys.a?1:0);if(!cur.ai&&joy.on&&Math.hypot(joy.x,joy.y)>.2){f=-joy.y;r=joy.x;}if(!cur.ai&&playPre())f=r=0;if(cur.jkM){if(Math.sign(r)!==cur.jkM)cur.jkM=0;else if(!cur.jk||cur.jk.cut)r=-r;}   // after a juke the side you're still holding steers you the way you cut, until you let go   // locked on the line until the snap (2)
  let dx=-s*f+c*r,dz=-c*f-s*r;const len=Math.hypot(dx,dz);
  const moving=len>0&&!limp&&js===0;let run=!!keys.shift;
  const crouchOn=(keys.c||keys.control)&&!limp&&js===0&&cs===0;crK+=((crouchOn?1:0)-crK)*Math.min(1,dt*8);if(crK>.3)run=false;   // crouch: C (or Ctrl)

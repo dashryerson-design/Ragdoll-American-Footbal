@@ -513,7 +513,8 @@ const V_MIN=10,V_MAX=27,CHARGE_MS=1200;let chargeT=-1,throwSpd=V_MIN;
 const throwSpeed=()=>chargeT<0?V_MIN:V_MIN+(V_MAX-V_MIN)*Math.min(1,(performance.now()-chargeT)/CHARGE_MS);
 function startCharge(){if(held&&aimOn&&thr<0&&!limp)chargeT=performance.now();}
 function releaseCharge(){if(chargeT<0)return;throwSpd=throwSpeed();chargeT=-1;startThrow();}
-function throwVel(){const THROW_V=thr>=0?throwSpd:throwSpeed(),e=cl(.3-camPitch,-.3,1.2),c=Math.cos(e);return new V(-Math.sin(camYaw)*c*THROW_V+pel.velocity.x,Math.sin(e)*THROW_V,-Math.cos(camYaw)*c*THROW_V+pel.velocity.z);}
+// the lob added above the crosshair shrinks with power: a hard throw aimed level is a flat bullet; aim higher to still loft it
+function throwVel(){const THROW_V=thr>=0?throwSpd:throwSpeed(),ch=(THROW_V-V_MIN)/(V_MAX-V_MIN),e=cl(.3-.27*ch-camPitch,-.3,1.2),c=Math.cos(e);return new V(-Math.sin(camYaw)*c*THROW_V+pel.velocity.x,Math.sin(e)*THROW_V,-Math.cos(camYaw)*c*THROW_V+pel.velocity.z);}
 const aimLine=new THREE.Points(new THREE.BufferGeometry().setFromPoints(Array.from({length:60},()=>new THREE.Vector3())),new THREE.PointsMaterial({color:0xffe27a,size:.22,transparent:true,opacity:.9,depthWrite:false}));   // dotted arc (GL lines are 1 px)
 aimLine.frustumCulled=false;aimLine.visible=false;scene.add(aimLine);
 function aimTick(){if(!held||!aimOn)chargeT=-1;aimLine.visible=held&&aimOn&&!limp;if(!aimLine.visible)return;

@@ -782,7 +782,7 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
  if(c.st==='cover'&&c.kind==='rush'){const q=roster.find(d=>d.cur.role==='qb');if(q){const Q=q.pel.position,dx=Q.x-P.x,dz=Q.z-P.z,dd=Math.hypot(dx,dz);goTo(Q.x,Q.z,true,null);if(dd<1.3&&dv===0&&H(q)){startDive();q.limp=true;q.limpT=performance.now()+2600;c.st='down';}}}   // blitz: straight at the QB, sack him
  if(c.st==='cover'&&(c.kind==='deep'||c.kind==='rob')){let T=null,bz=-1e9;   // help: deep = over the top of the deepest receiver in his half; robber = under the nearest one in the middle
   for(const d of roster){if(d.cur.role!=='wr')continue;const p=d.pel.position;if(c.half&&Math.sign(p.x||1)!==Math.sign(c.px))continue;const sc=c.kind==='deep'?p.z:-Math.hypot(p.x-P.x,p.z-P.z);if(sc>bz){bz=sc;T=p;}}
-  if(T){if(c.kind==='deep')goTo(c.px*.4+T.x*.6,Math.max(c.pz,T.z+7),true,T);else goTo(T.x*.7,cl(T.z-2,8,14),true,T);}}
+  if(T){if(c.kind==='deep')goTo(c.px*.4+T.x*.6,Math.min(GOAL_Z+4,Math.max(LOS+c.pz,T.z+7)),true,T);else goTo(T.x*.7,cl(T.z-2,LOS+8,LOS+14),true,T);}}
  if(c.st==='cover'&&c.kind==='man'){
   const vx=S[3],vz=S[4],sp=Math.hypot(vx,vz);
   if(c.pv&&sp>2){const pv=c.pv,cs2=(pv[0]*vx+pv[1]*vz)/((Math.hypot(pv[0],pv[1])||1)*sp);if(cs2<.6&&c.t>(c.biteEnd||0)&&Math.random()<.45){c.biteEnd=c.t+.35+Math.random()*.3;c.biteV=pv;}}   // a hard cut: sometimes he bites and keeps going
@@ -811,48 +811,58 @@ routeMesh.add(rtGlow,rtCore);routeMesh.visible=false;scene.add(routeMesh);   // 
 // each play: a weighted random route (mostly breaking inside, toward the middle / far side), then the hint mesh
 // (receivers in the same play don't repeat a route)
 function pickRoute(x0,used){let n;for(let t=0;t<12;t++){let r=Math.random()*ROUTE_W.reduce((a,b)=>a+b[1],0);n=ROUTE_W[0][0];for(const[k,w]of ROUTE_W){if((r-=w)<0){n=k;break;}}if(!used.includes(n))break;}used.push(n);
- const out=Math.sign(x0);return[ROUTES[n].map(([x,z])=>[x0+out*x*YD,z*YD]),n];}
+ const out=Math.sign(x0);return[ROUTES[n].map(([x,z])=>[x0+out*x*YD,LOS+Math.min(z*YD,GOAL_Z+5-LOS)]),n];}
 // vague = the first leg plus just the start of the break; full = the whole route (shown in the bird's-eye view)
 // every receiver's route gets an arrow (yours and the bots'): vague = the first leg plus just the start of the break; full = the whole route
 function routeShape(full){if(!route)return;const RS=roster.filter(d=>d.cur.role==='wr'&&d.cur.route).map(d=>[d.cur.x0,d.cur.route]);if(!RS.length)RS.push([routeX,route]);
- const ribbon=(w,y)=>{const pos=[];for(const[x0,rt]of RS){let P=[[x0,0],...rt];
-  if(!full){P=[[x0,0],rt[0]];if(rt[1]){const a=rt[0],b=rt[1],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,k=Math.min(1,4.5/L);P.push([a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]);}else P[1]=[x0,Math.min(rt[0][1],18)];}
+ const ribbon=(w,y)=>{const pos=[];for(const[x0,rt]of RS){let P=[[x0,LOS],...rt];
+  if(!full){P=[[x0,LOS],rt[0]];if(rt[1]){const a=rt[0],b=rt[1],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,k=Math.min(1,4.5/L);P.push([a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]);}else P[1]=[x0,Math.min(rt[0][1],LOS+18)];}
   for(let i=0;i<P.length-1;i++){const[a,b]=[P[i],P[i+1]],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,nx=-(b[1]-a[1])/L*w,nz=(b[0]-a[0])/L*w,e=i===P.length-2?.9:0,bx=b[0]-(b[0]-a[0])/L*e,bz=b[1]-(b[1]-a[1])/L*e;
   pos.push(a[0]+nx,y,a[1]+nz,a[0]-nx,y,a[1]-nz,bx+nx,y,bz+nz, a[0]-nx,y,a[1]-nz,bx-nx,y,bz-nz,bx+nx,y,bz+nz);
   if(e){pos.push(bx+nx*3,y,bz+nz*3,bx-nx*3,y,bz-nz*3,b[0]+(b[0]-a[0])/L*w,y,b[1]+(b[1]-a[1])/L*w);}}}return pos;};   // arrowheads
  for(const[m,w,y]of[[rtCore,.2,.04],[rtGlow,.55,.035]]){m.geometry.dispose();m.geometry=new THREE.BufferGeometry();m.geometry.setAttribute('position',new THREE.Float32BufferAttribute(ribbon(w,y),3));}routeFull=full;}
 function showRoute(){if(!playPre())return;routeVis=true;routeMesh.visible=true;routeDownT=performance.now();}   // tap: the vague hint; hold: bird's-eye + full route
 // the snap: the receiver (AI or you) can go, the defender reads and reacts
-// ---------- the goal: the offence attacks the far end zone (+z) from the 50; a play ends on a touchdown, a tackle, out of bounds,
-// an incompletion or an interception, then everyone resets for the next snap ----------
-const GOAL_Z=50*YD,SCORE={blue:0,red:0};let playEnd=0;
-function playOver(msg,col){if(playEnd)return;playEnd=performance.now()+2600;const b=$m('pbn');b.textContent=msg;b.style.color=col||'#ffd23f';b.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.1)',offset:.15},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:2500,fill:'forwards'});
- $m('score').textContent='BLUE '+SCORE.blue+'  –  '+SCORE.red+' RED';}
-function playTick(){if(!playOn)return;if(playEnd){if(performance.now()>playEnd){playEnd=0;resetPlay();}return;}if(playState!=='live')return;
- const car=roster.find(H),ot=ORG.off;
- if(car&&car.cur.side==='d'){playOver('INTERCEPTED!','#ff5a4a');return;}
- if(car){const p=car.pel.position,yd=Math.round(p.z/YD);
-  if(p.z>GOAL_Z){SCORE[ot]+=7;playOver('TOUCHDOWN '+ot.toUpperCase()+'!',hx(TEAM[ot][0]));}
-  else if(Math.abs(p.x)>FW/2)playOver('OUT OF BOUNDS  '+(yd>=0?'+':'')+yd+' YD');
-  else if(car.limp)playOver((car.cur.role==='qb'&&p.z<0?'SACKED  ':'TACKLED  ')+(yd>=0?'+':'')+yd+' YD');return;}
+// ---------- a real drive: the offence always attacks the +z end zone, starting from its own 25 (z = -25 yd). Four downs to gain 10 yards;
+// a touchdown, an interception or a turnover on downs flips possession: the other colour attacks and everyone swaps sides ----------
+const GOAL_Z=50*YD,SCORE={blue:0,red:0};let playEnd=0,resetT=0,LOS=-25*YD,DOWN=1,FD=-15*YD,flip=null;
+const losMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0x3a7bff,transparent:true,opacity:.85,depthWrite:false})),fdMesh=new THREE.Mesh(new THREE.PlaneGeometry(FW,.25),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.85,depthWrite:false}));
+for(const m of[losMesh,fdMesh]){m.rotation.x=-Math.PI/2;m.position.y=.03;m.visible=false;scene.add(m);}   // blue line of scrimmage, yellow first-down line
+const ORD=['','1ST','2ND','3RD','4TH'],spot=z=>{const y=Math.round(z/YD);return y<0?'OWN '+(50+y):y>0?'OPP '+(50-y):'50';};
+function hud(){$m('score').textContent='BLUE '+SCORE.blue+' – '+SCORE.red+' RED  ·  '+ORG.off.toUpperCase()+' BALL  ·  '+ORD[DOWN]+' & '+(FD>=GOAL_Z?'GOAL':Math.max(1,Math.round((FD-LOS)/YD)))+'  ·  '+spot(LOS);}
+function newGame(){SCORE.blue=SCORE.red=0;LOS=-25*YD;DOWN=1;FD=LOS+10*YD;flip=null;}
+function playOver(msg,col){if(playEnd)return;playEnd=performance.now()+2600;const b=$m('pbn');b.textContent=msg;b.style.color=col||'#ffd23f';b.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.1)',offset:.15},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:2500,fill:'forwards'});}
+// where the ball is down: gain the yards, move the chains, or lose it on downs
+function downAt(z,what){z=cl(z,-49*YD,GOAL_Z-YD);const g=Math.round((z-LOS)/YD);
+ if(z>=FD){LOS=z;DOWN=1;FD=Math.min(GOAL_Z,z+10*YD);playOver(what+'  '+(g>=0?'+':'')+g+' YD  ·  FIRST DOWN!');return;}
+ if(what!=='INCOMPLETE')LOS=z;if(++DOWN>4){flip=-LOS;playOver(what+'  ·  TURNOVER ON DOWNS','#ff5a4a');return;}
+ playOver(what==='INCOMPLETE'?what:what+'  '+(g>=0?'+':'')+g+' YD');}
+function playTick(){if(!playOn)return;if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){ORG.off=ORG.off==='blue'?'red':'blue';LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else resetPlay();}return;}   // possession change: rebuild both teams on their new sides
+ if(playState==='pre'&&player.cur.side==='d'&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
+ if(playState!=='live')return;const car=roster.find(H),ot=ORG.off;
+ if(car&&car.cur.side==='d'){flip=-Math.max(car.pel.position.z,-GOAL_Z+20*YD);playOver('INTERCEPTED!','#ff5a4a');return;}   // their ball where he picked it off (in the end zone: from their 20)
+ if(car){const p=car.pel.position;
+  if(p.z>GOAL_Z){SCORE[ot]+=7;flip=-25*YD;playOver('TOUCHDOWN '+ot.toUpperCase()+'!',hx(TEAM[ot][0]));}
+  else if(Math.abs(p.x)>FW/2)downAt(p.z,'OUT OF BOUNDS');
+  else if(car.limp)downAt(p.z,car.cur.role==='qb'&&p.z<LOS?'SACKED':'TACKLED');return;}
  if(!world.bodies.includes(ball))return;const q=roster.find(d=>d.cur.role==='qb');
- if(q&&!H(q)&&ball.position.y<.2&&ball.velocity.norm()<3)playOver('INCOMPLETE');}   // thrown and it hit the turf
+ if(q&&!H(q)&&ball.position.y<.2&&ball.velocity.norm()<3)downAt(LOS,'INCOMPLETE');}   // thrown and it hit the turf
 function playStart(){if(!playPre())return;playState='live';for(const d of roster){if(d.cur.ai&&d.cur.role==='wr'){d.cur.st='route';d.cur.i=0;}if(d.cur.ai&&d.cur.side==='d')d.cur.st='cover';}routeVis=false;routeMesh.visible=false;}
 // R: everyone back to the line, the ball to the QB, a new route; nothing moves until 2
 // receiver split wide on the 50, QB 15 yd behind the line, defender 20 yd in front of the receiver
-function resetPlay(){if(!playOn)return;playEnd=0;$m('score').textContent='BLUE '+SCORE.blue+'  –  '+SCORE.red+' RED';
+function resetPlay(){if(!playOn)return;playEnd=0;resetT=performance.now();hud();losMesh.position.z=LOS;fdMesh.position.z=FD;losMesh.visible=fdMesh.visible=true;
  for(const d of roster){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;limp=false;d.limpT=0;keys={};}use(player);
  const used=[];let q=null,rw=null;
  for(const d of roster){const c=d.cur;
-  if(c.role==='qb'){q=d;placeAt(d,0,QB_DEPTH);Object.assign(c,{st:'idle',T:null,wait:null,tg:null});}
-  if(c.role==='wr'){placeAt(d,c.x0,c.z0-.4);[c.route,c.rname]=pickRoute(c.x0,used);Object.assign(c,{st:'set',i:0,t:0});if(!rw||d===player)rw=d;}
-  if(c.side==='d'){placeAt(d,c.px,c.pz);if(d===player)camYaw=0;Object.assign(c,{st:'pre',t:0,hist:[],rd:.22+Math.random()*.2,biteEnd:0,pushT:0,pv:null});}}
- looseBall();if(q){use(q);grabBall();}use(player);
+  if(c.role==='qb'){q=d;placeAt(d,0,LOS+QB_DEPTH);Object.assign(c,{st:'idle',T:null,wait:null,tg:null});}
+  if(c.role==='wr'){placeAt(d,c.x0,LOS+c.z0-.4);[c.route,c.rname]=pickRoute(c.x0,used);Object.assign(c,{st:'set',i:0,t:0});if(!rw||d===player)rw=d;}
+  if(c.side==='d'){placeAt(d,c.px,Math.min(GOAL_Z+4,LOS+c.pz));if(d===player)camYaw=0;Object.assign(c,{st:'pre',t:0,hist:[],rd:.22+Math.random()*.2,biteEnd:0,pushT:0,pv:null});}}
+ looseBall();ball.position.z=LOS;if(q){use(q);grabBall();}use(player);
  route=rw&&rw.cur.route;routeName=rw?rw.cur.rname:'';routeX=rw?rw.cur.x0:WR_X;routeShape(false);   // the route shown on 1: yours, or the first receiver's when you're the QB
  routeVis=false;routeMesh.visible=false;playState=q?'pre':'live';callReq=null;}
 // the organiser's plan: offence = QB + receivers (the set matching the head count), defence = a man per receiver, then the set's extra jobs
-function plan(){const oT=ORG.off,dT=oT==='blue'?'red':'blue',youO=ORG.you===oT,nO=ORG.n[oT]=cl(ORG.n[oT],2,6),nD=ORG.n[dT]=cl(ORG.n[dT],youO?0:1,8);
- if(OSETS[ORG.os][1].length!==nO-1)ORG.os=OSETS.findIndex(o=>o[1].length===nO-1);
+function plan(){const oT=ORG.off,dT=oT==='blue'?'red':'blue',youO=ORG.you===oT,nO=ORG.n[oT]=cl(ORG.n[oT],1,5),nD=ORG.n[dT]=cl(ORG.n[dT],1,5);   // N = receivers on offence (the QB is extra), defenders on defence
+ if(OSETS[ORG.os][1].length!==nO)ORG.os=OSETS.findIndex(o=>o[1].length===nO);
  const wr=OSETS[ORG.os][1],ex=DSETS[ORG.ds][1],LB={deep:'S',rush:'BLITZ',rob:'ROB'};
  const O=[{role:'qb',lab:'QB',you:youO&&ORG.pos==='qb'},...wr.map(([x,z],i)=>({role:'wr',x0:x,z0:z,lab:'WR'+(i+1),you:youO&&ORG.pos==='wr'&&!i}))],D=[];
  for(let i=0;i<nD;i++){if(i<wr.length){const x=wr[i][0];D.push({kind:'man',m:i+1,lab:Math.abs(x)>=12?'CB':'NB',px:x-Math.sign(x)*1.5,pz:Math.abs(x)>=12?DEF_Z:7});}else{const k=ex[(i-wr.length)%ex.length];D.push({kind:k,lab:LB[k]});}}
@@ -868,7 +878,7 @@ function applyOrg(){for(const d of roster)if(d!==player)showDoll(d,false);use(pl
  if(playOn){const p=plan();oT=p.oT;dT=p.dT;const os=p.O.map(s=>add(s,'o'));for(const s of p.D){const d=add(s,'d');if(s.m)d.cur.mark=os[s.m];}}
  else{P.side='o';}
  for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
- if(playOn)resetPlay();else{routeMesh.visible=false;playState='live';}}
+ if(playOn)resetPlay();else{routeMesh.visible=false;losMesh.visible=fdMesh.visible=false;playState='live';}}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
 function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
  const P=pel.position,inAir=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.25,route=c.route;
@@ -877,7 +887,7 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
   const me=Math.hypot(x-P.x,z-P.z);c.go=roster.every(d=>d===curD||d.cur.role!=='wr'||Math.hypot(d.pel.position.x-x,d.pel.position.z-z)>=me);}   // only the receiver nearest where it comes down goes for it
  if((c.st==='route'||c.st==='after')&&inAir&&c.go){c.st='ball';catchOn=true;cur.catchT0=performance.now();}
  if(c.st==='route'){const W=route[c.i];if(Math.hypot(W[0]-P.x,W[1]-P.z)<1.1){if(c.i<route.length-1)c.i++;else c.st='after';}else{tx=W[0];tz=W[1];}}
- if(c.st==='after'){const a=route[route.length-2]||[c.x0,0],b=route[route.length-1],stop=/CURL|COMEBACK/.test(c.rname);   // breaking routes settle and face the QB; the rest keep running
+ if(c.st==='after'){const a=route[route.length-2]||[c.x0,LOS],b=route[route.length-1],stop=/CURL|COMEBACK/.test(c.rname);   // breaking routes settle and face the QB; the rest keep running
   if(!stop){const L=Math.hypot(b[0]-a[0],b[1]-a[1])||1;tx=P.x+(b[0]-a[0])/L*5;tz=P.z+(b[1]-a[1])/L*5;}}
  if(c.st==='ball'){if(!world.bodies.includes(ball)&&!held){c.st='after';catchOn=false;}
   else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);   // where it comes down through catch height
@@ -912,7 +922,7 @@ function primaryUp(){releaseCharge();catchOn=false;cur.catchT0=0;}
 // QB brain (runs with the QB swapped in): face the receiver; on a call, lead him (where he'll be, at the speed he had when he called), aim, throw
 function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
  // throwing to bots (you're not a receiver): after a 2-3.5 s drop, the most open one (most room from any defender, a bit of credit for depth)
- if(c.st==='idle'&&held&&!callReq&&playState==='live'&&player.cur.role!=='wr'&&(c.wait=(c.wait==null?2+Math.random()*1.5:c.wait)-dt)<0){let bs=-1e9;
+ if(c.st==='idle'&&held&&!callReq&&playState==='live'&&(c.wait=(c.wait==null?(player.cur.role==='wr'?4.5:2)+Math.random()*1.5:c.wait)-dt)<0){let bs=-1e9;
   for(const w of roster){if(w.cur.role!=='wr')continue;const p=w.pel.position;let sep=6;for(const d of roster)if(d.cur.side==='d')sep=Math.min(sep,Math.hypot(d.pel.position.x-p.x,d.pel.position.z-p.z));const sc=sep*2+Math.min(p.z,30)*.15;if(sc>bs){bs=sc;c.tg=w;}}
   if(c.tg)callReq={P:c.tg.pel.position.clone(),V:c.tg.pel.velocity.clone()};}
  const P=(c.tg||roster.find(d=>d.cur.role==='wr')||player).pel.position;let fx=P.x,fz=P.z;
@@ -974,7 +984,7 @@ $m('oyou').onclick=()=>{ORG.you=cyc(['blue','red'],ORG.you);orgUI();};$m('ooff')
 $m('opos').onclick=()=>{ORG.pos=cyc(['qb','wr'],ORG.pos);orgUI();};$m('ods').onclick=()=>{ORG.ds=(ORG.ds+1)%DSETS.length;orgUI();};
 $m('oos').onclick=()=>{const k=OSETS[ORG.os][1].length;do ORG.os=(ORG.os+1)%OSETS.length;while(OSETS[ORG.os][1].length!==k);orgUI();};   // sets with the same receiver count
 for(const t of['blue','red'])for(const[id,dd]of[['m',-1],['p',1]])$m(id+t).onclick=()=>{ORG.n[t]+=dd;orgUI();};
-$m('ogo').onclick=()=>{$m('org').hidden=true;applyOrg();togglePause();};$m('oback').onclick=()=>{$m('org').hidden=true;$m('pm').hidden=false;};
+$m('ogo').onclick=()=>{$m('org').hidden=true;newGame();applyOrg();togglePause();};$m('oback').onclick=()=>{$m('org').hidden=true;$m('pm').hidden=false;};
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});
 // ---------- main loop: fixed 400 Hz physics, muscles driven every step ----------
@@ -1004,7 +1014,7 @@ function frame(now){
  cam.position.set(pvx+dx*camCD,Math.max(.2,pvy+dy*camCD),pvz+dz*camCD);cam.lookAt(pvx,pvy,pvz);
  {const hold=playOn&&routeVis&&keys['1']&&performance.now()-routeDownT>250&&route;if(hold!==routeFull)routeShape(!!hold);   // holding 1: rise to a bird's-eye view of the whole route
   birdK+=((hold?1:0)-birdK)*Math.min(1,(now-(frame.lt||now))/1000*3.5);frame.lt=now;
-  if(birdK>.001&&route){const AR=roster.filter(d=>d.cur.route).flatMap(d=>[[d.cur.x0,0],...d.cur.route]),xs=AR.length?AR.map(p=>p[0]):[routeX],zs=AR.length?AR.map(p=>p[1]):[0],cx=(Math.min(...xs)+Math.max(...xs))/2,cz=(Math.min(...zs)+Math.max(...zs))/2,span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs),20);
+  if(birdK>.001&&route){const AR=roster.filter(d=>d.cur.route).flatMap(d=>[[d.cur.x0,LOS],...d.cur.route]),xs=AR.length?AR.map(p=>p[0]):[routeX],zs=AR.length?AR.map(p=>p[1]):[0],cx=(Math.min(...xs)+Math.max(...xs))/2,cz=(Math.min(...zs)+Math.max(...zs))/2,span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs),20);
    const k=birdK*birdK*(3-2*birdK),bp=new THREE.Vector3(cx,span*1.15+8,cz-span*.35),lk=new THREE.Vector3(cx,0,cz);
    const look=new THREE.Vector3(pvx,pvy,pvz).lerp(lk,k);cam.position.lerp(bp,k);cam.lookAt(look);}}
  if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,.8,pel.position.z);}   // test hook: side view

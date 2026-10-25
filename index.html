@@ -987,18 +987,29 @@ for(const t of['blue','red'])for(const[id,dd]of[['m',-1],['p',1]])$m(id+t).oncli
 $m('ogo').onclick=()=>{$m('org').hidden=true;newGame();applyOrg();togglePause();};$m('oback').onclick=()=>{$m('org').hidden=true;$m('pm').hidden=false;};
 $m('ctouch').onclick=()=>startGame('touch');$m('ckb').onclick=()=>startGame('kb');$m('bmenu').onclick=toMenu;
 $m('tpause').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();togglePause();},{passive:false});
-// ---------- turf kicked up by cleats: one fixed pool of points (a single draw call); bits fly, land, and vanish after ~3 s ----------
-const TN=700,tPos=new Float32Array(TN*3).fill(-50),tCol=new Float32Array(TN*3),tVel=new Float32Array(TN*3),tAge=new Float32Array(TN).fill(9);let tI=0;
-const tGeo=new THREE.BufferGeometry();tGeo.setAttribute('position',new THREE.BufferAttribute(tPos,3));tGeo.setAttribute('color',new THREE.BufferAttribute(tCol,3));
-const turf=new THREE.Points(tGeo,new THREE.PointsMaterial({size:.1,vertexColors:true}));turf.frustumCulled=false;scene.add(turf);
-const TC=[[.31,.54,.17],[.24,.43,.13],[.42,.64,.23],[.42,.29,.17],[.35,.24,.13]];   // grass greens, then dirt browns
-function kick(x,z,n,bx,bz,pw,dirt){for(let k=0;k<n;k++){const i=tI,j=i*3;tI=(tI+1)%TN;tAge[i]=0;   // bx,bz: the way the foot pushes; turf flies back off it
- tPos[j]=x+(Math.random()-.5)*.15;tPos[j+1]=.03;tPos[j+2]=z+(Math.random()-.5)*.15;
- tVel[j]=-bx*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;tVel[j+1]=pw*(.5+Math.random()*.8);tVel[j+2]=-bz*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;
- const c=TC[Math.random()<dirt?3+(Math.random()*2|0):Math.random()*3|0];tCol[j]=c[0];tCol[j+1]=c[1];tCol[j+2]=c[2];}}
-function turfTick(dt,rdt){for(let i=0;i<TN;i++){if(tAge[i]>3)continue;const j=i*3;tAge[i]+=rdt;if(tAge[i]>3){tPos[j+1]=-50;continue;}   // gone after 3 s
- if(tPos[j+1]>.012){tVel[j+1]-=9.8*dt;tPos[j]+=tVel[j]*dt;tPos[j+1]+=tVel[j+1]*dt;tPos[j+2]+=tVel[j+2]*dt;if(tPos[j+1]<.012)tPos[j+1]=.012;}}   // fly, then lie on the grass
- tGeo.attributes.position.needsUpdate=true;tGeo.attributes.color.needsUpdate=true;}
+// ---------- turf kicked up by cleats: real-looking bits - thin tapered, slightly curled grass blades and lumpy dirt crumbs -
+// two instanced meshes (two draw calls total); bits tumble through the air, land, and vanish after ~3 s ----------
+const blade=new THREE.BufferGeometry();
+{const w=.009,L=.075,P=[];const S=[[0,0],[.35,.006],[.7,.016],[1,.03]];   // a strip that narrows to a point and curls back as it goes
+ for(let k=0;k<3;k++){const[a,za]=S[k],[b,zb]=S[k+1],wa=w*(1-a),wb=w*(1-b);P.push(-wa,a*L,za,wa,a*L,za,wb,b*L,zb, -wa,a*L,za,wb,b*L,zb,-wb,b*L,zb);}
+ blade.setAttribute('position',new THREE.Float32BufferAttribute(P,3));blade.computeVertexNormals();}
+const crumb=new THREE.IcosahedronGeometry(.016,0);
+function tPool(geo,n,mat){const m=new THREE.InstancedMesh(geo,mat,n);m.frustumCulled=false;m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);const o=new THREE.Object3D();o.scale.set(0,0,0);o.updateMatrix();
+ for(let i=0;i<n;i++){m.setMatrixAt(i,o.matrix);m.setColorAt(i,new THREE.Color(1,1,1));}scene.add(m);
+ return{m,n,i:0,p:new Float32Array(n*3),v:new Float32Array(n*3),r:new Float32Array(n*3),w:new Float32Array(n*3),s:new Float32Array(n),age:new Float32Array(n).fill(9)};}
+const GR=tPool(blade,560,new THREE.MeshLambertMaterial({side:THREE.DoubleSide})),DR=tPool(crumb,240,new THREE.MeshLambertMaterial({flatShading:true}));
+const GC=[0x4f8a2b,0x3d6e22,0x6aa33a,0x5c9632,0x2f5a1a],DC=[0x6b4a2b,0x5a3c22,0x7a5835,0x4a3019],_c=new THREE.Color(),_o=new THREE.Object3D();
+function kick(x,z,n,bx,bz,pw,dirt){for(let k=0;k<n;k++){const d=Math.random()<dirt,P=d?DR:GR,i=P.i,j=i*3;P.i=(i+1)%P.n;P.age[i]=0;   // bx,bz: the way the foot pushes; turf flies back off it
+ P.p[j]=x+(Math.random()-.5)*.15;P.p[j+1]=.03;P.p[j+2]=z+(Math.random()-.5)*.15;
+ P.v[j]=-bx*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;P.v[j+1]=pw*(.5+Math.random()*.8)*(d?.8:1);P.v[j+2]=-bz*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;
+ for(let a=0;a<3;a++){P.r[j+a]=Math.random()*6.3;P.w[j+a]=(Math.random()-.5)*(d?14:26);}P.s[i]=d?.5+Math.random()*.9:.7+Math.random()*.6;   // spin; blades flutter faster
+ P.m.setColorAt(i,_c.setHex((d?DC:GC)[Math.random()*(d?4:5)|0]));P.m.instanceColor.needsUpdate=true;}}
+function turfTick(dt,rdt){for(const P of[GR,DR]){const fl=P===DR?.008:.004;for(let i=0;i<P.n;i++){if(P.age[i]>3)continue;const j=i*3;P.age[i]+=rdt;
+  if(P.age[i]>3){_o.scale.set(0,0,0);_o.updateMatrix();P.m.setMatrixAt(i,_o.matrix);continue;}   // gone after 3 s
+  if(P.p[j+1]>fl){P.v[j+1]-=9.8*dt;const dr=Math.exp(-(P===GR?2.2:.4)*dt);P.v[j]*=dr;P.v[j+2]*=dr;   // blades catch the air, crumbs don't
+   for(let a=0;a<3;a++){P.p[j+a]+=P.v[j+a]*dt;P.r[j+a]+=P.w[j+a]*dt;}if(P.p[j+1]<=fl){P.p[j+1]=fl;if(P===GR){P.r[j]=Math.PI/2;P.r[j+2]=0;}}}   // land: a blade lies flat on the turf
+  const k=Math.min(1,(3-P.age[i])*3)*P.s[i];_o.position.set(P.p[j],P.p[j+1],P.p[j+2]);_o.rotation.set(P.r[j],P.r[j+1],P.r[j+2]);_o.scale.set(k,k,k);_o.updateMatrix();P.m.setMatrixAt(i,_o.matrix);}   // shrink away over the last third of a second
+ P.m.instanceMatrix.needsUpdate=true;}}
 // per doll, per frame: sprinting strides flick up a little grass; braking hard (plants, stops) tears up grass and dirt in proportion
 function cleats(d,dt){const v=pel.velocity,sp=Math.hypot(v.x,v.z),dec=((d.psp??sp)-sp)/Math.max(dt,.001);d.psp=sp;if(!contact()||dt<=0)return;const ux=sp>.1?v.x/sp:0,uz=sp>.1?v.z/sp:0;
  for(const f of[parts.foot1,parts['foot-1']]){if(f.position.y-groundH(f.position.x,f.position.z)>.13)continue;

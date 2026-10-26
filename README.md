@@ -1,13 +1,13 @@
-# Ragdoll American Football
+# Physics American Football
 
-Starting point (formerly Physics Based Boxing): the ragdoll movement system from Ragdoll Shooters, on its own in `index.html`.
+4v4 American football with physics-driven ragdoll players, playable in the browser (keyboard & mouse or touch).
 
-It keeps the original's body parts and masses, per-joint muscle strengths, PD muscle controllers, joint limits, limp muscle tone, gait controller, foot planting, jumping, bounding, crouching and climbing. There are no guns, sounds or menus.
+- **Website:** https://dashryerson-design.github.io/Ragdoll-American-Footbal/
+- **Play:** https://dashryerson-design.github.io/Ragdoll-American-Footbal/play/
 
-## Controls
-- **WASD**: walk
-- **Shift**: run
-- **C / Ctrl**: crouch
-- **Space**: jump. While moving, hold then release to bound. Next to a waist-to-chest-high ledge, it climbs
-- **F**: go limp / get up
-- **Mouse** (click to capture): look. **Wheel**: zoom
+## Layout
+- `index.html`: landing page
+- `play/index.html`: the game (single file; three.js and cannon.js load from cdnjs)
+- `assets/`: screenshots captured from the game, used on the landing page
+
+Career saves live in the browser's localStorage for this site, so they are shared between the old root URL and `/play/`.

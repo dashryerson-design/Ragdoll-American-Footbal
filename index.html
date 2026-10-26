@@ -1154,7 +1154,17 @@ function menuOff(){if(!menuShot.on)return;menuShot.on=0;mmSpot.visible=false;ren
 function dust(){const cv=$m('mmdust'),g=cv.getContext('2d'),N=70,P=[];for(let i=0;i<N;i++)P.push([Math.random(),Math.random(),.4+Math.random()*1.6,Math.random()*6.28]);let lt=performance.now();
  const step=now=>{if($m('mm').hidden||mode)return;requestAnimationFrame(step);const dt=Math.min(.05,(now-lt)/1000);lt=now;const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}g.clearRect(0,0,w,h);
   for(const p of P){p[0]+=dt*.008*Math.sin(p[3]+now/4000);p[1]-=dt*.006*p[2];if(p[1]<-.02){p[1]=1.02;p[0]=Math.random();}const x=p[0]*w,y=p[1]*h,l=.5+.5*Math.sin(now/900+p[3]);g.fillStyle=`rgba(255,244,220,${.08+.22*l*(1-Math.abs(x/w-.5))})`;g.beginPath();g.arc(x,y,p[2],0,6.29);g.fill();}};requestAnimationFrame(step);}
-function startGame(m){menuOff();mode=m;document.body.classList.toggle('touch',m==='touch');$m('mm').hidden=true;last=performance.now();}
+// ===== touch performance profile: same resolution class, cheaper frame (no shadow pass, Lambert instead of PBR shading, shorter draw distance, no turf spray) =====
+let LOWFX=false;
+function lowMat(root){root.traverse(o=>{const m=o.material;if(!m||Array.isArray(m)||!m.isMeshStandardMaterial)return;
+ const l=new THREE.MeshLambertMaterial({color:m.color,map:m.map,transparent:m.transparent,opacity:m.opacity,side:m.side,depthWrite:m.depthWrite,emissive:m.emissive,emissiveMap:m.emissiveMap});o.userData.std=m;o.material=l;o.castShadow=o.receiveShadow=false;});}
+function highMat(root){root.traverse(o=>{if(o.userData.std){o.material.dispose();o.material=o.userData.std;delete o.userData.std;o.castShadow=true;}});}
+function perfMode(m){const low=m==='touch';if(low===LOWFX&&perfMode.done)return;perfMode.done=1;LOWFX=low;
+ renderer.setPixelRatio(Math.min(devicePixelRatio,low?1.5:2));renderer.setSize(innerWidth,innerHeight);
+ sun.castShadow=!low;renderer.shadowMap.enabled=!low;cam.far=low?240:600;cam.updateProjectionMatrix();scene.fog.near=low?80:150;scene.fog.far=low?230:470;
+ (low?lowMat:highMat)(scene);scene.traverse(o=>{if(o.material&&!Array.isArray(o.material))o.material.needsUpdate=true;});}
+{const k0=kit;kit=function(d,L,T){k0(d,L,T);if(LOWFX){for(const m of d.kitM||[])lowMat(m);for(const b of d.list||[])if(b.mesh)lowMat(b.mesh);}};}   // new kit pieces each drive get the cheap shading too
+function startGame(m){menuOff();perfMode(m);mode=m;document.body.classList.toggle('touch',m==='touch');$m('mm').hidden=true;last=performance.now();}
 function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
 function toMenu(){useClubs(null);BADJ.blue=BADJ.red=0;if(DRILL)drillEnd();if(MATCH){MATCH=null;ORG.four=false;$m('pcard').hidden=true;}paused=false;$m('pm').hidden=true;$m('org').hidden=true;mode=null;document.body.classList.remove('touch');
  for(const d of active()){use(d);held=false;thr=-1;aimOn=false;chargeT=-1;catchOn=false;reset();}use(player);   // a fresh start next time
@@ -1460,7 +1470,7 @@ function tPool(geo,n,mat){const m=new THREE.InstancedMesh(geo,mat,n);m.frustumCu
  return{m,n,i:0,p:new Float32Array(n*3),v:new Float32Array(n*3),r:new Float32Array(n*3),w:new Float32Array(n*3),s:new Float32Array(n),age:new Float32Array(n).fill(9)};}
 const GR=tPool(blade,560,new THREE.MeshLambertMaterial({side:THREE.DoubleSide})),DR=tPool(crumb,240,new THREE.MeshLambertMaterial({flatShading:true}));
 const GC=[0x4f8a2b,0x3d6e22,0x6aa33a,0x5c9632,0x2f5a1a],DC=[0x6b4a2b,0x5a3c22,0x7a5835,0x4a3019],_c=new THREE.Color(),_o=new THREE.Object3D();
-function kick(x,z,n,bx,bz,pw,dirt){for(let k=0;k<n;k++){const d=Math.random()<dirt,P=d?DR:GR,i=P.i,j=i*3;P.i=(i+1)%P.n;P.age[i]=0;   // bx,bz: the way the foot pushes; turf flies back off it
+function kick(x,z,n,bx,bz,pw,dirt){if(LOWFX)return;for(let k=0;k<n;k++){const d=Math.random()<dirt,P=d?DR:GR,i=P.i,j=i*3;P.i=(i+1)%P.n;P.age[i]=0;   // bx,bz: the way the foot pushes; turf flies back off it
  P.p[j]=x+(Math.random()-.5)*.15;P.p[j+1]=.03;P.p[j+2]=z+(Math.random()-.5)*.15;
  P.v[j]=-bx*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;P.v[j+1]=pw*(.5+Math.random()*.8)*(d?.8:1);P.v[j+2]=-bz*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;
  for(let a=0;a<3;a++){P.r[j+a]=Math.random()*6.3;P.w[j+a]=(Math.random()-.5)*(d?14:26);}P.s[i]=d?.5+Math.random()*.9:.7+Math.random()*.6;   // spin; blades flutter faster

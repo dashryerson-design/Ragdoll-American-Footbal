@@ -1156,14 +1156,21 @@ function dust(){const cv=$m('mmdust'),g=cv.getContext('2d'),N=70,P=[];for(let i=
   for(const p of P){p[0]+=dt*.008*Math.sin(p[3]+now/4000);p[1]-=dt*.006*p[2];if(p[1]<-.02){p[1]=1.02;p[0]=Math.random();}const x=p[0]*w,y=p[1]*h,l=.5+.5*Math.sin(now/900+p[3]);g.fillStyle=`rgba(255,244,220,${.08+.22*l*(1-Math.abs(x/w-.5))})`;g.beginPath();g.arc(x,y,p[2],0,6.29);g.fill();}};requestAnimationFrame(step);}
 // ===== touch performance profile: same resolution class, cheaper frame (no shadow pass, Lambert instead of PBR shading, shorter draw distance, no turf spray) =====
 let LOWFX=false;
-function lowMat(root){root.traverse(o=>{const m=o.material;if(!m||Array.isArray(m)||!m.isMeshStandardMaterial)return;
- const l=new THREE.MeshLambertMaterial({color:m.color,map:m.map,transparent:m.transparent,opacity:m.opacity,side:m.side,depthWrite:m.depthWrite,emissive:m.emissive,emissiveMap:m.emissiveMap});o.userData.std=m;o.material=l;o.castShadow=o.receiveShadow=false;});}
-function highMat(root){root.traverse(o=>{if(o.userData.std){o.material.dispose();o.material=o.userData.std;delete o.userData.std;o.castShadow=true;}});}
+const toLam=m=>m.isMeshStandardMaterial?new THREE.MeshLambertMaterial({color:m.color,map:m.map,transparent:m.transparent,opacity:m.opacity,side:m.side,depthWrite:m.depthWrite,emissive:m.emissive,emissiveMap:m.emissiveMap}):m;
+const toFlat=m=>m.isMeshBasicMaterial?m:new THREE.MeshBasicMaterial({color:m.color.clone().multiplyScalar(.82),map:m.map,transparent:m.transparent,opacity:m.opacity,side:m.side,depthWrite:m.depthWrite});
+function swapMat(o,f){const m=o.material;if(!m)return;const A=Array.isArray(m),n=A?m.map(f):f(m);if(A?n.every((x,i)=>x===m[i]):n===m)return;if(!o.userData.std)o.userData.std=m;o.material=n;o.castShadow=o.receiveShadow=false;}   // multi-material meshes (the helmet shell + its padding) included
+function lowMat(root){root.traverse(o=>swapMat(o,toLam));}
+// helmet in touch mode: unlit, colour baked slightly darker than the jersey would read: no highlight, no reflection, cheapest shader there is
+function flatMat(root){root.traverse(o=>swapMat(o,toFlat));}
+function highMat(root){root.traverse(o=>{if(o.userData.std){(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>x.dispose());o.material=o.userData.std;delete o.userData.std;o.castShadow=true;}});}
 function perfMode(m){const low=m==='touch';if(low===LOWFX&&perfMode.done)return;perfMode.done=1;LOWFX=low;
  renderer.setPixelRatio(Math.min(devicePixelRatio,low?1.5:2));renderer.setSize(innerWidth,innerHeight);
  sun.castShadow=!low;renderer.shadowMap.enabled=!low;cam.far=low?240:600;cam.updateProjectionMatrix();scene.fog.near=low?80:150;scene.fog.far=low?230:470;
- (low?lowMat:highMat)(scene);scene.traverse(o=>{if(o.material&&!Array.isArray(o.material))o.material.needsUpdate=true;});}
-{const k0=kit;kit=function(d,L,T){k0(d,L,T);if(LOWFX){for(const m of d.kitM||[])lowMat(m);for(const b of d.list||[])if(b.mesh)lowMat(b.mesh);}};}   // new kit pieces each drive get the cheap shading too
+ rimL.visible=fillL.visible=!low;   // two fewer lights in every shader
+ (low?lowMat:highMat)(scene);if(low)for(const d of[player,...pool])for(const m of d.kitM||[])if(m.userData.helm)flatMat(m);
+ scene.traverse(o=>{const t=o.material&&o.material.map;if(!t)return;if(t.an0==null)t.an0=t.anisotropy;const v=low?1:t.an0;if(t.anisotropy!==v){t.anisotropy=v;t.needsUpdate=true;}});
+scene.traverse(o=>{if(o.material&&!Array.isArray(o.material))o.material.needsUpdate=true;});}
+{const k0=kit;kit=function(d,L,T){k0(d,L,T);if(LOWFX){for(const m of d.kitM||[])m.userData.helm?flatMat(m):lowMat(m);for(const b of d.list||[])if(b.mesh)lowMat(b.mesh);}};}   // new kit pieces each drive get the cheap shading too
 function startGame(m){menuOff();perfMode(m);mode=m;document.body.classList.toggle('touch',m==='touch');$m('mm').hidden=true;last=performance.now();}
 function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
 function toMenu(){useClubs(null);BADJ.blue=BADJ.red=0;if(DRILL)drillEnd();if(MATCH){MATCH=null;ORG.four=false;$m('pcard').hidden=true;}paused=false;$m('pm').hidden=true;$m('org').hidden=true;mode=null;document.body.classList.remove('touch');
@@ -1668,7 +1675,7 @@ function kit(d,L,T){L=migLook(L);for(const m of d.kitM||[]){m.parent.remove(m);m
  d.fitK=[.95,1,1.06][L.fit];
  // helmet: three different shells, four facemasks, visor, chinstrap, finish, stripes
  const fin=[{r:.25,m:.2},{r:.85,m:0},{r:.08,m:.85}][L.hfin],H='head';
- {const hg=helmet(d,L,hel,fin);P.head.mesh.add(hg);d.kitM.push(hg);P.head.mesh.scale.setScalar(.92);}   // the helmet; the head cube is trimmed slightly so its corners stay inside the shell
+ {const hg=helmet(d,L,hel,fin);hg.userData.helm=1;P.head.mesh.add(hg);d.kitM.push(hg);P.head.mesh.scale.setScalar(.92);}   // the helmet; the head cube is trimmed slightly so its corners stay inside the shell
  if(L.eye)for(const x of[-.045,.045])kmesh(d,H,KB(.035,.012,.004),0x0a0a0a,x,.005,.111);
  // shoulder pads, compression, wristbands
  if(L.pads)for(const x of[-.19,.19])kmesh(d,'chest',KB(L.pads===2?.16:.12,L.pads===2?.07:.05,L.pads===2?.26:.23),pri,x,.14,0);

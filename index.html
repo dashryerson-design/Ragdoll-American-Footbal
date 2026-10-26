@@ -232,6 +232,11 @@
 @media (max-aspect-ratio:4/5){#mm.ov{justify-content:flex-end;padding-bottom:8vh;gap:3vh}#logo{margin-top:0}#pick{flex-direction:column;width:min(88vw,380px)}#mm .ch{min-width:0;width:100%}}
 @media (max-height:480px){#mm.ov{gap:2vh}#logo{width:min(70vw,90vh)}#mm .ch{min-height:60px;min-width:min(28vw,250px);padding:8px 18px!important}#mm .ch b{font-size:22px}#mm .ch svg{width:32px;height:32px}}
 @media (prefers-reduced-motion:reduce){#mm *,#mm::before{animation-duration:.01s!important;animation-iteration-count:1!important}}
+
+/* input prompts: one chip style; keyboard = key caps, touch = round icons (big enough to tap) */
+.kp{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:4px;background:#f2f4f6;color:#111;font:800 11px/1 system-ui,sans-serif;font-style:normal;letter-spacing:.04em;margin-right:7px;vertical-align:middle;box-shadow:inset 0 -2px 0 #0003}
+body[data-input=touch] .hints [data-act=confirm]{display:none}body[data-input=touch] .kp{min-width:26px;height:26px;padding:0;border-radius:50%;font-size:15px}body[data-input=touch] .hints button{min-height:44px;padding:0 6px!important}
+.hints .kp{margin-right:6px}button .kp{margin-right:8px}
 </style></head><body>
 <div id="mm" class="ov"><div class="mmfx" aria-hidden="true"><i class="beam b1"></i><i class="beam b2"></i><i class="beam b3"></i><i class="haze h1"></i><i class="haze h2"></i><canvas id="mmdust"></canvas><i class="vig"></i></div>
 <div id="logo" role="img" aria-label="Physics American Football"><svg viewBox="0 0 640 300" class="lg">
@@ -259,7 +264,7 @@
 <div class="htabs" id="htabs"></div>
 <div class="hbody"><div class="hmenu"><button class="mrow pri2" id="ccomb">Pre-Draft Combine</button><button class="mrow pri2" id="cplay">Play Next Match</button><button class="mrow" id="csim">Simulate Next Game</button><button class="mrow" id="cupg">Upgrade Player</button><button class="mrow" id="cedit">Edit Player</button><button class="mrow" id="cteams">League Clubs</button><button class="mrow" id="cnew">New Career</button><button class="mrow" id="cback">Back</button><div id="cempty" class="note"></div></div>
 <div class="hmain" id="hmain"></div><div class="mright"><div class="pvbox" id="pvh"></div></div></div>
-<div class="hints"><span><i>✕</i> Select</span><span><i>◯</i> Back</span><span><i>⟲</i> Drag to rotate</span></div></div>
+<div class="hints"><button data-act="confirm"><i class="kp" data-p="confirm"></i> Select</button><button data-act="back"><i class="kp" data-p="back"></i> Back</button><span><i class="kp" data-p="rotate"></i> Rotate player</span></div></div>
 <div id="cre" class="ov scr mad cb" hidden><div class="vt">//CAREER · CREATE</div>
 <div class="cbtop"><h1>Create Your Player</h1><div id="cbprog"></div></div>
 <div class="cbgrid"><div class="cbl" id="cbl"></div><div class="cbr"><div class="pvbox" id="pvc"></div><div class="cams" id="cams"><button data-c="front">Front</button><button data-c="side">Side</button><button data-c="back">Back</button><button data-c="head">Helmet</button><button data-c="spin">⟲ Spin</button></div><div class="pvi" id="pvi"></div></div></div>
@@ -268,7 +273,7 @@
 <div class="mleft"><h1>Career Match</h1><div class="sub" id="pvs"></div><div class="sub">4 v 4 · 6:00 game clock</div><div class="note" style="color:#ddd;font:500 16px/1.4 'Barlow Condensed'">You start on offence at your own 25. When the ball changes hands both teams swap sides, so you play offence and defence. Most points when the 6-minute clock runs out wins.</div>
 <div class="mlist" style="margin-top:16px"><button class="mrow pri2" id="pgo">Kick Off</button><button class="mrow" id="pback">Back</button></div></div>
 <div class="mmid" id="pline"></div><div class="mright"><div class="pvbox" id="pvp"></div><div class="pvi" id="pvip"></div></div></div>
-<div class="hints"><span><i>✕</i> Select</span><span><i>◯</i> Back</span></div></div>
+<div class="hints"><button data-act="confirm"><i class="kp" data-p="confirm"></i> Select</button><button data-act="back"><i class="kp" data-p="back"></i> Back</button></div></div>
 <div id="fin" class="ov scr mad" hidden><div class="vt">//CAREER · POST GAME</div><div class="fwrap" id="fwrap">
 <div class="fhead"><div><div class="res" id="fres"></div><div class="fsc"><span class="ftb">BLU</span><b id="fb"></b><span class="fx">FINAL</span><b id="fr"></b><span class="ftr">RED</span></div></div><div class="gbox"><div id="fgr" class="grade"></div><small>GRADE</small></div></div>
 <div class="fgrid"><div class="fpn"><h4>Player Stats</h4><div id="fst"></div></div><div class="fpn"><h4>Objectives</h4><div id="fobj"></div><h4 style="margin-top:14px">XP Breakdown</h4><div id="fxp"></div></div>
@@ -278,13 +283,13 @@
 <div id="ulist"></div><div class="umid"><h2 id="utitle"></h2><div id="udesc" class="note"></div><div id="utrack"></div>
 <div class="ubox"><div class="ul"><h4>Details</h4><div id="uinfo"></div></div><div class="urt"><h4>Overall Rating Impact</h4><div id="uovr"></div></div></div>
 <div class="ufoot"><button id="udev">Develop</button><span id="ucost"></span></div></div><div class="mright"><div class="pvbox" id="pvu"></div></div></div>
-<div class="hints"><button id="ureset"><i>Y</i> Reset Upgrades</button><button id="uback"><i>◯</i> Back</button></div></div>
+<div class="hints"><button id="ureset"><i class="kp" data-p="reset"></i> Reset Upgrades</button><button id="uback"><i class="kp" data-p="back"></i> Back</button></div></div>
 <div id="teams" class="ov scr mad" hidden><div class="vt">//CAREER · LEAGUE</div><div style="width:min(100%,1240px)"><h1 style="margin:0 0 4px;font:500 34px 'Barlow Condensed'">The League</h1><div class="sub" style="font:600 14px 'Barlow Condensed';letter-spacing:.2em;color:#ffffff88;margin-bottom:14px">16 CLUBS · PICK THE TEAM YOU PLAY FOR</div><div id="tgrid"></div></div>
-<div class="hints"><button id="tback"><i>◯</i> Back</button></div></div>
+<div class="hints"><button id="tback"><i class="kp" data-p="back"></i> Back</button></div></div>
 <div id="comb" class="ov scr mad" hidden><div class="vt">//CAREER · COMBINE</div><div class="mgrid">
 <div class="mleft"><h1>Pre-Draft Combine</h1><div class="sub">One attempt per drill · results go to every club</div><div id="clist"></div></div>
 <div class="mmid" id="ceval"></div><div class="mright"><div class="pvbox" id="pvk"></div></div></div>
-<div class="hints"><button id="kback"><i>◯</i> Back</button></div></div>
+<div class="hints"><button id="kback"><i class="kp" data-p="back"></i> Back</button></div></div>
 <div id="dhud" hidden><small id="dkind"></small><b id="dname"></b><span id="dinst"></span><div id="dstat"></div></div>
 <div id="dft" class="ov" hidden><div class="beams"></div><div class="board"><div class="bh"><span>THE DRAFT</span><b id="dround"></b></div>
 <div class="brow"><div class="otc" id="dotc"></div><div class="prev" id="dprev"></div></div></div>
@@ -292,7 +297,7 @@
 <button id="dskip">Skip to my pick ›</button></div>
 <div id="slots" class="ov scr mad" hidden><div class="vt">//CAREER · PLAYERS</div><div class="cbtop"><h1>Select Player</h1><div class="sub" style="font:600 14px 'Barlow Condensed';letter-spacing:.2em;color:#aaa">10 SLOTS · EACH WITH ITS OWN CAREER</div></div>
 <div class="cbgrid"><div id="sgrid"></div><div class="cbr"><div class="pvbox" id="pvsl"></div><div class="pvi" id="spvi"></div></div></div>
-<div class="hints"><button id="sback"><i>◯</i> Back</button></div></div>
+<div class="hints"><button id="sback"><i class="kp" data-p="back"></i> Back</button></div></div>
 <canvas id="pv3"></canvas>
 <div id="stam"><i></i></div>
 <div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="borg">GAME ORGANISER</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
@@ -1690,7 +1695,7 @@ function bracket(p,S){const P=S.po;return`<div class="brk">${[0,1,2,3].map(r=>`<
 {$m('htabs').onclick=e=>{const b=e.target.closest('button');if(b){HTAB=b.dataset.t;hubUI();}};$m('csim').onclick=simMine;}
 function carUI_old(){}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-{const mmGo=(m,b)=>{if(mmGo.t)return;b.classList.add('prs');$m('mm').classList.add('out');mmGo.t=setTimeout(()=>{mmGo.t=0;b.classList.remove('prs');$m('mm').classList.remove('out');pendMode=m;show('mode');},380);};   // press, fade to black, then the existing flow
+{const mmGo=(m,b)=>{if(mmGo.t)return;b.classList.add('prs');$m('mm').classList.add('out');mmGo.t=setTimeout(()=>{mmGo.t=0;b.classList.remove('prs');$m('mm').classList.remove('out');pendMode=m;setInput(m);show('mode');},380);};   // press, fade to black, then the existing flow
  $m('ctouch').onclick=e=>mmGo('touch',e.currentTarget);$m('ckb').onclick=e=>mmGo('kb',e.currentTarget);
  addEventListener('keydown',e=>{if($m('mm').hidden||mode)return;const B=[$m('ctouch'),$m('ckb')],i=B.indexOf(document.activeElement);if(/Arrow(Left|Right|Up|Down)/.test(e.key)){e.preventDefault();B[(i+1)%2].focus();}});
  $m('mquick').onclick=()=>{useClubs(null);show(null);applyProf(null);startGame(pendMode);};$m('mcar').onclick=slotsUI;$m('mback').onclick=()=>show('mm');
@@ -1886,18 +1891,34 @@ function useClubs(a,b){if(a==null){TEAM.blue=[...TEAM0.blue];TEAM.red=[...TEAM0.
 const jerseySVG=(c,n)=>`<svg viewBox="0 0 60 56" class="jsv"><path d="M18 4l-14 8 5 13 7-3v30h28V22l7 3 5-13-14-8c-2 5-6 7-12 7S20 9 18 4z" fill="${hx(c.jer)}" stroke="${hx(c.acc)}" stroke-width="2.5"/><text x="30" y="40" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif" font-weight="800" font-size="17" fill="${hx(c.acc)}">${n}</text></svg>`;
 function teamsUI(){const my=PROF?PROF.team??0:0;$m('tgrid').innerHTML=CLUBS.map((_,i)=>{const c=club(i);return`<button class="tcard${i===my?' on':''}" data-i="${i}" style="--j:${hx(c.jer)};--a:${hx(c.acc)}"><div class="tbadge">${c.ic}</div><div class="tinfo"><small>${c.city.toUpperCase()} · EST. ${c.yr}</small><b>${c.name}</b><span>${c.id}</span><em>${c.st} · ${c.ab}${PROF?` · TEAM OVR ${(lgEnsure(PROF),tStr(PROF,i))} · ${tTier(PROF,i)}`:''}</em></div>${jerseySVG(c,i===my&&PROF?PROF.num:(i*7+11)%99)}</button>`;}).join('');}
 {$m('tgrid').onclick=e=>{const b=e.target.closest('.tcard');if(!b||!PROF||PROF.draft)return;PROF.team=+b.dataset.i;saveProf(PROF);teamsUI();};$m('tback').onclick=()=>{show('car');carUI();};$m('cteams').onclick=()=>{show('teams');teamsUI();};}
+// ================= INPUT PROMPTS: one table for what every prompt shows, per control scheme; the same table drives ESC / ENTER / R in menus =================
+// keyboard shows the real key; touch shows an icon on a tappable control. (No controller support exists, so no controller glyphs anywhere.)
+const PROMPT={back:{kb:'ESC',t:'←'},close:{kb:'ESC',t:'✕'},confirm:{kb:'ENTER',t:'✓'},reset:{kb:'R',t:'↺'},rotate:{kb:'DRAG',t:'⟲'}};
+// what each prompt triggers, per screen: the first visible id wins (ESC = back / close, ENTER = confirm, R = reset)
+const ACT={back:['bres','oback','mback','cprev','pback','uback','tback','kback','sback','fhub','cback'],confirm:['ogo','pgo','cnext','dskip','dgo','fagain'],reset:['ureset']};
+const ACTP={bres:'close',oback:'back'};
+let INPUT=(()=>{try{return localStorage.getItem('rafInput')||'kb';}catch(e){return'kb';}})();
+const vis=el=>el&&!el.closest('[hidden]')&&el.offsetParent!==null&&!el.disabled;
+function setInput(m){INPUT=m==='touch'?'touch':'kb';try{localStorage.setItem('rafInput',INPUT);}catch(e){}document.body.dataset.input=INPUT;prompts();}
+function prompts(root=document){const k=INPUT==='touch'?'t':'kb';for(const el of root.querySelectorAll('.kp[data-p]')){const v=PROMPT[el.dataset.p][k];if(el.textContent!==v)el.textContent=v;}}   // only writes on change, so the observer can't loop
+function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const f=document.activeElement;if(f&&f.tagName==='BUTTON'&&vis(f)&&!f.closest('.hints')){f.click();return true;}}if(id){$m(id).click();return true;}return false;}
+{for(const a in ACT)for(const id of ACT[a]){const b=$m(id);if(b&&!b.querySelector('.kp'))b.insertAdjacentHTML('afterbegin',`<i class="kp" data-p="${ACTP[id]||a}"></i>`);}   // every target carries its own prompt
+ document.addEventListener('click',e=>{const b=e.target.closest('.hints [data-act]');if(b)doAct(b.dataset.act);});
+ addEventListener('keydown',e=>{if(e.repeat||(mode&&!paused&&$m('org').hidden))return;const t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT'){if(e.key==='Escape')e.target.blur();return;}
+  const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
+ new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= COMBINE: five drills on the real engine (your ragdoll, ball, catching, tackling) =================
 const DR_Z=-20*YD,drillG=new THREE.Group();scene.add(drillG);let DRILL=null;
-const DRILLS=[{id:'dash',kind:'SPEED',name:'40-Yard Dash',inst:'Sprint (Shift + W) through the far cones. The clock starts when you move.'},
+const DRILLS=[{id:'dash',kind:'SPEED',name:'40-Yard Dash',inst:'Sprint (Shift + W) through the far cones. The clock starts when you move.',tinst:'Push the stick forward and hold SPRINT through the far cones. The clock starts when you move.'},
  {id:'shut',kind:'AGILITY',name:'5-10-5 Shuttle',inst:'Touch the RIGHT cone, then the LEFT cone, then cut back through the middle.'},
- {id:'pass',kind:'PASSING',name:'Target Passing',inst:'Aim (right click / AIM) and throw at the lit target. 5 throws.'},
- {id:'jugs',kind:'CATCHING',name:'Jugs Machine',inst:'Hold CATCH (left click) and get under each ball. 6 balls.'},
- {id:'tack',kind:'DEFENCE',name:'Open-Field Tackle',inst:'Close on the ball carrier: Q to tackle, X for a big hit. 3 reps.'}];
+ {id:'pass',kind:'PASSING',name:'Target Passing',inst:'Aim (right click) and throw at the lit target. 5 throws.',tinst:'Hold AIM and throw at the lit target. 5 throws.'},
+ {id:'jugs',kind:'CATCHING',name:'Jugs Machine',inst:'Hold CATCH (left click) and get under each ball. 6 balls.',tinst:'Hold the CATCH button and get under each ball. 6 balls.'},
+ {id:'tack',kind:'DEFENCE',name:'Open-Field Tackle',inst:'Close on the ball carrier: Q to tackle, X for a big hit. 3 reps.',tinst:'Close on the ball carrier: DIVE to tackle, HIT for a big hit. 3 reps.'}];
 const dMk=(g,c,x,y,z)=>{const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.9}));m.position.set(x,y,z);drillG.add(m);return m;};
 const dCone=(x,z,c=0xff7a1a)=>dMk(new THREE.ConeGeometry(.18,.45,12),c,x,.22,z),dRing=(x,z,r,c)=>{const m=dMk(new THREE.RingGeometry(r*.8,r,40),c,x,.03,z);m.rotation.x=-Math.PI/2;return m;};
 const dstat=t=>$m('dstat').innerHTML=t;
 function drillStart(i){const d=DRILLS[i];show(null);if(!mode)startGame(pendMode);applyProf(PROF);ORG.free=true;MATCH=null;applyOrg();
- DRILL={i,d,t:0,ph:'set',rep:0,pts:[],T0:0,w:0};$m('dhud').hidden=false;$m('dkind').textContent=d.kind+' DRILL';$m('dname').textContent=d.name;$m('dinst').textContent=d.inst;
+ DRILL={i,d,t:0,ph:'set',rep:0,pts:[],T0:0,w:0};$m('dhud').hidden=false;$m('dkind').textContent=d.kind+' DRILL';$m('dname').textContent=d.name;$m('dinst').textContent=(mode==='touch'&&d.tinst)||d.inst;
  placeAt(player,0,DR_Z);use(player);camYaw=Math.PI;
  if(d.id==='dash'){for(const x of[-2.5,2.5]){dCone(x,DR_Z);dCone(x,DR_Z+40*YD,0xffd23f);}dstat('0.00 s');}
  if(d.id==='shut'){dCone(-5*YD,DR_Z,0xff3b2a);dCone(5*YD,DR_Z,0x3b6bff);dCone(0,DR_Z+1.5,0xffffff);DRILL.cn=[-5*YD,5*YD];dstat('0.00 s');}   // right cone is -x (screen right when facing downfield)
@@ -1932,7 +1953,7 @@ const avg16=a=>AK.reduce((t,k)=>t+a[k],0)/AK.length,combAvg=C=>DRILLS.reduce((t,
 function stockOf(p){const sp=ovr(p.att,p.style),tw=avg16(p.att),dr=combAvg(p.combine);return{sp,tw:Math.round(tw),dr:Math.round(dr),v:Math.round(.4*sp+.25*tw+.35*(50+dr*.45))};}
 const RCUT=[78,73,68,63],roundOf=v=>{for(let i=0;i<4;i++)if(v>=RCUT[i])return i+1;return 5;};
 function combUI(){const p=PROF,C=p.combine||{},st=stockOf(p),all=DRILLS.every(d=>C[d.id]);
- $m('clist').innerHTML=DRILLS.map((d,i)=>`<div class="dc${C[d.id]?' done':''}"><small>${d.kind}</small><b>${d.name}</b><span>${d.inst}</span>${C[d.id]?`<div class="sc">${C[d.id].s}<em>${C[d.id].l}</em></div>`:`<button data-i="${i}">Start</button>`}</div>`).join('');
+ $m('clist').innerHTML=DRILLS.map((d,i)=>`<div class="dc${C[d.id]?' done':''}"><small>${d.kind}</small><b>${d.name}</b><span>${(INPUT==='touch'&&d.tinst)||d.inst}</span>${C[d.id]?`<div class="sc">${C[d.id].s}<em>${C[d.id].l}</em></div>`:`<button data-i="${i}">Start</button>`}</div>`).join('');
  const pos=STYLES[p.style][4]==='qb'?'QB':'WR / CB';
  $m('ceval').innerHTML=`<div class="ev"><h4>Draft Stock</h4><div class="big2">${st.v}</div><div class="rd">Projected: Round ${roundOf(st.v)}</div>
   <div class="rw"><span>Specialist grade (${tcase(STYLES[p.style][0])})</span><b>${st.sp}</b></div><div class="rw"><span>Two-way grade (all ratings)</span><b>${st.tw}</b></div><div class="rw"><span>Combine average</span><b>${st.dr}</b></div><div class="rw"><span>Position</span><b>${pos}</b></div>

@@ -296,6 +296,30 @@ body{background:var(--bg);color:var(--tx)}
 #cre .ms .mrow2 button{width:28px;height:28px;min-width:0;padding:0!important;display:grid;place-items:center}
 @media (max-width:1200px){#cre .cbl.s1{grid-template-columns:1fr}}
 #cre .pad{max-width:440px;margin-left:auto;margin-right:auto}
+
+/* ===== player HUD block: stamina + player card + level / XP + XP feed, one column; placed by phudPlace() ===== */
+#phud{position:fixed;z-index:3;left:calc(14px + env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none;width:max-content;max-width:min(300px,46vw)}
+#phud #stam,#phud #pcard{position:static!important;margin:0}#phud #pcard{max-width:100%}#phud #pcard .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:180px}
+#xphud{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;width:230px;max-width:100%;box-sizing:border-box;padding:5px 10px 6px 6px;background:linear-gradient(90deg,#141b25e6,#0b0f15b3);border-left:3px solid var(--ac);border-radius:var(--rad);font-family:var(--fd);color:var(--tx)}
+#xphud[hidden],#xpq[hidden]{display:none}
+#xphud .lv{display:grid;place-items:center;min-width:38px;height:34px;padding:0 4px;border:1px solid #62bfff88;border-radius:3px;background:linear-gradient(180deg,#123a60,#0a1a2c);line-height:1}
+#xphud .lv small{font:800 9px var(--fd);letter-spacing:.2em;color:var(--ac2)}#xphud .lv b{font:900 19px var(--fd);font-variant-numeric:tabular-nums}
+#xphud .bar{position:relative;height:7px;background:#ffffff14;border-radius:4px;overflow:hidden}
+#xphud .bar i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,#0b6fd0,var(--ac2));box-shadow:0 0 8px #62bfff88;border-radius:4px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+#xphud .bar i.snap{transition:none}
+#xphud .num{margin-top:4px;font:700 11px var(--fd);letter-spacing:.08em;color:var(--tx2);font-variant-numeric:tabular-nums;white-space:nowrap}#xphud .num em{font-style:normal;color:var(--ac2)}
+#xphud.lup{animation:xLup .9s ease}#xphud.lup .lv{animation:xLv .9s ease}@keyframes xLup{30%{box-shadow:0 0 0 2px var(--ac2),0 0 22px #62bfffaa}}@keyframes xLv{30%{transform:scale(1.18);background:var(--ac)}}
+#xpq{display:flex;flex-direction:column;gap:4px;min-height:0}
+.xpn{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 8px;background:#0b0f15d9;border-left:2px solid var(--ac);border-radius:2px;font:800 12px var(--fd);letter-spacing:.12em;color:var(--tx);white-space:nowrap;animation:xIn .28s cubic-bezier(.2,.8,.2,1) both}
+.xpn b{color:var(--ac2);font-size:14px;letter-spacing:.04em}.xpn b.pop{animation:xPop .45s ease}.xpn.big{border-left-color:#ffd23f}.xpn.big b{color:#ffd23f}.xpn.out{animation:xOut .35s ease forwards}
+.xpn.lvl{background:linear-gradient(90deg,#0e3a66,#0b0f15d9);border-left-color:var(--ac2)}
+@keyframes xIn{from{opacity:0;transform:translateY(8px)}}@keyframes xOut{to{opacity:0;transform:translateY(-6px)}}@keyframes xPop{40%{transform:scale(1.3)}}
+@media (prefers-reduced-motion:reduce){#xphud .bar i{transition:none}.xpn,#xphud.lup,#xphud.lup .lv{animation:none}}
+
+/* touch: two columns so the block stays short (phones in landscape have little height above the stick): card | level+XP, notes under the XP bar */
+body.touch #phud{display:grid;grid-template-columns:auto 220px;column-gap:8px;row-gap:6px;max-width:none;align-items:start}
+body.touch #phud #stam{grid-column:1/-1}body.touch #phud #pcard{grid-column:1;grid-row:2}body.touch #xphud{grid-column:2;grid-row:2;width:220px}body.touch #xpq{grid-column:2;grid-row:3}
+body.touch #phud #pcard .n{max-width:120px}
 </style></head><body>
 <div id="mm" class="ov"><div class="mmfx" aria-hidden="true"><i class="beam b1"></i><i class="beam b2"></i><i class="beam b3"></i><i class="haze h1"></i><i class="haze h2"></i><canvas id="mmdust"></canvas><i class="vig"></i></div>
 <div id="logo" role="img" aria-label="Physics American Football"><svg viewBox="0 0 640 300" class="lg">
@@ -314,7 +338,7 @@ body{background:var(--bg);color:var(--tx)}
 <button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="currentColor" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#5fd4ff" stroke-width="5"/><path d="M103 18v14" stroke="#5fd4ff" stroke-width="5"/></svg><span><b>KEYBOARD</b><small>Keyboard &amp; mouse</small></span></button></div></div>
 <div class="tb" id="brst" title="Reset the QB with the ball (R)">&#x21bb;</div>
 <div id="cboost" hidden style="position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3;font:800 13px system-ui,sans-serif;letter-spacing:.12em;color:#111;background:#ffd23f;border-radius:999px;padding:6px 14px;pointer-events:none">CATCH BOOST +20%</div>
-<div id="pbn" style="position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:3;font:900 min(10vw,64px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;text-shadow:0 3px 0 #000,0 0 22px #000;pointer-events:none;opacity:0;white-space:nowrap"></div><div id="score" class="wrb"></div><div id="pcard" hidden></div>
+<div id="pbn" style="position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:3;font:900 min(10vw,64px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;text-shadow:0 3px 0 #000,0 0 22px #000;pointer-events:none;opacity:0;white-space:nowrap"></div><div id="score" class="wrb"></div><div id="pcard" hidden></div><div id="phud"></div><div id="xphud" hidden><div class="lv"><small>LVL</small><b id="xlv">1</b></div><div><div class="bar"><i id="xbar"></i></div><div class="num" id="xnum"></div></div></div><div id="xpq" hidden></div>
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
 <div id="mode" class="ov scr" hidden><div class="crumb">// SELECT MODE</div><div class="mpick"><button class="mc" id="mquick"><b>QUICK PLAY</b><span>Jump straight onto the field. Set up teams and plays from the pause menu.</span></button><button class="mc acc" id="mcar"><b>CAREER MODE</b><span>Create your player, choose a playstyle and take them into real drives.</span></button></div><button class="ghost" id="mback">BACK</button></div>
 <div id="car" class="ov scr mad hub" hidden><div class="vt">//CAREER</div>
@@ -1174,9 +1198,9 @@ function perfMode(m){const low=m==='touch';if(low===LOWFX&&perfMode.done)return;
  scene.traverse(o=>{const t=o.material&&o.material.map;if(!t)return;if(t.an0==null)t.an0=t.anisotropy;const v=low?1:t.an0;if(t.anisotropy!==v){t.anisotropy=v;t.needsUpdate=true;}});
 scene.traverse(o=>{if(o.material&&!Array.isArray(o.material))o.material.needsUpdate=true;});}
 {const k0=kit;kit=function(d,L,T){k0(d,L,T);if(LOWFX){for(const m of d.kitM||[])m.userData.helm?flatMat(m):lowMat(m);for(const b of d.list||[])if(b.mesh)lowMat(b.mesh);}};}   // new kit pieces each drive get the cheap shading too
-function startGame(m){menuOff();perfMode(m);mode=m;document.body.classList.toggle('touch',m==='touch');$m('mm').hidden=true;last=performance.now();}
+function startGame(m){menuOff();perfMode(m);mode=m;document.body.classList.toggle('touch',m==='touch');setTimeout(phudPlace,0);$m('mm').hidden=true;last=performance.now();}
 function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
-function toMenu(){useClubs(null);BADJ.blue=BADJ.red=0;if(DRILL)drillEnd();if(MATCH){MATCH=null;ORG.four=false;$m('pcard').hidden=true;}paused=false;$m('pm').hidden=true;$m('org').hidden=true;mode=null;document.body.classList.remove('touch');
+function toMenu(){useClubs(null);BADJ.blue=BADJ.red=0;if(DRILL)drillEnd();if(MATCH){MATCH=null;ORG.four=false;$m('pcard').hidden=true;xpHudStop();}paused=false;$m('pm').hidden=true;$m('org').hidden=true;mode=null;document.body.classList.remove('touch');
  for(const d of active()){use(d);held=false;thr=-1;aimOn=false;chargeT=-1;catchOn=false;reset();}use(player);   // a fresh start next time
  looseBall();resetPlay();$m('mm').hidden=false;}
 // ---------- dolls: the player and the QB run the exact same ragdoll + controller; each doll's state is swapped in with use(d) ----------
@@ -1297,7 +1321,37 @@ const oRings=[0,1,2,3,4].map(()=>{const m=new THREE.Mesh(new THREE.RingGeometry(
 function readOpen(){const on=playOn&&player.cur.role==='qb'&&player.cur.side==='o'&&!RET&&playState==='live'&&H(player),now=performance.now();
  const W=on?roster.filter(d=>d.cur.role==='wr'):[];oRings.forEach((m,i)=>{m.visible=!!W[i];if(W[i])m.position.set(W[i].pel.position.x,.03,W[i].pel.position.z);});
  if(on&&now>(readOpen.t||0)){readOpen.t=now+1000*A.read(E(player,'awr'));W.forEach((w,i)=>{let sep=99;for(const d of roster)if(d.cur.side==='d')sep=Math.min(sep,d.pel.position.distanceTo(w.pel.position));oRings[i].material.color.setHex(sep>3?0x3ee07a:sep>1.6?0xffd23f:0xff5a4a);});}}   // green open · yellow tight · red covered (stale between refreshes)
-function markTick(){readOpen();const on=playOn&&mode;youRing.visible=on;carMark.visible=false;if(!on)return;const P=player.pel.position;youRing.position.set(P.x,.025,P.z);youRing.material.color.setHex(TEAM[player.cur.team||ORG.you][0]);
+
+// ================= LIVE XP HUD: shows, as they happen, the exact per-stat XP the end-of-match tally (xpFor) will credit; the bar previews PROF.lxp + that, on the real XPN curve =================
+// nothing is written to the save until endMatch() commits once per match id (so no double credit, and an abandoned match still gives nothing, as before)
+const XPL={comp:'COMPLETED PASS',pyd:'PASSING YARDS',ptd:'PASSING TD',rec:'RECEPTION',recy:'RECEIVING YARDS',rectd:'RECEIVING TD',rush:'RUSHING YARDS',rtd:'RUSHING TD',tak:'TACKLE',stop:'DEFENSIVE STOP',pd:'PASS DEFENDED',int:'INTERCEPTION',dtd:'DEFENSIVE TD'},XPBIG=['ptd','rectd','rtd','int','dtd'];
+const XH={on:false};
+const statXP=S=>{let t=0;const per={};for(const[k,v]of XPV){per[k]=Math.min(300,Math.round(Math.max(0,S[k])*v));t+=per[k];}return{t:Math.min(1200,t),per};};   // same caps as xpFor
+function xpLevelOf(lvl,lxp,add){lxp+=add;while(lxp>=XPN(lvl)&&lvl<99){lxp-=XPN(lvl);lvl++;}return{lvl,lxp};}   // same rule as addXP
+function xpHudStart(){const p=PROF;XH.on=true;XH.last={...MATCH.st};XH.shown=0;XH.lv=p.lvl;$m('xphud').hidden=false;$m('xpq').hidden=false;$m('xpq').innerHTML='';xpDraw(true);phudPlace();}
+function xpHudStop(){XH.on=false;$m('xphud').hidden=true;$m('xpq').hidden=true;$m('xpq').innerHTML='';clearTimeout(XH.t2);}
+function xpDraw(snap){const p=PROF,v=xpLevelOf(p.lvl,p.lxp,XH.shown),need=XPN(v.lvl),bar=$m('xbar');
+ const set=w=>{bar.classList.toggle('snap',!!snap);bar.style.width=w+'%';};
+ if(v.lvl>XH.lv&&!snap){set(100);clearTimeout(XH.t2);XH.t2=setTimeout(()=>{$m('xlv').textContent=v.lvl;const h=$m('xphud');h.classList.remove('lup');void h.offsetWidth;h.classList.add('lup');bar.classList.add('snap');bar.style.width='0%';void bar.offsetWidth;bar.classList.remove('snap');bar.style.width=(v.lxp/need*100)+'%';},620);   // fill, level up, carry the excess
+  for(let L=XH.lv+1;L<=v.lvl;L++)xpNote('LEVEL UP! LEVEL '+L,null,'lvl');XH.lv=v.lvl;}
+ else{$m('xlv').textContent=v.lvl;set(v.lxp/need*100);}
+ $m('xnum').innerHTML=`<em>${v.lxp.toLocaleString()}</em> / ${need.toLocaleString()} XP${XH.shown?` · +${XH.shown} this game`:''}`;}
+function xpNote(label,x,cls){const q=$m('xpq'),top=q.lastElementChild;
+ if(x!=null&&top&&top.dataset.k===label&&!top.classList.contains('out')&&performance.now()-top.t0<1500){top.x+=x;top.querySelector('b').textContent='+'+top.x+' XP';const b=top.querySelector('b');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');clearTimeout(top.tm);top.tm=setTimeout(()=>xpOut(top),2200);return;}   // same action again quickly: one note, total climbs
+ const n=document.createElement('div');n.className='xpn'+(cls?' '+cls:'');n.dataset.k=label;n.t0=performance.now();n.x=x||0;n.innerHTML=x!=null?`<span>${label}</span><b class="pop">+${x} XP</b>`:`<span>${label}</span>`;q.appendChild(n);
+ while(q.children.length>3)q.firstElementChild.remove();while(q.children.length>1&&xpHits(q))q.firstElementChild.remove();q.style.visibility=xpHits(q)?'hidden':'';   // on a cramped screen show fewer notes; never draw over a button
+ n.tm=setTimeout(()=>xpOut(n),cls==='lvl'?3000:2200);}
+function xpHits(q){const r=q.getBoundingClientRect();if(!r.height)return false;for(const id of['joy','bjump','bdive','bhit','bjuke','baim','bsprint','bbig','bdrop','broute','bgo','tpause','brst','score']){const el=$m(id);if(!el||!el.offsetParent)continue;const b=el.getBoundingClientRect();if(r.left<b.right&&b.left<r.right&&r.top<b.bottom&&b.top<r.bottom)return true;}return false;}
+function xpOut(n){n.classList.add('out');setTimeout(()=>n.remove(),360);}
+function xpTick(){if(!XH.on||!MATCH||!PROF)return;{const n=performance.now();if(n-(XH.vt||0)>250){XH.vt=n;const q=$m('xpq');while(q.children.length>1&&xpHits(q))q.firstElementChild.remove();const hid=q.children.length&&xpHits(q)?'hidden':'';if(q.style.visibility!==hid)q.style.visibility=hid;}}   /* keep the feed off every button, even after rotation */const S=MATCH.st,L=XH.last;let ch=false;for(const k of STK)if(S[k]!==L[k]){ch=true;break;}if(!ch)return;
+ const a=statXP(L).per,b=statXP(S),tot=b.t;for(const[k]of XPV){const d=b.per[k]-a[k];if(d>0)xpNote(XPL[k],d,XPBIG.includes(k)?'big':'');}
+ XH.last={...S};if(tot!==XH.shown){XH.shown=Math.max(XH.shown,tot);xpDraw(false);}}   // never runs the bar backwards (lost yards don't un-earn the display)
+// placement: keyboard = top-left as before; touch = top-left but below any on-screen control parked in that corner (ROUTE / GO, wherever the layout editor put them)
+function phudPlace(){const h=$m('phud');if(!h)return;let top=14;if(document.body.classList.contains('touch')){const hw=h.offsetWidth||240;
+  for(const id of['broute','bgo','tpause','brst']){const el=$m(id);if(!el||!el.offsetParent)continue;const r=el.getBoundingClientRect();if(r.left<hw+24&&r.top<innerHeight*.45)top=Math.max(top,r.bottom+10);}}
+ h.style.top=`calc(${top}px + ${top===14?'env(safe-area-inset-top,0px)':'0px'})`;}
+{const h=$m('phud');h.append($m('stam'),$m('pcard'),$m('xphud'),$m('xpq'));addEventListener('resize',phudPlace);new ResizeObserver(phudPlace).observe(document.body);}
+function markTick(){xpTick();readOpen();const on=playOn&&mode;youRing.visible=on;carMark.visible=false;if(!on)return;const P=player.pel.position;youRing.position.set(P.x,.025,P.z);youRing.material.color.setHex(TEAM[player.cur.team||ORG.you][0]);
  const car=roster.find(H);if(car){const h=car.parts.head.position;carMark.visible=true;carMark.position.set(h.x,h.y+.42+Math.sin(performance.now()/160)*.05,h.z);}}
 function playTick(){if(!playOn)return;readTick();const tn=performance.now();if(MATCH){MATCH.clock=Math.max(0,MATCH.clock-Math.min(.5,(tn-(playTick.t||tn))/1000));if((MATCH.clock|0)!==playTick.c){playTick.c=MATCH.clock|0;hud();}}playTick.t=tn;   // the game clock runs whenever the match isn't paused
  if(MATCH&&MATCH.clock<=0&&(playState==='pre'||playEnd&&tn>playEnd)){flip=null;endMatch();return;}   // time's up: the play in progress finishes, then the final whistle
@@ -1434,7 +1488,7 @@ $m('brst').addEventListener('click',refreshQB);$m('brst').addEventListener('touc
 const LAY_IDS=['joy','bbig','baim','bjump','bdrop','bsprint','tpause','bdive','bhit','bjuke'],LAY_KEY='rafTouchLayout',layOrig={};
 for(const id of LAY_IDS)layOrig[id]=$m(id).getAttribute('style')||'';
 let lay={},editing=false,selId=null,drag=null;try{lay=JSON.parse(localStorage.getItem(LAY_KEY)||'{}')||{};}catch(e){}
-function applyLay(){for(const id of LAY_IDS){const el=$m(id),L=lay[id];el.setAttribute('style',layOrig[id]);if(id==='joy')$m('knob').removeAttribute('style');if(!L)continue;   // saved as a fraction of the screen, so it survives rotation / other screens
+function applyLay(){setTimeout(phudPlace,0);for(const id of LAY_IDS){const el=$m(id),L=lay[id];el.setAttribute('style',layOrig[id]);if(id==='joy')$m('knob').removeAttribute('style');if(!L)continue;   // saved as a fraction of the screen, so it survives rotation / other screens
  Object.assign(el.style,{left:(L.x*innerWidth-L.s/2)+'px',top:(L.y*innerHeight-L.s/2)+'px',right:'auto',bottom:'auto',width:L.s+'px',height:L.s+'px',fontSize:Math.max(10,L.s*.19)+'px'});
  if(id==='joy'){const k=L.s*.41;Object.assign($m('knob').style,{width:k+'px',height:k+'px',margin:(-k/2)+'px 0 0 '+(-k/2)+'px'});}}}
 function layOf(id){const r=$m(id).getBoundingClientRect();return lay[id]||{x:(r.left+r.width/2)/innerWidth,y:(r.top+r.height/2)/innerHeight,s:r.width};}
@@ -2103,9 +2157,9 @@ function preMatch(){if(!PROF)return;if(!PROF.draft){show('comb');combUI();return
  const pos=STYLES[PROF.style][4]==='qb'?'QB':'WR 1';$m('pline').innerHTML=`<div class="tbl"><div class="th"><span>${club(PROF.team??0).name} · your team</span><span></span><span></span></div>${[['YOU · '+esc(PROF.last.toUpperCase()),pos+' on offence · CB on defence'],...mates(PROF).map(m=>['#'+m.num+' '+m.n+' · '+m.ovr,m.pos])].map(([a,b])=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">${a}</span><span>${b}</span></div>`).join('')}
  <div class="th" style="margin-top:10px"><span>${club(preMatch.op).name} · opponents</span><span></span><span></span></div>${mates(PROF,op).map(m=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">#${m.num} ${m.n} · ${m.ovr}</span><span>${m.pos}</span></div>`).join('')}</div>`;}
 function kickOff(){show(null);useClubs(PROF.team??0,preMatch.op);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:STYLES[PROF.style][4]});lgEnsure(PROF);BADJ.blue=BADJ.red=0;MATCH={ctx:preMatch.ctx,id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj(STYLES[PROF.style][4]==='qb')};newGame();applyOrg();
- $m('pcard').hidden=false;$m('pcard').innerHTML=`<span class="o">${ovr(PROF.att,PROF.style)}</span><span><span class="n">#${PROF.num} ${esc(PROF.last)}</span><small>${STYLES[PROF.style][0]}</small></span>`;}
+ $m('pcard').hidden=false;$m('pcard').innerHTML=`<span class="o">${ovr(PROF.att,PROF.style)}</span><span><span class="n">#${PROF.num} ${esc(PROF.last)}</span><small>${STYLES[PROF.style][0]}</small></span>`;xpHudStart();}
 function endMatch(){const M=MATCH,S=M.st,me=ORG.you,op=me==='blue'?'red':'blue',r=SCORE[me]>SCORE[op]?'w':SCORE[me]<SCORE[op]?'l':'t';M.my=SCORE[me];M.their=SCORE[op];
- MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;toMenu();
+ MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;xpHudStop();toMenu();
  const X=xpFor(S,r,M.obj),p=PROF,dup=p.lastMatch===M.id,L0=p.lvl,X0=p.lxp;let ups=0;
  if(!dup){const C=p.career;C.gp++;C[r]++;for(const k of STK)C[k]=(C[k]||0)+S[k];p.lastMatch=M.id;ups=addXP(p,X.total);
   if(M.ctx&&p.season&&record(p,M.ctx,M.my,M.their)){for(const k of STK)p.season.st[k]+=S[k];}saveProf(p);}   // result into the season once; season stats only for games that counted   // awarded exactly once per match id, then saved straight away

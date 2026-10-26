@@ -401,7 +401,7 @@ let parts,list,joints,totalMass,pel,abd,chest,neck,head,cons=[];
 function part(n,hx,hy,hz,x,y,z,mass,col){
  const b=new C.Body({mass,material:bm,linearDamping:.05,angularDamping:.15});
  b.addShape(new C.Box(new V(hx,hy,hz)));b.position.set(x,y,z);b.collisionFilterGroup=2;b.collisionFilterMask=5;   // world + ball
- b.allowSleep=false;b.pn=n.replace(/-?1$/,'');b.I=(b.inertia.x+b.inertia.y+b.inertia.z)/3;b.home=[x,y,z];world.addBody(b);totalMass+=mass;
+ b.allowSleep=false;b.he0=[hx,hy,hz];b.pn=n.replace(/-?1$/,'');b.I=(b.inertia.x+b.inertia.y+b.inertia.z)/3;b.home=[x,y,z];world.addBody(b);totalMass+=mass;
  const m=new THREE.Mesh(new THREE.BoxGeometry(hx*2,hy*2,hz*2),new THREE.MeshStandardMaterial({color:col,roughness:.55}));
  m.castShadow=true;scene.add(m);b.mesh=m;parts[n]=b;list.push(b);return b;}
 // anatomical range of motion per joint, [min,max] radians about the parent's x / y / z axes (same convention as the joint targets)
@@ -412,7 +412,7 @@ const JLIM={
 // joint strength s: how hard that joint's muscles pull toward their target
 function joint(n,p,pp,c,cp,s,react=true){
  const pc=new C.PointToPointConstraint(p,new V(...pp),c,new V(...cp));world.addConstraint(pc);cons.push(pc);
- joints[n]={p,c,s,react,x:0,y:0,z:0,lim:JLIM[n.replace(/-?1$/,'')]};}
+ pc.pa0=[...pp];pc.pb0=[...cp];joints[n]={p,c,s,react,pc,x:0,y:0,z:0,lim:JLIM[n.replace(/-?1$/,'')]};}
 const SK=0xe0b48a;
 function buildDoll(BL,DK){parts={};list=[];joints={};totalMass=0;cons=[];
 pel=part('pelvis',.17,.1,.12,0,1.08,0,11.1,DK);
@@ -913,7 +913,7 @@ cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT(
   // support + drive while feet are on the ground
   if(contact()&&(js===0||js===1||js===4)){
    const y=pel.position.y,uu=Math.min(1,jt/.13),dip=js===0?Math.max(...[-1,1].map(sd=>tnorm(phase+(sd>0?0:Math.PI))>=.5?(1-legW[sd])*.2*Math.max(.35,mv):0)):0,   // body sags onto a weak leg
-    hy=gs-dip-.36*crK-.42*reachK-.45*(cur.low||0)+.07*(cur.high||0)+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07)),fy=(totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55)*(limp?Math.max(0,((cur.tone??1)-.6)/.4):Math.min(1,(cur.tone??1)*1.15));
+    hy=gs-dip-.36*crK-.42*reachK-.45*(cur.low||0)+.07*(cur.high||0)+(js===1?1.07-.14*uu*uu*(3-2*uu):js===4?.8:1.07-mv*(run?.16:.07))*(pel.hk||1),fy=(totalMass*(25*(hy-y)-6*pel.velocity.y)+totalMass*9.82*.55)*(limp?Math.max(0,((cur.tone??1)-.6)/.4):Math.min(1,(cur.tone??1)*1.15));
    pel.force.y+=Math.max(0,Math.min(fy,totalMass*9.82*1.0));
    // sprinting pushes harder (bigger force cap + gain)
    const vd=speed*mv;if(moving){const aK=(1+.35*AT('acc'))*defReact()*(.8+.2*Math.min(1,(cur.stam??1)/.4)),bf=Math.max(0,Math.min(totalMass*(run?6:3.5)*aK,totalMass*(run?7:4.5)*aK*(vd-(pel.velocity.x*dx+pel.velocity.z*dz))));pel.force.x+=dx*bf;pel.force.z+=dz*bf;}
@@ -1533,7 +1533,7 @@ let PROF=null;
 // in the match: ratings onto the player's doll, skin / gloves / cleats onto its parts, number and name onto the jersey
 // ================= BUILD MODEL: biometrics, caps, badges, equipment (one place for every calculation) =================
 // biometrics in inches / pounds; the neutral baseline (6'0", 205 lb, 6'2" wingspan) changes nothing
-const BIO0={h:72,w:205,ws:74},BIOR={h:[68,78],w:[170,260],ws:[66,84]},ftin=i=>`${i/12|0}'${i%12}"`;
+const BIO0={h:72,w:205,ws:74},BIOR={h:[68,80],w:[170,260],ws:[64,88]},ftin=i=>`${i/12|0}'${i%12}"`;
 const bioOf=p=>{const b={...BIO0,...((p&&p.bio)||{})};b.h=cl(Math.round(b.h),...BIOR.h);b.w=cl(Math.round(b.w),...BIOR.w);b.ws=cl(Math.round(b.ws),Math.max(BIOR.ws[0],b.h-4),Math.min(BIOR.ws[1],b.h+8));return b;};
 // h: taller (+) / shorter (-); w: heavier / lighter; ape: arms long for the height; reach: standing reach (height + wingspan)
 // only ratings a body really changes: bigger = stronger, harder to bring down and longer-reaching, but slower, heavier-footed and less elusive
@@ -1570,8 +1570,26 @@ function migLook(l){if(!l)return{...DEFLOOK};if('shell'in l){const o={...DEFLOOK
 const KG={},kg=(k,f)=>KG[k]||(KG[k]=f()),KB=(x,y,z)=>kg(`b${x},${y},${z}`,()=>new THREE.BoxGeometry(x,y,z));
 function kmesh(d,part,geo,col,x,y,z,o={}){const mat=new THREE.MeshStandardMaterial({color:col,roughness:o.r??.55,metalness:o.m??0,transparent:o.op!=null,opacity:o.op??1});const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);if(o.rx)m.rotation.x=o.rx;if(o.s)m.scale.set(...o.s);m.castShadow=true;d.parts[part].mesh.add(m);d.kitM.push(m);return m;}
 // body shape from biometrics: limb and torso meshes thicken / lengthen a little (the physics body stays the tuned one)
-function shape(d,b){const bm=b?bioMods(b):null,wF=bm?1+.075*bm.w:1,hF=bm?1+.045*bm.h:1,aF=bm?1+.05*bm.ape:1;
- for(const[n,P]of Object.entries(d.parts)){if(n==='head')continue;const arm=/uarm|farm|hand/.test(n),tor=/chest|abdomen|pelvis/.test(n);P.mesh.scale.set(tor||/thigh/.test(n)?wF*(d.fitK&&tor?d.fitK:1):1+(wF-1)*.6,(/head|neck|hand|foot|toe/.test(n)?1:hF)*(arm?aF:1),tor||/thigh/.test(n)?wF:1+(wF-1)*.6);}}
+// ================= BIOMETRICS -> BODY (1 world unit = 1 m, same as the field): one plan sizes every segment, joint and standing position =================
+// head (.22 m, so helmets fit) and feet (.10 m) keep their size; legs, torso and neck carry the height; the arms carry the wingspan; weight sets girth
+const INCH=.0254;
+function bodyPlan(b){b=bioOf({bio:b||BIO0});const H=b.h*INCH,WS=b.ws*INCH,w=(b.w-205)/40,k=(H-.32)/1.69,kw=1+.09*w,kl=1+.055*w,ks=1+.05*w,ka=(WS/2-.27*ks-.12)/.62;
+ const F={pelvis:[kw,k,kw],abdomen:[kw,k,kw],chest:[ks,k,kw],neck:[1,k,1],head:[1,1,1]};for(const s of['1','-1']){F['thigh'+s]=F['shin'+s]=[kl,k,kl];F['foot'+s]=F['toe'+s]=F['hand'+s]=[1,1,1];F['uarm'+s]=F['farm'+s]=[kl,ka,kl];}
+ // standing layout, feet on the ground (y = 0), pelvis at x = z = 0
+ const sh=.22*k,th=.22*k,pe=.1*k,ab=.1*k,ch=.15*k,nk=.055*k,pY=.1+2*sh+2*th+pe,aY=pY+pe+ab,cY=aY+ab+ch,nY=cY+ch+nk,hY=nY+nk+.11,sY=cY+.12*k,L={pelvis:[0,pY,0],abdomen:[0,aY,0],chest:[0,cY,0],neck:[0,nY,0],head:[0,hY,0]};
+ for(const d of[-1,1]){const s=d+'',lx=d*.1*kw,ax=d*.27*ks;L['shin'+s]=[lx,.1+sh,0];L['thigh'+s]=[lx,.1+2*sh+th,0];L['foot'+s]=[lx,.05,0];L['toe'+s]=[lx,.05,.15];
+  L['uarm'+s]=[ax,sY-.16*ka,0];L['farm'+s]=[ax,sY-.32*ka-.15*ka,0];L['hand'+s]=[ax,sY-.62*ka-.06,0];}
+ return{F,L,H:hY+.11,WS:2*(.27*ks+.62*ka+.12),hk:pY/1.08};}
+// a ragdoll: collision boxes, inertia, joint pivots, rest pose and meshes all rebuilt from the BASE sizes (never compounding); a preview: meshes only
+function shape(d,b){const P=bodyPlan(b),fit=d.fitK||1;
+ for(const[n,B]of Object.entries(d.parts)){const f=P.F[n];if(!f)continue;const tor=/chest|abdomen|pelvis/.test(n);B.mesh.scale.set(f[0]*(tor?fit:1),f[1],f[2]*(tor?fit:1));}
+ if(!d.list||!d.list[0].shapes){const L=P.L;for(const[n,B]of Object.entries(d.parts))if(L[n])B.mesh.position.set(...L[n]);return;}
+ const key=bioOf({bio:b||BIO0});const kk=key.h+'/'+key.w+'/'+key.ws;if(d.fitKey===kk)return;d.fitKey=kk;
+ for(const[n,B]of Object.entries(d.parts)){const f=P.F[n],h0=B.he0,S=B.shapes[0];S.halfExtents.set(h0[0]*f[0],h0[1]*f[1],h0[2]*f[2]);S.updateConvexPolyhedronRepresentation();S.updateBoundingSphereRadius();
+  B.updateBoundingRadius();B.updateMassProperties();B.I=(B.inertia.x+B.inertia.y+B.inertia.z)/3;B.aabbNeedsUpdate=true;B.fs=f;}
+ for(const j of Object.values(d.joints)){const pc=j.pc;pc.pivotA.set(...pc.pa0.map((v,i)=>v*j.p.fs[i]));pc.pivotB.set(...pc.pb0.map((v,i)=>v*j.c.fs[i]));}
+ const p0=d.pel.home;for(const[n,B]of Object.entries(d.parts)){const l=P.L[n];B.home=[p0[0]+l[0],l[1],p0[2]+l[2]];}d.pel.hk=P.hk;
+ const me=curD,x=d.pel.position.x,z=d.pel.position.z;use(d);reset();for(const B of list){B.position.x+=x-B.home[0]+(B.home[0]-p0[0]);B.position.z+=z-p0[2];}use(me);}   // re-stand him where he was
 // kit(d, look, teamCols): team colours (jersey, pants, helmet) override the player's own in matches; personal gear never changes
 // ================= HELMETS: four parametric shells (one continuous surface each, with real rim thickness),
 // faceguards built from swept tubes that mount on points ON each shell, chin cup + straps, curved visor =================

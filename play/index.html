@@ -329,7 +329,7 @@ body{background:var(--bg);color:var(--tx)}
 <div class="cbgrid"><div class="cbl" id="cbl"></div><div class="cbr"><div class="pvbox" id="pvc"></div><div class="cams" id="cams"><button data-c="front">Front</button><button data-c="side">Side</button><button data-c="back">Back</button><button data-c="head">Helmet</button><button data-c="spin">⟲ Spin</button></div><div class="pvi" id="pvi"></div></div></div>
 <div class="cbfoot"><span id="cerr"></span><button class="mrow" id="ccan">Exit</button><button class="mrow" id="cprev">Back</button><button class="mrow pri2" id="cnext">Continue</button></div></div>
 <div id="pre" class="ov scr mad" hidden><div class="vt">//CAREER · MATCHUP</div><div class="mgrid">
-<div class="mleft"><h1>Career Match</h1><div class="sub" id="pvs"></div><div class="sub">4 v 4 · 6:00 game clock</div><div class="note" style="color:#ddd;font:500 16px/1.4 'Barlow Condensed'">You start on offence at your own 25. When the ball changes hands both teams swap sides, so you play offence and defence. Most points when the 6-minute clock runs out wins.</div>
+<div class="mleft"><h1>Career Match</h1><div class="sub" id="pvs"></div><div class="sub">4 v 4 · 4:00 game clock</div><div class="note" style="color:#ddd;font:500 16px/1.4 'Barlow Condensed'">You start on offence at your own 25. When the ball changes hands both teams swap sides, so you play offence and defence. Most points when the 6-minute clock runs out wins.</div>
 <div class="mlist" style="margin-top:16px"><button class="mrow pri2" id="pgo">Kick Off</button><button class="mrow" id="pback">Back</button></div></div>
 <div class="mmid" id="pline"></div><div class="mright"><div class="pvbox" id="pvp"></div><div class="pvi" id="pvip"></div></div></div>
 <div class="hints"><button data-act="confirm"><i class="kp" data-p="confirm"></i> Select</button><button data-act="back"><i class="kp" data-p="back"></i> Back</button></div></div>
@@ -1926,7 +1926,7 @@ function crePv(){const e=ED,c=PROF&&PROF.draft?club(PROF.team):null;paint(PVW.d,
  $m('cams').onclick=e=>{const b=e.target.closest('button');if(b)pvCam(b.dataset.c);};}
 
 // ---------- career match: pre-match screen -> a real 4v4 drive game on the normal engine with your player in it -> final screen; stats saved to the profile ----------
-const MLEN=360;   // 6-minute games
+const MLEN=240;   // 6-minute games
 // ================= THE LEAGUE: 16 clubs (fictional, styled like real ones) =================
 // [abbr, city, name, icon, jersey, pants, accent, founded, stadium, identity]
 const CLUBS=[['POR','Portland','Timberwolves','🐺',0x1f5d3a,0x14261b,0xc9a227,1961,'Cascade Field','Pack defence that swarms the ball; rain-soaked home games are a fortress.'],

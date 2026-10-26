@@ -1230,9 +1230,9 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
   if(T){if(c.kind==='deep')goTo(c.px*.4+T.x*.6,Math.min(GOAL_Z+4,Math.max(LOS+c.pz,T.z+7)),true,T);else goTo(T.x*.7,cl(T.z-2,LOS+8,LOS+14),true,T);}}
  if(c.st==='cover'&&c.kind==='man'){
   const vx=S[3],vz=S[4],sp=Math.hypot(vx,vz);
-  if(c.pv&&sp>2){const pv=c.pv,cs2=(pv[0]*vx+pv[1]*vz)/((Math.hypot(pv[0],pv[1])||1)*sp);if(cs2<.6&&c.t>(c.biteEnd||0)&&Math.random()<.45*(1+.8*E(Rc,'rte')+.06*BT(Rc,'route'))*(1-.6*AT('awr'))){c.biteEnd=c.t+.35+Math.random()*.3;c.biteV=pv;}}   // a hard cut: sometimes he bites and keeps going
+  if(c.pv&&sp>2){const pv=c.pv,cs2=(pv[0]*vx+pv[1]*vz)/((Math.hypot(pv[0],pv[1])||1)*sp);if(cs2<.6&&c.t>(c.biteEnd||0)&&Math.random()<.45*(1+.8*E(Rc,'rte')+.06*BT(Rc,'route'))*(1-.6*AT('awr'))*((SAI[c.sty]||{}).lock?.5:1)){c.biteEnd=c.t+.35+Math.random()*.3;c.biteV=pv;}}   // a hard cut: sometimes he bites and keeps going
   if(sp>.5)c.pv=[vx,vz];
-  const CL=.4+.25*AT('cov'),cush=Math.max(1.4,3.6-c.t*.45)*(1-.3*AT('cov')),inside=-Math.sign(S[1]||1)*.5;let tx=S[1]+vx*CL+inside,tz=S[2]+vz*CL+cush+Math.max(0,vz)*1.1;   // a cushion downfield that tightens, shaded inside, and grows with the receiver's speed at him (he gives ground early)
+  const LK=(SAI[c.sty]||{}).lock,CL=.4+.25*AT('cov')+(LK?.15:0),cush=Math.max(LK?.9:1.4,(LK?2.6:3.6)-c.t*.45)*(1-.3*AT('cov'))*(LK?.7:1),inside=-Math.sign(S[1]||1)*.5;let tx=S[1]+vx*CL+inside,tz=S[2]+vz*CL+cush+Math.max(0,vz)*1.1;   // a cushion downfield that tightens, shaded inside, and grows with the receiver's speed at him (he gives ground early)
   if(c.t<(c.biteEnd||0)){tx=P.x+c.biteV[0];tz=P.z+c.biteV[1];}
   goTo(tx,tz,true,RP);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);   // jam: hands on him early in the route
@@ -1255,7 +1255,8 @@ const routeMesh=new THREE.Group(),rtCore=new THREE.Mesh(new THREE.BufferGeometry
 routeMesh.add(rtGlow,rtCore);routeMesh.visible=false;scene.add(routeMesh);   // solid red core + soft red glow (additive turned it yellow on the grass)
 // each play: a weighted random route (mostly breaking inside, toward the middle / far side), then the hint mesh
 // (receivers in the same play don't repeat a route)
-function pickRoute(x0,used){let n;for(let t=0;t<12;t++){let r=Math.random()*ROUTE_W.reduce((a,b)=>a+b[1],0);n=ROUTE_W[0][0];for(const[k,w]of ROUTE_W){if((r-=w)<0){n=k;break;}}if(!used.includes(n))break;}used.push(n);
+const ROUTE_SHORT=['SHALLOW_CROSS','LONG_SLANT','CURL','COMEBACK'],ROUTE_DEEP=['GO','SEAM','DEEP_POST','CORNER'];   // YAC specialists lean short (room to run after the catch), deep threats lean vertical
+function pickRoute(x0,used,sty){const A=SAI[sty]||{},W=ROUTE_W.map(([k,w])=>[k,w*(A.short&&ROUTE_SHORT.includes(k)?3:A.deep&&ROUTE_DEEP.includes(k)?3.5:1)]);let n;for(let t=0;t<12;t++){let r=Math.random()*W.reduce((a,b)=>a+b[1],0);n=W[0][0];for(const[k,w]of W){if((r-=w)<0){n=k;break;}}if(!used.includes(n))break;}used.push(n);
  const out=Math.sign(x0);return[ROUTES[n].map(([x,z])=>[x0+out*x*YD,LOS+Math.min(z*YD,GOAL_Z+5-LOS)]),n];}
 // vague = the first leg plus just the start of the break; full = the whole route (shown in the bird's-eye view)
 // every receiver's route gets an arrow (yours and the bots'): vague = the first leg plus just the start of the break; full = the whole route
@@ -1323,7 +1324,7 @@ function resetPlay(){if(!playOn)return;RET=null;if(MATCH)MATCH.caught=0;for(cons
  const used=[];let q=null,rw=null;
  for(const d of roster){const c=d.cur;
   if(c.role==='qb'){q=d;placeAt(d,0,LOS+QB_DEPTH);Object.assign(c,{st:'idle',T:null,wait:null,tg:null});}
-  if(c.role==='wr'){placeAt(d,c.x0,LOS+c.z0-.4);[c.route,c.rname]=pickRoute(c.x0,used);Object.assign(c,{st:'set',i:0,t:0});if(!rw||d===player)rw=d;}
+  if(c.role==='wr'){placeAt(d,c.x0,LOS+c.z0-.4);[c.route,c.rname]=pickRoute(c.x0,used,c.sty);Object.assign(c,{st:'set',i:0,t:0});if(!rw||d===player)rw=d;}
   if(c.side==='d'){placeAt(d,c.px,Math.min(GOAL_Z+4,LOS+c.pz));if(d===player)camYaw=0;Object.assign(c,{st:'pre',t:0,hist:[],rd:(.3-.12*E(d,'rea'))+Math.random()*.12,biteEnd:0,pushT:0,pv:null});}}
  looseBall();ball.position.z=LOS;if(q){use(q);grabBall();}use(player);playTick.lc=q;
  route=rw&&rw.cur.route;routeName=rw?rw.cur.rname:'';routeX=rw?rw.cur.x0:WR_X;routeShape(false);   // the route shown on 1: yours, or the first receiver's when you're the QB
@@ -1366,8 +1367,8 @@ function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=fal
     sprint=need>2&&!behind&&carry<d+.5;                       // sprint only when the timing needs it and it won't run him past the spot
     if(!behind&&carry>d+1.5)tx=null;}                          // well ahead of the pass: ease off completely and let it come to him
    if(ball.position.y<.15&&ball.velocity.norm()<2){c.st='done';catchOn=false;}}}
- if(c.st==='caught'){let ax=0,az=1;for(const d of roster){if(d.cur.side!=='d')continue;const Q=d.pel.position,dx=Q.x-P.x,dz=Q.z-P.z,dd=Math.hypot(dx,dz);if(dd>12||dz<-2)continue;ax-=dx/dd*3/dd;az-=dz/dd*1.5/dd;   // run for the end zone, bending away from defenders ahead
-   if(dd<3.2&&!cur.jk&&performance.now()>(c.jkCool||0)&&dv===0&&js===0){const cy=camYaw,rs=dx*Math.cos(cy)-dz*Math.sin(cy);cur.jk={t:0,sd:rs>0?-1:1,cut:false};c.jkCool=performance.now()+1500;}}   // one closing in: juke him
+ if(c.st==='caught'){let ax=0,az=1;for(const d of roster){if(d.cur.side!=='d')continue;const Q=d.pel.position,dx=Q.x-P.x,dz=Q.z-P.z,dd=Math.hypot(dx,dz);if(dd>12||dz<-2)continue;const Y=(SAI[c.sty]||{}).yac?1.5:1;ax-=dx/dd*3*Y/dd;az-=dz/dd*1.5/dd;   // run for the end zone, bending away from defenders ahead
+   if(dd<(Y>1?4.2:3.2)&&!cur.jk&&performance.now()>(c.jkCool||0)&&dv===0&&js===0){const cy=camYaw,rs=dx*Math.cos(cy)-dz*Math.sin(cy);cur.jk={t:0,sd:rs>0?-1:1,cut:false};c.jkCool=performance.now()+(Y>1?1000:1500);}}   // one closing in: juke him
   const ex=Math.abs(P.x)>FW/2-3?-Math.sign(P.x)*.8:0;tx=P.x+(ax+ex)*4;tz=P.z+Math.max(.6,az)*6;sprint=true;}
  if(c.st==='set'){camYaw=Math.PI;}   // lined up, looking downfield
  if(fumT&&!held&&playState==='live'){tx=ball.position.x;tz=ball.position.z;sprint=true;}   // loose ball: go get it
@@ -1402,6 +1403,16 @@ const aiQB=()=>roster.find(d=>d.cur.ai&&d.cur.role==='qb');
 function primaryUp(){releaseCharge();catchOn=false;cur.catchT0=0;}
 // QB brain (runs with the QB swapped in): face the receiver; on a call, lead him (where he'll be, at the speed he had when he called), aim, throw
 function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
+ // mobile QBs (Dual-Threat, Scrambler): a real read each frame, not a timer: run only when the pass isn't there AND there's a lane; Dual-Threat needs a worse passing picture than a Scrambler
+ const QR=(SAI[c.sty]||{}).qbRun;
+ if(QR&&c.st==='idle'&&held&&!callReq&&playState==='live'){const P=pel.position,D=roster.filter(d=>d.cur.side==='d');let press=99,best=0,lane=true;
+  for(const d of D){const q=d.pel.position,dx=q.x-P.x,dz=q.z-P.z;press=Math.min(press,Math.hypot(dx,dz));if(dz>-1&&dz<7&&Math.abs(dx)<dz*.7+1.6)lane=false;}
+  for(const w of roster){if(w.cur.role!=='wr')continue;const p=w.pel.position;let sep=6;for(const d of D)sep=Math.min(sep,Math.hypot(d.pel.position.x-p.x,d.pel.position.z-p.z));best=Math.max(best,sep);}
+  if(lane&&((press<3.2&&best<2.4*QR)||(c.wait!=null&&c.wait<.5&&best<1.4*QR))){c.st='run';c.runT=0;}}
+ if(c.st==='run'){if(!held){c.st='idle';return;}const P=pel.position;let ax=0,az=1.2;c.runT+=dt;
+  for(const d of roster){if(d.cur.side!=='d')continue;const q=d.pel.position,dx=q.x-P.x,dz=q.z-P.z,dd=Math.hypot(dx,dz)||1;if(dd>10)continue;ax-=dx/dd*2.5/dd;az-=dz/dd*1.2/dd;
+   if(dd<3&&!cur.jk&&dv===0&&js===0&&performance.now()>(c.jkCool||0)){const rs=dx*Math.cos(camYaw)-dz*Math.sin(camYaw);cur.jk={t:0,sd:rs>0?-1:1,cut:false};c.jkCool=performance.now()+1500;}}
+  const ex=Math.abs(P.x)>FW/2-3?-Math.sign(P.x):0,tx=P.x+(ax+ex)*4,tz=P.z+Math.max(.5,az)*6;camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=true;return;}
  // throwing to bots (you're not a receiver): after a 2-3.5 s drop, the most open one (most room from any defender, a bit of credit for depth)
  if(c.st==='idle'&&held&&!callReq&&playState==='live'&&(c.wait=(c.wait==null?(player.cur.role==='wr'?4.5:2)+Math.random()*1.5:c.wait)-dt)<0){let bs=-1e9;
   for(const w of roster){if(w.cur.role!=='wr')continue;const p=w.pel.position;let sep=6;for(const d of roster)if(d.cur.side==='d')sep=Math.min(sep,Math.hypot(d.pel.position.x-p.x,d.pel.position.z-p.z));const sc=sep*2+Math.min(p.z-LOS,30)*.15+(Math.random()-.5)*5*(1-AT('awr'));if(sc>bs){bs=sc;c.tg=w;}}
@@ -1536,7 +1547,14 @@ const STYLES=[['QUARTERBACK','A field general: a big, accurate arm and the eyes 
  ['ELUSIVE RUNNER','Makes tacklers miss and keeps the ball safe through traffic.',['bhd','car','agi','acc'],['str','thp','tha'],'wr'],
  ['POWER RUNNER','Runs through contact, holds on to the ball and never tires.',['str','car','sta'],['agi','spd','thp','tha'],'wr'],
  ['DEFENSIVE SPECIALIST','Reads the play, blankets receivers and takes the ball away.',['cov','int','tak','rea','awr'],['thp','tha','rte','bhd'],'wr'],
- ['TWO-WAY ATHLETE','Balanced on both sides of the ball: no glaring hole, no elite skill.',['spd','acc','cth','tak','cov'],['thp','tha','str','sta','car'],'wr']];
+ ['TWO-WAY ATHLETE','Balanced on both sides of the ball: no glaring hole, no elite skill.',['spd','acc','cth','tak','cov'],['thp','tha','str','sta','car'],'wr'],
+ // added later: appended so saved playstyle numbers (0-7) keep their meaning
+ ['DUAL-THREAT QB','A real passer first, but quick enough to punish a defence that drops everyone into coverage.',['tha','thp','awr','spd','acc'],['cov','int','tak'],'qb'],
+ ['YAC SPECIALIST','Catches it short, makes the first man miss and turns five yards into twenty.',['cth','agi','acc','bhd','spd'],['thp','str','tak'],'wr'],
+ ['DEEP THREAT','Pure vertical speed: runs past the coverage and wins the long ball.',['spd','acc','cth','rte','awr'],['str','tak','bhd'],'wr'],
+ ['SHUTDOWN CORNER','Mirrors his man step for step and takes away the throw.',['cov','spd','agi','rea','awr','int'],['str','tak','thp','tha'],'wr']];
+// AI flavour per playstyle (what the bots do differently; human players get only the ratings): qbRun = how readily an AI QB runs when the pass isn't there
+const SAI={1:{qbRun:1.6},8:{qbRun:1},9:{short:1,yac:1},10:{deep:1},11:{lock:1}};
 const BUDGET=AK.length*62,A_MIN=25,A_MAX0=92;   // starting ratings cap at 92; career upgrades can take them to 100 later
 function styleAt(i){const[, ,up,dn]=STYLES[i],two=i===7,a={};for(const k of AK)a[k]=60;up.forEach((k,j)=>a[k]=two?72:88-j*2);dn.forEach(k=>a[k]=two?50:40);
  const free=AK.filter(k=>!up.includes(k)&&!dn.includes(k));let diff=BUDGET-AK.reduce((t,k)=>t+a[k],0);
@@ -1699,7 +1717,7 @@ function jersey(d,num,name,bg){for(const m of d.decals||[]){m.parent.remove(m);m
   if(nm){let fs=46;g.font=`800 ${fs}px "Barlow Condensed",Impact,sans-serif`;const w=g.measureText(nm).width;if(w>236){fs=Math.max(24,fs*236/w);g.font=`800 ${fs}px "Barlow Condensed",Impact,sans-serif`;}   // long names shrink to fit the shoulders
    g.lineWidth=5;g.save();g.translate(128,52);const w2=g.measureText(nm).width;if(w2>236)g.scale(236/w2,1);g.strokeText(nm,0,0);g.fillText(nm,0,0);g.restore();}
   const m=new THREE.Mesh(new THREE.PlaneGeometry(.3,.28),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}));m.position.z=z;m.rotation.y=ry;d.parts.chest.mesh.add(m);d.decals.push(m);}}
-function applyProf(p){const P=player.cur;P.at=p?{...p.att}:null;P.app=p?migLook(p.look):{...DEFLOOK};P.bio=p?bioOf(p):null;P.bm=p?bioMods(P.bio):null;P.bd=p?Object.fromEntries((p.badges||[]).map(id=>[id,btier(p,id)])):{};kit(player,P.app,null);shape(player,P.bio);P.num=p&&p.num>=0?p.num:null;P.nm=p&&p.last;jersey(player,P.num,P.nm);}
+function applyProf(p){const P=player.cur;P.sty=p?p.style:null;P.at=p?{...p.att}:null;P.app=p?migLook(p.look):{...DEFLOOK};P.bio=p?bioOf(p):null;P.bm=p?bioMods(P.bio):null;P.bd=p?Object.fromEntries((p.badges||[]).map(id=>[id,btier(p,id)])):{};kit(player,P.app,null);shape(player,P.bio);P.num=p&&p.num>=0?p.num:null;P.nm=p&&p.last;jersey(player,P.num,P.nm);}
 // ---------- menus: control pick -> QUICK PLAY / CAREER MODE -> career hub -> creator ----------
 let pendMode=null,ED=null,TAB='bio';
 const show=id=>{for(const x of['mm','mode','car','cre','pre','fin','upg','teams','comb','dft','slots'])$m(x).hidden=x!==id;};
@@ -1715,7 +1733,7 @@ function pvInit(){if(PVW.r)return;const r=PVW.r=new THREE.WebGLRenderer({canvas:
  const loop=()=>{requestAnimationFrame(loop);const host=$m('pv3').parentElement;if(!host||host.closest('[hidden]')||host.id==='')return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;
   if(PVW.w!==w||PVW.h!==h){PVW.w=w;PVW.h=h;r.setSize(w,h,false);PVW.cam.aspect=w/h;PVW.cam.updateProjectionMatrix();}if(performance.now()-(PVW.t||0)>2500)PVW.yaw+=.004;g.rotation.y=PVW.yaw;r.render(sc,PVW.cam);};loop();}
 function pvShow(host,p){pvInit();if(host!=='pvc'&&PVW.cam&&(PVW.cam.position.y>1.5||PVW.t>performance.now()))pvCam('spin');const cv=$m('pv3');$m(host).appendChild(cv);cv.style.cssText='position:static;width:100%;height:100%;display:block';const c=p.draft?club(p.team):null;paint(PVW.d,'blue');kit(PVW.d,p.look,c?[c.jer,c.pant]:null);shape(PVW.d,bioOf(p));jersey(PVW.d,p.num>=0&&p.num<=99?p.num:'',p.last);}
-const tcase=t=>t.toLowerCase().replace(/(^|[\s-])\w/g,c=>c.toUpperCase());
+const tcase=t=>t.toLowerCase().replace(/(^|[\s-])\w/g,c=>c.toUpperCase()).replace(/\b(Qb|Yac)\b/g,m=>m.toUpperCase());   // QB / YAC stay acronyms
 const GROUPS=[['Offense',['thp','tha','cth','rte','car','bhd']],['Defense',['cov','int','tak','rea','awr']],['Athletic',['spd','acc','agi','str','sta']]];
 // max potential (for career progression later): an archetype's strengths can reach 99, everything else grows ~24 past its archetype default
 const potOf=(p,k)=>{const b=styleAt(p.style)[k];return STYLES[p.style][2].includes(k)?99:Math.min(99,b+(STYLES[p.style][3].includes(k)?18:24));};
@@ -1932,7 +1950,7 @@ const club=i=>{const c=CLUBS[i];return{ab:c[0],city:c[1],name:c[2],ic:c[3],jer:c
 // lives in the career save (p.lg); the user is roster id 'U' and stays the profile itself, so there is never a second copy of you
 const DEV=[['High Potential',1.6,1],['Steady Developer',1,.6],['Established Player',0,.7],['Declining Player',-1.4,.7],['Unpredictable',0,2]];   // [name, mean change, spread] per affected rating
 const STR0=[80,79,78,77,75,74,74,73,73,72,71,70,69,68,67,66];   // club targets: 4 contenders, 8 in the middle, 4 rebuilding (dealt out by a fixed seed)
-const BIOS=[[75,220],[73,205],[71,185],[72,195],[70,190],[71,235],[73,210],[74,215]];   // [height in, weight lb] per playstyle
+const BIOS=[[75,220],[73,205],[71,185],[72,195],[70,190],[71,235],[73,210],[74,215],[74,212],[70,188],[73,192],[72,192]];   // [height in, weight lb] per playstyle
 const rng=s=>()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
 const pOvr=(p,id)=>id==='U'?ovr(p.att,p.style):ovr(p.lg.pl[id].att,p.lg.pl[id].style);   // the one OVR (ovr()) for everyone
 // team strength: average OVR plus a share of the best player (stars matter in 4 v 4)
@@ -1946,7 +1964,7 @@ function genPlayer(p,R,c,st,tgt,dev){const L=p.lg,id='P'+String(++L.next).padSta
   c_glove:pk([-1,0xffffff,0x111111,CLUBS[c][6]]),c_cleat:pk([0x111111,0xffffff,CLUBS[c][6]]),c_comp:pk([0x111111,0xffffff,CLUBS[c][6]]),c_sock:pk([0xffffff,0x111111])};
  return L.pl[id]={id,first,last,num,style:st,att:a,bio:{h:bh,w:cl(w+Math.round((R()-.5)*20),170,260),ws:cl(bh+Math.round(R()*5),66,84)},look,dev:dev??(tgt>=80?pk([2,2,1,3,4]):tgt<70?pk([0,0,1,4]):pk([0,1,1,2,4])),yrs:0,team:c,hist:[]};}
 function lgEnsure(p){if(!p.lg){const R=rng(2027),str=[...STR0].sort(()=>R()-.5);p.lg={pl:{},rost:CLUBS.map(()=>[]),fa:[],ret:[],log:[],next:0};
-  CLUBS.forEach((_,c)=>{const sty=[R()<.7?0:1,...[2,3,4,5,6,7].sort(()=>R()-.5).slice(0,3)],off=[4,1,-1,-4].sort(()=>R()-.5);
+  CLUBS.forEach((_,c)=>{const sty=[[0,0,0,1,8][R()*5|0],...[2,3,4,5,6,7,9,10,11].sort(()=>R()-.5).slice(0,3)],off=[4,1,-1,-4].sort(()=>R()-.5);
    sty.forEach((st,j)=>p.lg.rost[c].push(genPlayer(p,R,c,st,str[c]+off[j]+(str[c]>=77&&off[j]===4?3:0)+Math.round((R()-.5)*4)).id));});}   // contenders get a true star
  if(p.draft&&!p.lg.rost.some(r=>r.includes('U')))lgDraft(p,p.team);return p.lg;}
 // drafting you: you replace the LOWEST-OVR player on the club's current four (ties: lowest id), whatever your own OVR is; he goes to free agency, never deleted
@@ -1961,7 +1979,7 @@ function devStep(R,P){const[,m,s]=DEV[P.dev],key=STYLES[P.style][2],o0=ovr(P.att
   if(d>0&&P.att[k]>=82&&R()<(P.att[k]-78)/16)d=0;if(d<0&&P.att[k]<=55)d=0;P.att[k]=cl(P.att[k]+d,A_MIN,99);}
  P.yrs++;if((P.dev===0&&P.yrs>=3)||(P.dev===1&&P.yrs>=5)||(P.dev===2&&P.yrs>=6)||(P.dev===4&&P.yrs>=5)){P.dev=P.dev===4?2:P.dev+1;P.yrs=0;}   // careers age: prospect -> steady -> established -> declining
  return ovr(P.att,P.style)-o0;}
-const hasQB=(p,r)=>r.some(id=>[0,1].includes(id==='U'?p.style:p.lg.pl[id].style));
+const hasQB=(p,r)=>r.some(id=>[0,1,8].includes(id==='U'?p.style:p.lg.pl[id].style));
 // the offseason (menus only, between seasons): trades, then development, retirements with rookies, then new club ratings
 function offseason(p){const L=lgEnsure(p),R=rng((p.season?p.season.year:0)*7919+(L.next|0)),yr=p.season?p.season.year:0,log={yr,tr:[],dv:[]},nm=id=>id==='U'?p.first+' '+p.last:L.pl[id].first+' '+L.pl[id].last;
  // trades: a top-6 club buys a proven player from a bottom-6 club with a prospect of similar value (0-4 OVR less); each club trades once at most; you are never traded
@@ -1984,7 +2002,7 @@ const lgRat=(p,i)=>Math.round(74+(tStr(p,i)-74)*.25);   // season sim rating: co
 function lgAssign(){const p=PROF,L=p&&p.lg;if(!L||!MATCH)return;const tc={blue:p.team,red:preMatch.op};
  for(const tm of['blue','red']){const ds=roster.filter(d=>d!==player&&d.cur.team===tm).sort((a,b)=>(b.cur.role==='qb')-(a.cur.role==='qb')),ps=id=>L.pl[id].att.thp+L.pl[id].att.tha,
   ids=L.rost[tc[tm]].filter(id=>id!=='U').sort((a,b)=>ps(b)-ps(a)||(a<b?-1:1));
-  ds.forEach((d,i)=>{const P=L.pl[ids[i]];if(P)Object.assign(d.cur,{pid:P.id,at:{...P.att},app:migLook(P.look),bio:bioOf(P),num:P.num,nm:P.last});});}}
+  ds.forEach((d,i)=>{const P=L.pl[ids[i]];if(P)Object.assign(d.cur,{pid:P.id,sty:P.style,at:{...P.att},app:migLook(P.look),bio:bioOf(P),num:P.num,nm:P.last});});}}
 const TABB={blue:'BLU',red:'RED'},TFULL={blue:'BLUE',red:'RED'},TEAM0={blue:[...TEAM.blue],red:[...TEAM.red]};
 function useClubs(a,b){if(a==null){TEAM.blue=[...TEAM0.blue];TEAM.red=[...TEAM0.red];TABB.blue='BLU';TABB.red='RED';TFULL.blue='BLUE';TFULL.red='RED';return;}const A=club(a),B=club(b);TEAM.blue=[A.jer,A.pant];TEAM.red=[B.jer,B.pant];TABB.blue=A.ab;TABB.red=B.ab;TFULL.blue=A.name.toUpperCase();TFULL.red=B.name.toUpperCase();}   // the two slots wear the clubs' kits
 const jerseySVG=(c,n)=>`<svg viewBox="0 0 60 56" class="jsv"><path d="M18 4l-14 8 5 13 7-3v30h28V22l7 3 5-13-14-8c-2 5-6 7-12 7S20 9 18 4z" fill="${hx(c.jer)}" stroke="${hx(c.acc)}" stroke-width="2.5"/><text x="30" y="40" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif" font-weight="800" font-size="17" fill="${hx(c.acc)}">${n}</text></svg>`;

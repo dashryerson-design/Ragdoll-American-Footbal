@@ -1058,7 +1058,7 @@ cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT(
   if(js===0&&mv>.3&&contact()){const f=pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw);cur.runV=(cur.runV==null?f:cur.runV*.995+f*.005);}   // remember normal ground speed: a bound only beats it by ~20%
   if(cur.bufB&&(js===4||js===0)&&contact()&&!limp){if(performance.now()-cur.bufB<400){jpt=.2;startBound();}cur.bufB=0;}   // space pressed just before landing: chain straight into the next bound
  }
- ballArm();if(!cur.ai)stanceArms(dt);
+ ballArm();if(!cur.ai)stanceArms(dt);else blockArms(dt);
  const lean=thLean-.08*qbK+.95*reachK+.85*(cur.low||0)+.18*crK+mv*(run?.14+.16*cl((speed-vf)/3,0,1):.1)*(1-qbK)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
  if(!limp){
   // balance: keep pelvis and chest facing the heading, upright
@@ -1625,14 +1625,19 @@ function applyOrg(){preEnd();if(!applyOrg.keep)NEWSERIES=0;if(!applyOrg.keep){OR
 // run blocking: each receiver takes a different defender, fits between him and the back, and drives him off the runner's line; strength decides the push, the defender's strength / awareness his chance to shed
 function blockThink(dt,run){const c=cur,P=pel.position,now=performance.now();for(const k in keys)keys[k]=false;const who=run||(CALL.rb&&(H(CALL.rb)||!CALL.done)?CALL.rb:roster.find(H)||CALL.rb);if(!who){keys.w=false;return;}const R=who.pel.position;
  if(!c.bt||c.bt.limp||now>(c.btT||0)){const taken=roster.filter(d=>d!==curD&&d.cur.blk).map(d=>d.cur.bt);let best=null,bs=1e9;
-  for(const d of roster){if(d.cur.side!=='d'||d.limp||taken.includes(d))continue;const q=d.pel.position,s=Math.hypot(q.x-R.x,q.z-R.z)+.6*Math.hypot(q.x-P.x,q.z-P.z)-(d===c.bt?2.5:0);if(s<bs){bs=s;best=d;}}   // closest threat to the back he can reach; sticks with his man unless another is clearly worse
+  for(const d of roster){if(d.cur.side!=='d'||d.limp||taken.includes(d))continue;const q=d.pel.position,s=Math.hypot(q.x-R.x,q.z-R.z)+.6*Math.hypot(q.x-P.x,q.z-P.z)-(d===c.bt?2.5:0)+(CALL.gx!=null&&R.z<LOS+1?.5*Math.hypot(q.x-CALL.gx,q.z-LOS):0);if(s<bs){bs=s;best=d;}}   // closest threat to the back he can reach; sticks with his man unless another is clearly worse
   c.bt=best;c.btT=now+600;}
  const T=c.bt;if(!T){camYaw=Math.PI;keys.w=true;return;}
  const Q=T.pel.position;let ux=R.x-Q.x,uz=R.z-Q.z;const L=Math.hypot(ux,uz)||1;ux/=L;uz/=L;const dd=Math.hypot(Q.x-P.x,Q.z-P.z),tx=Q.x+ux*.7,tz=Q.z+uz*.7;   // the fit: in his path to the runner
  camYaw=Math.atan2((dd<1.3?Q.x:tx)-P.x,(dd<1.3?Q.z:tz)-P.z)+Math.PI;keys.w=true;keys.shift=dd>1.6;
+ if(dd<2)c.blkT=now,c.blkQ=T;   // close: brace (blockArms)
  if(dd<1.2&&now>(T.cur.shedT||0)){const k=cl(5+3*AT('str')-2.5*E(T,'str'),1.5,9)*dt,mr=kgOf(T)/kgOf(curD);   // engaged: per second, strength vs strength
   for(const b of T.list){b.velocity.x-=ux*k;b.velocity.z-=uz*k;}for(const b of list){b.velocity.x+=ux*k*mr*.5;b.velocity.z+=uz*k*mr*.5;}   // the blocker gets pushed back too
   if(Math.random()<dt*cl(.3+.35*E(T,'str')+.2*E(T,'awr')-.3*AT('str'),.06,.9))T.cur.shedT=now+900;}}   // he works free for a moment
+// blocker posture: sink, lean in, shoulders forward and arms punching at the defender's chest - PD joint targets, so contact still pushes the arms around
+function blockArms(dt){const c=cur,on=!playEnd&&!limp&&!held&&c.blkQ&&performance.now()-(c.blkT||0)<200;c.bK=(c.bK||0)+((on?1:0)-(c.bK||0))*Math.min(1,dt*(on?8:4));
+ if(c.bK<.02){if(c.bK0){c.low=0;c.bK0=0;}return;}c.bK0=1;const k=c.bK,J=joints;c.low=.28*k;
+ for(const sd of[1,-1]){J['shoulder'+sd].x+=(-1.35-J['shoulder'+sd].x)*k;J['shoulder'+sd].z+=(sd*.18-J['shoulder'+sd].z)*k;J['elbow'+sd].x+=(-.45-J['elbow'+sd].x)*k;}}
 // ---------- after the route: find open space. Every 0.5-0.8 s (Awareness) score a few nearby spots: room from defenders, a clean lane from the QB,
 // spacing from teammates, a useful depth, inside the field. Keep the current spot unless a clearly better one appears (no zig-zagging).
 function findSpace(c,P){const now=performance.now(),q=roster.find(x=>x.cur.role==='qb'),Q=q&&q.pel.position;if(!Q)return null;
@@ -2405,8 +2410,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.06';
+const GAME_VER='3.07';
 const PATCH=[
+ {version:'3.07',title:'Receiver Blocking',date:'2026-10-28',changes:{AI:['Run blockers now take the defender most dangerous to the play\'s gap or edge','Blockers sink, lean in and punch their arms out on contact, then let go at the whistle']}},
  {version:'3.06',title:'Smarter Receivers',date:'2026-10-28',changes:{AI:['After a route, receivers find open space instead of running on: they weigh room from defenders, a clear lane from the QB, spacing from teammates and depth, then settle facing the QB; Awareness sets how often and how well they read it','When the QB scrambles, receivers drift with him; once a teammate has the ball in the open, the others block for him; running backs without the ball block or show as the check-down','Everyone pulls up when the play is dead'],'Bug Fixes':['Route waypoints are kept inside the sidelines, so receivers no longer run off the pitch']}},
  {version:'3.05',title:'New Play Each Series',date:'2026-10-28',changes:{Gameplay:['You choose a new play card at every new possession and after every first down (a new series); 2nd to 4th down keep the current play','The AI offence also calls a fresh play each series; recently shown plays are never dealt again straight away']}},
  {version:'3.04',title:'Clearer Combine Courses',date:'2026-10-28',changes:{'Career Mode':['Running drills show one objective at a time: the next zone pulses bright with a light pillar, the one after is only a faint hint, completed ones flash green and disappear','A ground arrow just ahead of you always points at the current objective and follows you as you move','Movement Fundamentals is now four short stages (move, sprint, one marked turn, stop in the box), each with its own instruction and control hint; the 40-yard dash is one lane with a single finish line; the three-cone cuts are numbered','Ball Security still makes you read the dummy line yourself: the arrow points straight ahead there, not at the open gap']}},

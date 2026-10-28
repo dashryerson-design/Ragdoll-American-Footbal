@@ -1278,9 +1278,21 @@ function lowMat(root){root.traverse(o=>swapMat(o,toLam));}
 // helmet in touch mode: unlit, colour baked slightly darker than the jersey would read: no highlight, no reflection, cheapest shader there is
 function flatMat(root){root.traverse(o=>swapMat(o,toFlat));}
 function highMat(root){root.traverse(o=>{if(o.userData.std){(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>x.dispose());o.material=o.userData.std;delete o.userData.std;o.castShadow=true;}});}
+// touch tiers: 24 solver passes (the lowest that measured identical tackles / grabs / runs vs 30), then only draw distance steps down; resolution is never touched
+const TOUCH_TIERS=[{it:24,far:240},{it:24,far:200},{it:24,far:165}];let TTIER=0;
+function touchTier(t){t=cl(t,0,TOUCH_TIERS.length-1);if(t===TTIER)return;TTIER=t;if(!LOWFX)return;const T=TOUCH_TIERS[t];world.solver.iterations=T.it;cam.far=T.far;cam.updateProjectionMatrix();scene.fog.far=T.far-10;scene.fog.near=Math.min(80,T.far-90);}
+// contact shadows for touch (the shadow map is off there): one soft disc per player and the ball, one draw call
+const blobG=(()=>{const G=new THREE.Group();G.visible=false;for(const[r,o]of[[.55,.16],[.33,.2]]){const m=new THREE.InstancedMesh(new THREE.CircleGeometry(r,24).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:o,depthWrite:false}),12);m.frustumCulled=false;m.renderOrder=1;G.add(m);}scene.add(G);return G;})();   // two stacked discs: a soft-edged shadow with no texture
+const _bo=new THREE.Object3D();
+function blobTick(){if(!blobG.visible)return;let i=0;const put=(x,z,h,s)=>{const k=Math.max(.35,1-h*.35);_bo.position.set(x,.035,z);_bo.scale.set(s*k,1,s*k);_bo.updateMatrix();for(const m of blobG.children)m.setMatrixAt(i,_bo.matrix);i++;};
+ for(const d of active()){if(!d.pel||!world.bodies.includes(d.pel))continue;const P=d.pel.position,C=d.chest.position;put((P.x+C.x)/2,(P.z+C.z)/2,Math.max(0,P.y-1),d.limp?1.5:1.05);}
+ if(world.bodies.includes(ball))put(ball.position.x,ball.position.z,ball.position.y,.45);for(const m of blobG.children){m.count=i;m.instanceMatrix.needsUpdate=true;}}   // fade/shrink with height so a jump still reads
+// adaptive: judged on 3 s of frame times (single hitches ignored); steps down when it can't hold ~45 fps, back up after 8 s of easy 60
+function touchAdapt(fdt){if(!LOWFX||!mode||paused)return;const A=touchAdapt;A.n=(A.n||0)+1;A.s=(A.s||0)+fdt;if(A.s<3)return;const avg=A.s/A.n;A.n=A.s=0;
+ if(avg>1/45){A.good=0;touchTier(TTIER+1);}else if(avg<1/57){A.good=(A.good||0)+3;if(A.good>=8){A.good=0;touchTier(TTIER-1);}}else A.good=0;}
 function perfMode(m){const low=m==='touch';if(low===LOWFX&&perfMode.done)return;perfMode.done=1;LOWFX=low;
- renderer.setPixelRatio(Math.min(devicePixelRatio,low?1.5:2));renderer.setSize(innerWidth,innerHeight);
- sun.castShadow=!low;renderer.shadowMap.enabled=!low;cam.far=low?240:600;cam.updateProjectionMatrix();scene.fog.near=low?80:150;scene.fog.far=low?230:470;
+ renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);world.solver.iterations=low?TOUCH_TIERS[TTIER].it:30;blobG.visible=low;
+ sun.castShadow=!low;renderer.shadowMap.enabled=!low;cam.far=low?TOUCH_TIERS[TTIER].far:600;cam.updateProjectionMatrix();scene.fog.near=low?80:150;scene.fog.far=low?TOUCH_TIERS[TTIER].far-10:470;
  rimL.visible=fillL.visible=!low;   // two fewer lights in every shader
  (low?lowMat:highMat)(scene);if(low)for(const d of[player,...pool])for(const m of d.kitM||[])if(m.userData.helm)flatMat(m);
  scene.traverse(o=>{const t=o.material&&o.material.map;if(!t)return;if(t.an0==null)t.an0=t.anisotropy;const v=low?1:t.an0;if(t.anisotropy!==v){t.anisotropy=v;t.needsUpdate=true;}});
@@ -2324,8 +2336,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='2.20';
+const GAME_VER='2.30';
 const PATCH=[
+ {version:'2.30',title:'Touch Performance',date:'2026-10-28',changes:{Performance:['Touch: physics solver does 24 passes per step instead of 30 (the solver is about 80% of physics time; 24 is the lowest that plays identically); AI decisions run at 200 Hz while physics and muscles stay at 400 Hz','Touch: adaptive quality judged on 3-second windows: if it can\'t hold about 45 fps it pulls in far scenery, and steps back up after 8 easy seconds','Touch now renders at native resolution (up to 2x); it used to be capped at 1.5x'],Visuals:['Touch: soft contact shadows under every player and the ball, so nobody floats without the shadow map'],'Bug Fixes':['Keyboard settings are unchanged']}},
  {version:'2.20',title:'Running Game',date:'2026-10-28',changes:{Gameplay:['Handoff plays line up in a pistol 5 yards deep (was 15), so the back reaches the line before the defence reaches him'],AI:['Receivers block on run plays: each takes a different defender, fits between him and the back and drives him off the runner\'s line; Strength decides the push, the defender\'s Strength and Awareness his chance to shed the block','Backs read the line: the called gap, one either side, or the cutback, whichever is least crowded (blocked defenders count less); Agility sets how fast he re-reads, Awareness how well']}},
  {version:'2.10',title:'Menu Reorganisation',date:'2026-10-28',changes:{UI:['Main menu is now five categories: Play, Player Hub, Teams & Rosters, Settings and Updates','Touch / Keyboard choice moved to Settings and is remembered; Play goes straight to Quick Play or Career','Player Hub opens your loaded career (or the career slots); Teams & Rosters opens the league clubs from anywhere','Career hub actions grouped under Match Day, My Player and League & Career']}},
  {version:'2.00',title:'Team Defence',date:'2026-10-28',changes:{AI:['Defenders work as a unit: once there is a runner, the best-placed defender attacks, the next takes a cut-off angle, the safety stays the last line between him and the goal, and the rest keep their man (while a pass is still possible) or hold contain on the outside','Predictive pursuit: each defender aims at where he can actually meet the runner, from his own speed, stamina and reaction; how far ahead he reads depends on Awareness; aim points ease instead of snapping on cuts and respect the sideline','Thrown balls: only defenders who can actually get there (or the safety over the top) leave their man to play it'],'Bug Fixes':['A quarterback running at or past the line, or scrambling, is now treated as a runner (it used to take him reaching midfield)']}},
@@ -2504,7 +2517,7 @@ function frame(now){
  const D=active();
  for(const d of D){use(d);sense();}
  while(acc>=DT){
-  for(const d of D){use(d);if(cur.ai)(RET?liveThink:cur.role==='dr'?drillThink:cur.role==='wr'?wrThink:cur.role==='rb'?rbThink:cur.role==='df'?defThink:qbThink)(DT);control(DT);for(const k in joints)drive(joints[k]);}
+  frame.sub=(frame.sub||0)+1;for(const d of D){use(d);if(cur.ai&&(!LOWFX||frame.sub%2===0))(RET?liveThink:cur.role==='dr'?drillThink:cur.role==='wr'?wrThink:cur.role==='rb'?rbThink:cur.role==='df'?defThink:qbThink)(LOWFX?2*DT:DT);control(DT);for(const k in joints)drive(joints[k]);}
   world.step(DT);acc-=DT;
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}
@@ -2526,7 +2539,7 @@ function frame(now){
    const look=new THREE.Vector3(pvx,pvy,pvz).lerp(lk,k);cam.position.lerp(bp,k);cam.lookAt(look);}}
  if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,window.DBGLY||.8,pel.position.z);}   // test hook: side view
  sun.position.set(pel.position.x+5,12,pel.position.z+4);sun.target.position.set(pel.position.x,0,pel.position.z);
- cam.updateMatrixWorld();preTick(performance.now());renderer.render(scene,cam);
+ cam.updateMatrixWorld();preTick(performance.now());blobTick();touchAdapt(frame.fdt||0);renderer.render(scene,cam);
 }
 requestAnimationFrame(frame);
 </script></body></html>

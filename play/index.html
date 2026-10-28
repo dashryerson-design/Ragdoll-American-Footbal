@@ -358,6 +358,18 @@ body.touch #phud #pcard .n{max-width:120px}
 details.rv{margin:0 0 10px;border:1px solid #ffffff18;border-left:4px solid var(--rc,#ffd23f);border-radius:4px;background:#11161e}details.rv summary{list-style:none;cursor:pointer;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-family:"Barlow Condensed"}details.rv summary::-webkit-details-marker{display:none}
 details.rv summary b{font:700 19px "Barlow Condensed";color:#fff}details.rv summary em{font:600 13px "Barlow Condensed";letter-spacing:.12em;color:var(--rc,#ffd23f);font-style:normal;text-transform:uppercase}details.rv summary span{grid-column:1/3;font:500 15px "Barlow Condensed";color:#b8c4d2}
 details.rv ol{margin:0;padding:4px 14px 12px 34px;font:500 15px/1.5 "Barlow Condensed";color:#cfd8e3}details.rv ol li.k{color:#ffd23f}details[open].rv summary{border-bottom:1px solid #ffffff12}
+#achq{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));z-index:40;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.achn{min-width:240px;max-width:min(340px,calc(100vw - 32px));display:grid;grid-template-columns:38px 1fr;gap:2px 10px;align-items:center;padding:10px 14px;border-radius:4px;background:linear-gradient(100deg,#121922f2,#0b0f15f2);border:1px solid #ffffff1c;border-left:4px solid var(--tc,#ffd23f);box-shadow:0 10px 30px #000a;font-family:"Barlow Condensed";animation:achIn 3.4s ease forwards}
+.achn i{grid-row:1/4;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:800 18px system-ui;font-style:normal;background:var(--tc,#ffd23f);color:#111}.achn small{font:700 11px "Barlow Condensed";letter-spacing:.18em;color:var(--tc,#ffd23f)}.achn b{font:700 18px/1.1 "Barlow Condensed";color:#fff}.achn span{font:500 14px/1.25 "Barlow Condensed";color:#b8c4d2}
+@keyframes achIn{0%{opacity:0;transform:translateX(30px)}8%,88%{opacity:1;transform:none}100%{opacity:0;transform:translateX(30px)}}
+.tpv{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}.tpv button{padding:7px 12px!important;font:700 14px "Barlow Condensed"!important;letter-spacing:.06em;background:#ffffff0f!important;border:1px solid #ffffff1f!important;color:#cfd8e3!important;border-radius:3px;cursor:pointer}.tpv button.on{background:#ffd23f!important;color:#111!important;border-color:#ffd23f!important}
+.tpv.sm button{padding:4px 9px!important;font-size:13px!important}
+.mvp{margin:0 0 16px;padding:14px 16px;border:1px solid #ffd23f55;border-radius:4px;background:linear-gradient(120deg,#1b1a10,#0f1218 60%)}.mvp h4{margin:0 0 2px!important;color:#ffd23f!important}.mvp .hl{font:italic 700 18px "Barlow Condensed";color:#fff;margin:2px 0 10px}
+.arow{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto;gap:4px 10px;align-items:center;padding:7px 8px;border-top:1px solid #ffffff10;font-family:"Barlow Condensed"}.arow:first-of-type{border-top:0}.arow .rk{font:800 20px "Barlow Condensed";color:#9aa8b8;text-align:center}.arow.lead .rk{color:#ffd23f}
+.arow b{font:700 17px "Barlow Condensed";color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.arow small{display:block;font:500 13px "Barlow Condensed";color:#9aa8b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.arow .sc{font:700 18px "Barlow Condensed";color:#fff;text-align:right}.arow .mv{font:700 13px "Barlow Condensed";min-width:30px;text-align:right}.mv.up{color:#3ee07a}.mv.dn{color:#ff6a5a}.mv.nw{color:#62bfff}
+.arow.me{background:#1e9bff1f;border-radius:3px}.arow.gap{border-top:1px dashed #ffffff25}.abox{margin:0 0 12px;padding:12px 14px;border:1px solid #ffffff18;border-radius:4px;background:#11161e}.abox h4{margin:0!important}.abox p.d{margin:2px 0 6px;font:500 14px "Barlow Condensed";color:#9aa8b8}
+.awin{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;margin:0 0 10px;padding:12px 14px;border:1px solid #ffd23f40;border-left:4px solid #ffd23f;border-radius:4px;background:#14130d}.awin small{font:700 12px "Barlow Condensed";letter-spacing:.16em;color:#ffd23f}.awin b{font:700 20px "Barlow Condensed";color:#fff}.awin p{grid-column:1/3;margin:2px 0 0;font:500 15px/1.35 "Barlow Condensed";color:#cfd8e3}.awin .vt2{font:600 14px "Barlow Condensed";color:#9aa8b8;text-align:right}
+.achg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.ach{padding:10px 12px;border:1px solid #ffffff16;border-radius:4px;background:#11161e;font-family:"Barlow Condensed";opacity:.62}.ach.on{opacity:1;border-color:var(--tc,#ffd23f)}.ach b{font:700 16px "Barlow Condensed";color:#fff}.ach small{float:right;font:700 11px "Barlow Condensed";letter-spacing:.14em;color:var(--tc,#9aa8b8)}.ach p{margin:2px 0 6px;font:500 14px/1.25 "Barlow Condensed";color:#b8c4d2}.ach .pb{height:4px;border-radius:2px;background:#ffffff14;overflow:hidden}.ach .pb i{display:block;height:100%;background:var(--tc,#ffd23f)}
 .rvempty{padding:22px;border:1px dashed #ffffff26;border-radius:4px;text-align:center;font:500 16px/1.4 "Barlow Condensed";color:#9aa8b8}#ppc .ppk{position:absolute;left:0;top:0;will-change:transform}
 .ppk .in{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:7px;align-items:center;min-width:92px;max-width:148px;padding:4px 9px 5px 6px;background:linear-gradient(180deg,#151c27f0,#080b10e8);border:1px solid #ffffff1c;border-left:2px solid var(--k);border-radius:3px;box-shadow:0 6px 18px #000a,inset 0 1px 0 #ffffff12;font-family:"Barlow Condensed","Arial Narrow",sans-serif;color:#fff;opacity:0;transform:translateY(var(--dy)) scale(.94);animation:ppIn .38s cubic-bezier(.2,.8,.2,1) forwards}
 .ppk.o{--k:#62bfff;--dy:6px}.ppk.d{--k:#ff6a5a;--dy:-6px}.ppk.you .in{box-shadow:0 6px 18px #000a,0 0 0 1px var(--k),0 0 14px color-mix(in srgb,var(--k) 45%,transparent)}
@@ -425,7 +437,7 @@ body.cine #tc,body.cine #phud,body.cine #xphud{display:none!important}
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
 <div id="pnm" class="ov" hidden role="dialog" aria-modal="true" aria-labelledby="pnhd"><div class="pnbox"><div class="pnh"><h2 id="pnhd">PATCH NOTES<small id="pnsub"></small></h2><button id="pnx">CLOSE</button></div><div id="pnl"></div></div></div>
 <div id="pcs" class="ov" hidden role="dialog" aria-label="Choose your play"><div class="pch"><small>// NEW POSSESSION</small><h2>CHOOSE YOUR PLAY</h2></div><div id="pcards"></div></div>
-<div id="ppc" hidden aria-hidden="true"></div><div id="rvm" hidden aria-live="polite"></div><div id="ppn" hidden aria-hidden="true"></div>
+<div id="ppc" hidden aria-hidden="true"></div><div id="rvm" hidden aria-live="polite"></div><div id="achq" aria-live="polite"></div><div id="ppn" hidden aria-hidden="true"></div>
 <div id="set" class="ov scr" hidden><div class="crumb">// SETTINGS</div><h2 class="ttl">SETTINGS</h2><section class="sset"><h4>CONTROLS</h4><p class="note">How you play: changes the on-screen controls and the button prompts. Saved on this device.</p><div class="ssc"><button class="ch" id="ctouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="currentColor" stroke-width="5"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#5fd4ff"/></svg><span><b>TOUCH</b><small>Phone &amp; tablet</small></span></button>
 <button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="currentColor" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#5fd4ff" stroke-width="5"/><path d="M103 18v14" stroke="#5fd4ff" stroke-width="5"/></svg><span><b>KEYBOARD</b><small>Keyboard &amp; mouse</small></span></button></div><p class="note">Touch button positions and sizes: pause during a game → Edit Button Layout.</p></section><button class="ghost" id="setback">BACK</button></div>
 <div id="cskip" class="ov scr" hidden role="dialog" aria-labelledby="cskt"><div class="sset"><h4>PRE-DRAFT COMBINE</h4><h2 class="ttl" id="cskt">Skip the Combine?</h2><p class="note">You go straight to your scouting report with a standard, mid-level evaluation: solid but unspectacular results, clearly marked as estimated. Your ratings, OVR and player don't change. You can still run any drill afterwards; a real result replaces that drill's estimate.</p><div class="row"><button class="pri" id="cskyes">Skip Combine</button><button class="ghost" id="cskno">Return to the tutorial</button></div></div></div>
@@ -1602,7 +1614,7 @@ function playTick(){if(!playOn)return;if(!$m('pcs').hidden){playTick.t=performan
  if(fumT){if(car){fumT=0;if(car.cur.team!==POSS()){crowdEvent('turnover',POSS());RET=car.cur.team===ot?null:{team:car.cur.team};toast('FUMBLE! '+TFULL[car.cur.team]+' BALL','#ff5a4a');hud();}else toast('RECOVERED');}   // loose ball: whoever falls on it has it, and the play goes on
   else{if(performance.now()-fumT>500&&ball.position.y<.35){let best=null,bd=1e9;for(const d of roster){const P=d.pel.position,dd=Math.hypot(P.x-ball.position.x,P.z-ball.position.z)-.5*E(d,'rea');if(dd<bd){bd=dd;best=d;}}
    if(best&&bd<1.4){const me=curD;use(best);grabBall();use(me);}}return;}}   // the scramble: whoever gets there first (quick reactions help) falls on it
- if(car&&car.cur.team!==POSS()){crowdEvent('turnover',POSS());rivEv('int',car,PASS&&PASS.by);RET={team:car.cur.team};toast('INTERCEPTED! '+TFULL[car.cur.team]+' BALL','#ff5a4a');hud();}   // a pick is live: he can run it back, everyone switches jobs on the spot
+ if(car&&car.cur.team!==POSS()){crowdEvent('turnover',POSS());rivEv('int',car,PASS&&PASS.by);if(MATCH&&PASS&&PASS.by===player)MATCH.st.ithr=(MATCH.st.ithr||0)+1;RET={team:car.cur.team};toast('INTERCEPTED! '+TFULL[car.cur.team]+' BALL','#ff5a4a');hud();}   // a pick is live: he can run it back, everyone switches jobs on the spot
  if(car){const p=car.pel.position,D=DIR(),tm=car.cur.team;
   if(p.z*D>GOAL_Z){if(!RET)tally(car,p.z,1);else if(MATCH&&car===player)MATCH.st.dtd++;SCORE[tm]+=7;crowdEvent('td',tm);rivTD(tm,car);flip=-25*YD;NEXT=tm===ot?null:ot;playOver(RET?'PICK SIX! '+TFULL[tm]:TFULL[tm]+' TOUCHDOWN!',hx(TEAM[tm][0]));}   // after a pick six the team that threw it gets it back
   else if(RET&&(Math.abs(p.x)>FW/2||car.limp)){flip=p.z>GOAL_Z?-30*YD:-p.z;NEXT=tm;playOver((car.limp?'DOWNED':'OUT OF BOUNDS')+' · '+TFULL[tm]+' BALL','#ff5a4a');}   // return over: their ball where he went down (a pick downed in his own end zone is a touchback)
@@ -2149,7 +2161,7 @@ function tblHTML(p,edit){const base=styleAt(p.style),key=STYLES[p.style][2],row=
 const pviHTML=p=>{const st=STYLES[p.style];return`<div class="ovr">${ovr(p.att,p.style)} <small>OVR</small></div><h3>${esc(tcase(st[0]))}</h3><div class="nm">${esc(p.first||'First')} ${esc(p.last||'Last')} · #${p.num>=0?p.num:''}</div><p>${st[1]}</p>`;};
 // ================= SEASON: 20-week round robin (+ rematches), simulated league, 16-team seeded bracket =================
 const zst=()=>Object.fromEntries(STK.map(k=>[k,0]));
-function newSeason(p,year){const a=[...Array(16).keys()].sort(()=>Math.random()-.5),weeks=[];
+function newSeason(p,year){if(p.draft&&p.awRookie==null)p.awRookie=year;const a=[...Array(16).keys()].sort(()=>Math.random()-.5),weeks=[];
  for(let r=0;r<15;r++){weeks.push(Array.from({length:8},(_,i)=>r%2?[a[15-i],a[i]]:[a[i],a[15-i]]));a.splice(1,0,a.pop());}   // circle method: everyone meets everyone once
  for(let r=0;r<5;r++)weeks.push(weeks[r].map(([x,y])=>[y,x]));   // weeks 16-20: rematches with home and away swapped
  p.season={year,week:0,weeks,res:weeks.map(w=>w.map(()=>null)),rat:(lgEnsure(p),CLUBS.map((_,i)=>lgRat(p,i))),st:zst(),po:null,champ:null,ugames:0};}
@@ -2168,9 +2180,9 @@ function record(p,ctx,mine,theirs){const S=p.season;
  else{const G=S.po&&S.po.r===ctx.r&&S.po.rounds[ctx.r][ctx.g];if(!G||G.s)return false;if(mine===theirs)mine+=7;G.s=G.t[0]===p.team?[mine,theirs]:[theirs,mine];}   // playoff tie: your side wins it in overtime
  advance(p);return true;}
 function advance(p){const S=p.season;
- if(S.week<20){S.weeks[S.week].forEach(([a,b],g)=>{if(!S.res[S.week][g])S.res[S.week][g]=simScore(S.rat[a],S.rat[b]);});S.week++;if(S.week===20)startPO(S);return;}
+ if(S.week<20){S.weeks[S.week].forEach(([a,b],g)=>{if(!S.res[S.week][g])S.res[S.week][g]=simScore(S.rat[a],S.rat[b]);});awWeek(p,S,S.week);S.week++;if(S.week===20)startPO(S);return;}
  const R=S.po.rounds[S.po.r];for(const G of R)if(!G.s)G.s=simScore(S.rat[G.t[0]],S.rat[G.t[1]],1);
- const win=R.map(G=>G.s[0]>G.s[1]?G.t[0]:G.t[1]);if(S.po.r===3){S.champ=win[0];if(win[0]===p.team){p.titles=(p.titles||0)+1;}return;}
+ const win=R.map(G=>G.s[0]>G.s[1]?G.t[0]:G.t[1]);if(S.po.r===3){S.champ=win[0];if(win[0]===p.team){p.titles=(p.titles||0)+1;}awFinal(p,S);return;}
  const nx=[];for(let i=0;i<win.length;i+=2)nx.push({t:[win[i],win[i+1]],s:null});S.po.rounds.push(nx);S.po.r++;}
 function startPO(S){const st=standings(S),seed=st.map(x=>x.i);S.po={seeds:seed,r:0,rounds:[SEEDPAIR.map(([a,b])=>({t:[seed[a-1],seed[b-1]],s:null}))]};}   // every club qualifies: 1 v 16, 2 v 15 ... winners move up the bracket
 // your own game simulated (no XP, no stats): the team plays without you
@@ -2182,9 +2194,9 @@ function mates(p,c=p.team){const L=lgEnsure(p);return L.rost[c].filter(id=>id!==
 let HTAB='over';
 function carUI(){const p=PROF;if(p&&p.draft&&!p.season){newSeason(p,1);saveProf(p);}hubUI();}
 const posLbl=()=>{const b=$m('cpos');if(b&&PROF)b.textContent='Offence: '+{qb:'Quarterback',wr:'Wide Receiver',rb:'Running Back'}[PROF.pos||STYLES[PROF.style][4]];};   // position is its own choice; playstyle never changes it
-const HCATS=[['over','Overview',['over'],['cnew']],['match','Match Day',['next','sched'],['ccomb','cplay','csim']],['player','My Player',['player','attr','stats'],['cupg','cedit','cpos']],['league','League',['team','stand','riv'],['cteams']]];   // [id, label, tabs, hub actions]; Main Menu stays in every category
+const HCATS=[['over','Overview',['over'],['cnew']],['match','Match Day',['next','sched','top'],['ccomb','cplay','csim']],['player','My Player',['player','attr','stats'],['cupg','cedit','cpos']],['league','League',['team','stand','riv'],['cteams']]];   // [id, label, tabs, hub actions]; Main Menu stays in every category
 let HCAT='over';
-function hubUI(){posLbl();const p=PROF,T=[['over','Overview'],['player','Player'],['attr','Ratings'],['team','Team'],['sched','Schedule'],['stand','Standings'],['stats','Stats'],['next','Next Match'],['riv','Rivalries']];
+function hubUI(){posLbl();const p=PROF,T=[['over','Overview'],['player','Player'],['attr','Ratings'],['team','Team'],['sched','Schedule'],['stand','Standings'],['stats','Stats'],['next','Next Match'],['riv','Rivalries'],['top','Top Performers']];
  const C=HCATS.find(c=>c[2].includes(HTAB))||HCATS[0];HCAT=C[0];
  $m('htabs').innerHTML=p?`<div class="hcats">${HCATS.map(c=>`<button data-c="${c[0]}" class="${c[0]===HCAT?'on':''}">${c[1]}</button>`).join('')}</div>`+(C[2].length>1?`<div class="hsub">${T.filter(([k])=>C[2].includes(k)).map(([k,l])=>`<button data-t="${k}" class="${k===HTAB?'on':''}">${l}</button>`).join('')}</div>`:''):'';
  const S=p&&p.season,n=p&&p.draft?nextGame(p):null,c=p?club(p.team??0):null;
@@ -2217,9 +2229,10 @@ const TABS={
  stand:(p,S)=>!S?'<h3>Standings</h3><p class="note">Your season starts after the draft.</p>':`<h3>Season ${S.year} Standings</h3><table class="gt"><tr><th>Seed</th><th>Club</th><th>W-L-T</th><th style="text-align:right">PF</th><th style="text-align:right">PA</th><th style="text-align:right">Diff</th></tr>${standings(S).map((x,i)=>`<tr class="${x.i===p.team?'me':''}"><td>${i+1}</td><td>${tn(x.i)}</td><td>${x.w}-${x.l}-${x.t}</td><td class="n">${x.pf}</td><td class="n">${x.pa}</td><td class="n">${x.pf-x.pa>0?'+':''}${x.pf-x.pa}</td></tr>`).join('')}</table><p class="note">All 16 clubs make the playoffs, seeded by wins: 1 v 16, 2 v 15 … winners move up the bracket to the Championship.</p>${S.po?bracket(p,S):''}`,
  stats:(p,S)=>`<h3>Statistics</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px"><div><h4>Season ${S?S.year:''}</h4>${rowS(S?S.st:zst(),STL)}</div><div><h4>Career · ${p.career.gp} games</h4>${rowS(p.career,STL)}</div></div>`,
  next:(p,S,n)=>nextCard(p,S,n),
- riv:p=>rivHub(p)};
+ riv:p=>rivHub(p),
+ top:(p,S)=>topHub(p,S)};
 function bracket(p,S){const P=S.po;return`<div class="brk">${[0,1,2,3].map(r=>`<div class="col"><small style="color:#aaa;letter-spacing:.14em">${RNAME[r].toUpperCase()}</small>${(P.rounds[r]||Array.from({length:8>>r},()=>null)).map(G=>!G?'<div class="bg"><div><span>TBD</span></div><div><span>TBD</span></div></div>':`<div class="bg${G.t.includes(p.team)?' me':''}">${G.t.map((t,j)=>`<div class="${G.s?(G.s[j]>G.s[1-j]?'w':'l'):''}"><span>${P.seeds.indexOf(t)+1} ${club(t).ab}</span><span>${G.s?G.s[j]:''}</span></div>`).join('')}</div>`).join('')}</div>`).join('')}</div>`;}
-{$m('htabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.c){const C=HCATS.find(c=>c[0]===b.dataset.c);HTAB=C[2][0];}else HTAB=b.dataset.t;hubUI();};$m('csim').onclick=simMine;}
+{$m('hmain').addEventListener('click',e=>{const b=e.target.closest('[data-tp]');if(!b)return;const[k,v]=b.dataset.tp.split(':');TOPV[k]=v;hubUI();});$m('htabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.c){const C=HCATS.find(c=>c[0]===b.dataset.c);HTAB=C[2][0];}else HTAB=b.dataset.t;hubUI();};$m('csim').onclick=simMine;}
 function carUI_old(){}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 {const mmGo=(m,b)=>{if(mmGo.t)return;b.classList.add('prs');$m('mm').classList.add('out');mmGo.t=setTimeout(()=>{mmGo.t=0;b.classList.remove('prs');$m('mm').classList.remove('out');pendMode=m;setInput(m);show('mode');},380);};   // press, fade to black, then the existing flow
@@ -2444,8 +2457,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.19';
+const GAME_VER='3.20';
 const PATCH=[
+ {version:'3.20',title:'Awards & Achievements',date:'2026-10-28',changes:{Career:['Top Performers in Match Day: a live MVP race, 14 more award races, league stat leaders, weekly honours and award history','End-of-season awards decided by a 50-voter panel and frozen in history','29 achievements with bronze / silver / gold tiers and unlock notifications']}},
  {version:'3.19',title:'Rivalries',date:'2026-10-28',changes:{Career:['Rivalries build from real games: club rivals from close finishes, streaks and playoff knockouts; personal rivals from repeated one-on-one battles','New Rivalries tab in League, a RIVALRY GAME card before big matchups and a rivalry recap after them','Your rivals wear a gold marker on the pre-snap player cards, a nemesis a red one']}},
  {version:'3.18',title:'Hit Sounds',date:'2026-10-28',changes:{Audio:['Tackles now sound like tackles: light, heavy and huge hits, chosen by how hard the collision really was, in varied clips']}},
  {version:'3.17',title:'Coached Drills',date:'2026-10-28',changes:{Career:['Every Combine drill now opens with the Head Coach: camera shots of the drill, what it measures and the controls, then a ghost example player shows how it is done','Each explanation stays up at least 2 seconds after it is fully shown; skip a briefing on purpose with the Skip button / Backspace','Your attempt, clock and score only start after the briefing']}},
@@ -2859,6 +2873,191 @@ function draftShow(){const p=PROF,D=p.draft,ord=D.order,ov=D.overall,first=Math.
 {$m('ccomb').onclick=()=>{if(!PROF)return;if(PROF.draft)return draftShow();if(!(PROF.combine||{}).intro)return introStart();show('comb');combUI();};$m('kback').onclick=()=>{show('car');carUI();};$m('dskip').onclick=()=>draftShow.skip();$m('dgo').onclick=()=>{show('car');carUI();};
  $m('cskyes').onclick=skipCombine;$m('cskno').onclick=()=>{show('comb');combUI();};
  $m('clist').onclick=e=>{const b=e.target.closest('button');if(b)drillStart(+b.dataset.i);};}
+// ===== season stats, awards and achievements =========================================================================================
+// LEAGUE STATS: only your own matches record real per-player stats (MATCH.st). Every other line comes from the league's box-score simulation:
+// each completed regular-season game is split into per-player lines that add up to its real final score (TDs = points / 7), driven by the
+// players' ratings and roles, seeded by season/week/game so the same save always gives the same numbers. In your games your real line is used
+// and your team-mates fill the rest. One authoritative store: S.ps (season totals per stable player id; you are 'U'), S.pg (per-game lines).
+const AWS=['att','comp','pyd','ptd','ithr','rec','recy','rectd','rush','rtd','tak','stop','int','pd','dtd'];
+const roleOf=(p,id)=>{if(id==='U'){const q=p.pos||STYLES[p.style][4];return q==='qb'?'qb':q==='rb'?'rb':STYLES[p.style][0]==='SHUTDOWN CORNER'||STYLES[p.style][0]==='DEFENSIVE SPECIALIST'?'def':'wr';}
+ const st=p.lg.pl[id].style,n=STYLES[st][0];return STYLES[st][4]==='qb'?'qb':n==='ELUSIVE RUNNER'||n==='POWER RUNNER'?'rb':n==='SHUTDOWN CORNER'||n==='DEFENSIVE SPECIALIST'?'def':'wr';};
+const atOf=(p,id)=>id==='U'?p.att:p.lg.pl[id].att,nmOf=(p,id)=>id==='U'?`${p.first} ${p.last}`:`${p.lg.pl[id].first} ${p.lg.pl[id].last}`;
+const hsh=(...a)=>{let h=2166136261;for(const c of a.join('|')){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;};
+function pick(R,ids,wf){const w=ids.map(wf),t=w.reduce((a,b)=>a+b,0);let x=R()*t;for(let i=0;i<ids.length;i++){x-=w[i];if(x<=0)return ids[i];}return ids[ids.length-1];}
+function boxGame(p,S,w,g,a,b,sa,sb,U){const R=rng(hsh(S.year,w,g,a,b)),L=p.lg,team=c=>L.rost[c].filter(id=>id),lines={},ln=id=>id?lines[id]||(lines[id]=Object.fromEntries(AWS.map(k=>[k,0]))):{};
+ const side=(off,def,pts,uOff)=>{const O=team(off),D=team(def),at=id=>atOf(p,id),uIn=U&&O.includes('U'),qbU=uIn&&roleOf(p,'U')==='qb';
+  const qb=qbU?'U':O.filter(id=>id!=='U').sort((x,y)=>(at(y).tha+at(y).thp)-(at(x).tha+at(x).thp)||(x<y?-1:1))[0],rx=O.filter(id=>id!==qb),run=O.filter(id=>id!==qb);
+  let td=Math.round(pts/7);if(uIn){const u=U;Object.assign(ln('U'),Object.fromEntries(AWS.map(k=>[k,u[k]||0])));td-=u.ptd+u.rectd+u.rtd+u.dtd;
+   for(let i=0;i<u.ptd;i++)ln(pick(R,rx.filter(x=>x!=='U'),id=>at(id).cth+at(id).spd)).rectd++;for(let i=0;i<u.rectd;i++)if(qb!=='U')ln(qb).ptd++;}   // your real TDs, credited to the right partner
+  td=Math.max(0,td);const accF=cl((at(qb).tha-40)/55,0,1);
+  for(let i=0;i<td;i++){if(!qbU&&R()<.65){ln(qb).ptd++;ln(pick(R,rx.filter(x=>x!=='U'),id=>at(id).cth+at(id).spd+(roleOf(p,id)==='wr'?40:0))).rectd++;}else{const c=pick(R,run.filter(x=>x!=='U'),id=>at(id).car+at(id).spd+(roleOf(p,id)==='rb'?50:0));if(c)ln(c).rtd++;}}
+  if(!qbU){let yd=Math.round(70+td*22+R()*55*(.6+accF)),cmp=Math.round(yd/(9+R()*4));for(const id of rx){if(id==='U'){yd-=0;continue;}}
+   const uRec=uIn&&!qbU?U.recy:0,uC=uIn&&!qbU?U.rec:0;yd=Math.max(yd,uRec);cmp=Math.max(cmp,uC);const others=rx.filter(x=>x!=='U');let ry=yd-uRec,rc=cmp-uC;
+   for(let i=0;i<rc;i++){const r=pick(R,others,id=>at(id).cth+at(id).rte*.5+(roleOf(p,id)==='wr'?30:0));const y=i===rc-1?Math.max(0,ry):Math.round(ry/(rc-i)*(.5+R()));ln(r).rec++;ln(r).recy+=y;ry-=y;}
+   const q=ln(qb);q.pyd+=yd;q.comp+=cmp;q.att+=Math.round(cmp/(.5+.32*accF+R()*.08));}
+  for(const id of run.filter(x=>x!=='U')){const k=roleOf(p,id)==='rb'?1:.35;ln(id).rush+=Math.round((10+R()*35)*k*(.6+at(id).spd/150));}
+  // the defence on this possession side: tackles, stops, picks and breakups, with your real defensive line kept as is
+  const uD=U&&D.includes('U'),dd=D.filter(x=>x!=='U');let tk=Math.round(9+R()*7)-(uD?U.tak:0),ints=(R()<.35+.45*(1-accF)?1:0)+(R()<.12?1:0),pds=Math.round(R()*3);
+  if(qbU&&uIn)ints=U.ithr||0;else if(uD)ints=Math.max(0,ints-(U.int||0));   // your real interceptions (thrown or made) are the truth for this side
+  for(let i=0;i<Math.max(0,tk);i++)ln(pick(R,dd,id=>at(id).tak+at(id).str*.5+(roleOf(p,id)==='def'?40:0))).tak++;
+  for(let i=0;i<ints;i++){ln(pick(R,dd,id=>at(id).int+at(id).cov+(roleOf(p,id)==='def'?40:0))).int++;if(qb!=='U')ln(qb).ithr++;}
+  for(let i=0;i<pds;i++)ln(pick(R,dd,id=>at(id).cov+(roleOf(p,id)==='def'?30:0))).pd++;for(const id of dd)ln(id).stop+=Math.round(lines[id]?lines[id].tak*.3:0);};
+ side(a,b,sa);side(b,a,sb);return lines;}
+function awSeason(S){return S.aw||(S.aw={bx0:S.week,ps:{},pg:{},wk:{},snap:{},final:null,done:{}});}
+function awWeek(p,S,w){const A=awSeason(S);if(A.done[w])return;A.done[w]=1;   // each week processed exactly once
+ S.weeks[w].forEach(([a,b],g)=>{const r=S.res[w][g];if(!r)return;const U=p._ubox&&p._ubox.w===w&&(a===p.team||b===p.team)?p._ubox:null,L=boxGame(p,S,w,g,a,b,r[0],r[1],U);
+  for(const id in L){if(id==='U'&&!U)continue;const T=A.ps[id]||(A.ps[id]=Object.fromEntries([...AWS.map(k=>[k,0]),['gp',0],['tm',{}]]));const c=p.lg.rost[a].includes(id)?a:b,ln=L[id],mg=c===a?r[0]-r[1]:r[1]-r[0];
+   for(const k of AWS)T[k]+=ln[k];T.gp++;T.tm[c]=(T.tm[c]||0)+1;(A.pg[id]||(A.pg[id]=[])).push({w,c,mg,v:+lineVal(ln).toFixed(2),o:+offVal(ln).toFixed(2),d:+defVal(ln).toFixed(2),ln});}});
+ const E=awEval(p,S,true);A.wk[w]=weeklyHonours(p,S,w);A.snap[w]={};for(const aw of AWARDS)if(E[aw.id])A.snap[w][aw.id]=E[aw.id].rank.slice(0,12).map(x=>x.id);
+ achCheck(p,{week:w,S});}
+// one value scale, each event counted once: a TD is 6 for whoever scored or threw it (the receiver and the passer are different players)
+const offVal=l=>l.pyd*.04+l.ptd*4-l.ithr*3+l.rush*.1+l.rtd*6+l.recy*.1+l.rec*.4+l.rectd*6,defVal=l=>l.tak*1+l.stop*.5+l.int*5+l.pd*1.5+l.dtd*6,lineVal=l=>offVal(l)+defVal(l);
+// award definitions: eligibility + an evaluation profile. Add / remove awards here only
+const zsc=(xs,f)=>{const v=xs.map(f),m=v.reduce((a,b)=>a+b,0)/(v.length||1),sd=Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(v.length||1))||1;return x=>(f(x)-m)/sd;};
+const AWARDS=[
+ {id:'mvp',n:'Most Valuable Player',d:'Overall value: production on both sides, efficiency, consistency, availability and winning.',w:{tot:.42,eff:.14,con:.14,av:.12,win:.12,imp:.06}},
+ {id:'opoy',n:'Offensive Player of the Year',d:'Offensive production and efficiency per game.',w:{off:.65,eff:.2,av:.15}},
+ {id:'dpoy',n:'Defensive Player of the Year',d:'Tackles, stops, picks and breakups: disruption per game.',w:{def:.6,imp:.25,av:.15}},
+ {id:'oroy',n:'Offensive Rookie of the Year',d:'Best offensive rookie (first-year players).',rookie:1,w:{off:.7,eff:.15,av:.15}},
+ {id:'droy',n:'Defensive Rookie of the Year',d:'Best defensive rookie (first-year players).',rookie:1,w:{def:.7,imp:.15,av:.15}},
+ {id:'qb',n:'Best Quarterback',d:'Passing value per game, completion rate and avoiding interceptions.',role:['qb'],w:{pass:.6,cmp:.25,safe:.15}},
+ {id:'wr',n:'Best Receiver',d:'Receiving yards, catches and touchdowns per game.',role:['wr','def'],w:{recv:.8,av:.2}},
+ {id:'rb',n:'Best Running Back',d:'Rushing production per game.',role:['rb'],w:{rushv:.8,av:.2}},
+ {id:'bdp',n:'Best Coverage Defender',d:'Interceptions and pass breakups per game.',w:{cov:.75,av:.25}},
+ {id:'two',n:'Best Two-Way Player',d:'Strong on both sides: rewards the weaker of offence and defence.',w:{two:.8,av:.2}},
+ {id:'mip',n:'Most Improved Player',d:'Biggest gain in value per game over last season (needs a full previous season).',prev:1,w:{gain:1}},
+ {id:'brk',n:'Breakout Player of the Year',d:'From below-average last season to a top performer now.',prev:1,brk:1,w:{gain:.5,tot:.5}},
+ {id:'clutch',n:'Clutch Player of the Year',d:'Value per game in close games (decided by 7 or less, at least 2 played).',w:{clutch:1}},
+ {id:'cons',n:'Most Consistent Player',d:'Steady value every week: low variation among above-average players.',w:{con:.7,tot:.3}},
+ {id:'team',n:'Best Team Player',d:'Share of his own team\'s total production, weighted by its win rate.',w:{share:.8,win:.2}}];
+function awEval(p,S,fresh){const A=awSeason(S);if(!fresh&&A.cache&&A.cache.k===Object.keys(A.done).length)return A.cache.r;
+ const wks=Object.keys(A.done).length,minGp=Math.max(1,Math.ceil(wks*.5)),prev=(p.awPrev||{})[S.year-1]||null,all=Object.keys(A.ps);
+ const X=all.map(id=>{const T=A.ps[id],G=A.pg[id]||[],gp=T.gp||0,pg=v=>gp?v/gp:0,vals=G.map(g=>g.v),mean=vals.reduce((a,b)=>a+b,0)/(vals.length||1),sd=Math.sqrt(vals.reduce((a,b)=>a+(b-mean)**2,0)/(vals.length||1)),
+   close=G.filter(g=>Math.abs(g.mg)<=7),tmW=G.filter(g=>g.mg>0).length/(G.length||1),c=+Object.entries(T.tm).sort((a,b)=>b[1]-a[1])[0][0],
+   tmTot=all.filter(o=>A.ps[o].tm[c]).reduce((a,o)=>a+(A.pg[o]||[]).filter(g=>g.c===c).reduce((x,g)=>x+g.v,0),0);
+  const P=id==='U'?null:p.lg.pl[id],rk=id==='U'?(p.awRookie??1)===S.year:(P&&P.yrs===0&&S.year>1);
+  return{id,T,gp,c,role:roleOf(p,id),ok:gp>=minGp,tot:pg(lineVal(T)),off:pg(offVal(T)),def:pg(defVal(T)),eff:(T.att>=8?T.comp/T.att:0)+(T.rec?T.recy/T.rec/40:0)-(T.att?T.ithr/T.att*2:0),
+   con:vals.length>=2?-(sd/(Math.abs(mean)+1)):0,av:gp/(wks||1),win:tmW,imp:pg(T.int*5+T.dtd*6),pass:pg(T.pyd*.04+T.ptd*4-T.ithr*3),cmp:T.att>=8?T.comp/T.att:0,safe:T.att>=8?-T.ithr/T.att:0,
+   recv:pg(T.recy*.1+T.rec*.4+T.rectd*6),rushv:pg(T.rush*.1+T.rtd*6),cov:pg(T.int*5+T.pd*1.5),two:Math.min(pg(offVal(T)),pg(defVal(T))),clutch:close.length>=2?close.reduce((a,g)=>a+g.v,0)/close.length:null,
+   share:tmTot>0?G.filter(g=>g.c===c).reduce((a,g)=>a+g.v,0)/tmTot:0,rookie:rk,prevV:prev&&prev[id]!=null?prev[id]:null};});
+ const pool=X.filter(x=>x.ok),medPrev=(()=>{const v=pool.filter(x=>x.prevV!=null).map(x=>x.prevV).sort((a,b)=>a-b);return v.length?v[v.length>>1]:null;})(),medTot=(()=>{const v=pool.map(x=>x.tot).sort((a,b)=>a-b);return v.length?v[v.length>>1]:0;})();
+ for(const x of pool)x.gain=x.prevV!=null?x.tot-x.prevV:null;const out={};
+ for(const aw of AWARDS){let C=pool.filter(x=>(!aw.role||aw.role.includes(x.role))&&(!aw.rookie||x.rookie)&&(!aw.prev||x.gain!=null)&&(!aw.brk||x.prevV<medPrev)&&(aw.id!=='clutch'||x.clutch!=null)&&(aw.id!=='cons'||x.tot>=medTot));
+  if(C.length<2){out[aw.id]={aw,rank:[],why:C.length?'Only one eligible player':'No eligible players this season'};continue;}
+  const Zs=Object.fromEntries(Object.keys(aw.w).map(k=>[k,zsc(C,x=>x[k]??0)]));const sc=(x,j)=>Object.entries(aw.w).reduce((a,[k,v])=>a+v*(j?j[k]:1)*Zs[k](x),0);
+  const rank=C.map(x=>({id:x.id,x,s:+sc(x).toFixed(3)})).sort((a,b)=>b.s-a.s||b.x.tot-a.x.tot||b.x.gp-a.x.gp||(a.id<b.id?-1:1));out[aw.id]={aw,rank,sc};}
+ A.cache={k:Object.keys(A.done).length,r:out};return out;}
+// weekly honours from that week's lines only
+function weeklyHonours(p,S,w){const A=awSeason(S),G=Object.keys(A.pg).map(id=>({id,g:(A.pg[id]||[]).find(x=>x.w===w)})).filter(x=>x.g),o={};if(!G.length)return o;
+ const best=(f,flt)=>{const C=G.filter(x=>!flt||flt(x)).map(x=>({id:x.id,v:f(x)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v||(a.id<b.id?-1:1));return C[0]||null;},L=x=>x.g.ln,rl=x=>roleOf(p,x.id);
+ o.opow=best(x=>x.g.o);o.dpow=best(x=>x.g.d);o.qbw=best(x=>L(x).pyd*.04+L(x).ptd*4-L(x).ithr*3,x=>rl(x)==='qb');o.wrw=best(x=>L(x).recy*.1+L(x).rec*.4+L(x).rectd*6,x=>rl(x)!=='qb');
+ if(G.some(x=>rl(x)==='rb'))o.rbw=best(x=>L(x).rush*.1+L(x).rtd*6,x=>rl(x)==='rb');o.play=best(x=>L(x).int*5+L(x).pd*1.5,x=>L(x).int+L(x).pd>0);
+ o.clutch=best(x=>x.g.v,x=>x.g.mg>0&&x.g.mg<=7);o.allr=best(x=>Math.min(x.g.o,x.g.d));
+ o.brk=best(x=>{const P=(A.pg[x.id]||[]).filter(g=>g.w<w);if(P.length<2)return 0;const m=P.reduce((a,g)=>a+g.v,0)/P.length;return x.g.v-m*1.6;},x=>x.id!==(o.opow&&o.opow.id));
+ for(const k in o)if(!o[k])delete o[k];else o[k]={id:o[k].id,v:+o[k].v.toFixed(1),c:G.find(g=>g.id===o[k].id).g.c};return o;}
+const WKN={opow:'Offensive Player of the Week',dpow:'Defensive Player of the Week',qbw:'Quarterback of the Week',wrw:'Receiver of the Week',rbw:'Running Back of the Week',play:'Defensive Playmaker of the Week',clutch:'Clutch Performer of the Week',allr:'Best All-Round Performance',brk:'Breakout Player of the Week'};
+// end of season: a deterministic 50-voter panel (each voter re-weights the same profile's criteria by ±35%, seeded by season + award), 5-3-1 ballots, frozen
+function awFinal(p,S){const A=awSeason(S);if(A.final)return;const E=awEval(p,S,true),res=[];
+ for(const aw of AWARDS){const e=E[aw.id];if(!e||!e.rank.length){res.push({id:aw.id,n:aw.n,none:e?e.why:'No eligible players'});continue;}
+  const R=rng(hsh(S.year,aw.id)),pts={},top=e.rank.slice(0,8);for(let v=0;v<50;v++){const j=Object.fromEntries(Object.keys(aw.w).map(k=>[k,.65+R()*.7]));top.map(c=>({id:c.id,s:e.sc(c.x,j)})).sort((a,b)=>b.s-a.s||(a.id<b.id?-1:1)).slice(0,3).forEach((c,i)=>pts[c.id]=(pts[c.id]||0)+[5,3,1][i]);}
+  const V=Object.entries(pts).sort((a,b)=>b[1]-a[1]||e.rank.findIndex(x=>x.id===a[0])-e.rank.findIndex(x=>x.id===b[0])),win=V[0][0],wx=e.rank.find(x=>x.id===win).x;
+  res.push({id:aw.id,n:aw.n,win,nm:nmOf(p,win),c:wx.c,role:wx.role,votes:V.slice(0,5),why:awWhy(aw,wx),line:awLine(wx.T,wx.gp)});}
+ A.final=res;p.awHist=p.awHist||[];if(!p.awHist.some(h=>h.y===S.year))p.awHist.unshift({y:S.year,res,champ:S.champ});
+ p.awPrev=p.awPrev||{};p.awPrev[S.year]=Object.fromEntries(Object.keys(A.ps).map(id=>[id,+(lineVal(A.ps[id])/(A.ps[id].gp||1)).toFixed(2)]));for(const y in p.awPrev)if(+y<S.year-1)delete p.awPrev[y];
+ achCheck(p,{final:res,S});}
+const awLine=(T,gp)=>{const o=[`${gp} GP`];if(T.att)o.push(`${T.comp}/${T.att} · ${T.pyd} pass yds · ${T.ptd} TD · ${T.ithr} INT`);if(T.rec)o.push(`${T.rec} rec · ${T.recy} yds · ${T.rectd} TD`);if(T.rush)o.push(`${T.rush} rush yds · ${T.rtd} TD`);o.push(`${T.tak} tkl · ${T.int} INT · ${T.pd} PD`);return o.join(' · ');};
+function awWhy(aw,x){const T=x.T,g=x.gp||1,f=v=>(v/g).toFixed(1),bits=[];
+ const k=Object.entries(aw.w).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);for(const m of k.slice(0,2)){
+  if(m==='off'||m==='tot'||m==='pass'||m==='recv'||m==='rushv'){if(T.ptd||T.pyd)bits.push(`${T.pyd} passing yards and ${T.ptd} TDs`);if(T.recy)bits.push(`${T.recy} receiving yards (${T.rectd} TD)`);if(T.rush>80)bits.push(`${T.rush} rushing yards`);}
+  if(m==='def'||m==='cov'||m==='imp')bits.push(`${T.tak} tackles, ${T.int} interceptions and ${T.pd} breakups`);if(m==='con')bits.push(`the steadiest week-to-week value in the league`);if(m==='av')bits.push(`${x.gp} games played`);
+  if(m==='win')bits.push(`a ${(x.win*100|0)}% win rate`);if(m==='clutch')bits.push(`${x.clutch.toFixed(1)} value per game in close games`);if(m==='gain')bits.push(`+${x.gain.toFixed(1)} value per game over last season`);if(m==='share')bits.push(`${(x.share*100|0)}% of his team's production`);if(m==='two')bits.push(`real value on both offence and defence`);if(m==='cmp'||m==='eff'&&T.att>=8)bits.push(`${(T.comp/Math.max(1,T.att)*100|0)}% completions`);}
+ return [...new Set(bits)].slice(0,3).join(', ')+'.';}
+// ---------- achievements: id, category, condition (from real records only), optional tiers with progress; each unlock stored once
+const ACH=[
+ ['first_td','Career','First Career Touchdown','Score or throw your first touchdown.',p=>{const c=p.career;return c.ptd+c.rectd+c.rtd+c.dtd;},[1]],
+ ['first_ptd','Career','First Passing Touchdown','Throw a touchdown pass.',p=>p.career.ptd,[1]],
+ ['first_int','Career','First Interception','Pick off a pass.',p=>p.career.int,[1]],
+ ['first_win','Career','First Career Victory','Win a career match.',p=>p.career.w,[1]],
+ ['veteran','Career','Veteran Performer','Career games played.',p=>p.career.gp,[10,25,60]],
+ ['streak','Career','Winning Streak','Win career matches in a row.',p=>p.ach.st||0,[3,5,8]],
+ ['record','Career','Record Breaker','Set a new personal single-game high (passing, receiving or rushing yards) after 5+ games.',p=>p.ach.rec||0,[1]],
+ ['pass_ms','Offence','Passing Milestone','Career passing yards.',p=>p.career.pyd,[500,1500,4000]],
+ ['multi_td','Offence','Multi-Touchdown Game','Account for 3+ touchdowns in one match.',p=>p.ach.mtd||0,[1]],
+ ['rec_mc','Offence','Receiving Masterclass','100+ receiving yards in one match.',p=>p.ach.r100||0,[1]],
+ ['breakaway','Offence','Breakaway Runner','80+ rushing yards in one match.',p=>p.ach.ru80||0,[1]],
+ ['secure','Offence','Ball Security Expert','Throw 15+ passes in a match without an interception, five times.',p=>p.ach.clean||0,[5]],
+ ['playmaker','Defence','Defensive Playmaker','Career interceptions + passes defended.',p=>p.career.int+p.career.pd,[5,15,40]],
+ ['int2','Defence','Interception Specialist','Two interceptions in one match.',p=>p.ach.i2||0,[1]],
+ ['pick6','Defence','Game-Changing Turnover','Return an interception for a touchdown.',p=>p.career.dtd,[1]],
+ ['wall','Defence','Defensive Wall','6+ tackles in one match.',p=>p.ach.t6||0,[1]],
+ ['momentum','Defence','Momentum Shifter','An interception and a touchdown in the same match.',p=>p.ach.mom||0,[1]],
+ ['po_win','Competition','Playoff Winner','Win a playoff game.',p=>p.ach.pow||0,[1,3,6]],
+ ['champ','Competition','Champion','Win the league championship.',p=>p.titles||0,[1,2,3]],
+ ['unbeaten','Competition','Unbeaten Season','Finish a regular season without a loss in the games you played (10+ played).',p=>p.ach.unb||0,[1]],
+ ['riv_win','Competition','Rivalry Victory','Beat a club you have an established rivalry with.',p=>p.ach.rvw||0,[1,5]],
+ ['nemesis','Competition','Nemesis Slayer','Win the duel against your nemesis in a match.',p=>p.ach.nem||0,[1]],
+ ['wk_aw','Awards','Weekly Honour','Win a weekly award.',p=>p.ach.wk||0,[1,3,8]],
+ ['ssn_aw','Awards','Season Award Winner','Win an end-of-season award.',p=>p.ach.ssn||0,[1,3]],
+ ['mvp','Awards','League MVP','Win Most Valuable Player.',p=>p.ach.mvp||0,[1]],
+ ['riv_aw','Awards','Rival\'s Reckoning','Win a season award while holding a personal rivalry.',p=>p.ach.rva||0,[1]],
+ ['ovr','Development','Rising Star','Reach an overall rating.',p=>ovr(p.att,p.style),[70,80,90]],
+ ['allround','Development','All-Round Development','Have 6 attributes at 75 or higher.',p=>AK.filter(k=>p.att[k]>=75).length,[6]],
+ ['breakout','Development','Breakout Season','Win Most Improved or Breakout Player of the Year.',p=>p.ach.bo||0,[1]]];
+const TIERN=['','BRONZE','SILVER','GOLD'],TIERC=['#9aa8b8','#d08a4c','#c9d3de','#ffd23f'];
+const tierOf=(n,T)=>T.length===1?(n>=T[0]?3:0):T.filter(t=>n>=t).length;
+function achCheck(p,ev){const A=p.ach||(p.ach={u:{},seen:{}});
+ if(ev.m){const id=ev.m.id;if(A.seen[id])return;A.seen[id]=1;const S2=ev.S,td=S2.ptd+S2.rectd+S2.rtd+S2.dtd;A.st=ev.r==='w'?(A.st||0)+1:0;   // per-match counters, each match id once
+  if(td>=3)A.mtd=(A.mtd||0)+1;if(S2.recy>=100)A.r100=(A.r100||0)+1;if(S2.rush>=80)A.ru80=(A.ru80||0)+1;if(S2.att>=15&&!(S2.ithr||0))A.clean=(A.clean||0)+1;if(S2.int>=2)A.i2=(A.i2||0)+1;if(S2.tak>=6)A.t6=(A.t6||0)+1;if(S2.int&&td)A.mom=(A.mom||0)+1;
+  const B=A.best||(A.best={pyd:0,recy:0,rush:0});if((p.career.gp||0)>5&&['pyd','recy','rush'].some(k=>S2[k]>B[k]&&B[k]>0))A.rec=(A.rec||0)+1;for(const k in B)B[k]=Math.max(B[k],S2[k]);
+  if(ev.m.ctx&&ev.m.ctx.k==='po'&&ev.r==='w')A.pow=(A.pow||0)+1;const T=rivTeam(p,preMatch.op);if(ev.r==='w'&&T.lv>=1&&T.last&&T.last.id===id)A.rvw=(A.rvw||0)+1;
+  const D=ev.m.riv;if(D)for(const pid in D.pl){const r=rivPl(p,pid);if(r.mark==='nem'&&D.pl[pid].me>D.pl[pid].th)A.nem=(A.nem||0)+1;}}
+ if(ev.week!=null){const H=awSeason(ev.S).wk[ev.week]||{};const k='w'+ev.S.year+'-'+ev.week;if(!A.seen[k]){A.seen[k]=1;A.wk=(A.wk||0)+Object.values(H).filter(h=>h.id==='U').length;}}
+ if(ev.final){const k='f'+ev.S.year;if(!A.seen[k]){A.seen[k]=1;const mine=ev.final.filter(r=>r.win==='U');A.ssn=(A.ssn||0)+mine.length;if(mine.some(r=>r.id==='mvp'))A.mvp=1;if(mine.some(r=>r.id==='mip'||r.id==='brk'))A.bo=1;
+  if(mine.length&&Object.keys(rivEnsure(p).pl).some(id=>rivPl(p,id).mark))A.rva=1;const S3=ev.S,G=(awSeason(S3).pg.U||[]);if(G.length>=10&&G.every(g=>g.mg>=0))A.unb=(A.unb||0)+1;}}
+ for(const [id,cat,n,d,f,T] of ACH){const v=f(p),t=tierOf(v,T),had=A.u[id]?A.u[id].t:0;if(t>had){A.u[id]={t,y:p.season?p.season.year:0,at:Date.now()};achToast(cat,n,d,T.length>1?t:0);}}}
+function achToast(cat,n,d,t){const q=$m('achq');if(!q)return;const go=()=>{if(q.children.length>=2){setTimeout(go,900);return;}const e=document.createElement('div');e.className='achn';e.style.setProperty('--tc',TIERC[t||3]);
+ e.innerHTML=`<i>${t?'★':'✓'}</i><small>ACHIEVEMENT · ${cat.toUpperCase()}${t?' · '+TIERN[t]:''}</small><b>${esc(n)}</b><span>${esc(d)}</span>`;q.appendChild(e);setTimeout(()=>e.remove(),3400);};go();}   // queued: at most two on screen, the rest wait their turn
+// ---------- Top Performers (Player Hub → Match Day → Top Performers)
+const TOPV={v:'race',aw:'mvp',pos:'all',hy:''};
+function topHub(p,S){const v=TOPV.v,tabs=[['race','Award Races'],['lead','Stat Leaders'],['wk','Weekly Honours'],['ach','Achievements'],['hist','Award History']];
+ const nav=`<div class="tpv">${tabs.map(([k,l])=>`<button data-tp="v:${k}" class="${k===v?'on':''}">${l}</button>`).join('')}</div>`;
+ if(v==='ach')return`<h3>Top Performers</h3>${nav}${achView(p)}`;if(v==='hist')return`<h3>Top Performers</h3>${nav}${histView(p)}`;
+ if(!S||!p.draft)return`<h3>Top Performers</h3>${nav}<p class="note">The league starts tracking after the draft.</p>`;
+ const A=awSeason(S),wks=Object.keys(A.done).length;if(!wks)return`<h3>Top Performers</h3>${nav}<p class="note">Season ${S.year}: the first awards update arrives when week ${A.bx0+1} is complete.</p>`;
+ const head=`<p class="note">Season ${S.year} · ${S.week<20?'after week '+S.week:S.champ!=null?'season complete':'playoffs'} · regular-season stats${A.bx0?` (tracked from week ${A.bx0+1})`:''}. League lines for games you didn't play come from the league simulation; your lines are your real matches.</p>`;
+ return`<h3>Top Performers</h3>${nav}${head}${v==='race'?raceView(p,S):v==='lead'?leadView(p,S):wkView(p,S)}`;}
+const whoLn=(p,id,c)=>`${esc(nmOf(p,id))}${id==='U'?' (you)':''}`,teamLn=(p,c)=>{const B=club(c);return`${B.ic} ${B.name}`;};
+function raceRows(p,S,id,n){const E=awEval(p,S),e=E[id];if(!e||!e.rank.length)return`<p class="note">${e?e.why:'No eligible players'}.</p>`;const A=awSeason(S),ws=Object.keys(A.snap).map(Number).sort((a,b)=>a-b),pw=ws.length>1?A.snap[ws[ws.length-2]][id]:null;
+ const row=(r,i)=>{const pr=pw?pw.indexOf(r.id):-2,mv=pr===-2?'':pr<0?'<span class="mv nw">NEW</span>':pr>i?`<span class="mv up">▲${pr-i}</span>`:pr<i?`<span class="mv dn">▼${i-pr}</span>`:'<span class="mv">–</span>';
+  return`<div class="arow${i===0?' lead':''}${r.id==='U'?' me':''}"><span class="rk">${i+1}</span><span><b>${whoLn(p,r.id)}</b><small>${teamLn(p,r.x.c)} · ${r.x.role.toUpperCase()} · ${awLine(r.x.T,r.x.gp)}</small></span><span class="sc">${r.s.toFixed(2)}</span>${mv}</div>`;};
+ const R=e.rank,top=R.slice(0,n),ui=R.findIndex(r=>r.id==='U');let h=top.map(row).join('');
+ if(ui>=n)h+=`<div class="arow me gap"><span class="rk">${ui+1}</span><span><b>${whoLn(p,'U')}</b><small>${(R[0].s-R[ui].s).toFixed(2)} behind the leader · ${awLine(R[ui].x.T,R[ui].x.gp)}</small></span><span class="sc">${R[ui].s.toFixed(2)}</span><span></span></div>`;
+ else if(ui<0&&A.ps.U)h+=`<p class="note">You: ${A.ps.U.gp} games played${A.ps.U.gp<Math.ceil(Object.keys(A.done).length*.5)?' · not yet eligible (needs half the weeks played)':' · not eligible for this award'}.</p>`;return h;}
+function raceView(p,S){const E=awEval(p,S),A=awSeason(S),e=E.mvp,R=e&&e.rank||[],ws=Object.keys(A.snap).map(Number).sort((a,b)=>a-b),pw=ws.length>1?A.snap[ws[ws.length-2]].mvp:null;
+ let hl='';if(R.length){const lead=R[0],gap=R[1]?R[0].s-R[1].s:9;hl=pw&&pw[0]!==lead.id?`${esc(nmOf(p,lead.id))} moves into first place.`:pw&&pw[0]===lead.id&&ws.length>2?`${esc(nmOf(p,lead.id))} holds on to first.`:`${esc(nmOf(p,lead.id))} leads the early race.`;
+  if(R[1]&&gap<.15)hl+=` A tight race: ${esc(nmOf(p,R[1].id))} is only ${gap.toFixed(2)} behind.`;else if(R[1]&&gap>.8)hl+=` A clear lead of ${gap.toFixed(2)}.`;
+  if(pw){const out=pw.slice(0,5).filter(id=>!R.slice(0,5).some(r=>r.id===id));if(out.length)hl+=` ${esc(nmOf(p,out[0]))} drops out of the top five.`;}}
+ const fin=A.final&&A.final.find(r=>r.id==='mvp');
+ const chips=`<div class="tpv sm">${AWARDS.filter(a=>a.id!=='mvp').map(a=>`<button data-tp="aw:${a.id}" class="${TOPV.aw===a.id?'on':''}">${a.n.replace('Player of the Year','POY').replace('Rookie of the Year','ROY')}</button>`).join('')}</div>`;
+ const sel=AWARDS.find(a=>a.id===TOPV.aw&&a.id!=='mvp')||AWARDS[1];
+ return`<div class="mvp"><h4>${fin?'MVP · FINAL RESULT':'LIVE MVP RACE'}</h4><p class="d note" style="margin:0">${AWARDS[0].d} Scores are standard deviations above the league's eligible players.</p>${fin&&fin.win?`<div class="hl">🏆 ${esc(fin.nm)} wins MVP · ${fin.votes[0][1]} pts to ${fin.votes[1]?fin.votes[1][1]:0}</div>`:`<div class="hl">${hl}</div>`}${raceRows(p,S,'mvp',5)}</div>
+  ${S.champ!=null&&A.final?finalView(p,S):''}<h4>Other award races</h4>${chips}<div class="abox"><h4>${sel.n}</h4><p class="d">${sel.d}</p>${raceRows(p,S,sel.id,5)}</div>`;}
+function finalView(p,S){const A=awSeason(S);return`<h4>Season ${S.year} Awards</h4>${A.final.map(r=>r.none?`<div class="awin"><span><small>${r.n.toUpperCase()}</small><b>Not awarded</b></span><span></span><p>${esc(r.none)}.</p></div>`:
+ `<div class="awin"><span><small>${r.n.toUpperCase()}</small><b>${whoLn(p,r.win)}</b></span><span class="vt2">${teamLn(p,r.c)} · ${r.role.toUpperCase()}<br>${r.votes[0][1]} pts · margin ${r.votes[0][1]-(r.votes[1]?r.votes[1][1]:0)}</span><p>${esc(r.why)} ${esc(r.line)}<br><span style="color:#9aa8b8">Runners-up: ${r.votes.slice(1,3).map(v=>esc(nmOf(p,v[0]))+' ('+v[1]+')').join(', ')||'none'}${(()=>{const n=Object.values(A.wk).filter(h=>Object.values(h).some(x=>x.id===r.win)).length;return n?` · ${n} weekly honour week${n>1?'s':''}`:'';})()}</span></p></div>`).join('')}`;}
+function leadView(p,S){const A=awSeason(S),pos=TOPV.pos,ids=Object.keys(A.ps).filter(id=>pos==='all'||roleOf(p,id)===pos);
+ const cats=[['pyd','Passing yards'],['ptd','Passing TDs'],['cpct','Completion %'],['recy','Receiving yards'],['rec','Receptions'],['rectd','Receiving TDs'],['rush','Rushing yards'],['rtd','Rushing TDs'],['tak','Tackles'],['int','Interceptions'],['pd','Passes defended'],['ithr','Fewest INTs thrown (50+ att)']];
+ const val=(id,k)=>{const T=A.ps[id];return k==='cpct'?(T.att>=40?T.comp/T.att*100:null):k==='ithr'?(T.att>=50?-T.ithr:null):T[k];};
+ const pf=`<div class="tpv sm">${[['all','All'],['qb','QB'],['wr','WR'],['rb','RB'],['def','DEF']].map(([k,l])=>`<button data-tp="pos:${k}" class="${pos===k?'on':''}">${l}</button>`).join('')}</div>`;
+ return pf+`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">${cats.map(([k,l])=>{const L=ids.map(id=>({id,v:val(id,k)})).filter(x=>x.v!=null&&x.v!==0||k==='ithr'&&x.v!=null).sort((a,b)=>b.v-a.v||(a.id<b.id?-1:1)).slice(0,5);
+  return`<div class="abox"><h4>${l}</h4>${L.length?L.map((x,i)=>`<div class="arow${x.id==='U'?' me':''}${i===0?' lead':''}" style="grid-template-columns:24px minmax(0,1fr) auto"><span class="rk">${i+1}</span><span><b>${whoLn(p,x.id)}</b><small>${teamLn(p,+Object.entries(A.ps[x.id].tm).sort((a,b)=>b[1]-a[1])[0][0])} · ${A.ps[x.id].gp} GP</small></span><span class="sc">${k==='cpct'?x.v.toFixed(1)+'%':k==='ithr'?-x.v:x.v}</span></div>`).join(''):'<p class="note">No qualifying players yet.</p>'}</div>`;}).join('')}</div>`;}
+function wkView(p,S){const A=awSeason(S),ws=Object.keys(A.wk).map(Number).sort((a,b)=>b-a);if(!ws.length)return'<p class="note">No weeks completed yet.</p>';
+ return ws.map(w=>`<div class="abox"><h4>Week ${w+1}</h4>${Object.entries(A.wk[w]).map(([k,h])=>`<div class="arow${h.id==='U'?' me':''}" style="grid-template-columns:minmax(0,1fr) auto"><span><b>${WKN[k]}</b><small>${whoLn(p,h.id)} · ${teamLn(p,h.c)} · ${roleOf(p,h.id).toUpperCase()}</small></span><span class="sc">${h.v}</span></div>`).join('')}</div>`).join('');}
+function achView(p){const A=p.ach||{u:{}},n=ACH.length,got=ACH.filter(a=>A.u[a[0]]).length,rec=Object.entries(A.u).sort((a,b)=>b[1].at-a[1].at).slice(0,3);
+ const cats=[...new Set(ACH.map(a=>a[1]))];return`<p class="note">${got} / ${n} unlocked · ${Math.round(got/n*100)}% complete${rec.length?' · recent: '+rec.map(([id])=>ACH.find(a=>a[0]===id)[2]).join(', '):''}. All achievements are lifetime unlocks; tiered ones (bronze / silver / gold) keep climbing.</p>`+
+ cats.map(c=>`<h4>${c}</h4><div class="achg">${ACH.filter(a=>a[1]===c).map(([id,,nm,d,f,T])=>{const u=A.u[id],v=f(p),t=u?u.t:0,nx=T.find(x=>v<x),tc=TIERC[T.length===1?(t?3:0):t];
+  return`<div class="ach${t?' on':''}" style="--tc:${tc}"><small>${T.length>1?(t?TIERN[t]:'LOCKED'):(t?'UNLOCKED':'LOCKED')}</small><b>${nm}</b><p>${d}${T.length>1?` (${T.join(' / ')})`:''}</p>${nx!=null?`<div class="pb"><i style="width:${Math.min(100,v/nx*100)}%"></i></div><p style="margin:4px 0 0;font-size:13px">${Math.min(v,nx)} / ${nx}${u?' · season '+u.y:''}</p>`:u?`<p style="margin:0;font-size:13px">Unlocked in season ${u.y}</p>`:''}</div>`;}).join('')}</div>`).join('');}
+function histView(p){const H=p.awHist||[];if(!H.length)return'<p class="note">No completed seasons yet. Final awards are decided and frozen when a season\'s championship is played.</p>';
+ return H.map(h=>`<div class="abox"><h4>Season ${h.y}${h.champ!=null?' · Champion: '+teamLn(p,h.champ):''}</h4>${h.res.map(r=>`<div class="arow${r.win==='U'?' me':''}" style="grid-template-columns:minmax(0,1fr) auto"><span><b>${r.n}</b><small>${r.none?esc(r.none):whoLn(p,r.win)+' · '+teamLn(p,r.c)+' · '+r.votes[0][1]+' pts'}</small></span><span></span></div>`).join('')}</div>`).join('');}
 // ===== rivalries: one service, one source of truth (PROF.riv). Only raw history is stored - each meeting with your club's opponent, and each
 // head-to-head duel between YOU and a specific league player (stable id P###, so it follows him through trades). Records, streaks, intensity and
 // every sentence shown are derived from that history on demand, so nothing is ever counted twice; a game id is processed exactly once.
@@ -2948,8 +3147,8 @@ function endMatch(){const M=MATCH,S=M.st,me=ORG.you,op=me==='blue'?'red':'blue',
  MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;xpHudStop();toMenu();
  const X=xpFor(S,r,M.obj),p=PROF,dup=p.lastMatch===M.id,L0=p.lvl,X0=p.lxp;let ups=0;
  if(!dup){const C=p.career;C.gp++;C[r]++;for(const k of STK)C[k]=(C[k]||0)+S[k];p.lastMatch=M.id;ups=addXP(p,X.total);
-  if(M.ctx&&p.season)rivGame(p,M.id,M.ctx,preMatch.op,M.my,M.their,0,M.riv);
-  if(M.ctx&&p.season&&record(p,M.ctx,M.my,M.their)){for(const k of STK)p.season.st[k]+=S[k];}saveProf(p);}   // result into the season once; season stats only for games that counted   // awarded exactly once per match id, then saved straight away
+  if(M.ctx&&p.season)rivGame(p,M.id,M.ctx,preMatch.op,M.my,M.their,0,M.riv);if(M.ctx&&M.ctx.k==='reg')p._ubox={...S,ithr:S.ithr||0,w:M.ctx.w};
+  if(M.ctx&&p.season&&record(p,M.ctx,M.my,M.their)){for(const k of STK)p.season.st[k]+=S[k];}p._ubox=null;achCheck(p,{m:M,S,r});saveProf(p);}   // result into the season once; season stats only for games that counted   // awarded exactly once per match id, then saved straight away
  show('fin');finUI(M,S,r,X,L0,X0,ups,dup);}
 // ---------- stats, XP, grades, levels ----------
 const STK=['att','comp','pyd','ptd','rec','recy','rectd','rush','rtd','tak','stop','int','pd','dtd'];

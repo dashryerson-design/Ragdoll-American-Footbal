@@ -2661,7 +2661,7 @@ function coachNext(){const C=CINE;if(C.k<C.lines.length-1)return coachLine(C.k+1
  if(!C.ret)return coachFinish();C.ph='ret';C.rl=0;C.fp.copy(C.p);C.fl.copy(C.l);$m('cine').classList.remove('in');}   // ease back into the gameplay camera
 function coachLine(k){const C=CINE,L=C.lines[k];Object.assign(C,{k,ch:0,rt:0,lt:0,dlt:0,demo:false,done:!(L.demo||L.rdemo),idle:0});C.text=typeof L.t==='function'?L.t():L.t;
  [...$m('cidt').children].forEach((d,i)=>d.className=i<k?'done':i===k?'on':'');$m('cist').textContent=`${k+1} / ${C.lines.length}`;$m('citx').textContent='';coachShot(L.cam);}
-function coachShot(sp){const C=CINE;if(!sp||sp===C.spec)return;C.spec=sp;C.bl=0;C.fp.copy(C.p);C.fl.copy(C.l);C.cut=false;
+function coachShot(sp){const C=CINE;if(!sp||sp===C.spec)return;C.spec=sp;C.bl=0;C.fp.copy(C.p);C.fl.copy(C.l);C.cut=false;C.seeded=0;$m('cine').querySelector('.ci-fd').classList.remove('on');
  if(sp.s){const P=sp.s[0];C.cut=Math.hypot(P[0]-C.p.x,P[1]-C.p.y,P[2]-C.p.z)>8;}if(C.cut)$m('cine').querySelector('.ci-fd').classList.add('on');}   // a long move would sweep through people: dip to black and cut
 const ghWho=k=>k==='g'?GH[0]:k==='r'?GH[1]:k==='p'?player:null;
 function camPose(sp,u,dt){const C=CINE,e=u*u*(3-2*u);
@@ -2686,11 +2686,12 @@ function coachFinish(skipped){const C=CINE;if(!C.on)return;C.on=false;removeEven
 // ---------- ghost example player: a pooled doll, translucent, colliding only with the ground (and the other ghost), elite ratings, driven by a short
 // script through the real movement / throwing / tackling code. It is never your player, never scored, and is removed when the briefing ends
 const GH=[],GHAT=Object.fromEntries(AK.map(k=>[k,92]));
-function ghost(i,x,z,face,col){use(player);const g=bot(7+i);g.cur={ai:true,role:'demo',team:'ghost',side:'g',q:[],at:GHAT,t:0};showDoll(g,true);shape(g,null);
+function ghost(i,x,z,face,col){use(player);const g=bot(7+i);g.cur={ai:true,role:'demo',team:'ghost',side:'g',q:[],at:GHAT,t:0};g.limpT=0;   // a pooled doll may still carry the last demo's knock-down timer
+ showDoll(g,true);shape(g,null);
  kit(g,{...DEFLOOK,skin:i?3:1},col||[0x2fa36b,0x1d5a3e]);jersey(g,null);
  const mats=[];for(const b of g.list){b.collisionFilterGroup=i?32:16;b.collisionFilterMask=1|(i?16:32);mats.push(b.mesh.material);}   // the ground and the other ghost only: never its own limbs, never a real playerfor(const m of g.kitM||[])m.traverse(o=>{if(o.material)mats.push(...[].concat(o.material));});
  for(const m of mats){m.transparent=true;m.opacity=.55;}g.gm=mats;placeAt(g,x,z);use(g);camYaw=face;yaw=face-Math.PI;limp=false;use(player);roster.push(g);GH[i]=g;return g;}
-function ghostsClear(){for(const g of GH){if(!g)continue;use(g);if(held)held=false;dv=0;cur.tkS=null;limp=false;use(player);for(const m of g.gm||[]){m.opacity=1;m.transparent=false;}showDoll(g,false);roster=roster.filter(x=>x!==g);}GH.length=0;
+function ghostsClear(){for(const g of GH){if(!g)continue;g.limpT=0;use(g);if(held)held=false;dv=0;cur.tkS=null;limp=false;use(player);for(const m of g.gm||[]){m.opacity=1;m.transparent=false;}showDoll(g,false);roster=roster.filter(x=>x!==g);}GH.length=0;
  const B=CINE.ball;if(B){use(player);if(B.pl){held=false;grabBall();}else if(B.inW){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.copy(B.p);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);}else if(world.bodies.includes(ball))world.removeBody(ball);CINE.ball=null;}}   // the ball goes back exactly where the drill had it
 // script steps: go (walk / run to a spot, optionally stopping in it), wait, face, place, grab (take the ball), throw (perfect solved throw at a spot),
 // feed (the machine fires at a spot), catch (scripted clean catch when the ball reaches the hands), drop, stance, tackle (pursue with a lead, real tackle move)
@@ -2703,15 +2704,15 @@ function demoThink(dt){const c=cur,P=pel.position;for(const k in keys)keys[k]=fa
  if(s.grab){for(const d of roster)if(d!==curD&&H(d)){const me=curD;use(d);held=false;use(me);}if(!held)grabBall();return nx();}
  if(s.throw){if(!held)return nx();camYaw=Math.atan2(s.throw[0]-P.x,s.throw[2]-P.z)+Math.PI;if(s.t<.35)return;c.T=new V(s.throw[0],s.throw[1],s.throw[2]);c.arrive=qbClock+(s.ft||1.1);throwBall();return nx();}
  if(s.feed){const F=new V(0,1.75,DR_Z+21.4),T=new V(s.feed[0],s.feed[1],s.feed[2]);if(world.bodies.includes(ball))world.removeBody(ball);world.addBody(ball);ball.position.copy(F);ball.velocity.copy(solveVel(F,T,s.ft||1.2));ball.angularVelocity.set(0,0,0);ball.wakeUp&&ball.wakeUp();return nx();}
- if(s.catch){c.catchOn=true;catchOn=true;const Cp=chest.position,d=ball.position.distanceTo(Cp);if(d<1.05||s.t>4&&d<2.5){grabBall();catchOn=false;return nx();}if(s.t>5)return nx();
+ if(s.catch){c.catchOn=true;catchOn=true;const Cp=chest.position,d=ball.position.distanceTo(Cp);if(d<1.4||s.t>4&&d<2.5){grabBall();catchOn=false;return nx();}if(s.t>5)return nx();
   const dx=ball.position.x-P.x,dz=ball.position.z-P.z;camYaw=Math.atan2(dx,dz)+Math.PI;return;}
- if(s.fall){limp=true;curD.limpT=performance.now()+4000;return nx();}   // the scripted result of losing the contact battle
+ if(s.fall){limp=true;curD.limpT=performance.now()+9000;return nx();}   // the scripted result of losing the contact battle
  if(s.drop){if(held){held=false;}if(world.bodies.includes(ball))world.removeBody(ball);return nx();}
  if(s.stance){c.stance=true;c.low=.3;c.blkQ=1;c.blkT=performance.now();if(s.face2)camYaw=Math.atan2(s.face2[0]-P.x,s.face2[1]-P.z)+Math.PI;if(s.t>=s.stance)nx();return;}
  if(s.tackle){const R=GH[1];if(!R)return nx();const Q=R.pel.position,V2=R.pel.velocity,d=Math.hypot(Q.x-P.x,Q.z-P.z);
-  if(s.hit){if(s.t-s.hit>.35&&!R.limp){const me=curD;use(R);limp=true;R.limpT=performance.now()+4000;R.cur.q.length=0;use(me);}if(s.t-s.hit>1.2)nx();return;}   // the result: he goes down
+  if(s.hit){if(s.t-s.hit>.35&&!s.down){s.down=1;const me=curD;use(R);limp=true;R.limpT=Math.max(R.limpT||0,performance.now()+9000);R.cur.q.length=0;use(me);}if(s.t-s.hit>1.2)nx();return;}   // the result: he goes down
   const lead=Math.min(1.2,d/7),tx=Q.x+V2.x*lead,tz=Q.z+V2.z*lead;camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=d>3;   // cut him off: run at where he will be
-  if(d<(s.type==='power'?2.0:2.3)&&startTackle(R,s.type||'wrap'))s.hit=s.t;if(s.t>10)nx();return;}
+  if(d<(s.type==='power'?2.0:2.3)&&startTackle(R,s.type||'wrap')||d<1.1)s.hit=s.t;if(s.t>10)nx();return;}   // the move is real; if it can't start at point-blank range the scripted result still happens
  nx();}
 // ---------- the briefings, per drill. Positions are world coordinates; DZ(z) = z metres down the drill lane
 const KL=k=>HK[k][INPUT==='touch'?1:0],DZ=z=>DR_Z+z,ST=(p0,p1,l0,l1)=>({s:[p0,p1,l0,l1]}),TR=(t,o,k,f)=>({t,o,k,f});
@@ -2737,16 +2738,16 @@ const BRIEF={
   {t:`The example shows this play's path: mesh with the quarterback, then hit the hole the play is designed for.`,cam:birdShot(),dcam:TR('g',[0,6,-9],[0,0,4]),demo:rbPath().map(w=>({go:w,run:true,r:1}))},
   {t:`You snap it with ${KL('snap')} when you're ready. Three reps, and every one is graded.`,cam:TR('p',[0,3,-6],[0,1,4])}],
  pass:D=>{const T=D.tg;return[{t:`Quarterback passing. Five throws at the lit targets, short to deep.`,cam:ST([2,7,DZ(-8)],[1.5,7.5,DZ(-7)],[0,0,DZ(20)],[0,0,DZ(22)])},
-  {t:`Aim with the arc, then hold ${KL('throw')} longer for more speed. Accuracy shrinks the miss, and Throw Power is how hard you can drive it.`,cam:TR('g',[1.2,2.2,-4.5],[0,1,8]),dcam:ST([5,5,DZ(-4)],[5,5,DZ(-3)],[T[0].x,0,T[0].z],[T[0].x,0,T[0].z]),demo:[{grab:1},{face:[T[0].x,T[0].z]},{throw:[T[0].x,.25,T[0].z],ft:1.0},{wait:1.4}]},
+  {t:`Aim with the arc and throw with ${KL('throw')}: the longer you hold it, the faster the ball. Accuracy shrinks the miss, and Throw Power is how hard you can drive it.`,cam:TR('g',[1.2,2.2,-4.5],[0,1,8]),dcam:ST([5,5,DZ(-4)],[5,5,DZ(-3)],[T[0].x,0,T[0].z],[T[0].x,0,T[0].z]),demo:[{grab:1},{face:[T[0].x,T[0].z]},{throw:[T[0].x,.25,T[0].z],ft:1.0},{wait:1.4}]},
   {t:`The deep ones need more air and more power. Same rules: put it in the ring.`,cam:TR('g',[1.2,2.2,-4.5],[0,1,8]),dcam:ST([6,8,DZ(4)],[6,9,DZ(8)],[T[4].x,0,T[4].z],[T[4].x,0,T[4].z]),demo:[{grab:1},{face:[T[4].x,T[4].z]},{throw:[T[4].x,.25,T[4].z],ft:2.1},{wait:2.3}]}];},
  qbmove:D=>{const P=player.pel.position,rx=PLAY&&PLAY.roll!=null?PLAY.roll:P.x+6;return[{t:`Throwing on the move. Rollout plays: snap with ${KL('snap')}, roll toward the sideline, and hit a receiver on the run.`,cam:birdShot()},
   {t:`Here's the rollout path for this play. Get your eyes downfield while you move.`,cam:birdShot(),dcam:TR('g',[-3,4,-8],[0,1,6]),demo:[{go:[P.x,P.z-2.2],run:true,r:.8},{go:[rx,P.z-3],run:true,r:1},{face:[rx,P.z+15]}]},
   {t:`Never throw into a defender: that gets picked off. If nobody's open, keep moving.`,cam:TR('p',[0,3,-6],[0,1,6])}];},
- routes:D=>[{t:`Routes and separation. Run your route, win at the break and get open. Hold ${KL('route')} any time to see it.`,cam:birdShot()},
+ routes:D=>[{t:`Routes and separation. Run your route, win at the break and get open. ${KL('route')} shows it any time.`,cam:birdShot()},
   {t:`This is your route on this play. Sell it, then break hard at the turn.`,cam:birdShot(),dcam:TR('g',[0,7,-9],[0,0,5]),demo:myRoute().map(w=>({go:w,run:true,r:1,brake:1.6}))},
-  {t:`The quarterback throws to whoever is open. When the ball comes, hold ${KL('catch')}.`,cam:TR('p',[0,3,-6],[0,1,6])}],
+  {t:`The quarterback throws to whoever is open. When the ball comes: ${KL('catch')}.`,cam:TR('p',[0,3,-6],[0,1,6])}],
  jugs:D=>[{t:`Catching and ball tracking. Six balls from the machine: to your chest, to each side, and deep over your head.`,cam:ST([-8,4,DZ(10)],[-7.5,4.2,DZ(11)],[0,1,DZ(8)],[0,1,DZ(8)])},
-  {t:`Get your body under the flight path and hold ${KL('catch')} as it arrives. Hands, not chest.`,cam:TR('g',[3.5,2,-4],[0,1.2,6]),demo:[{feed:[1.6,1.35,DZ(0)],ft:1.1},{catch:1},{wait:.7},{drop:1}]},
+  {t:`Get your body under the flight path, and as it arrives: ${KL('catch')}. Hands, not chest.`,cam:TR('g',[3.5,2,-4],[0,1.2,6]),demo:[{feed:[1.6,1.35,DZ(0)],ft:1.1},{catch:1},{wait:.7},{drop:1}]},
   {t:`The deep ones go over your head. Turn, run to where it's coming down, and look it in.`,cam:TR('g',[4,2.6,6],[0,1.2,-4]),demo:[{feed:[1.6,1.4,DZ(-6)],ft:2.0},{go:[1.6,DZ(-6)],run:true,r:.5,brake:1.2},{catch:1},{wait:.7},{drop:1}]}],
  pursuit:D=>[{t:`Defensive pursuit. A ball carrier is loose. Take an angle that cuts him off instead of chasing his back.`,cam:ST([-14,8,DZ(4)],[-13,8,DZ(6)],[0,0,DZ(14)],[0,0,DZ(14)])},
   {t:`Watch the angle: run to where he's going, not where he is. Getting to him is the score; a tackle is a bonus.`,cam:ST([-14,8,DZ(4)],[-13,8,DZ(6)],[0,0,DZ(12)],[0,0,DZ(12)]),dcam:TR('g',[-7,5,-6],[3,0,6],2),demo:[{tackle:1,type:'wrap'}],rdemo:[{go:[10,DZ(6)],run:true,r:1,brake:0}]}],
@@ -2755,9 +2756,9 @@ const BRIEF={
  cover:D=>{const W=roster.filter(d=>d.cur.side==='o'&&d.cur.role==='wr').sort((a,b)=>Math.abs(b.pel.position.x)-Math.abs(a.pel.position.x))[0],R=W&&W.cur.route?W.cur.route:[[player.pel.position.x,player.pel.position.z-8]];
   return[{t:`Coverage and interceptions. You take the outside receiver on live pass plays.`,cam:birdShot()},
   {t:`Mirror his route and stay between him and the quarterback. Here's how it looks against this play.`,cam:birdShot(),dcam:TR('g',[0,8,10],[0,0,-4]),demo:R.map(w=>({go:[w[0]-Math.sign(w[0]||1)*1.2,w[1]+1.2],run:true,r:1.2,brake:1.4}))},
-  {t:`When it's thrown, go for the ball and hold ${KL('catch')} to pick it off. A breakup counts too.`,cam:TR('p',[0,3,6],[0,1,-6])}];},
+  {t:`When it's thrown, go for the ball and pick it off: ${KL('catch')}. A breakup counts too.`,cam:TR('p',[0,3,6],[0,1,-6])}];},
  contact:D=>[{t:`Contact, strength and physics. Runners come straight at you, each one a little faster.`,cam:ST([-7,3,DZ(5)],[-6.5,3.2,DZ(6)],[1.4,1,DZ(4)],[1.4,1,DZ(4)])},
-  {t:`Hold ${KL('stance')} to sink into a wide base. Your arms reach for him, grab and pull. Momentum, angle and Strength decide who gives.`,cam:ST([-6,2.6,DZ(3)],[-5.5,2.6,DZ(3.5)],[1.4,1,DZ(3)],[1.4,1,DZ(3)]),demo:[{stance:4.5,face2:[1.4,DZ(10)]}],rdemo:[{wait:.8},{go:[1.4,DZ(1.1)],r:.5},{wait:.45},{fall:1},{wait:1.4}]}],
+  {t:`Sink into a wide base with ${KL('stance')}. Your arms reach for him, grab and pull. Momentum, angle and Strength decide who gives.`,cam:ST([-6,2.6,DZ(3)],[-5.5,2.6,DZ(3.5)],[1.4,1,DZ(3)],[1.4,1,DZ(3)]),demo:[{stance:4.5,face2:[1.4,DZ(10)]}],rdemo:[{wait:.8},{go:[1.4,DZ(1.1)],r:.5},{wait:.45},{fall:1},{wait:1.4}]}],
  aware:D=>{const P=player.pel.position;return[{t:`Awareness and reaction. Live plays, run or pass, and you won't know which until it happens.`,cam:birdShot()},
   {t:`Read it first. On a run, close on the carrier and get him down with ${KL('tackle')}.`,cam:birdShot(),dcam:TR('g',[0,6,9],[0,0,-4]),demo:[{go:[P.x,P.z+1.5],r:.6},{wait:.4},{go:[P.x*.4,LOS+1],run:true,r:1}]},
   {t:`On a pass, stay with your man and react to the throw. Getting fooled by the fake is what the scouts are watching for.`,cam:TR('p',[0,3,6],[0,1,-6])}];},
@@ -2770,6 +2771,7 @@ const RSTART={pursuit:[-9,DZ(26),2.6],tack:[1.4,DZ(18),0],contact:[1.4,DZ(10),0]
 function drillBrief(D){const d=D.d,f=BRIEF[d.id];if(!f||(PROF.combine||{}).brief===false)return false;
  const P=player.pel.position,g=GSTART[d.id]||[P.x,P.z],r=RSTART[d.id];
  CINE.ball={pl:H(player),inW:world.bodies.includes(ball),p:ball.position.clone()};
+ if(!d.ball&&d.eng!=='pass'&&d.eng!=='jugs'&&d.eng!=='scen'&&!CINE.ball.pl&&CINE.ball.inW)world.removeBody(ball);   // a loose ball on the field would get scooped up by the example player; it's put back after
  ghost(0,g[0],g[1],d.side==='def'||d.id==='contact'?0:Math.PI);if(r)ghost(1,r[0],r[1],r[2],[0x8a2a2a,0x4a1515]);
  if(d.id==='contact'){GH[0].cur.stance=false;}
  D.brief=true;coachRun({lines:f(D),skip:'SKIP BRIEFING',end:sk=>{D.brief=false;use(player);if(d.eng==='runner')tackRep();if(d.eng==='scen'&&D.sc){D.sc.start=performance.now();resetT=performance.now();}

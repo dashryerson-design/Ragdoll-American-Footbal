@@ -704,7 +704,10 @@ addEventListener('blur',()=>{keys={};});
 const lockEl=renderer.domElement;
 addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('mouseup',e=>{if(e.button===2)aimOn=false;if(e.button===0)primaryUp();});
-lockEl.addEventListener('mousedown',e=>{if(mode!=='kb'||paused)return;if(e.button===2)aimOn=true;if(e.button===0)primaryDown();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
+// the one rule for the mouse: captured only while a keyboard match is live and nothing (pause, results, cards, any screen) is on top
+const lockWanted=()=>mode==='kb'&&!paused&&!document.querySelector('.ov:not([hidden])');
+function lockSync(){if(document.pointerLockElement&&!lockWanted())document.exitPointerLock();}
+lockEl.addEventListener('mousedown',e=>{if(!lockWanted())return;if(e.button===2)aimOn=true;if(e.button===0)primaryDown();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
 addEventListener('mousemove',e=>{if(document.pointerLockElement!==lockEl||paused)return;camYaw-=e.movementX*.006;camPitch=Math.max(-.6,Math.min(1.2,camPitch+e.movementY*.006));});
 addEventListener('wheel',e=>{camDist=Math.max(1.8,Math.min(8,camDist+e.deltaY*.003));});
 addEventListener('resize',()=>{frame.pz=0;renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
@@ -1340,7 +1343,7 @@ function mergeHelmet(g){const parts=[],keep=[];g.updateMatrixWorld(true);_hm.cop
   const mesh=new THREE.Mesh(bg,L[0].material);for(const o of L)o.parent.remove(o);g.add(mesh);}}
 {const k0=kit;kit=function(d,L,T){k0(d,L,T);if(LOWFX){for(const m of d.kitM||[]){if(m.userData.helm){flatMat(m);mergeHelmet(m);}else lowMat(m);}for(const b of d.list||[])if(b.mesh)lowMat(b.mesh);}};}   // new kit pieces each drive get the cheap shading too
 function startGame(m){perfMode(m);mode=m;document.body.classList.toggle('touch',m==='touch');setTimeout(phudPlace,0);$m('mm').hidden=true;last=performance.now();}
-function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
+function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();if(!paused&&lockWanted()&&document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}}   // resume: straight back to mouse-look
 function toMenu(){preEnd();useClubs(null);BADJ.blue=BADJ.red=0;if(DRILL)drillEnd();if(MATCH){MATCH=null;ORG.four=false;$m('pcard').hidden=true;xpHudStop();}paused=false;$m('pm').hidden=true;$m('org').hidden=true;mode=null;document.body.classList.remove('touch');
  for(const d of active()){use(d);held=false;thr=-1;aimOn=false;chargeT=-1;catchOn=false;reset();}use(player);   // a fresh start next time
  looseBall();resetPlay();$m('mm').hidden=false;}
@@ -2385,8 +2388,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.02';
+const GAME_VER='3.03';
 const PATCH=[
+ {version:'3.03',title:'Mouse Unlock',date:'2026-10-28',changes:{'Bug Fixes':['The mouse is released automatically whenever a menu is showing (match results, main menu, Combine, pause, any screen); no more pressing ESC just to get the cursor back','It is captured only during a live keyboard match, and Resume captures it again straight away']}},
  {version:'3.02',title:'Skip Combine',date:'2026-10-28',changes:{'Career Mode':['Skip Combine on the Combine screen (before any drill): after a confirmation you go straight to the scouting report with a standard mid-level evaluation, clearly marked as estimated','Estimated results sit in a fixed middle band (a C workout); your ratings, OVR and player never change, and you can still run drills afterwards (a real result replaces that drill\'s estimate)']}},
  {version:'3.01',title:'Impact Camera',date:'2026-10-28',changes:{Visuals:['Tackles, broken tackles, big hits and hard stance collisions give the camera a short, subtle shake','Strength comes from the hit\'s real severity and fades smoothly with distance from the camera: full within 3 m, faint by 15 m, none past 24 m','Purely visual: the camera always returns to its exact follow position, and simultaneous reports of one hit count once']}},
  {version:'3.00',title:'The New Combine',date:'2026-10-28',changes:{'Career Mode':['The Pre-Draft Combine is rebuilt as the game\'s tutorial: an arrival and scouts\' briefing, then 15 drills in 6 stations (movement, ball security, passing & receiving, defence, contact, situational football)','Movement course, 40-yard dash, three-cone, ball security with a gap read and a live chaser, live run plays, target passing, rollouts, route running, jugs machine, pursuit, tackling, coverage, contact with the hold-E stance, awareness plays and a full offence + defence challenge','Live drills run real 4v4 plays from the playbook through the match engine and are scored from what actually happened','Each drill shows its objective and the real controls for your device, and gives feedback from what happened','Score = 75% your performance + 25% the ratings that drill tests; the first attempt is official, replays are practice','A scouting report with grades, best and weakest areas and a summary; skipping the rest needs a confirmation and grades those drills from ratings only']}},
@@ -2668,6 +2672,7 @@ const DT=1/400;let acc=0,last=performance.now();
 const tgt=new THREE.Vector3(0,1,0);let camCD=3.6;
 function frame(now){
  requestAnimationFrame(frame);
+ lockSync();   // any menu showing (match over, back to menu, results...): the cursor is released right away, no ESC needed
  const cv=renderer.domElement,on=!!mode;if(cv.hidden===on)cv.hidden=!on;   // no match: the 3D canvas is not shown at all (its last frame can't leak through a menu)
  if(!mode){last=now;return;}   // menus: no physics, no AI, no rendering
  if(paused){last=now;if(!frame.pz){frame.pz=1;renderer.render(scene,cam);}return;}frame.pz=0;   // paused: one frozen frame, then nothing

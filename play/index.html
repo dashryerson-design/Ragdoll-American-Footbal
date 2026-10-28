@@ -363,7 +363,7 @@ body.touch #phud #pcard .n{max-width:120px}
 <div class="hhead"><div class="hbadge" id="hbadge"></div><div class="hname"><small id="hpos"></small><span id="hfirst"></span><b id="hlast"></b><em id="hteam"></em></div>
 <div class="hovr"><div class="ob2"><b id="hovr"></b><small>OVR</small></div><div class="xpb"><i id="hxp"></i></div><small id="hxpt"></small></div><div class="hchips" id="hchips"></div></div>
 <div class="htabs" id="htabs"></div>
-<div class="hbody"><div class="hmenu"><button class="mrow pri2" id="ccomb">Pre-Draft Combine</button><button class="mrow pri2" id="cplay">Play Next Match</button><button class="mrow" id="csim">Simulate Next Game</button><button class="mrow" id="cupg">Upgrade Player</button><button class="mrow" id="cedit">Edit Player</button><button class="mrow" id="cteams">League Clubs</button><button class="mrow" id="cnew">New Career</button><button class="mrow" id="cback">Back</button><div id="cempty" class="note"></div></div>
+<div class="hbody"><div class="hmenu"><button class="mrow pri2" id="ccomb">Pre-Draft Combine</button><button class="mrow pri2" id="cplay">Play Next Match</button><button class="mrow" id="csim">Simulate Next Game</button><button class="mrow" id="cupg">Upgrade Player</button><button class="mrow" id="cedit">Edit Player</button><button class="mrow" id="cpos"></button><button class="mrow" id="cteams">League Clubs</button><button class="mrow" id="cnew">New Career</button><button class="mrow" id="cback">Back</button><div id="cempty" class="note"></div></div>
 <div class="hmain" id="hmain"></div><div class="mright"><div class="pvbox" id="pvh"></div></div></div>
 <div class="hints"><button data-act="confirm"><i class="kp" data-p="confirm"></i> Select</button><button data-act="back"><i class="kp" data-p="back"></i> Back</button><span><i class="kp" data-p="rotate"></i> Rotate player</span></div></div>
 <div id="cre" class="ov scr mad cb" hidden><div class="vt">//CAREER · CREATE</div>
@@ -1415,7 +1415,7 @@ function playTick(){if(!playOn)return;readTick();const tn=performance.now();if(M
  if(MATCH&&MATCH.clock<=0&&(playState==='pre'||playEnd&&tn>playEnd)){flip=null;endMatch();return;}   // time's up: the play in progress finishes, then the final whistle
  if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){DRIVE++;ORG.off=NEXT||(ORG.off==='blue'?'red':'blue');NEXT=null;LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
  if(playState==='pre'&&player.cur.side==='d'&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
- if(playState!=='live')return;const car=roster.find(H),ot=ORG.off;if(car)playTick.g=0;
+ if(playState!=='live')return;handoffTick();const car=roster.find(H),ot=ORG.off;if(car)playTick.g=0;
  if(car&&car!==playTick.lc){if(MATCH&&playTick.lc){const S=MATCH.st;if(car===player){if(player.cur.side==='d')S.int++;else{S.rec++;MATCH.caught=1;}}if(car===player&&player.cur.side!=='d')player.cur.yacT=performance.now()+2000;else if(playTick.lc===player&&car.cur.side==='o')S.comp++;}playTick.lc=car;}   // who caught it from whom
  if(fumT){if(car){fumT=0;if(car.cur.team!==POSS()){RET=car.cur.team===ot?null:{team:car.cur.team};toast('FUMBLE! '+TFULL[car.cur.team]+' BALL','#ff5a4a');hud();}else toast('RECOVERED');}   // loose ball: whoever falls on it has it, and the play goes on
   else{if(performance.now()-fumT>500&&ball.position.y<.35){let best=null,bd=1e9;for(const d of roster){const P=d.pel.position,dd=Math.hypot(P.x-ball.position.x,P.z-ball.position.z)-.5*E(d,'rea');if(dd<bd){bd=dd;best=d;}}
@@ -1433,19 +1433,23 @@ function playStart(){if(!playPre())return;playState='live';EVT=performance.now()
 // receiver split wide on the 50, QB 15 yd behind the line, defender 20 yd in front of the receiver
 function resetPlay(){if(!playOn)return;RET=null;if(MATCH)MATCH.caught=0;for(const d of roster)d.cur.tkd=0;fumT=0;for(const d of roster)d.cur.stam=Math.min(1,(d.cur.stam??1)+.35);playTick.g=0;playEnd=0;resetT=performance.now();hud();losMesh.position.z=LOS;fdMesh.position.z=FD;losMesh.visible=fdMesh.visible=true;
  for(const d of roster){use(d);held=false;aimOn=false;thr=-1;chargeT=-1;catchOn=false;dv=0;js=0;limp=false;d.limpT=0;keys={};}use(player);
+ for(const d of roster)if(d.cur.role0){d.cur.role=d.cur.role0;delete d.cur.role0;}   // last play's RB goes back to receiver
+ const W=roster.filter(d=>d.cur.role==='wr'),me=W.includes(player)&&ORG.pos==='rb';CALL={run:W.length&&Math.random()<(me?.6:.35)?(Math.random()<.5?'inside':'outside'):null,done:false};
+ if(CALL.run){const rb=me?player:W.filter(d=>d!==player).sort((a,b)=>Math.abs(a.cur.x0)-Math.abs(b.cur.x0))[0];if(rb){rb.cur.role0='wr';rb.cur.role='rb';CALL.rb=rb;CALL.sd=Math.random()<.5?1:-1;}else CALL.run=null;}
  const used=[];let q=null,rw=null;
  for(const d of roster){const c=d.cur;
   if(c.role==='qb'){q=d;placeAt(d,0,LOS+QB_DEPTH);Object.assign(c,{st:'idle',T:null,wait:null,tg:null});}
+  if(c.role==='rb'){placeAt(d,CALL.sd*2.2,LOS+QB_DEPTH-1.3);Object.assign(c,{st:'set',t:0});if(d===player)camYaw=Math.PI;}
   if(c.role==='wr'){placeAt(d,c.x0,LOS+c.z0-.4);[c.route,c.rname]=pickRoute(c.x0,used,c.sty);Object.assign(c,{st:'set',i:0,t:0});if(!rw||d===player)rw=d;}
   if(c.side==='d'){placeAt(d,c.px,Math.min(GOAL_Z+4,LOS+c.pz));if(d===player)camYaw=0;Object.assign(c,{st:'pre',t:0,hist:[],rd:(.3-.12*E(d,'rea'))+Math.random()*.12,biteEnd:0,pushT:0,pv:null});}}
  looseBall();ball.position.z=LOS;if(q){use(q);grabBall();}use(player);playTick.lc=q;
  route=rw&&rw.cur.route;routeName=rw?rw.cur.rname:'';routeX=rw?rw.cur.x0:WR_X;routeShape(false);   // the route shown on 1: yours, or the first receiver's when you're the QB
- routeVis=false;routeMesh.visible=false;playState=q?'pre':'live';callReq=null;}
+ routeVis=false;routeMesh.visible=false;playState=q?'pre':'live';callReq=null;if(CALL.run)toast((CALL.run==='inside'?'INSIDE RUN':'OUTSIDE RUN')+(CALL.rb===player?' · GET TO THE QB FOR THE HANDOFF':''),'#62bfff');}
 // the organiser's plan: offence = QB + receivers (the set matching the head count), defence = a man per receiver, then the set's extra jobs
 function plan(){const oT=ORG.off,dT=oT==='blue'?'red':'blue',youO=ORG.you===oT,nO=ORG.four?3:(ORG.n[oT]=cl(ORG.n[oT],1,5)),nD=ORG.four?4:(ORG.n[dT]=cl(ORG.n[dT],1,5));   // N = receivers on offence (the QB is extra), defenders on defence
  if(OSETS[ORG.os][1].length!==nO)ORG.os=OSETS.findIndex(o=>o[1].length===nO);
  const wr=OSETS[ORG.os][1],ex=DSETS[ORG.ds][1],LB={deep:'S',rush:'BLITZ',rob:'ROB'};
- const O=[{role:'qb',lab:'QB',you:youO&&ORG.pos==='qb'},...wr.map(([x,z],i)=>({role:'wr',x0:x,z0:z,lab:'WR'+(i+1),you:youO&&ORG.pos==='wr'&&i===(ORG.wi||0)%wr.length}))],D=[];
+ const O=[{role:'qb',lab:'QB',you:youO&&ORG.pos==='qb'},...wr.map(([x,z],i)=>({role:'wr',x0:x,z0:z,lab:'WR'+(i+1),you:youO&&ORG.pos!=='qb'&&i===(ORG.wi||0)%wr.length}))],D=[];
  for(let i=0;i<nD;i++){if(i<wr.length){const x=wr[i][0];D.push({kind:'man',m:i+1,lab:Math.abs(x)>=12?'CB':'NB',px:x-Math.sign(x)*1.5,pz:Math.abs(x)>=12?DEF_Z:7});}else{const k=ex[(i-wr.length)%ex.length];D.push({kind:k,lab:LB[k]});}}
  if(!youO)D[0].you=true;
  const dp=D.filter(d=>d.kind==='deep');dp.forEach((d,i)=>Object.assign(d,{half:dp.length>1,px:dp.length>1?(i%2?-10:10)*(i<2?1:.4):0,pz:DEF_Z+8}));
@@ -1514,7 +1518,7 @@ function primaryDown(){if(playPre())return;if(held){startCharge();return;}{const
 const aiQB=()=>roster.find(d=>d.cur.ai&&d.cur.role==='qb');
 function primaryUp(){releaseCharge();catchOn=false;cur.catchT0=0;}
 // QB brain (runs with the QB swapped in): face the receiver; on a call, lead him (where he'll be, at the speed he had when he called), aim, throw
-function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
+function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;if(CALL.run&&!CALL.done){const R=CALL.rb.pel.position;camYaw=Math.atan2(R.x-pel.position.x,R.z-pel.position.z)+Math.PI;return;}   // handoff: turn to the back and hold the ball out for him
  // mobile QBs (Dual-Threat, Scrambler): a real read each frame, not a timer: run only when the pass isn't there AND there's a lane; Dual-Threat needs a worse passing picture than a Scrambler
  const QR=(SAI[c.sty]||{}).qbRun;
  if(QR&&c.st==='idle'&&held&&!callReq&&playState==='live'){const P=pel.position,D=roster.filter(d=>d.cur.side==='d');let press=99,best=0,lane=true;
@@ -1539,6 +1543,16 @@ function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;
  camYaw=Math.atan2(fx-pel.position.x,fz-pel.position.z)+Math.PI;      // the body turns to face camYaw + 180°
  if(c.st==='aim'&&(c.t+=dt)>.35){startThrow();c.st='throw';}
  if(c.st==='throw'&&thr<0){c.st='idle';}}
+let CALL={run:null,done:true};
+// running back: from beside the QB, run the mesh past him (aiming at his near hip) toward the play's gap; with the ball he's a normal carrier
+function rbThink(dt){const c=cur,P=pel.position;if(held||c.st==='caught'){if(P.z<LOS+QB_DEPTH+4&&CALL.run){for(const k in keys)keys[k]=false;const gx=CALL.run==='inside'?CALL.sd*-1.2:CALL.sd*-7;camYaw=Math.atan2(gx-P.x,LOS+QB_DEPTH+6-P.z)+Math.PI;keys.w=keys.shift=true;held&&(c.st='caught');return;}return wrThink(dt);}
+ for(const k in keys)keys[k]=false;if(playState!=='live'){camYaw=Math.PI;return;}const q=roster.find(d=>d.cur.role==='qb');if(!q||CALL.done){keys.w=true;camYaw=Math.PI;return;}const Q=q.pel.position,tx=Q.x-CALL.sd*.45,tz=Q.z+.6;   // the mesh point: just in front of the QB, on the side the run goes
+ camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=Math.hypot(tx-P.x,tz-P.z)>1.5;}
+// the exchange: real possession moves from QB to RB once the back is in the pocket (belly to the ball), one way, once per play
+function handoffTick(){if(!CALL.run||CALL.done||playState!=='live')return;const rb=CALL.rb,q=roster.find(d=>d.cur.role==='qb'),now=performance.now();
+ if(!q||!H(q)||rb.limp||q.limp||now-EVT>3500){CALL.done=true;return;}   // sacked, fumbled or blown: the play just goes on with whoever has it
+ const a=q.chest.position,b=rb.chest.position,d=Math.hypot(a.x-b.x,a.z-b.z);
+ if(d<.9){CALL.done=true;const me=curD;use(q);held=false;use(rb);grabBall();use(me);playTick.lc=rb;if(rb===player)toast('HANDOFF','#3ee07a');}}
 // refresh button (and R): reset the play
 function refreshQB(){if(mode&&!paused)resetPlay();}
 $m('brst').addEventListener('click',refreshQB);$m('brst').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();refreshQB();},{passive:false});
@@ -1576,7 +1590,7 @@ function fig(x,y,s,t,num,lab,you,face,k){const[B,D]=TEAM[t].map(hx),sk=OSK[k%5],
  <text y="34" text-anchor="middle" font-family="system-ui,sans-serif" font-style="italic" font-weight="800" font-size="26" fill="${you?'#ffd23f':'#fff'}">${you?'YOU':lab}</text></g>`;}
 function orgUI(){const{oT,dT,O,D}=plan(),youO=ORG.you===oT;
  $m('oyou').textContent='YOUR TEAM: '+ORG.you.toUpperCase();$m('ooff').textContent='OFFENCE: '+oT.toUpperCase()+'  ·  DEFENCE: '+dT.toUpperCase();
- $m('opos').textContent='YOUR POSITION: '+(youO?(ORG.pos==='qb'?'QB':'WR 1'):'CORNER (ON WR 1)');$m('oos').textContent='OFFENCE SET: '+OSETS[ORG.os][0];$m('ods').textContent='DEFENCE SET: '+DSETS[ORG.ds][0];
+ $m('opos').textContent='YOUR POSITION: '+(youO?({qb:'QB',wr:'WR 1',rb:'RB (WR on passes)'}[ORG.pos]):'CORNER (ON WR 1)');$m('oos').textContent='OFFENCE SET: '+OSETS[ORG.os][0];$m('ods').textContent='DEFENCE SET: '+DSETS[ORG.ds][0];
  $m('omode').textContent='MODE: '+(ORG.free?'FREE ROAM (NO PLAY)':'PLAY');$m('nblue').textContent=ORG.n.blue;$m('nred').textContent=ORG.n.red;
  const side=(L,t,left)=>{let g='';const n=L.length;for(let i=n-1;i>=0;i--){const u=n>1?i/(n-1):0,x=left?60+u*300:740-u*300;g+=fig(x,340-u*120,1-u*.45,t,(i*7+(t==='red'?23:3))%99||1,L[i].lab,L[i].you,left?1:-1,i+(left?0:2));}return g;};
  const bl=oT==='blue'?O:D,rd=oT==='red'?O:D;
@@ -1585,7 +1599,7 @@ function orgUI(){const{oT,dT,O,D}=plan(),youO=ORG.you===oT;
  <text x="20" y="40" font-family="Impact,Arial Black,sans-serif" font-size="34" fill="${hx(TEAM.blue[0])}">BLUE · ${oT==='blue'?'OFFENCE':'DEFENCE'}</text><text x="780" y="40" text-anchor="end" font-family="Impact,Arial Black,sans-serif" font-size="34" fill="${hx(TEAM.red[0])}">RED · ${oT==='red'?'OFFENCE':'DEFENCE'}</text>
  ${side(bl,'blue',true)}${side(rd,'red',false)}</svg>`;}
 $m('oyou').onclick=()=>{ORG.you=cyc(['blue','red'],ORG.you);orgUI();};$m('ooff').onclick=()=>{ORG.off=cyc(['blue','red'],ORG.off);orgUI();};$m('omode').onclick=()=>{ORG.free=!ORG.free;orgUI();};
-$m('opos').onclick=()=>{ORG.pos=cyc(['qb','wr'],ORG.pos);orgUI();};$m('ods').onclick=()=>{ORG.ds=(ORG.ds+1)%DSETS.length;orgUI();};
+$m('opos').onclick=()=>{ORG.pos=cyc(['qb','wr','rb'],ORG.pos);orgUI();};$m('ods').onclick=()=>{ORG.ds=(ORG.ds+1)%DSETS.length;orgUI();};
 $m('oos').onclick=()=>{const k=OSETS[ORG.os][1].length;do ORG.os=(ORG.os+1)%OSETS.length;while(OSETS[ORG.os][1].length!==k);orgUI();};   // sets with the same receiver count
 for(const t of['blue','red'])for(const[id,dd]of[['m',-1],['p',1]])$m(id+t).onclick=()=>{ORG.n[t]+=dd;orgUI();};
 $m('ogo').onclick=()=>{$m('org').hidden=true;ORG.four=false;MATCH=null;newGame();applyOrg();togglePause();};$m('oback').onclick=()=>{$m('org').hidden=true;$m('pm').hidden=false;};
@@ -1889,7 +1903,8 @@ function newSeasonGo(){const p=PROF;if(p.season&&p.season.champ!=null)offseason(
 function mates(p,c=p.team){const L=lgEnsure(p);return L.rost[c].filter(id=>id!=='U').map(id=>{const P=L.pl[id];return{n:P.first+' '+P.last,pos:tcase(STYLES[P.style][0])+' · '+DEV[P.dev][0],num:P.num,ovr:ovr(P.att,P.style)};});}
 let HTAB='over';
 function carUI(){const p=PROF;if(p&&p.draft&&!p.season){newSeason(p,1);saveProf(p);}hubUI();}
-function hubUI(){const p=PROF,T=[['over','Overview'],['player','Player'],['attr','Ratings'],['team','Team'],['sched','Schedule'],['stand','Standings'],['stats','Stats'],['next','Next Match']];
+const posLbl=()=>{const b=$m('cpos');if(b&&PROF)b.textContent='Offence: '+{qb:'Quarterback',wr:'Wide Receiver',rb:'Running Back'}[PROF.pos||STYLES[PROF.style][4]];};   // position is its own choice; playstyle never changes it
+function hubUI(){posLbl();const p=PROF,T=[['over','Overview'],['player','Player'],['attr','Ratings'],['team','Team'],['sched','Schedule'],['stand','Standings'],['stats','Stats'],['next','Next Match']];
  $m('htabs').innerHTML=p?T.map(([k,l])=>`<button data-t="${k}" class="${k===HTAB?'on':''}">${l}</button>`).join(''):'';
  const S=p&&p.season,n=p&&p.draft?nextGame(p):null,c=p?club(p.team??0):null;
  for(const[id,v]of[['ccomb',!p||!!p.draft],['cplay',!n],['csim',!n],['cupg',!p],['cedit',!p],['cteams',!p]])$m(id).hidden=v;
@@ -1929,7 +1944,7 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
  addEventListener('keydown',e=>{if($m('mm').hidden||mode)return;const B=[$m('ctouch'),$m('ckb')],i=B.indexOf(document.activeElement);if(/Arrow(Left|Right|Up|Down)/.test(e.key)){e.preventDefault();B[(i+1)%2].focus();}});
  $m('mquick').onclick=()=>{useClubs(null);show(null);applyProf(null);startGame(pendMode);};$m('mcar').onclick=slotsUI;$m('mback').onclick=()=>show('mm');
  $m('cplay').onclick=preMatch;$m('pback').onclick=()=>{show('car');carUI();};$m('pgo').onclick=kickOff;$m('fagain').onclick=preMatch;$m('fagain').textContent='Next Match';$m('fhub').onclick=()=>{show('car');carUI();};
- $m('cedit').onclick=()=>openCre(false);$m('cnew').onclick=()=>{if(PROF&&!confirm('Start a new career? '+PROF.first+' '+PROF.last+' (level '+PROF.lvl+(PROF.season?', season '+PROF.season.year:'')+') and all progress will be deleted.'))return;HTAB='over';openCre(true);};$m('cback').onclick=slotsUI;
+ $m('cedit').onclick=()=>openCre(false);$m('cpos').onclick=()=>{PROF.pos={qb:'wr',wr:'rb',rb:'qb'}[PROF.pos||STYLES[PROF.style][4]];saveProf(PROF);posLbl();};$m('cnew').onclick=()=>{if(PROF&&!confirm('Start a new career? '+PROF.first+' '+PROF.last+' (level '+PROF.lvl+(PROF.season?', season '+PROF.season.year:'')+') and all progress will be deleted.'))return;HTAB='over';openCre(true);};$m('cback').onclick=slotsUI;
  }
 // ================= PLAYER SLOTS SCREEN =================
 function slotsUI(){show('slots');const L=[...Array(NSLOT).keys()].map(i=>[i,loadProf(i)]);
@@ -2137,8 +2152,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='1.60';
+const GAME_VER='1.70';
 const PATCH=[
+ {version:'1.70',title:'Running Backs & Position Choice',date:'2026-10-28',changes:{'Career Mode':['Player Hub: choose your offensive position (Quarterback, Wide Receiver or Running Back), separate from your playstyle and saved with your career','Quick Play position toggle also offers RB'],Gameplay:['Run plays: some downs are an Inside Run or Outside Run with a running back beside and behind the QB; passing plays are unchanged','The RB is one of your four players for that play only (you, if you picked RB, otherwise the slot receiver), so it stays 4v4','Handoff: the back runs the mesh past the QB and possession really moves to him; one exchange per play, and a blown handoff just plays on'],AI:['AI backs hit the called gap, then use the normal ball-carrier AI: bend away from tacklers and juke'],UI:['Play call shown at the line; as RB you are told to get to the QB for the handoff']}},
  {version:'1.60',title:'Defensive Wrestling',date:'2026-10-28',changes:{Defence:['Hold E on defence: your player reaches for a runner who comes within arm\'s length, using the arm on the side he passes (both arms head-on)','A hand only takes hold when it actually touches his chest, waist or arms; the grip then pulls him back with a capped, equal-and-opposite force','Runners can tear free: the grip slips past its limit and tires the longer he fights; Strength and Tackling vs his Strength and Agility','Hold him long enough and you can drag him down or stop his forward progress; running straight into you meets a braced body that shoves him back along the line he came in on','A big enough hit still flattens you; releasing E lets go smoothly'],Physics:['Arm reach is two-bone IK on the ragdoll\'s shoulder and elbow joint targets, within the normal joint limits; wider base in the stance'],Gameplay:['Replaces the old invisible slow-down when a carrier ran into your stance','Only your own defender: never AI, never on offence, not while tackling, diving, down or before the snap']}},
  {version:'1.56',title:'Version Label & Patch Notes',date:'2026-10-28',changes:{UI:['PATCH NOTES button at the top left of the main menu, with the current alpha version underneath','Patch notes window with the full development history, newest first; close with the button or ESC']}},
  {version:'1.55',title:'Defensive Sprint Burst',date:'2026-10-28',changes:{Gameplay:['Sprint burst (tap Space / JUMP after 1 s of sprinting) now also works for your own player on defence','Never used by AI, and off while tackling, diving or knocked down']}},
@@ -2241,9 +2257,9 @@ function draftShow(){const p=PROF,D=p.draft,ord=D.order,ov=D.overall,first=Math.
 {$m('ccomb').onclick=()=>{if(!PROF)return;if(PROF.draft)return draftShow();show('comb');combUI();};$m('kback').onclick=()=>{show('car');carUI();};$m('dskip').onclick=()=>draftShow.skip();$m('dgo').onclick=()=>{show('car');carUI();};
  $m('clist').onclick=e=>{const b=e.target.closest('button');if(b&&!(PROF.combine||{})[DRILLS[+b.dataset.i].id])drillStart(+b.dataset.i);};}
 function preMatch(){if(!PROF)return;if(!PROF.draft){show('comb');combUI();return;}const nx=nextGame(PROF);if(!nx){HTAB='next';show('car');carUI();return;}show('pre');const my=PROF.team??0,op=nx.op;preMatch.op=op;preMatch.ctx=nx.ctx;const A=club(my),B=club(op);$m('pvs').innerHTML=`<span style="color:${hx(A.acc)}">${A.ic} ${A.city} ${A.name}</span> vs <span style="color:${hx(B.acc)}">${B.ic} ${B.city} ${B.name}</span>`;pvShow('pvp',PROF);$m('pvip').innerHTML=pviHTML(PROF);
- const pos=STYLES[PROF.style][4]==='qb'?'QB':'WR 1';$m('pline').innerHTML=`<div class="tbl"><div class="th"><span>${club(PROF.team??0).name} · your team</span><span></span><span></span></div>${[['YOU · '+esc(PROF.last.toUpperCase()),pos+' on offence · CB on defence'],...mates(PROF).map(m=>['#'+m.num+' '+m.n+' · '+m.ovr,m.pos])].map(([a,b])=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">${a}</span><span>${b}</span></div>`).join('')}
+ const pos={qb:'QB',wr:'WR',rb:'RB / WR'}[PROF.pos||STYLES[PROF.style][4]];$m('pline').innerHTML=`<div class="tbl"><div class="th"><span>${club(PROF.team??0).name} · your team</span><span></span><span></span></div>${[['YOU · '+esc(PROF.last.toUpperCase()),pos+' on offence · CB on defence'],...mates(PROF).map(m=>['#'+m.num+' '+m.n+' · '+m.ovr,m.pos])].map(([a,b])=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">${a}</span><span>${b}</span></div>`).join('')}
  <div class="th" style="margin-top:10px"><span>${club(preMatch.op).name} · opponents</span><span></span><span></span></div>${mates(PROF,op).map(m=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">#${m.num} ${m.n} · ${m.ovr}</span><span>${m.pos}</span></div>`).join('')}</div>`;}
-function kickOff(){show(null);useClubs(PROF.team??0,preMatch.op);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:STYLES[PROF.style][4]});lgEnsure(PROF);BADJ.blue=BADJ.red=0;MATCH={ctx:preMatch.ctx,id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj(STYLES[PROF.style][4]==='qb')};newGame();applyOrg();
+function kickOff(){show(null);useClubs(PROF.team??0,preMatch.op);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:PROF.pos||STYLES[PROF.style][4]});lgEnsure(PROF);BADJ.blue=BADJ.red=0;MATCH={ctx:preMatch.ctx,id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj((PROF.pos||STYLES[PROF.style][4])==='qb')};newGame();applyOrg();
  $m('pcard').hidden=false;$m('pcard').innerHTML=`<span class="o">${ovr(PROF.att,PROF.style)}</span><span><span class="n">#${PROF.num} ${esc(PROF.last)}</span><small>${STYLES[PROF.style][0]}</small></span>`;xpHudStart();}
 function endMatch(){const M=MATCH,S=M.st,me=ORG.you,op=me==='blue'?'red':'blue',r=SCORE[me]>SCORE[op]?'w':SCORE[me]<SCORE[op]?'l':'t';M.my=SCORE[me];M.their=SCORE[op];
  MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;xpHudStop();toMenu();
@@ -2311,7 +2327,7 @@ function frame(now){
  const D=active();
  for(const d of D){use(d);sense();}
  while(acc>=DT){
-  for(const d of D){use(d);if(cur.ai)(RET?liveThink:cur.role==='dr'?drillThink:cur.role==='wr'?wrThink:cur.role==='df'?defThink:qbThink)(DT);control(DT);for(const k in joints)drive(joints[k]);}
+  for(const d of D){use(d);if(cur.ai)(RET?liveThink:cur.role==='dr'?drillThink:cur.role==='wr'?wrThink:cur.role==='rb'?rbThink:cur.role==='df'?defThink:qbThink)(DT);control(DT);for(const k in joints)drive(joints[k]);}
   world.step(DT);acc-=DT;
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}

@@ -1516,8 +1516,9 @@ function newGame(){SCORE.blue=SCORE.red=0;DRIVE=1;LOS=-25*YD;DOWN=1;FD=LOS+10*YD
 function toast(msg,col){const b=$m('pbn');b.textContent=msg;b.style.color=col||'#ffd23f';b.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.7)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.15},{opacity:1,offset:.7},{opacity:0,transform:'translate(-50%,-60%) scale(1)'}],{duration:1300,fill:'forwards'});}
 function playOver(msg,col){if(playEnd)return;playEnd=performance.now()+2600;const b=$m('pbn');b.textContent=msg;b.style.color=col||'#ffd23f';b.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.1)',offset:.15},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:2500,fill:'forwards'});}
 // where the ball is down: gain the yards, move the chains, or lose it on downs
+let NEWSERIES=0;   // a first down starts a new series: the offence calls a new play (2nd-4th down keep it)
 function downAt(z,what){z=cl(z,-49*YD,GOAL_Z-YD);const g=Math.round((z-LOS)/YD);
- if(z>=FD){LOS=z;DOWN=1;FD=Math.min(GOAL_Z,z+10*YD);playOver(what+'  '+(g>=0?'+':'')+g+' YD  ·  FIRST DOWN!');return;}
+ if(z>=FD){LOS=z;DOWN=1;FD=Math.min(GOAL_Z,z+10*YD);NEWSERIES=1;playOver(what+'  '+(g>=0?'+':'')+g+' YD  ·  FIRST DOWN!');return;}
  if(what!=='INCOMPLETE')LOS=z;if(++DOWN>4){flip=-LOS;NEXT=null;playOver(what+'  ·  TURNOVER ON DOWNS','#ff5a4a');return;}
  playOver(what==='INCOMPLETE'?what:what+'  '+(g>=0?'+':'')+g+' YD');}
 const readRing=new THREE.Mesh(new THREE.RingGeometry(.55,.75,40),new THREE.MeshBasicMaterial({color:0xff3b2a,transparent:true,opacity:.8,depthWrite:false}));readRing.rotation.x=-Math.PI/2;readRing.visible=false;scene.add(readRing);
@@ -1563,7 +1564,7 @@ function markTick(){xpTick();readOpen();const on=playOn&&mode;youRing.visible=on
  const car=roster.find(H);if(car){const h=car.parts.head.position;carMark.visible=true;carMark.position.set(h.x,h.y+.42+Math.sin(performance.now()/160)*.05,h.z);}}
 function playTick(){if(!playOn)return;if(!$m('pcs').hidden){playTick.t=performance.now();resetT=performance.now();return;}readTick();const tn=performance.now();if(MATCH){MATCH.clock=Math.max(0,MATCH.clock-Math.min(.5,(tn-(playTick.t||tn))/1000));if((MATCH.clock|0)!==playTick.c){playTick.c=MATCH.clock|0;hud();}}playTick.t=tn;   // the game clock runs whenever the match isn't paused
  if(MATCH&&MATCH.clock<=0&&(playState==='pre'||playEnd&&tn>playEnd)){flip=null;endMatch();return;}   // time's up: the play in progress finishes, then the final whistle
- if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){DRIVE++;ORG.off=NEXT||(ORG.off==='blue'?'red':'blue');NEXT=null;LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
+ if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){DRIVE++;ORG.off=NEXT||(ORG.off==='blue'?'red':'blue');NEXT=null;LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else if(NEWSERIES&&ORG.four&&!ORG.free&&!DRILL){NEWSERIES=0;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
  if(playState==='pre'&&player.cur.side==='d'&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
  if(playState!=='live')return;handoffTick();const car=roster.find(H),ot=ORG.off;if(car)playTick.g=0;
  if(car&&car!==playTick.lc){if(MATCH&&playTick.lc){const S=MATCH.st;if(car===player){if(player.cur.side==='d')S.int++;else{S.rec++;MATCH.caught=1;}}if(car===player&&player.cur.side!=='d')player.cur.yacT=performance.now()+2000;else if(playTick.lc===player&&car.cur.side==='o')S.comp++;}playTick.lc=car;}   // who caught it from whom
@@ -1611,7 +1612,7 @@ function plan(){const oT=ORG.off,dT=oT==='blue'?'red':'blue',youO=ORG.you===oT,n
  D.filter(d=>d.kind==='rush').forEach((d,i)=>Object.assign(d,{px:i%2?-3:3,pz:2}));D.filter(d=>d.kind==='rob').forEach((d,i)=>Object.assign(d,{px:i%2?-5:i?5:0,pz:10}));
  return{oT,dT,O,D};}
 // apply it: your spot, everyone else a bot
-function applyOrg(){preEnd();if(!applyOrg.keep){ORG.wi=Math.random()*5|0;PLAY=null;if(!ORG.free&&ORG.four&&!DRILL){if(ORG.you===ORG.off)setTimeout(showPlays,0);else PLAY=dealPlays()[Math.random()*3|0];}}for(const d of roster)if(d!==player)showDoll(d,false);use(player);held=false;aimOn=false;thr=-1;reset();looseBall();
+function applyOrg(){preEnd();if(!applyOrg.keep)NEWSERIES=0;if(!applyOrg.keep){ORG.wi=Math.random()*5|0;PLAY=null;if(!ORG.free&&ORG.four&&!DRILL){if(ORG.you===ORG.off)setTimeout(showPlays,0);else PLAY=dealPlays()[Math.random()*3|0];}}for(const d of roster)if(d!==player)showDoll(d,false);use(player);held=false;aimOn=false;thr=-1;reset();looseBall();
  const P=player.cur;for(const k of['role','role0','side','kind','mark','x0','z0','px','pz','half','you','lab','m'])delete P[k];
  roster=[player];playOn=!ORG.free;document.body.classList.toggle('play',playOn);let n=0,oT=ORG.you,dT;
  const add=(s,side)=>{const d=s.you?player:bot(n++);if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,s,{side,role:side==='o'?s.role:'df',team:side==='o'?oT:dT});if(d!==player)d.cur.at=botAt(d.cur.role,d.cur.team);return d;};
@@ -2388,8 +2389,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.04';
+const GAME_VER='3.05';
 const PATCH=[
+ {version:'3.05',title:'New Play Each Series',date:'2026-10-28',changes:{Gameplay:['You choose a new play card at every new possession and after every first down (a new series); 2nd to 4th down keep the current play','The AI offence also calls a fresh play each series; recently shown plays are never dealt again straight away']}},
  {version:'3.04',title:'Clearer Combine Courses',date:'2026-10-28',changes:{'Career Mode':['Running drills show one objective at a time: the next zone pulses bright with a light pillar, the one after is only a faint hint, completed ones flash green and disappear','A ground arrow just ahead of you always points at the current objective and follows you as you move','Movement Fundamentals is now four short stages (move, sprint, one marked turn, stop in the box), each with its own instruction and control hint; the 40-yard dash is one lane with a single finish line; the three-cone cuts are numbered','Ball Security still makes you read the dummy line yourself: the arrow points straight ahead there, not at the open gap']}},
  {version:'3.03',title:'Mouse Unlock',date:'2026-10-28',changes:{'Bug Fixes':['The mouse is released automatically whenever a menu is showing (match results, main menu, Combine, pause, any screen); no more pressing ESC just to get the cursor back','It is captured only during a live keyboard match, and Resume captures it again straight away']}},
  {version:'3.02',title:'Skip Combine',date:'2026-10-28',changes:{'Career Mode':['Skip Combine on the Combine screen (before any drill): after a confirmation you go straight to the scouting report with a standard mid-level evaluation, clearly marked as estimated','Estimated results sit in a fixed middle band (a C workout); your ratings, OVR and player never change, and you can still run drills afterwards (a real result replaces that drill\'s estimate)']}},

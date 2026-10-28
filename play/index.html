@@ -1692,6 +1692,7 @@ function smartLook(L){const st=R1(Object.keys(LOOKS)),P=LOOKS[st](),c=k=>SW[P[k]
  Object.assign(L,{c_pri:c('pri'),c_sec:R(['neu','sec']),c_acc:c('acc'),c_helm:R(['pri','pri','neu']),c_mask:R(['neu','neu','acc']),c_strap:R(['neu','pri']),c_glove:R(['neu','pri','sec']),c_cleat:R(['neu','neu','pri']),c_comp:R(['neu','pri','sec']),c_sock:R(['neu','pri','sec'])});
  if(L.c_sec===L.c_pri)L.c_sec=c('neu')===L.c_pri?SW.W===L.c_pri?SW.K:SW.W:c('neu');   // pants never vanish into the jersey
  L.comp=R1([0,0,3]);L.leg=R1([0,0,3]);return st;}   // compression: both sides or none
+{const T=[];addEventListener('keydown',e=>{if(e.key!=='6'||!PROF||$m('upg').hidden)return;const n=performance.now();T.push(n);while(T.length&&n-T[0]>2000)T.shift();if(T.length>=5){T.length=0;for(const k of AK)PROF.ups[k]=100;PROF.up=1e9;recompute(PROF);saveProf(PROF);upgUI();}});}
 // refresh button (and R): reset the play
 function refreshQB(){if(mode&&!paused)resetPlay();}
 $m('brst').addEventListener('click',refreshQB);$m('brst').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();refreshQB();},{passive:false});

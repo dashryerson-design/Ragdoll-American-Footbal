@@ -369,6 +369,20 @@ body.touch #phud #pcard .n{max-width:120px}
 .hcats button.on{border-bottom-color:var(--ac)!important;color:#fff!important;background:#ffffff1a!important}.hcats button:hover:not(.on){background:#ffffff14!important;color:#fff!important}.hsub{display:flex;gap:4px;margin-top:6px}.hsub button{font:600 16px "Barlow Condensed"!important;letter-spacing:.01em!important;text-transform:none;background:none!important;border:0!important;color:#bbb!important;padding:4px 12px!important;border-radius:3px!important}.hsub button.on{background:#e8e8e8!important;color:#111!important;font-weight:800!important}
 .htabs{flex-direction:column;align-items:flex-start}.hmenu .hgrp{display:none}
 .hks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;justify-content:center}.hk{display:inline-flex;align-items:center;gap:5px;font:600 12px "Barlow Condensed";letter-spacing:.1em;color:#ccd;text-transform:uppercase}.hk i{font:800 12px "Barlow Condensed";font-style:normal;letter-spacing:.04em;background:#e8edf2;color:#111;border-radius:3px;padding:2px 7px;text-transform:none}
+body.cine #tc,body.cine #phud,body.cine #xphud{display:none!important}
+#cine{position:fixed;inset:0;z-index:30;background:none;pointer-events:auto;display:block}#cine[hidden]{display:none}
+#cine .ci-fd{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .22s;pointer-events:none}#cine .ci-fd.on{opacity:1}
+#cine .ci-lb{position:absolute;left:0;right:0;height:9vh;background:#000;transition:transform .9s cubic-bezier(.2,.7,.2,1)}#cine .ci-lb.t{top:0;transform:translateY(-100%)}#cine .ci-lb.b{bottom:0;transform:translateY(100%)}#cine.in .ci-lb{transform:none}
+#cisk{position:absolute;top:calc(4.5vh - 15px);right:max(16px,env(safe-area-inset-right));display:flex;gap:8px;align-items:center;height:30px;padding:0 12px;background:#ffffff14;border:1px solid #ffffff30;border-radius:15px;color:#cfd8e3;font:700 13px "Barlow Condensed";letter-spacing:.12em;cursor:pointer;opacity:0;transition:opacity .6s .8s}#cine.in #cisk{opacity:1}#cisk kbd{font:600 12px system-ui;color:#8fa0b3}body.touch #cisk kbd{display:none}
+#cine .ci-pan{position:absolute;left:50%;bottom:calc(9vh + 18px);width:min(780px,calc(100vw - 32px));transform:translate(-50%,16px);opacity:0;transition:opacity .5s,transform .5s cubic-bezier(.2,.7,.2,1);display:grid;grid-template-columns:4px 1fr;
+ background:linear-gradient(100deg,#07090dee 0%,#0a0e14d9 60%,#0a0e14a6 100%);border-radius:3px;box-shadow:0 18px 40px #0008}#cine.in .ci-pan{opacity:1;transform:translate(-50%,0)}
+#cine .ci-bar{background:linear-gradient(#ffd23f,#e8a417);border-radius:3px 0 0 3px}#cine .ci-body{padding:14px 20px 12px;min-width:0}
+#cine .ci-name{display:flex;align-items:baseline;gap:10px;font-family:"Barlow Condensed"}#cine .ci-name b{font-weight:800;font-size:15px;letter-spacing:.16em;color:#ffd23f}#cine .ci-name span{font-weight:600;font-size:13px;letter-spacing:.08em;color:#8fa0b3;text-transform:uppercase}#cine .ci-name em{margin-left:auto;font:600 12px "Barlow Condensed";letter-spacing:.12em;color:#6c7a8a;font-style:normal}
+#citx{margin:8px 0 12px;font:500 clamp(17px,2.3vw,22px)/1.35 "Barlow Condensed";color:#f2f5f9;min-height:2.7em;max-width:62ch;overflow-wrap:break-word}
+#cine .ci-foot{display:flex;align-items:center;justify-content:space-between;gap:12px}#cidt{display:flex;gap:6px}#cidt i{width:18px;height:3px;border-radius:2px;background:#ffffff26;transition:background .3s}#cidt i.on{background:#ffd23f}#cidt i.done{background:#ffd23f80}
+#cinx{font:700 13px "Barlow Condensed";letter-spacing:.1em;color:#cfd8e3;opacity:.25;transition:opacity .3s}#cinx.rdy{opacity:1;animation:cpulse 1.6s ease-in-out infinite}#cinx kbd{font:600 12px system-ui;padding:1px 6px;margin-right:6px;border:1px solid #ffffff40;border-radius:4px;color:#fff}
+@keyframes cpulse{50%{opacity:.55}}@media (max-height:500px){#cine .ci-lb{height:6vh}#cine .ci-pan{bottom:calc(6vh + 8px)}#citx{min-height:0;margin:6px 0 8px}}
+.dc.next{border-left-color:#ffd23f;box-shadow:0 0 0 1px #ffd23f55,0 0 18px #ffd23f22}.dc .nx{grid-column:1;font:800 12px "Barlow Condensed";letter-spacing:.14em;color:#ffd23f;font-style:normal}
 #dhud{max-width:min(94vw,560px)}#dhud #dinst{font-size:14px;line-height:1.3}#dstat small{display:block;font:500 14px "Barlow Condensed";color:#ddd;margin-top:4px}
 .cst{margin:12px 0 2px;padding-left:2px}.cst small{display:block;font:700 10px "Barlow Condensed";letter-spacing:.3em;color:var(--ac2)}.cst b{font:800 15px "Barlow Condensed";letter-spacing:.06em;text-transform:uppercase;color:#fff}.cst:first-child{margin-top:0}
 #clist{max-height:min(68vh,640px);overflow-y:auto;padding-right:4px}#clist .dc{padding:7px 10px}#clist .dc b{font-size:18px}#clist .dc .sc{grid-row:1/3;font-size:24px}#clist .dc .rp{grid-row:2;grid-column:1;justify-self:start;font:600 12px "Barlow Condensed"!important;background:none!important;color:#9fb4ff!important;padding:0!important}#clist .dc.last{box-shadow:0 0 0 2px var(--ac2)}
@@ -435,6 +449,9 @@ body.touch #phud #pcard .n{max-width:120px}
 <div class="mleft"><h1>Pre-Draft Combine</h1><div class="sub">15 drills · 6 stations · first attempt is official</div><div id="clist"></div></div>
 <div class="mmid" id="ceval"></div><div class="mright"><div class="pvbox" id="pvk"></div></div></div>
 <div class="hints"><button id="kback"><i class="kp" data-p="back"></i> Back</button></div></div>
+<div id="cine" class="ov" hidden><div class="ci-fd"></div><div class="ci-lb t"></div><div class="ci-lb b"></div><button id="cisk" type="button"><span>SKIP INTRO</span><kbd>⌫</kbd></button>
+ <div class="ci-pan"><div class="ci-bar"></div><div class="ci-body"><div class="ci-name"><b>HEAD COACH</b><span>Combine Director</span><em id="cist"></em></div><p id="citx"></p>
+ <div class="ci-foot"><div id="cidt"></div><span id="cinx"></span></div></div></div></div>
 <div id="dhud" hidden><small id="dkind"></small><b id="dname"></b><span id="dinst"></span><div id="dstat"></div></div>
 <div id="dft" class="ov" hidden><div class="beams"></div><div class="board"><div class="bh"><span>THE DRAFT</span><b id="dround"></b></div>
 <div class="brow"><div class="otc" id="dotc"></div><div class="prev" id="dprev"></div></div></div>
@@ -691,7 +708,7 @@ let cur={};   // movement memory (normal ground speed, queued bounds)
 function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>1){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=jdz=0;}}
 function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat){togglePause();return;}if(!mode||paused)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat&&!CINE.on){togglePause();return;}if(!mode||paused||CINE.on)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
  if(k===' '&&cur.runT>1){cur.boost=Math.min(.3,(cur.boost||0)+.06);return;}   // ball carrier in a long sprint: Space taps are a burst of speed, not a jump
  if(playPre()&&(k===' '||k==='q'||k==='e'||k==='x'))return;   // no jumping / diving before the snap
  // R: reset (QB / receiver drill), Q: dive the way the camera points, F: go limp / get up, T: drop the ball, 1: show the receiver's route, 2: receiver goes
@@ -2412,8 +2429,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.14';
+const GAME_VER='3.15';
 const PATCH=[
+ {version:'3.15',title:'Combine Arrival',date:'2026-10-28',changes:{Career:['New Combine opening: the Head Coach briefs you and four other prospects in a short directed cutscene','New dialogue panel: advance with Space, Enter or a tap, or skip the intro on purpose with the Skip button / Backspace','The Combine screen now points you to your next drill']}},
  {version:'3.14',title:'Audio Fix',date:'2026-10-28',changes:{Audio:['Fixed: no sound at all in the embedded / sandboxed version of the game (the sound files could not load there)','Sound now unlocks from any key, click or tap, so keyboard-only and iPhone players hear it too']}},
  {version:'3.13',title:'Explosive Starts',date:'2026-10-28',changes:{Audio:['Bursting into a run from a standstill or a jog now hits the turf hard for the first few steps']}},
  {version:'3.12',title:'Footsteps',date:'2026-10-28',changes:{Audio:['Every player\'s footsteps, one per planted foot, louder up close and quieter across the field']}},
@@ -2607,23 +2625,67 @@ function drillDone(perf,label,fb){const D=DRILL;D.ph='done';const d=D.d,attr=d.a
  dstat(`<span style="color:#ffd23f">${label}</span> · ${off?'SCORE':'PRACTICE'} ${sc} (${GRADE(sc)})${fb&&fb.length?`<small>${fb[fb.length-1]}</small>`:''}`);setTimeout(()=>{toMenu();show('comb');combUI(d.id);},3200);}
 function drillEnd(){const D=DRILL;DRILL=null;$m('dhud').hidden=true;window.DBGCAM=null;while(drillG.children.length)drillG.remove(drillG.children[0]);
  for(const x of roster)if(x!==player)showDoll(x,false);roster=[player];if(D&&D.d.eng==='scen'){ORG.four=false;ORG.free=true;PLAY=null;playOn=false;CALL={run:null,done:true};document.body.classList.remove('play');routeMesh.visible=losMesh.visible=fdMesh.visible=false;}}
-// ---------- arrival: the prospect walks into the facility, the scouts' briefing over a slow orbit (any key / tap skips) ----------
+// ---------- arrival cinematic: the Head Coach briefs a group of prospects (you among them), five directed shots, a bottom dialogue panel.
+// Actors are pooled bots on a cheap idle brain (look + sway, no gameplay AI); everything is cleaned up by drillEnd. Space / Enter / tap: finish the line, then advance
 const INTRO={id:'intro',st:0,kind:'ARRIVAL',name:'Welcome to the Physics Combine',eng:'intro',at:['spd'],keys:[],obj:''};
-const BRIEF=['Fifteen drills in six stations. Every club\'s scouts are watching. Experienced? You can skip the Combine on the next screen.','Each drill: a short objective, the real controls for your device, then the attempt. Your first attempt is the official one; you can replay any drill as practice.','Scores mix what you actually do (75%) with the ratings that drill tests (25%). Grades go to every club and shape your draft stock.'];
-function introStart(){drillBase();DRILL={d:INTRO,t:0,ph:'run',fb:[]};placeAt(player,0,DR_Z);use(player);camYaw=Math.PI;$m('dhud').hidden=false;$m('dkind').textContent='PRE-DRAFT COMBINE · DAY 1';$m('dname').textContent=`${PROF.first} ${PROF.last}, #${PROF.num}`;
- for(const[x,z]of[[-2.5,0],[2.5,0],[-2.5,36.6],[2.5,36.6],[0,4.6],[-4.6,4.6]])dCone(x,DR_Z+z,z>30?0xffd23f:0xff7a1a);
- const t0=performance.now(),skip=()=>{if(performance.now()-t0<400)return;document.removeEventListener('keyup',skip);document.removeEventListener('pointerup',skip);if(DRILL&&DRILL.d===INTRO)introEnd();};document.addEventListener('keyup',skip);document.addEventListener('pointerup',skip);}   // attached at once; the click that opened it can't skip it   // key-up: the game's own key-down handlers don't get in the way
-function introTick(dt){const D=DRILL,k=Math.min(BRIEF.length-1,D.t/4.2|0);$m('dinst').innerHTML=`${BRIEF[k]}<div class="hks"><span class="hk"><i>${INPUT==='touch'?'Tap':'Any key'}</i>skip</span></div>`;dstat(`${tcase(STYLES[PROF.style][0])} · ${PROF.bio?Math.floor(PROF.bio.h/12)+"'"+(PROF.bio.h%12)+'" '+PROF.bio.w+' lb':''} · OVR ${ovr(PROF.att,PROF.style)}`);
- const a=D.t*.35;window.DBGCAM=[Math.sin(a)*5.5,1.6+Math.sin(D.t*.4)*.3,Math.cos(a)*5.5];window.DBGLY=1.1;if(D.t>BRIEF.length*4.2)introEnd();}
-function introEnd(){PROF.combine=PROF.combine||{};PROF.combine.intro=1;saveProf(PROF);DRILL.ph='done';toMenu();setTimeout(()=>{show('comb');combUI();},250);}   // a beat later, so the tap that skipped the intro can't land on the Combine screen's buttons
+const CINE={on:false,p:new THREE.Vector3(),l:new THREE.Vector3(),fp:new THREE.Vector3(),fl:new THREE.Vector3(),tp:new THREE.Vector3(),tl:new THREE.Vector3()};
+const COACH_Z=6;   // the coach stands 6 m upfield of the group, facing it
+// shots, relative to (0, DR_Z): [from pos, to pos, from look, to look] - each drifts slowly for the length of its line
+const SHOTS=[[[-10,6,-9],[-7.5,4.6,-7],[0,1,2.5],[0,1.1,2.8]],   // 0 establishing: the whole group and the coach
+ [[1.7,1.75,2.9],[1.25,1.7,3.3],[0,1.1,COACH_Z],[0,1.1,COACH_Z]],     // 1 the coach, from among the prospects
+ [[1.6,1.95,8.4],[1.1,1.85,8.0],[0,1.2,0],[0,1.25,0]],                // 2 over the coach's shoulder: the prospects listening
+ [[-1.0,1.6,2.0],[-.65,1.58,1.75],[0,1.1,0],[0,1.12,0]],             // 3 you, in the line
+ [[4.5,4.2,-4.5],[3.5,6.5,-7.5],[0,1,3],[0,.5,16]]];                  // 4 pull back over the field: on to station one
+const CLINES=[[0,()=>'Alright, bring it in. Welcome to the Pre-Draft Combine.'],
+ [1,()=>'Every club in the league has scouts in this building today. From here on, they\'re watching all of you.'],
+ [2,()=>'Fifteen drills across six stations: speed, agility, strength, hands, and live football reps.'],
+ [3,()=>`${PROF.first} ${PROF.last}. ${tcase(STYLES[PROF.style][0])}. Your first attempt at every drill is the one that goes on the record. You can run any of them again, but only for practice.`],
+ [1,()=>'Your score is mostly what you show out here, with your ratings making up the rest. Every grade goes to every club, and it moves your draft stock.'],
+ [4,()=>'I\'ll walk you through each drill before you run it. Station one is waiting. Let\'s go to work.']];
+function introStart(){drillBase();DRILL={d:INTRO,t:0,ph:'run',fb:[]};$m('dhud').hidden=true;
+ const R=[[-3.3,.5],[-1.65,-.25],[1.65,-.25],[3.3,.5]],NUM=[12,33,47,81],K=[[0x3a3f4a,0x22262e],[0x2d3644,0x1c222b],[0x444a55,0x262a31],[0x343a46,0x1f242c]];roster=[player];
+ R.forEach(([x,z],i)=>{use(player);const r=bot(i);   // bot() saves the current globals as the player's: they must BE the player's
+  r.cur={ai:true,role:'cine',team:'blue',side:'o',ph:Math.random()*6.3,sw:.6+Math.random()*.5};showDoll(r,true);shape(r,{h:70+i*2.5|0,w:195+i*14,ws:72+i*2});
+  kit(r,{...DEFLOOK,skin:(i*2+1)%SKC.length},K[i]);jersey(r,NUM[i],null,K[i][0],0xffffff);placeAt(r,x,DR_Z+z);for(const b of r.list){b.collisionFilterGroup=8;b.collisionFilterMask=7;}roster.push(r);});
+ use(player);const c=bot(4);c.cur={ai:true,role:'cine',team:'red',side:'d',coach:true,ph:0,sw:1};showDoll(c,true);shape(c,{h:74,w:232,ws:76});kit(c,{...DEFLOOK,skin:2},[0x14171c,0x2b3038]);jersey(c,null);
+ for(const m of c.kitM||[])if(m.parent===c.parts.head.mesh)m.visible=false;   // no helmet on the coach
+ {const H=c.parts.head,h=H.shapes[0].halfExtents,M=new THREE.MeshLambertMaterial({color:0x1b2230}),cap=new THREE.Mesh(new THREE.BoxGeometry(h.x*2.12,h.y*.55,h.z*2.12),M),brim=new THREE.Mesh(new THREE.BoxGeometry(h.x*1.9,.04,h.z*1.3),M);
+  cap.position.y=h.y*.78;brim.position.set(0,h.y*.5,h.z*1.55);H.mesh.add(cap,brim);c.kitM.push(cap,brim);}   // a ball cap with a brim: reads as a coach, and shows which way he faces (the next kit() removes it)
+ placeAt(c,0,DR_Z+COACH_Z);for(const b of c.list){b.collisionFilterGroup=8;b.collisionFilterMask=7;}roster.push(c);
+ placeAt(player,0,DR_Z);use(player);camYaw=Math.PI;
+ const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.52,40),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.75,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.set(0,.02,DR_Z);drillG.add(ring);   // marks you in the group
+ Object.assign(CINE,{on:true,k:-1,ch:0,ring,t0:performance.now(),lastIn:0});CINE.p.set(-10,6,DR_Z-9);CINE.l.set(0,1,DR_Z+2.5);
+ $m('cidt').innerHTML=CLINES.map(()=>'<i></i>').join('');document.body.classList.add('cine');$m('cine').hidden=false;requestAnimationFrame(()=>$m('cine').classList.add('in'));cineLine(0);
+ const adv=()=>{const n=performance.now();if(n-CINE.lastIn<220||n-CINE.t0<600)return;CINE.lastIn=n;const L=CLINES[CINE.k][1]();if(CINE.ch<L.length)CINE.ch=L.length;else if(CINE.k<CLINES.length-1)cineLine(CINE.k+1);else introEnd();};
+ CINE.key=e=>{if(e.repeat)return;if(e.key==='Backspace'){e.preventDefault();return introEnd();}if(e.key===' '||e.key==='Enter'||e.key.toLowerCase()==='e'||e.key==='ArrowRight'){e.preventDefault();adv();}};
+ CINE.tap=e=>{if(e.target.closest('#cisk'))return;adv();};CINE.skip=e=>{e.stopPropagation();introEnd();};
+ addEventListener('keydown',CINE.key);$m('cine').addEventListener('pointerup',CINE.tap);$m('cisk').addEventListener('click',CINE.skip);}
+function cineLine(k){const S=SHOTS[CLINES[k][0]][0];CINE.k=k;CINE.ch=0;CINE.lt=0;CINE.cutDone=0;CINE.fp.copy(CINE.p);CINE.fl.copy(CINE.l);
+ CINE.cut=k>0&&Math.hypot(S[0]-CINE.p.x,S[1]-CINE.p.y,DR_Z+S[2]-CINE.p.z)>6;if(CINE.cut)$m('cine').querySelector('.ci-fd').classList.add('on');   // a long move would sweep through the players: dip to black and cut instead
+ [...$m('cidt').children].forEach((d,i)=>d.className=i<k?'done':i===k?'on':'');$m('cist').textContent=`${k+1} / ${CLINES.length}`;}
+function introTick(dt){const C=CINE;if(!C.on)return;C.lt+=dt;use(player);for(const k in keys)keys[k]=false;camYaw=Math.PI;   // you stand in line facing the coach; no inputs reach your player
+ const L=CLINES[C.k][1](),S=SHOTS[CLINES[C.k][0]],u=Math.min(1,C.lt/9),e=u*u*(3-2*u),w=C.cut?1:Math.min(1,C.lt/1.5),bw=w*w*(3-2*w);
+ if(C.cut&&C.lt<.25)return;if(C.cut&&!C.cutDone){C.cutDone=1;$m('cine').querySelector('.ci-fd').classList.remove('on');}   // held black, then the new shot fades up
+ C.tp.set(S[0][0]+(S[1][0]-S[0][0])*e,S[0][1]+(S[1][1]-S[0][1])*e,DR_Z+S[0][2]+(S[1][2]-S[0][2])*e);C.tl.set(S[2][0]+(S[3][0]-S[2][0])*e,S[2][1]+(S[3][1]-S[2][1])*e,DR_Z+S[2][2]+(S[3][2]-S[2][2])*e);
+ C.p.lerpVectors(C.fp,C.tp,bw);C.l.lerpVectors(C.fl,C.tl,bw);   // ease out of the last shot, then drift
+ const was=C.ch|0;C.ch=Math.min(L.length,C.ch+dt*48);if((C.ch|0)!==was||!C.lt||dt>0){const n=C.ch|0;$m('citx').textContent=L.slice(0,n);}
+ const rdy=C.ch>=L.length;$m('cinx').className=rdy?'rdy':'';$m('cinx').innerHTML=INPUT==='touch'?'TAP TO CONTINUE':'<kbd>SPACE</kbd>CONTINUE';
+ if(rdy&&(C.done=C.done||C.lt)&&C.lt-C.done>7){C.done=0;if(C.k<CLINES.length-1)cineLine(C.k+1);else introEnd();}else if(!rdy)C.done=0;   // never stuck: a finished line moves on by itself after 7 s
+ C.ring.position.x=pel.position.x;C.ring.position.z=pel.position.z;C.ring.material.opacity=.5+.25*Math.sin(C.lt*3);}
+// idle actor: face the speaker with a slow, individual sway; the coach turns along the line as he talks
+function cineThink(dt){const c=cur,P=pel.position,t=performance.now()/1000;for(const k in keys)keys[k]=false;
+ if(c.coach){const x=Math.sin(t*.35)*2.4;camYaw=Math.atan2(x-P.x,DR_Z-P.z)+Math.PI;}else camYaw=Math.atan2(-P.x,DR_Z+COACH_Z-P.z)+Math.PI+Math.sin(t*.4*c.sw+c.ph)*.14;}
+function introEnd(){const C=CINE;if(!C.on)return;C.on=false;removeEventListener('keydown',C.key);$m('cine').removeEventListener('pointerup',C.tap);$m('cisk').removeEventListener('click',C.skip);
+ $m('cine').classList.remove('in');$m('cine').hidden=true;document.body.classList.remove('cine');C.ring.geometry.dispose();C.ring.material.dispose();
+ PROF.combine=PROF.combine||{};PROF.combine.intro=1;saveProf(PROF);if(DRILL)DRILL.ph='done';toMenu();setTimeout(()=>{show('comb');combUI();},250);}   // a beat later, so the tap that ended it can't land on the Combine screen's buttons
 // skipped Combine: every drill not yet on tape gets a standard mid-level estimate (a "C" workout). Ratings nudge it a little inside a fixed 62-70 band (always a C),
 // so it is never elite and never poor; nothing about the player changes, and it's generated once per drill (coming back doesn't re-roll)
 function skipCombine(){const p=PROF,C=p.combine=p.combine||{};C.intro=1;
  for(const d of DRILLS)if(!C[d.id]){const a=d.at.reduce((t,k)=>t+cl((p.att[k]-40)/55*100,0,100),0)/d.at.length;C[d.id]={s:Math.round(cl(65+(a-50)*.08,62,70)),l:'Estimated',est:1,perf:null,attr:Math.round(a),fb:['Combine skipped: standard scouting estimate, not an on-field result.']};}
  C.skipped=1;saveProf(p);show('comb');combUI();}
 // ---------- the Combine screen: stations, results, and the scouting report ----------
-function combUI(last){const p=PROF,C=p.combine||{},st=stockOf(p),done=DRILLS.filter(d=>C[d.id]),all=done.length===DRILLS.length;
- $m('clist').innerHTML=STATIONS.map((sn,si)=>`<div class="cst"><small>STATION ${si+1}</small><b>${sn}</b></div>`+DRILLS.map((d,i)=>d.st!==si?'':`<div class="dc${C[d.id]?' done':''}${last===d.id?' last':''}"><small>${d.kind}</small><b>${d.name}</b>${C[d.id]?`<div class="sc">${C[d.id].skip?'—':GRADE(C[d.id].s)}<em>${C[d.id].skip?'skipped':C[d.id].est?C[d.id].s+' · estimated':C[d.id].s+' · '+C[d.id].l}</em></div><button class="rp" data-i="${i}">Replay</button>`:`<button data-i="${i}">Start</button>`}</div>`).join('')).join('');
+function combUI(last){const p=PROF,C=p.combine||{},st=stockOf(p),done=DRILLS.filter(d=>C[d.id]),all=done.length===DRILLS.length,nxt=C.skipped?null:DRILLS.find(d=>!C[d.id]);
+ $m('clist').innerHTML=STATIONS.map((sn,si)=>`<div class="cst"><small>STATION ${si+1}</small><b>${sn}</b></div>`+DRILLS.map((d,i)=>d.st!==si?'':`<div class="dc${C[d.id]?' done':''}${last===d.id?' last':''}${d===nxt?' next':''}"><small>${d.kind}</small><b>${d.name}</b>${d===nxt?'<i class="nx">'+(done.length?'NEXT UP':'COACH: START HERE')+'</i>':''}${C[d.id]?`<div class="sc">${C[d.id].skip?'—':GRADE(C[d.id].s)}<em>${C[d.id].skip?'skipped':C[d.id].est?C[d.id].s+' · estimated':C[d.id].s+' · '+C[d.id].l}</em></div><button class="rp" data-i="${i}">Replay</button>`:`<button data-i="${i}">Start</button>`}</div>`).join('')).join('');
  const sc=d=>C[d.id]&&!C[d.id].skip&&!C[d.id].est?C[d.id].s:null,R=DRILLS.filter(d=>sc(d)!=null).sort((a,b)=>sc(b)-sc(a)),best=R.slice(0,3),worst=R.slice(-2).reverse().filter(d=>!best.includes(d)),L=last&&C[last];
  const pos={qb:'QB',wr:'WR',rb:'RB'}[p.pos||STYLES[p.style][4]],avg=done.length?Math.round(done.reduce((t,d)=>t+C[d.id].s,0)/done.length):0;
  const summary=!R.length?(C.skipped?`${p.last} skipped the Combine. Clubs have a standard mid-level estimate on file and will lean on tape and ratings.`:'No drills on tape yet.'):`${p.last} tested best in ${best.map(d=>d.name.toLowerCase()).join(', ')}${worst.length?`; scouts want to see more in ${worst.map(d=>d.name.toLowerCase()).join(' and ')}`:''}. ${avg>=80?'A standout workout.':avg>=65?'A solid, draftable workout.':avg>=50?'An uneven workout with flashes.':'A workout that leaves questions.'}`;
@@ -2736,7 +2798,7 @@ function frame(now){
  for(const d of D){use(d);sense();}
  if(LOWFX&&acc>10*DT)acc=10*DT;   // touch: drop the backlog instead of spiralling (sim time stays exact per step)
  while(acc>=DT){
-  frame.sub=(frame.sub||0)+1;for(const d of D){use(d);if(cur.ai&&(!LOWFX||frame.sub%2===0))(RET?liveThink:cur.role==='dr'?drillThink:cur.role==='wr'?wrThink:cur.role==='rb'?rbThink:cur.role==='df'?defThink:qbThink)(LOWFX?2*DT:DT);control(DT);for(const k in joints)drive(joints[k]);}
+  frame.sub=(frame.sub||0)+1;for(const d of D){use(d);if(cur.ai&&(!LOWFX||frame.sub%2===0))(RET?liveThink:cur.role==='cine'?cineThink:cur.role==='dr'?drillThink:cur.role==='wr'?wrThink:cur.role==='rb'?rbThink:cur.role==='df'?defThink:qbThink)(LOWFX?2*DT:DT);control(DT);for(const k in joints)drive(joints[k]);}
   world.step(DT);acc-=DT;
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}
@@ -2756,7 +2818,7 @@ function frame(now){
   if(birdK>.001&&route){const AR=roster.filter(d=>d.cur.route).flatMap(d=>[[d.cur.x0,LOS],...d.cur.route]),xs=AR.length?AR.map(p=>p[0]):[routeX],zs=AR.length?AR.map(p=>p[1]):[0];let cx=(Math.min(...xs)+Math.max(...xs))/2,cz=(Math.min(...zs)+Math.max(...zs))/2,span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs),20);if(PRE){const P=roster.map(d=>d.pel.position),X=P.map(p=>p.x),Z=P.map(p=>p.z);cx=(Math.min(...X)+Math.max(...X))/2;cz=(Math.min(...Z)+Math.max(...Z))/2+3;span=cl(Math.max(Math.max(...X)-Math.min(...X),Math.max(...Z)-Math.min(...Z))*.7,16,26);}   // breakdown: the whole formation, close enough to read
    const k=birdK*birdK*(3-2*birdK),bp=PRE?new THREE.Vector3(cx,span*.62+5,cz-span*.95):new THREE.Vector3(cx,span*1.15+8,cz-span*.35),lk=new THREE.Vector3(cx,0,cz);
    const look=new THREE.Vector3(pvx,pvy,pvz).lerp(lk,k);cam.position.lerp(bp,k);cam.lookAt(look);}}
- if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,window.DBGLY||.8,pel.position.z);}   // test hook: side view
+ if(CINE.on){cam.position.copy(CINE.p);cam.lookAt(CINE.l);}else if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,window.DBGLY||.8,pel.position.z);}   // test hook: side view
  sun.position.set(pel.position.x+5,12,pel.position.z+4);sun.target.position.set(pel.position.x,0,pel.position.z);
  cam.updateMatrixWorld();preTick(performance.now());blobTick();touchAdapt(frame.fdt||0);shakeApply();renderer.render(scene,cam);shakeRestore();
 }

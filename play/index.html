@@ -871,9 +871,62 @@ function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  follow(t=>[0,dvY+(1.07+gs-dvY)*sm3(cl(t/(DIVE_END-DIVE_UP),0,1))],T-DIVE_UP,.9,70,16,35);
  ballArm();
  if(T>=DIVE_END){dv=0;dvY=0;phase=0;}}
+// ===== defensive stance (hold E, your defender only): arms reach with PD joint targets, hands grip by real hand-to-body contact, and every push / pull is an equal-and-opposite force =====
+const _sv=new V(),_sl=new V(),_sa=new V(),_sf=new V();
+const ST_PARTS=['chest','abdomen','pelvis','uarm1','uarm-1','farm1','farm-1'];   // what a hand can catch hold of
+function armLen(){const h=n=>parts[n].shapes[0].halfExtents.y;return 2*h('uarm1')+2*h('farm1')+h('hand1');}
+function upTilt(d){d.chest.quaternion.vmult(Y,_sv);return _sv.y;}   // 1 = chest upright
+function stanceArms(dt){
+ const S=cur.dst||(cur.dst={k:0,ar:{1:{k:0,g:null,cool:0},'-1':{k:0,g:null,cool:0}},hitT:0});const now=performance.now(),J=joints;
+ const on=cur.stance&&!limp&&!cur.tkS&&dv===0&&js===0&&!held&&playOn&&!playPre();   // never while tackling, diving, jumping, down or before the snap
+ S.k+=((on?1:0)-S.k)*Math.min(1,dt*(on?8:4));
+ for(const sd of[1,-1])J['hip'+sd].z=sd*.17*S.k;   // wide base
+ if(S.k<.02&&!S.ar[1].g&&!S.ar[-1].g)return;
+ // the runner to fight: nearest opponent on his feet, in front of or beside the chest, within a reach + step
+ const aL=armLen(),C=chest.position;let R=null,rd=aL+.7;
+ if(on)for(const d of active()){if(d===player||d.limp||d.cur.team===player.cur.team||!d.chest)continue;const q=d.chest.position,x=Math.hypot(q.x-C.x,q.z-C.z);
+  if(x<rd){chest.vectorToLocalFrame(_sv.set(q.x-C.x,q.y-C.y,q.z-C.z),_sl);if(_sl.z>-.25){rd=x;R=d;}}}
+ let lx=0;if(R){const q=R.chest.position,v=R.pel.velocity;chest.vectorToLocalFrame(_sv.set(q.x+v.x*.12-C.x,0,q.z+v.z*.12-C.z),_sl);lx=_sl.x;}   // where he'll be a beat from now: the reach follows his cuts
+ const sMe=E(player,'str'),tMe=E(player,'tak');
+ for(const sd of[1,-1]){const A=S.ar[sd],sh=(p=>bpt(chest,p.x,p.y,p.z))(J['shoulder'+sd].pc.pivotA),hd=parts['hand'+sd];
+  // which arm: the side he's passing on; straight at you, both
+  const pick=R&&(Math.abs(lx)<.2||Math.sign(lx)===sd);let T=null;
+  if(A.g){const g=A.g;g.b.pointToWorldFrame(g.loc,_sa);_sa.x+=(sh.x-_sa.x)*.3;_sa.y+=(sh.y-_sa.y)*.3;_sa.z+=(sh.z-_sa.z)*.3;T=_sa;}   // holding: the arm draws the hand back in, so the grip pulls him toward you
+  else if(pick&&now>A.cool){const q=R.chest.position,v=R.pel.velocity;_sa.set(q.x+v.x*.08,q.y+.05,q.z+v.z*.08);
+   if(Math.hypot(_sa.x-sh.x,_sa.y-sh.y,_sa.z-sh.z)<aL*1.05)T=_sa;}   // only inside a real arm's length: no grabbing from a distance
+  A.k+=((T&&on?1:0)-A.k)*Math.min(1,dt*(T&&on?12:3.5));   // short controlled reach out, slower drift back to ready
+  // ready pose: elbows bent, hands up in front of the chest
+  const k=S.k,rx=-.95*k+J['shoulder'+sd].x*(1-k),rz=sd*.28*k+J['shoulder'+sd].z*(1-k),re=-1.2*k+J['elbow'+sd].x*(1-k);let ax=rx,az=rz,el=re;
+  if(T){chest.vectorToLocalFrame(_sv.set(T.x-sh.x,T.y-sh.y,T.z-sh.z),_sl);const L=Math.max(.1,_sl.length()),u=2*parts['uarm'+sd].shapes[0].halfExtents.y,f=aL-u,Lc=Math.min(L,u+f-.01);
+   const flex=Math.PI-Math.acos(cl((u*u+f*f-Lc*Lc)/(2*u*f),-1,1)),off=Math.acos(cl((u*u+Lc*Lc-f*f)/(2*u*Lc),-1,1));   // two-bone IK: the elbow bends so the hand lands on the target, not past it
+   const tx=cl(-Math.atan2(_sl.z,-_sl.y)+off,-2.6,.3),tz=cl(Math.asin(cl(_sl.x/L,-1,1)),sd>0?-.5:-1.4,sd>0?1.4:.5);
+   ax=rx+(tx-rx)*A.k;az=rz+(tz-rz)*A.k;el=re+(-cl(flex,.05,2.2)-re)*A.k;}
+  if(k>.02||A.g){J['shoulder'+sd].x=ax;J['shoulder'+sd].z=az;J['shoulder'+sd].y=0;J['elbow'+sd].x=el;J['wrist'+sd].x=0;}
+  // grip: the hand has to actually touch him (inside a body box, small skin margin)
+  if(!A.g&&on&&R&&A.k>.55){const hp=hd.position;for(const n of ST_PARTS){const b=R.parts[n];if(!b)continue;b.pointToLocalFrame(hp,_sl);const h=b.shapes[0].halfExtents,m=.09;
+   if(Math.abs(_sl.x)<h.x+m&&Math.abs(_sl.y)<h.y+m&&Math.abs(_sl.z)<h.z+m){A.g={d:R,b,loc:new V(cl(_sl.x,-h.x,h.x),cl(_sl.y,-h.y,h.y),cl(_sl.z,-h.z,h.z)),w:1,slip:0,t:0};break;}}}
+  // holding on: spring-damper between the hand and the spot it holds, force-capped; past the cap the grip slips and tears free
+  if(A.g){const g=A.g,D=g.d;g.t+=dt;g.w=on&&!D.limp?Math.min(1,g.w+dt*8):g.w-dt*7;   // E released / he's down: let go over ~0.15 s, no snap
+   g.b.pointToWorldFrame(g.loc,_sa);const hp=hd.position,dx=_sa.x-hp.x,dy=_sa.y-hp.y,dz=_sa.z-hp.z,dist=Math.hypot(dx,dy,dz);
+   const vx=g.b.velocity.x-hd.velocity.x,vy=g.b.velocity.y-hd.velocity.y,vz=g.b.velocity.z-hd.velocity.z;
+   const cap=520*cl(1+.35*sMe+.2*tMe-.25*E(D,'str')-.15*E(D,'agi'),.45,1.7)*g.w/(1+.6*Math.max(0,g.t-.6));   // grip strength: your Strength + Tackling vs his Strength + Agility; it tires the longer he fights it
+   let fx=-(900*dx+110*vx),fy=-(900*dy+110*vy)*.5,fz=-(900*dz+110*vz);const fm=Math.hypot(fx,fy,fz);   // pulls the held spot back toward the hand
+   if(fm>cap){const s=cap/fm;fx*=s;fy*=s;fz*=s;g.slip+=dt;}else g.slip=Math.max(0,g.slip-dt*2);
+   if(g.w<=0||dist>.42||g.slip>.14||g.t>2.2){A.g=null;A.cool=now+650;}   // broke free (or let go): the arm has to re-reach
+   else{g.b.applyForce(_sf.set(fx,fy,fz),_sa);for(const[b,s]of[[hd,.25],[chest,.45],[pel,.3]])b.applyForce(_sf.set(-fx*s,-fy*s,-fz*s),b.position);   // equal and opposite, carried up the arm into the body
+    if(g.t>.5&&now>(g.nx||0)){g.nx=now+450;if(Math.random()<cl(.3+.25*tMe+.2*sMe-.2*E(D,'str')-.15*E(D,'bhd'),.08,.7))for(const b of[D.chest,D.parts.abdomen]){b.velocity.y-=1.4;b.velocity.x+=(hp.x-b.position.x)*1.6;b.velocity.z+=(hp.z-b.position.z)*1.6;}}   // leverage: every so often you yank his top half down and in; whether he stays up is up to his balance
+    const fp=D.held&&g.t>1.2&&Math.hypot(D.pel.velocity.x,D.pel.velocity.z)<1;   // held up with no forward progress: whistle, he's down where he stands
+    if(g.t>.25&&upTilt(D)<.7||fp){D.limp=true;D.limpT=now+1200;D.cur.lastTk={ok:true,by:player,t:now,type:'wrap',sev:1};if(MATCH){MATCH.st.tak++;if(!RET&&D.pel.position.z-LOS<=3*YD)MATCH.st.stop++;}A.g=null;A.cool=now+800;if(playOn&&D.held)toast(fp?'FORWARD PROGRESS STOPPED':'DRAGGED DOWN','#3ee07a');}}}}   // pulled off balance far enough: he goes down, through the normal tackle fall
+ // body contact: a runner who runs into you meets your braced torso; momentum along the contact line decides who gives
+ if(on&&R&&now>S.hitT){const q=R.chest.position,nx=q.x-C.x,nz=q.z-C.z,d=Math.hypot(nx,nz),w=chest.shapes[0].halfExtents.x+R.chest.shapes[0].halfExtents.x+.12;
+  if(d<w&&d>1e-3){const ux=nx/d,uz=nz/d,vr=R.pel.velocity,vm=pel.velocity,vc=-((vr.x-vm.x)*ux+(vr.z-vm.z)*uz);
+   if(vc>.4){const mR=kgOf(R),mM=kgOf(player)*(1.6+.4*sMe),e=cl(.12+.22*sMe-.1*E(R,'str')+.05*vc,0,.5),Jm=(1+e)*vc*mR*mM/(mR+mM),dR=Math.min(5,Jm/mR),dM=Jm/mM;   // braced: your legs make you heavier along the hit; restitution = the shove
+    for(const[n,b]of Object.entries(R.parts)){const k=/chest|abdomen|head|neck|uarm/.test(n)?1.2:/thigh|shin|foot|toe/.test(n)?.7:1;b.velocity.x+=ux*dR*k;b.velocity.z+=uz*dR*k;}   // pushed back along the line he came in on; top half first, so he rocks back
+    for(const b of list){b.velocity.x-=ux*dM;b.velocity.z-=uz*dM;}S.hitT=now+220;freeFeet(R,400);
+    if(dM>2.6*(1+.3*sMe)){limp=true;player.limpT=now+900;}   // a big enough runner still flattens you
+    else if(playOn&&R.held&&dR>2.2)toast('STONEWALLED','#62bfff');}}}}
 function control(dt){{const tg=limp?limpTone:1,t0=cur.tone??tg;cur.tone=t0+(tg-t0)*Math.min(1,dt*(limp?12:1.8));}   // falling = tone drains over ~0.3 s; getting up = it returns over ~0.6 s
- if(cur.jk)jukeTick(dt);if(!cur.ai&&!limp&&dv===0&&js===0&&!cur.jk)cutAssist();if(held&&cur.team!==player.cur.team&&player.cur.stance&&curD!==player){const P=player.pel.position,dx=pel.position.x-P.x,dz=pel.position.z-P.z;   // ball carrier running into a defender's stance (E): held up and stopped, Strength vs Strength
- if(dx*dx+dz*dz<2.1){const k=Math.exp(-14*cl(.6+.3*(E(player,'str')-AT('str')),.2,.95)*dt);for(const b of list){b.velocity.x*=k;b.velocity.z*=k;}const k2=Math.exp(-10*dt);for(const b of player.list){b.velocity.x*=k2;b.velocity.z*=k2;}}}   // the defender stays planted too
+ if(cur.jk)jukeTick(dt);if(!cur.ai&&!limp&&dv===0&&js===0&&!cur.jk)cutAssist();
 if(!cur.ai){const st=playOn&&POSS()!==cur.team&&!!keys.e;if(st)cur.low=.3;else if(cur.stance)cur.low=0;cur.stance=st;}   // holding E on defence: sink into a wide, low defensive stance
 cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT('sta')))*dt,0,1);if(cur.jkB)cur.jkB=Math.max(0,cur.jkB-.3*dt);
  const s=Math.sin(camYaw),c=Math.cos(camYaw);
@@ -941,7 +994,7 @@ cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT(
   if(js===0&&mv>.3&&contact()){const f=pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw);cur.runV=(cur.runV==null?f:cur.runV*.995+f*.005);}   // remember normal ground speed: a bound only beats it by ~20%
   if(cur.bufB&&(js===4||js===0)&&contact()&&!limp){if(performance.now()-cur.bufB<400){jpt=.2;startBound();}cur.bufB=0;}   // space pressed just before landing: chain straight into the next bound
  }
- ballArm();
+ ballArm();if(!cur.ai)stanceArms(dt);
  const lean=thLean-.08*qbK+.95*reachK+.85*(cur.low||0)+.18*crK+mv*(run?.14+.16*cl((speed-vf)/3,0,1):.1)*(1-qbK)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
  if(!limp){
   // balance: keep pelvis and chest facing the heading, upright
@@ -2084,8 +2137,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='1.56';
+const GAME_VER='1.60';
 const PATCH=[
+ {version:'1.60',title:'Defensive Wrestling',date:'2026-10-28',changes:{Defence:['Hold E on defence: your player reaches for a runner who comes within arm\'s length, using the arm on the side he passes (both arms head-on)','A hand only takes hold when it actually touches his chest, waist or arms; the grip then pulls him back with a capped, equal-and-opposite force','Runners can tear free: the grip slips past its limit and tires the longer he fights; Strength and Tackling vs his Strength and Agility','Hold him long enough and you can drag him down or stop his forward progress; running straight into you meets a braced body that shoves him back along the line he came in on','A big enough hit still flattens you; releasing E lets go smoothly'],Physics:['Arm reach is two-bone IK on the ragdoll\'s shoulder and elbow joint targets, within the normal joint limits; wider base in the stance'],Gameplay:['Replaces the old invisible slow-down when a carrier ran into your stance','Only your own defender: never AI, never on offence, not while tackling, diving, down or before the snap']}},
  {version:'1.56',title:'Version Label & Patch Notes',date:'2026-10-28',changes:{UI:['PATCH NOTES button at the top left of the main menu, with the current alpha version underneath','Patch notes window with the full development history, newest first; close with the button or ESC']}},
  {version:'1.55',title:'Defensive Sprint Burst',date:'2026-10-28',changes:{Gameplay:['Sprint burst (tap Space / JUMP after 1 s of sprinting) now also works for your own player on defence','Never used by AI, and off while tackling, diving or knocked down']}},
  {version:'1.54',title:'Menu Key Art',date:'2026-10-26',changes:{Visuals:['Main menu shows static key art of the receiver at full sprint, ball tucked, rendered once from the game engine','Receiver\'s head faces the running direction, turned slightly toward the camera'],Performance:['Live 3D menu scene, spotlight, dust and animated beams removed from the menu']}},

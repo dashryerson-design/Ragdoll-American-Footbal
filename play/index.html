@@ -517,22 +517,24 @@ const X=new V(1,0,0),Y=new V(0,1,0),Z=new V(0,0,1);
 function eul(x,y,z,o){qa.setFromAxisAngle(X,x);qb.setFromAxisAngle(Y,y);qc.setFromAxisAngle(Z,z);qa.mult(qb,o);o.mult(qc,o);}
 let limp=false,limpTone=.12;   // limpTone: muscle tone left when limp
 let gdir=1,crK=0;   // crK: 0 standing .. 1 fully crouched   // gdir: +1 stepping forwards, -1 stepping backwards
+const ZW=new V();   // a real Vec3 (never written) keeps pd monomorphic; a plain object deoptimised it
 function pd(c,p,s,react,KP=600,KD=30){
  c.quaternion.inverse(inv);des.mult(inv,er);
  const sg=er.w<0?-1:1,sc=(cur.tone??(limp?limpTone:1))*(c.wk||1),Ie=p?c.I*p.I/(c.I+p.I):c.I,kp=18000*Ie*Math.min(1,s*.45)*sc,kd=Math.max(limp?.06*Ie/DT:0,Math.min(1.8*Math.sqrt(kp*Ie),.9*Ie/DT)),I=1;   // limp joints still have friction
  let ex=2*sg*er.x,ey=2*sg*er.y,ez=2*sg*er.z;const el=Math.hypot(ex,ey,ez);if(el>1.5){const f=1.5/el;ex*=f;ey*=f;ez*=f;}
- const w=c.angularVelocity,pw=p?p.angularVelocity:{x:0,y:0,z:0};
+ const w=c.angularVelocity,pw=p?p.angularVelocity:ZW;
  const tx=I*(kp*ex-kd*(w.x-pw.x)),ty=I*(kp*ey-kd*(w.y-pw.y)),tz=I*(kp*ez-kd*(w.z-pw.z));
  c.torque.x+=tx;c.torque.y+=ty;c.torque.z+=tz;
  if(p&&react){p.torque.x-=tx;p.torque.y-=ty;p.torque.z-=tz;}}
 function drive(j){eul(j.x,j.y,j.z,tq);j.p.quaternion.mult(tq,des);pd(j.c,j.p,j.s,j.react);if(j.lim)limitJ(j);}   // anatomical stops always apply, limp or not
 // bones and ligaments: a joint pushed past its natural range meets a stiff, damped stop (knees and elbows can't bend backwards, necks can't fold flat)
 const rq=new Q(),lv=new V(),lw=new V(),lt=new V();
+const _la=[0,0,0],_lr=[0,0,0],_lt=[0,0,0];   // scratch: limitJ runs ~65k times a second
 function limitJ(j){const P=j.p,Cb=j.c,L=j.lim;P.quaternion.inverse(inv);inv.mult(Cb.quaternion,rq);
  let x=rq.x,y=rq.y,z=rq.z;if(rq.w<0){x=-x;y=-y;z=-z;}const sn=Math.hypot(x,y,z);if(sn<1e-6)return;
- const f=2*Math.atan2(sn,Math.abs(rq.w))/sn,a=[x*f,y*f,z*f];
- lv.set(Cb.angularVelocity.x-P.angularVelocity.x,Cb.angularVelocity.y-P.angularVelocity.y,Cb.angularVelocity.z-P.angularVelocity.z);inv.vmult(lv,lw);const rv=[lw.x,lw.y,lw.z];
- const Ie=Cb.I*P.I/(Cb.I+P.I),k=16000*Ie,kd=.5*Ie/DT,t=[0,0,0];let any=false;
+ const f=2*Math.atan2(sn,Math.abs(rq.w))/sn,a=_la;a[0]=x*f;a[1]=y*f;a[2]=z*f;
+ lv.set(Cb.angularVelocity.x-P.angularVelocity.x,Cb.angularVelocity.y-P.angularVelocity.y,Cb.angularVelocity.z-P.angularVelocity.z);inv.vmult(lv,lw);const rv=_lr;rv[0]=lw.x;rv[1]=lw.y;rv[2]=lw.z;
+ const Ie=Cb.I*P.I/(Cb.I+P.I),k=16000*Ie,kd=.5*Ie/DT,t=_lt;t[0]=t[1]=t[2]=0;let any=false;
  for(let i=0;i<3;i++){const o=a[i]>L[i][1]?a[i]-L[i][1]:a[i]<L[i][0]?a[i]-L[i][0]:0;if(!o)continue;any=true;
   t[i]=-k*o-((o>0?rv[i]>0:rv[i]<0)?kd*rv[i]:0);}                          // spring back + damp only motion going further out
  if(!any)return;lt.set(t[0],t[1],t[2]);P.quaternion.vmult(lt,lt);
@@ -702,7 +704,7 @@ let yaw=0,phase=0,mv=0;
 let airT=0,ab=0;
 const cl=(x,a,b)=>Math.min(b,Math.max(a,x));
 function pitchOf(b){const f=new V();b.quaternion.vmult(new V(0,0,1),f);return -Math.asin(cl(f.y,-1,1));}
-function bpt(b,x,y,z){const r=new V();b.quaternion.vmult(new V(x,y,z),r);r.vadd(b.position,r);return r;}
+const _bp=new V();function bpt(b,x,y,z){const r=new V();_bp.set(x,y,z);b.quaternion.vmult(_bp,r);r.vadd(b.position,r);return r;}   // callers keep the result, so only the input is reused
 function legIK(fx,fy){const dd=Math.min(.868,Math.max(.35,Math.hypot(fx,fy)));
  return[-(Math.atan2(fx,fy)+Math.acos(Math.min(1,dd/.88))),Math.PI-Math.acos(Math.max(-1,Math.min(1,(.3872-dd*dd)/.3872)))];}
 // body orientation target: heading yaw, then lie (about Z: lays the body down sideways), then roll about the lateral axis (th)
@@ -1279,8 +1281,8 @@ function lowMat(root){root.traverse(o=>swapMat(o,toLam));}
 function flatMat(root){root.traverse(o=>swapMat(o,toFlat));}
 function highMat(root){root.traverse(o=>{if(o.userData.std){(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>x.dispose());o.material=o.userData.std;delete o.userData.std;o.castShadow=true;}});}
 // touch tiers: 24 solver passes (the lowest that measured identical tackles / grabs / runs vs 30), then only draw distance steps down; resolution is never touched
-const TOUCH_TIERS=[{it:24,far:240},{it:24,far:200},{it:24,far:165}];let TTIER=0;
-function touchTier(t){t=cl(t,0,TOUCH_TIERS.length-1);if(t===TTIER)return;TTIER=t;if(!LOWFX)return;const T=TOUCH_TIERS[t];world.solver.iterations=T.it;cam.far=T.far;cam.updateProjectionMatrix();scene.fog.far=T.far-10;scene.fog.near=Math.min(80,T.far-90);}
+const TOUCH_TIERS=[{it:24,far:240,rs:.95},{it:24,far:220,rs:.9},{it:24,far:180,rs:.9}];let TTIER=0;   // rs: internal render scale (UI is HTML, always native); never below 90%
+function touchTier(t){t=cl(t,0,TOUCH_TIERS.length-1);if(t===TTIER)return;TTIER=t;if(!LOWFX)return;const T=TOUCH_TIERS[t];world.solver.iterations=T.it;renderer.setPixelRatio(Math.min(devicePixelRatio,2)*T.rs);renderer.setSize(innerWidth,innerHeight);cam.far=T.far;cam.updateProjectionMatrix();scene.fog.far=T.far-10;scene.fog.near=Math.min(80,T.far-90);}
 // contact shadows for touch (the shadow map is off there): one soft disc per player and the ball, one draw call
 const blobG=(()=>{const G=new THREE.Group();G.visible=false;for(const[r,o]of[[.55,.16],[.33,.2]]){const m=new THREE.InstancedMesh(new THREE.CircleGeometry(r,24).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:o,depthWrite:false}),12);m.frustumCulled=false;m.renderOrder=1;G.add(m);}scene.add(G);return G;})();   // two stacked discs: a soft-edged shadow with no texture
 const _bo=new THREE.Object3D();
@@ -1291,13 +1293,23 @@ function blobTick(){if(!blobG.visible)return;let i=0;const put=(x,z,h,s)=>{const
 function touchAdapt(fdt){if(!LOWFX||!mode||paused)return;const A=touchAdapt;A.n=(A.n||0)+1;A.s=(A.s||0)+fdt;if(A.s<3)return;const avg=A.s/A.n;A.n=A.s=0;
  if(avg>1/45){A.good=0;touchTier(TTIER+1);}else if(avg<1/57){A.good=(A.good||0)+3;if(A.good>=8){A.good=0;touchTier(TTIER-1);}}else A.good=0;}
 function perfMode(m){const low=m==='touch';if(low===LOWFX&&perfMode.done)return;perfMode.done=1;LOWFX=low;
- renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);world.solver.iterations=low?TOUCH_TIERS[TTIER].it:30;blobG.visible=low;
+ renderer.setPixelRatio(Math.min(devicePixelRatio,2)*(low?TOUCH_TIERS[TTIER].rs:1));renderer.setSize(innerWidth,innerHeight);world.solver.iterations=low?TOUCH_TIERS[TTIER].it:30;blobG.visible=low;
  sun.castShadow=!low;renderer.shadowMap.enabled=!low;cam.far=low?TOUCH_TIERS[TTIER].far:600;cam.updateProjectionMatrix();scene.fog.near=low?80:150;scene.fog.far=low?TOUCH_TIERS[TTIER].far-10:470;
  rimL.visible=fillL.visible=!low;   // two fewer lights in every shader
- (low?lowMat:highMat)(scene);if(low)for(const d of[player,...pool])for(const m of d.kitM||[])if(m.userData.helm)flatMat(m);
+ (low?lowMat:highMat)(scene);if(low)for(const d of[player,...pool])for(const m of d.kitM||[])if(m.userData.helm){flatMat(m);mergeHelmet(m);}
  scene.traverse(o=>{const t=o.material&&o.material.map;if(!t)return;if(t.an0==null)t.an0=t.anisotropy;const v=low?1:t.an0;if(t.anisotropy!==v){t.anisotropy=v;t.needsUpdate=true;}});
 scene.traverse(o=>{if(o.material&&!Array.isArray(o.material))o.material.needsUpdate=true;});}
-{const k0=kit;kit=function(d,L,T){k0(d,L,T);if(LOWFX){for(const m of d.kitM||[])m.userData.helm?flatMat(m):lowMat(m);for(const b of d.list||[])if(b.mesh)lowMat(b.mesh);}};}   // new kit pieces each drive get the cheap shading too
+// touch: a helmet is 16 meshes (shell, padding, mask bars, stripes, visor, straps); pieces that share a look become one mesh. Same triangles, same colours, ~11 fewer draw calls per player
+const _hm=new THREE.Matrix4();
+function mergeHelmet(g){const parts=[],keep=[];g.updateMatrixWorld(true);_hm.copy(g.matrixWorld).invert();
+ g.traverse(o=>{if(o===g||!o.isMesh)return;if(Array.isArray(o.material)||!o.geometry.attributes.normal){keep.push(o);return;}parts.push(o);});
+ const G=new Map();for(const o of parts){const m=o.material,k=[m.type,m.color.getHex(),m.side,m.transparent,m.opacity,m.map?m.map.uuid:'',m.emissive?m.emissive.getHex():''].join();(G.get(k)||G.set(k,[]).get(k)).push(o);}
+ for(const L of G.values()){if(L.length<2)continue;const pos=[],nor=[],mt=new THREE.Matrix4(),nm=new THREE.Matrix3();
+  for(const o of L){const geo=o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone();mt.multiplyMatrices(_hm,o.matrixWorld);geo.applyMatrix4(mt);pos.push(geo.attributes.position.array);nor.push(geo.attributes.normal.array);geo.dispose();}
+  const cat=a=>{const out=new Float32Array(a.reduce((n,x)=>n+x.length,0));let i=0;for(const x of a){out.set(x,i);i+=x.length;}return out;},bg=new THREE.BufferGeometry();
+  bg.setAttribute('position',new THREE.BufferAttribute(cat(pos),3));bg.setAttribute('normal',new THREE.BufferAttribute(cat(nor),3));
+  const mesh=new THREE.Mesh(bg,L[0].material);for(const o of L)o.parent.remove(o);g.add(mesh);}}
+{const k0=kit;kit=function(d,L,T){k0(d,L,T);if(LOWFX){for(const m of d.kitM||[]){if(m.userData.helm){flatMat(m);mergeHelmet(m);}else lowMat(m);}for(const b of d.list||[])if(b.mesh)lowMat(b.mesh);}};}   // new kit pieces each drive get the cheap shading too
 function startGame(m){perfMode(m);mode=m;document.body.classList.toggle('touch',m==='touch');setTimeout(phudPlace,0);$m('mm').hidden=true;last=performance.now();}
 function togglePause(){paused=!paused;$m('pm').hidden=!paused;keys={};joy.on=false;joy.x=joy.y=0;aimOn=false;chargeT=-1;if(paused&&document.pointerLockElement)document.exitPointerLock();}
 function toMenu(){preEnd();useClubs(null);BADJ.blue=BADJ.red=0;if(DRILL)drillEnd();if(MATCH){MATCH=null;ORG.four=false;$m('pcard').hidden=true;xpHudStop();}paused=false;$m('pm').hidden=true;$m('org').hidden=true;mode=null;document.body.classList.remove('touch');
@@ -1574,6 +1586,7 @@ function applyOrg(){preEnd();if(!applyOrg.keep){ORG.wi=Math.random()*5|0;PLAY=nu
  if(playOn){const p=plan();oT=p.oT;dT=p.dT;const os=p.O.map(s=>add(s,'o'));for(const s of p.D){const d=add(s,'d');if(s.m)d.cur.mark=os[s.m];}lgAssign();}
  else{P.side='o';P.team=ORG.you;}
  for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);kit(d,d===player?player.cur.app:(d.cur.app||DEFLOOK),d===player&&!playOn?null:TEAM[o?oT:dT]);shape(d,d.cur.bio||null);jersey(d,d.cur.num??null,d.cur.nm,d===player&&!playOn?null:TEAM[o?oT:dT][0],d===player&&!playOn?null:TEAM[o?oT:dT][4]);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
+ try{renderer.compile(scene,cam);}catch(e){}   // shaders for the new kits now, not on the first frame of the play
  if(playOn)resetPlay();else{routeMesh.visible=false;losMesh.visible=fdMesh.visible=false;playState='live';}}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
 // run blocking: each receiver takes a different defender, fits between him and the back, and drives him off the runner's line; strength decides the push, the defender's strength / awareness his chance to shed
@@ -2336,8 +2349,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='2.30';
+const GAME_VER='2.40';
 const PATCH=[
+ {version:'2.40',title:'Touch Performance II',date:'2026-10-28',changes:{Performance:['Touch: each helmet\'s 16 pieces are merged by look into a few meshes; helmets were about 140 of a match\'s ~225 draw calls (the stadium itself was already cheap)','Touch: never more than 10 physics steps in one frame, so one slow frame can no longer snowball into a stutter','Touch: renders at 95% internal resolution, 90% only after sustained slowness, never lower; menus, HUD and text stay native','Less garbage per physics step in the joint and muscle code (smoother frame pacing on every device); shaders are prepared when teams are set up instead of mid-play']}},
  {version:'2.30',title:'Touch Performance',date:'2026-10-28',changes:{Performance:['Touch: physics solver does 24 passes per step instead of 30 (the solver is about 80% of physics time; 24 is the lowest that plays identically); AI decisions run at 200 Hz while physics and muscles stay at 400 Hz','Touch: adaptive quality judged on 3-second windows: if it can\'t hold about 45 fps it pulls in far scenery, and steps back up after 8 easy seconds','Touch now renders at native resolution (up to 2x); it used to be capped at 1.5x'],Visuals:['Touch: soft contact shadows under every player and the ball, so nobody floats without the shadow map'],'Bug Fixes':['Keyboard settings are unchanged']}},
  {version:'2.20',title:'Running Game',date:'2026-10-28',changes:{Gameplay:['Handoff plays line up in a pistol 5 yards deep (was 15), so the back reaches the line before the defence reaches him'],AI:['Receivers block on run plays: each takes a different defender, fits between him and the back and drives him off the runner\'s line; Strength decides the push, the defender\'s Strength and Awareness his chance to shed the block','Backs read the line: the called gap, one either side, or the cutback, whichever is least crowded (blocked defenders count less); Agility sets how fast he re-reads, Awareness how well']}},
  {version:'2.10',title:'Menu Reorganisation',date:'2026-10-28',changes:{UI:['Main menu is now five categories: Play, Player Hub, Teams & Rosters, Settings and Updates','Touch / Keyboard choice moved to Settings and is remembered; Play goes straight to Quick Play or Career','Player Hub opens your loaded career (or the career slots); Teams & Rosters opens the league clubs from anywhere','Career hub actions grouped under Match Day, My Player and League & Career']}},
@@ -2516,6 +2530,7 @@ function frame(now){
  acc+=Math.min(.05,(now-last)/1000);last=now;if(window.DBGFREEZE)acc=0;   // test hook
  const D=active();
  for(const d of D){use(d);sense();}
+ if(LOWFX&&acc>10*DT)acc=10*DT;   // touch: drop the backlog instead of spiralling (sim time stays exact per step)
  while(acc>=DT){
   frame.sub=(frame.sub||0)+1;for(const d of D){use(d);if(cur.ai&&(!LOWFX||frame.sub%2===0))(RET?liveThink:cur.role==='dr'?drillThink:cur.role==='wr'?wrThink:cur.role==='rb'?rbThink:cur.role==='df'?defThink:qbThink)(LOWFX?2*DT:DT);control(DT);for(const k in joints)drive(joints[k]);}
   world.step(DT);acc-=DT;

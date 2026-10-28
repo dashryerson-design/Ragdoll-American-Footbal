@@ -2429,8 +2429,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.15';
+const GAME_VER='3.16';
 const PATCH=[
+ {version:'3.16',title:'Read Timer',date:'2026-10-28',changes:{Career:['Each line of the Combine intro now stays up at least 2.5 seconds before you can move on']}},
  {version:'3.15',title:'Combine Arrival',date:'2026-10-28',changes:{Career:['New Combine opening: the Head Coach briefs you and four other prospects in a short directed cutscene','New dialogue panel: advance with Space, Enter or a tap, or skip the intro on purpose with the Skip button / Backspace','The Combine screen now points you to your next drill']}},
  {version:'3.14',title:'Audio Fix',date:'2026-10-28',changes:{Audio:['Fixed: no sound at all in the embedded / sandboxed version of the game (the sound files could not load there)','Sound now unlocks from any key, click or tap, so keyboard-only and iPhone players hear it too']}},
  {version:'3.13',title:'Explosive Starts',date:'2026-10-28',changes:{Audio:['Bursting into a run from a standstill or a jog now hits the turf hard for the first few steps']}},
@@ -2656,11 +2657,12 @@ function introStart(){drillBase();DRILL={d:INTRO,t:0,ph:'run',fb:[]};$m('dhud').
  const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.52,40),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.75,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.set(0,.02,DR_Z);drillG.add(ring);   // marks you in the group
  Object.assign(CINE,{on:true,k:-1,ch:0,ring,t0:performance.now(),lastIn:0});CINE.p.set(-10,6,DR_Z-9);CINE.l.set(0,1,DR_Z+2.5);
  $m('cidt').innerHTML=CLINES.map(()=>'<i></i>').join('');document.body.classList.add('cine');$m('cine').hidden=false;requestAnimationFrame(()=>$m('cine').classList.add('in'));cineLine(0);
- const adv=()=>{const n=performance.now();if(n-CINE.lastIn<220||n-CINE.t0<600)return;CINE.lastIn=n;const L=CLINES[CINE.k][1]();if(CINE.ch<L.length)CINE.ch=L.length;else if(CINE.k<CLINES.length-1)cineLine(CINE.k+1);else introEnd();};
+ const adv=()=>{const n=performance.now();if(n-CINE.lastIn<220||n-CINE.t0<600)return;CINE.lastIn=n;const L=CLINES[CINE.k][1]();if(CINE.ch<L.length)CINE.ch=L.length;else if(n-CINE.ls<CINE_MIN)return;else if(CINE.k<CLINES.length-1)cineLine(CINE.k+1);else introEnd();};   // a line can be finished early, but not left before CINE_MIN
  CINE.key=e=>{if(e.repeat)return;if(e.key==='Backspace'){e.preventDefault();return introEnd();}if(e.key===' '||e.key==='Enter'||e.key.toLowerCase()==='e'||e.key==='ArrowRight'){e.preventDefault();adv();}};
  CINE.tap=e=>{if(e.target.closest('#cisk'))return;adv();};CINE.skip=e=>{e.stopPropagation();introEnd();};
  addEventListener('keydown',CINE.key);$m('cine').addEventListener('pointerup',CINE.tap);$m('cisk').addEventListener('click',CINE.skip);}
-function cineLine(k){const S=SHOTS[CLINES[k][0]][0];CINE.k=k;CINE.ch=0;CINE.lt=0;CINE.cutDone=0;CINE.fp.copy(CINE.p);CINE.fl.copy(CINE.l);
+const CINE_MIN=2500;   // ms every line stays up before it can be advanced, so it actually gets read
+function cineLine(k){CINE.ls=performance.now();const S=SHOTS[CLINES[k][0]][0];CINE.k=k;CINE.ch=0;CINE.lt=0;CINE.cutDone=0;CINE.fp.copy(CINE.p);CINE.fl.copy(CINE.l);
  CINE.cut=k>0&&Math.hypot(S[0]-CINE.p.x,S[1]-CINE.p.y,DR_Z+S[2]-CINE.p.z)>6;if(CINE.cut)$m('cine').querySelector('.ci-fd').classList.add('on');   // a long move would sweep through the players: dip to black and cut instead
  [...$m('cidt').children].forEach((d,i)=>d.className=i<k?'done':i===k?'on':'');$m('cist').textContent=`${k+1} / ${CLINES.length}`;}
 function introTick(dt){const C=CINE;if(!C.on)return;C.lt+=dt;use(player);for(const k in keys)keys[k]=false;camYaw=Math.PI;   // you stand in line facing the coach; no inputs reach your player
@@ -2669,7 +2671,7 @@ function introTick(dt){const C=CINE;if(!C.on)return;C.lt+=dt;use(player);for(con
  C.tp.set(S[0][0]+(S[1][0]-S[0][0])*e,S[0][1]+(S[1][1]-S[0][1])*e,DR_Z+S[0][2]+(S[1][2]-S[0][2])*e);C.tl.set(S[2][0]+(S[3][0]-S[2][0])*e,S[2][1]+(S[3][1]-S[2][1])*e,DR_Z+S[2][2]+(S[3][2]-S[2][2])*e);
  C.p.lerpVectors(C.fp,C.tp,bw);C.l.lerpVectors(C.fl,C.tl,bw);   // ease out of the last shot, then drift
  const was=C.ch|0;C.ch=Math.min(L.length,C.ch+dt*48);if((C.ch|0)!==was||!C.lt||dt>0){const n=C.ch|0;$m('citx').textContent=L.slice(0,n);}
- const rdy=C.ch>=L.length;$m('cinx').className=rdy?'rdy':'';$m('cinx').innerHTML=INPUT==='touch'?'TAP TO CONTINUE':'<kbd>SPACE</kbd>CONTINUE';
+ const wait=Math.max(0,CINE_MIN-(performance.now()-C.ls)),rdy=C.ch>=L.length&&!wait;$m('cinx').className=rdy?'rdy':'';$m('cinx').innerHTML=wait?`READ · ${(wait/1000).toFixed(1)}s`:INPUT==='touch'?'TAP TO CONTINUE':'<kbd>SPACE</kbd>CONTINUE';
  if(rdy&&(C.done=C.done||C.lt)&&C.lt-C.done>7){C.done=0;if(C.k<CLINES.length-1)cineLine(C.k+1);else introEnd();}else if(!rdy)C.done=0;   // never stuck: a finished line moves on by itself after 7 s
  C.ring.position.x=pel.position.x;C.ring.position.z=pel.position.z;C.ring.material.opacity=.5+.25*Math.sin(C.lt*3);}
 // idle actor: face the speaker with a slow, individual sway; the coach turns along the line as he talks

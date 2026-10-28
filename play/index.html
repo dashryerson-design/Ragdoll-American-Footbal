@@ -1313,7 +1313,7 @@ const OSETS=[['SINGLEBACK - 1 WR',[[12,0]]],['PRO SET - 2 WR',[[12,0],[-12,0]]],
 const DSETS=[['COVER 1 MAN FREE',['deep','rob','deep','rob']],['COVER 2 MAN',['deep','deep','rob','rob']],['COVER 1 ROBBER',['rob','deep','deep','rob']],['COVER 2 ROBBER',['deep','deep','rob','rob']]];
 const ORG={you:'blue',off:'blue',pos:'qb',n:{blue:2,red:2},os:0,ds:0,free:true};
 let RET=null,NEXT=null,EVT=0,PASS=null,DRIVE=1,MATCH=null,playState='live',playOn=false,roster=[player],qbClock=0,callReq=null;
-const QB_DEPTH=-15*YD,DEF_Z=20*YD;
+const QB_DEPTH=-15*YD,RUN_DEPTH=-5*YD,DEF_Z=20*YD;
 const playPre=()=>playOn&&playState==='pre';
 const H=d=>d===curD?held:d.held;   // the swapped-in doll's live state is in the globals
 // ---------- defender: reads the receiver with a reaction delay, mirrors with a cushion, sometimes bites on cuts,
@@ -1412,7 +1412,7 @@ console.assert(['run','deep','mid'].every(c=>PLAYBOOK.filter(p=>p.cat===c).lengt
 let PLAY=null;const PB_REC=[];
 function dealPlays(){return['run','deep','mid'].map(c=>{const A=PLAYBOOK.filter(p=>p.cat===c),F=A.filter(p=>!PB_REC.includes(p.id)),p=(F.length?F:A)[Math.random()*(F.length||A.length)|0];PB_REC.push(p.id);if(PB_REC.length>60)PB_REC.shift();return p;});}   // one per category, nothing seen in the last 20 possessions
 // diagram straight from the definition: x = metres across, y = metres downfield (LOS at 0)
-function playSVG(p){const W=22,top=40,bot=QB_DEPTH-4,sx=x=>(-x).toFixed(1),sy=z=>(-z).toFixed(1),qz=QB_DEPTH,pt=(x,z)=>`${sx(x)},${sy(z)}`,ln=(a,cls)=>`<polyline class="${cls}" points="${a.map(([x,z])=>pt(x,z)).join(' ')}"/>`;
+function playSVG(p){const W=22,top=40,qz=p.slots.some(o=>o.rb)?RUN_DEPTH:QB_DEPTH,bot=qz-4,sx=x=>(-x).toFixed(1),sy=z=>(-z).toFixed(1),pt=(x,z)=>`${sx(x)},${sy(z)}`,ln=(a,cls)=>`<polyline class="${cls}" points="${a.map(([x,z])=>pt(x,z)).join(' ')}"/>`;
  let s=`<svg viewBox="${-W} ${-top} ${2*W} ${top-bot}" class="pdg" aria-hidden="true"><rect x="${-W}" y="${-top}" width="${2*W}" height="${top-bot}" class="fd"/>`;for(let z=10*YD;z<top;z+=10*YD)s+=`<line x1="${-W}" x2="${W}" y1="${sy(z)}" y2="${sy(z)}" class="yl"/>`;s+=`<line x1="${-W}" x2="${W}" y1="0" y2="0" class="los"/>`;
  for(const[i,o]of p.slots.entries()){if(o.rb){const R=[o.x,qz+o.z],M=[Math.sign(p.lane)*.45,qz+.6];s+=ln([R,M],'hand')+ln([M,[p.lane,-1],[p.lane,9]],'run')+`<circle cx="${sx(R[0])}" cy="${sy(R[1])}" r="1.5" class="rb"/>`;continue;}
   const r=routeOf(o.route,o.x).map(([x,z])=>[x,z-LOS]);s+=ln([[o.x,o.z],...r],i===p.pri&&p.cat!=='run'?'rt pri':'rt')+`<circle cx="${sx(o.x)}" cy="${sy(o.z)}" r="1.4" class="wr${i===p.pri&&p.cat!=='run'?' pri':''}"/>`;}
@@ -1436,7 +1436,7 @@ function pickRoute(x0,used,sty){const A=SAI[sty]||{},W=ROUTE_W.map(([k,w])=>[k,w
 // vague = the first leg plus just the start of the break; full = the whole route (shown in the bird's-eye view)
 // every receiver's route gets an arrow (yours and the bots'): vague = the first leg plus just the start of the break; full = the whole route
 function routeShape(full){if(!route)return;const RS=roster.filter(d=>d.cur.role==='wr'&&d.cur.route).map(d=>[d.cur.x0,d.cur.route]);if(!RS.length)RS.push([routeX,route]);
- const RN=[],qz=LOS+QB_DEPTH;if(CALL.rb&&CALL.gx!=null)RN.push([CALL.x,[[(Math.sign(CALL.gx)||1)*.45,qz+.6],[CALL.gx,LOS],[CALL.gx,LOS+8*YD]],qz+CALL.z]);if(ORG.four&&PLAY&&PLAY.qb)RN.push([0,[[PLAY.lane,LOS],[PLAY.lane,LOS+8*YD]],qz]);   // the back's mesh + lane; a called QB run
+ const RN=[],qz=CALL.qz??LOS+QB_DEPTH;if(CALL.rb&&CALL.gx!=null)RN.push([CALL.x,[[(Math.sign(CALL.gx)||1)*.45,qz+.6],[CALL.gx,LOS],[CALL.gx,LOS+8*YD]],qz+CALL.z]);if(ORG.four&&PLAY&&PLAY.qb)RN.push([0,[[PLAY.lane,LOS],[PLAY.lane,LOS+8*YD]],qz]);   // the back's mesh + lane; a called QB run
  const ribbon=(w,y,RS)=>{const pos=[];for(const[x0,rt,z0]of RS){let P=[[x0,z0??LOS],...rt];
   if(!full){P=[[x0,LOS],rt[0]];if(rt[1]){const a=rt[0],b=rt[1],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,k=Math.min(1,4.5/L);P.push([a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]);}else P[1]=[x0,Math.min(rt[0][1],LOS+18)];}
   for(let i=0;i<P.length-1;i++){const[a,b]=[P[i],P[i+1]],L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,nx=-(b[1]-a[1])/L*w,nz=(b[0]-a[0])/L*w,e=i===P.length-2?.9:0,bx=b[0]-(b[0]-a[0])/L*e,bz=b[1]-(b[1]-a[1])/L*e;
@@ -1531,10 +1531,11 @@ function resetPlay(){if(!playOn)return;RET=null;if(MATCH)MATCH.caught=0;for(cons
  const W=roster.filter(d=>d.cur.role==='wr'),me=W.includes(player)&&ORG.pos==='rb';if(PLAY&&ORG.four){const rb=roster.find(d=>d.cur.role==='rb');CALL={run:rb?PLAY.name:null,done:false,rb,gx:PLAY.lane,delay:PLAY.delay||0};}else CALL=ORG.four&&!ORG.free?{run:null,done:true}:{run:W.length&&Math.random()<(me?.6:.35)?(Math.random()<.5?'inside':'outside'):null,done:false};
  if(CALL.run&&!(PLAY&&ORG.four)){const rb=me?player:W.filter(d=>d!==player).sort((a,b)=>Math.abs(a.cur.x0)-Math.abs(b.cur.x0))[0];if(rb){rb.cur.role0='wr';rb.cur.role='rb';CALL.rb=rb;CALL.sd=Math.random()<.5?1:-1;CALL.gx=CALL.run==='inside'?CALL.sd*-1.2:CALL.sd*-7;CALL.delay=0;CALL.x=CALL.sd*2.2;CALL.z=-1.3;}else CALL.run=null;}
  if(CALL.rb&&PLAY&&ORG.four){const o=PLAY.slots.find(o=>o.rb);CALL.x=o.x;CALL.z=o.z;}
+ CALL.qz=LOS+(CALL.run&&CALL.rb?RUN_DEPTH:QB_DEPTH);for(const d of roster)d.cur.blk=!!(CALL.run&&CALL.rb&&d.cur.role==='wr'),d.cur.bt=null;   // handoffs from a pistol; receivers block on runs
  const used=[];let q=null,rw=null;
  for(const d of roster){const c=d.cur;
-  if(c.role==='qb'){q=d;placeAt(d,0,LOS+QB_DEPTH);Object.assign(c,{st:'idle',T:null,wait:null,tg:null});}
-  if(c.role==='rb'){placeAt(d,CALL.x,LOS+QB_DEPTH+CALL.z);Object.assign(c,{st:'set',t:0});if(d===player)camYaw=Math.PI;}
+  if(c.role==='qb'){q=d;placeAt(d,0,CALL.qz);Object.assign(c,{st:'idle',T:null,wait:null,tg:null});}
+  if(c.role==='rb'){placeAt(d,CALL.x,CALL.qz+CALL.z);Object.assign(c,{st:'set',t:0});if(d===player)camYaw=Math.PI;}
   if(c.role==='wr'){placeAt(d,c.x0,LOS+c.z0-.4);[c.route,c.rname]=c.route0?[routeOf(c.route0,c.x0),c.route0]:pickRoute(c.x0,used,c.sty);Object.assign(c,{st:'set',i:0,t:0});if(!rw||d===player)rw=d;}
   if(c.side==='d'){placeAt(d,c.px,Math.min(GOAL_Z+4,LOS+c.pz));if(d===player)camYaw=0;Object.assign(c,{st:'pre',t:0,hist:[],rd:(.3-.12*E(d,'rea'))+Math.random()*.12,biteEnd:0,pushT:0,pv:null});}}
  looseBall();ball.position.z=LOS;if(q){use(q);grabBall();}use(player);playTick.lc=q;
@@ -1563,7 +1564,18 @@ function applyOrg(){preEnd();if(!applyOrg.keep){ORG.wi=Math.random()*5|0;PLAY=nu
  for(const d of roster){const o=d.cur.side!=='d';for(const b of d.list){b.collisionFilterGroup=o?2:8;b.collisionFilterMask=o?13:7;}paint(d,o?oT:dT);kit(d,d===player?player.cur.app:(d.cur.app||DEFLOOK),d===player&&!playOn?null:TEAM[o?oT:dT]);shape(d,d.cur.bio||null);jersey(d,d.cur.num??null,d.cur.nm,d===player&&!playOn?null:TEAM[o?oT:dT][0],d===player&&!playOn?null:TEAM[o?oT:dT][4]);if(d!==player)showDoll(d,true);}   // teams collide with each other, never with themselves
  if(playOn)resetPlay();else{routeMesh.visible=false;losMesh.visible=fdMesh.visible=false;playState='live';}}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
-function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
+// run blocking: each receiver takes a different defender, fits between him and the back, and drives him off the runner's line; strength decides the push, the defender's strength / awareness his chance to shed
+function blockThink(dt){const c=cur,P=pel.position,now=performance.now();for(const k in keys)keys[k]=false;const R=(H(CALL.rb)||!CALL.done?CALL.rb:roster.find(H)||CALL.rb).pel.position;
+ if(!c.bt||c.bt.limp||now>(c.btT||0)){const taken=roster.filter(d=>d!==curD&&d.cur.blk).map(d=>d.cur.bt);let best=null,bs=1e9;
+  for(const d of roster){if(d.cur.side!=='d'||d.limp||taken.includes(d))continue;const q=d.pel.position,s=Math.hypot(q.x-R.x,q.z-R.z)+.6*Math.hypot(q.x-P.x,q.z-P.z)-(d===c.bt?2.5:0);if(s<bs){bs=s;best=d;}}   // closest threat to the back he can reach; sticks with his man unless another is clearly worse
+  c.bt=best;c.btT=now+600;}
+ const T=c.bt;if(!T){camYaw=Math.PI;keys.w=true;return;}
+ const Q=T.pel.position;let ux=R.x-Q.x,uz=R.z-Q.z;const L=Math.hypot(ux,uz)||1;ux/=L;uz/=L;const dd=Math.hypot(Q.x-P.x,Q.z-P.z),tx=Q.x+ux*.7,tz=Q.z+uz*.7;   // the fit: in his path to the runner
+ camYaw=Math.atan2((dd<1.3?Q.x:tx)-P.x,(dd<1.3?Q.z:tz)-P.z)+Math.PI;keys.w=true;keys.shift=dd>1.6;
+ if(dd<1.2&&now>(T.cur.shedT||0)){const k=cl(5+3*AT('str')-2.5*E(T,'str'),1.5,9)*dt,mr=kgOf(T)/kgOf(curD);   // engaged: per second, strength vs strength
+  for(const b of T.list){b.velocity.x-=ux*k;b.velocity.z-=uz*k;}for(const b of list){b.velocity.x+=ux*k*mr*.5;b.velocity.z+=uz*k*mr*.5;}   // the blocker gets pushed back too
+  if(Math.random()<dt*cl(.3+.35*E(T,'str')+.2*E(T,'awr')-.3*AT('str'),.06,.9))T.cur.shedT=now+900;}}   // he works free for a moment
+function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;if(c.blk&&CALL.run&&playState==='live'&&!held&&!fumT)return blockThink(dt);for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
  const P=pel.position,inAir=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.25,route=c.route;
  if(held&&c.st!=='caught'){c.st='caught';c.t=0;}
  if((c.st==='route'||c.st==='after')&&inAir){let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);for(let t=0;t<5&&!(vy<0&&y<1.3)&&y>.09;t+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}
@@ -1646,8 +1658,14 @@ function qbThink(dt){qbClock+=dt;const c=cur;for(const k in keys)keys[k]=false;i
  if(c.st==='throw'&&thr<0){c.st='idle';}}
 let CALL={run:null,done:true};
 // running back: from beside the QB, run the mesh past him (aiming at his near hip) toward the play's gap; with the ball he's a normal carrier
-function rbThink(dt){const c=cur,P=pel.position;if(held||c.st==='caught'){if(P.z<LOS-2&&CALL.run){for(const k in keys)keys[k]=false;const gx=CALL.gx;camYaw=Math.atan2(gx-P.x,LOS-P.z)+Math.PI;keys.w=keys.shift=true;held&&(c.st='caught');return;}return wrThink(dt);}
- for(const k in keys)keys[k]=false;if(playState!=='live'){camYaw=Math.PI;return;}const q=roster.find(d=>d.cur.role==='qb');if(!q||CALL.done){keys.w=true;camYaw=Math.PI;return;}if(performance.now()-EVT<CALL.delay*1000){camYaw=Math.PI;return;}const Q=q.pel.position,tx=Q.x+(Math.sign(CALL.gx-Q.x)||1)*.45,tz=Q.z+.6;   // delayed handoffs sit a beat first   // the mesh point: just in front of the QB, on the side the run goes
+function rbThink(dt){const c=cur,P=pel.position;if(held||c.st==='caught'){if(P.z<LOS+1.5&&CALL.run){for(const k in keys)keys[k]=false;const now=performance.now();
+  if(c.gx==null||now>(c.rdT||0)){const gx0=CALL.gx,cs=[gx0,gx0+3,gx0-3,-Math.sign(gx0||1)*Math.max(3,Math.abs(gx0))],nz=(1-(E(curD,'awr')+1)/2)*1.2;let best=c.gx??gx0,bs=-1e9;   // the called gap, one either side, and the cutback
+   for(const x of cs){if(Math.abs(x)>FW/2-2)continue;const ex=x,ez=LOS+2,sx=ex-P.x,sz=ez-P.z,sl=sx*sx+sz*sz||1;let mn=9;
+    for(const d of roster){if(d.cur.side!=='d'||d.limp)continue;const q=d.pel.position,u=cl(((q.x-P.x)*sx+(q.z-P.z)*sz)/sl,0,1),dist=Math.hypot(P.x+sx*u-q.x,P.z+sz*u-q.z),held2=roster.some(b=>b.cur.blk&&b.cur.bt===d&&b.pel.position.distanceTo(q)<1.3&&now>(d.cur.shedT||0));mn=Math.min(mn,dist*(held2?2.2:1));}   // a blocked defender is half a threat
+    const sc=mn-.12*Math.abs(x-gx0)+(x===c.gx?.5:0)+(Math.random()-.5)*nz;if(sc>bs){bs=sc;best=x;}}
+   c.gx=best;c.rdT=now+450-220*(AT('agi')+1)/2;}   // agile backs re-read (and cut) sooner
+  camYaw=Math.atan2(c.gx-P.x,LOS+2-P.z)+Math.PI;keys.w=keys.shift=true;held&&(c.st='caught');return;}return wrThink(dt);}
+ for(const k in keys)keys[k]=false;if(playState!=='live'){camYaw=Math.PI;return;}const q=roster.find(d=>d.cur.role==='qb');if(!q||CALL.done){keys.w=true;camYaw=Math.PI;return;}if(performance.now()-EVT<CALL.delay*1000){camYaw=Math.PI;return;}c.gx=null;const Q=q.pel.position,tx=Q.x+(Math.sign(CALL.gx-Q.x)||1)*.45,tz=Q.z+.6;   // delayed handoffs sit a beat first   // the mesh point: just in front of the QB, on the side the run goes
  camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=Math.hypot(tx-P.x,tz-P.z)>1.5;}
 // the exchange: real possession moves from QB to RB once the back is in the pocket (belly to the ball), one way, once per play
 function handoffTick(){if(!CALL.run||CALL.done||playState!=='live')return;const rb=CALL.rb,q=roster.find(d=>d.cur.role==='qb'),now=performance.now();
@@ -2306,8 +2324,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='2.10';
+const GAME_VER='2.20';
 const PATCH=[
+ {version:'2.20',title:'Running Game',date:'2026-10-28',changes:{Gameplay:['Handoff plays line up in a pistol 5 yards deep (was 15), so the back reaches the line before the defence reaches him'],AI:['Receivers block on run plays: each takes a different defender, fits between him and the back and drives him off the runner\'s line; Strength decides the push, the defender\'s Strength and Awareness his chance to shed the block','Backs read the line: the called gap, one either side, or the cutback, whichever is least crowded (blocked defenders count less); Agility sets how fast he re-reads, Awareness how well']}},
  {version:'2.10',title:'Menu Reorganisation',date:'2026-10-28',changes:{UI:['Main menu is now five categories: Play, Player Hub, Teams & Rosters, Settings and Updates','Touch / Keyboard choice moved to Settings and is remembered; Play goes straight to Quick Play or Career','Player Hub opens your loaded career (or the career slots); Teams & Rosters opens the league clubs from anywhere','Career hub actions grouped under Match Day, My Player and League & Career']}},
  {version:'2.00',title:'Team Defence',date:'2026-10-28',changes:{AI:['Defenders work as a unit: once there is a runner, the best-placed defender attacks, the next takes a cut-off angle, the safety stays the last line between him and the goal, and the rest keep their man (while a pass is still possible) or hold contain on the outside','Predictive pursuit: each defender aims at where he can actually meet the runner, from his own speed, stamina and reaction; how far ahead he reads depends on Awareness; aim points ease instead of snapping on cuts and respect the sideline','Thrown balls: only defenders who can actually get there (or the safety over the top) leave their man to play it'],'Bug Fixes':['A quarterback running at or past the line, or scrambling, is now treated as a runner (it used to take him reaching midfield)']}},
  {version:'1.90',title:'Pre-Play Breakdown & Uniforms',date:'2026-10-28',changes:{UI:['After you pick a play card: a 6-second breakdown with a wide formation camera, a countdown, and a scouting card on every player (offence under the feet, defence over the helmet)','Each card shows name, playstyle, OVR and one strength earned from real ratings (a label needs 70+ in what it describes)','Routes are always drawn in full before the snap, with run lanes and QB keepers in green; they fade out at the snap'],Visuals:['Home and away uniforms: home in club colour, away in white with club-colour trim, helmet and numbers; if two kits would still look alike, one side switches to an alternate','Detroit, Boston, Las Vegas and Nashville have new colours so no two clubs share a look'],'Player Creation':['Randomise now picks a style (Classic, Stealth, Bold, Clean or Vibrant) and dresses the outfit from one coordinated palette; left and right compression always match']}},

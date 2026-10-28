@@ -883,7 +883,7 @@ cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT(
  // per-limb weakness (wk, 1 = healthy) slows the gait and makes the body sag onto that leg
  const legW={1:Math.min(parts.thigh1.wk||1,parts.shin1.wk||1,parts.foot1.wk||1),'-1':Math.min(parts['thigh-1'].wk||1,parts['shin-1'].wk||1,parts['foot-1'].wk||1)};
  const legF=.45+.55*Math.min(legW[1],legW[-1]);
- if(held&&keys.shift&&mv>.5)cur.runT=(cur.runT||0)+dt;else{cur.runT=0;cur.boost=0;}cur.boost=Math.max(0,(cur.boost||0)-.12*dt);   // the burst fades unless you keep tapping
+ if((held||(!cur.ai&&curD===player&&playOn&&playState==='live'&&cur.side==='d'))&&keys.shift&&mv>.5&&!limp&&!cur.tkS&&!dv)cur.runT=(cur.runT||0)+dt;else{cur.runT=0;cur.boost=0;}   // ball carrier, or YOUR player sprinting on defence (never an AI); off while tackling, diving or downcur.boost=Math.max(0,(cur.boost||0)-.12*dt);   // the burst fades unless you keep tapping
  const speed=(run?7.2*(1+cur.boost):qbMove?(keys.shift?1.6:1.1):2.3)*(cur.stance?.6:1)*(performance.now()<(cur.stmb||0)?.6:1)*(performance.now()<(cur.yacT||0)?1+.03*BT(curD,'yac'):1)*(1+(cur.jkB||0))*(1+.13*AT('spd'))*defStick()*(.85+.15*Math.min(1,(cur.stam??1)/.4))*(1-.55*crK)*(gdir<0?.75:1)*legF,A=run?.95:.5,S=run?.72:.4,vf=Math.max(0,pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw)),w=Math.PI*(run?.38:.5)*Math.max(speed,vf*1.08)/S;   // legs cycle at least as fast as the body is really moving, so they never drag behind
  const airN=js===0&&!contact();airT=airN?airT+dt:0;const aw=airT>.1?1:0;ab+=(aw-ab)*Math.min(1,dt*(aw?14:20));const gm=mv*(1-ab);
  phase+=w*dt*gm;

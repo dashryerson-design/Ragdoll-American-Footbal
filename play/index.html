@@ -364,7 +364,13 @@ body.touch #phud #pcard .n{max-width:120px}
 .ssc{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.ssc .ch{flex:1 1 200px;width:auto;flex-direction:row;justify-content:flex-start;gap:14px;padding:14px 18px;font:700 15px system-ui}.ssc .ch svg{width:40px;max-height:48px}.ssc .ch small{display:block;font:600 11px system-ui;letter-spacing:.14em;color:var(--mu)}
 .ssc .ch.on{border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac);background:var(--pn2)}.ssc .ch.on::after{content:"✓";margin-left:auto;color:var(--ac2);font-size:18px}
 .hgrp{display:block;margin:8px 0 0;font:700 11px "Barlow Condensed";letter-spacing:.3em;color:#ffffff66}.hgrp:first-child{margin-top:0}
+#boot{z-index:12;background:radial-gradient(120% 90% at 75% 20%,#121a24 0,#0a0a0b 60%),#0a0a0b;gap:14px}#boot .ttl{text-align:center}#boot .note{text-align:center;max-width:520px}.bootc{width:min(100%,640px);justify-content:center}.bootc .ch{min-height:110px;font-size:17px}.bootc .ch svg{width:54px;max-height:64px}
+.hcats{display:flex;gap:6px;flex-wrap:wrap}.hcats button{font:700 18px "Barlow Condensed"!important;letter-spacing:.1em!important;text-transform:uppercase;background:#ffffff0d!important;border:1px solid #ffffff1a!important;border-bottom:3px solid transparent!important;color:#ddd!important;padding:8px 16px!important;border-radius:3px!important}
+.hcats button.on{border-bottom-color:var(--ac)!important;color:#fff!important;background:#ffffff1a!important}.hcats button:hover:not(.on){background:#ffffff14!important;color:#fff!important}.hsub{display:flex;gap:4px;margin-top:6px}.hsub button{font:600 16px "Barlow Condensed"!important;letter-spacing:.01em!important;text-transform:none;background:none!important;border:0!important;color:#bbb!important;padding:4px 12px!important;border-radius:3px!important}.hsub button.on{background:#e8e8e8!important;color:#111!important;font-weight:800!important}
+.htabs{flex-direction:column;align-items:flex-start}.hmenu .hgrp{display:none}
 </style></head><body>
+<div id="boot" class="ov" hidden><div class="crumb">// BEFORE YOU START</div><h2 class="ttl">HOW ARE YOU PLAYING?</h2><p class="note">This sets the controls and the graphics profile. You can change it later in Settings.</p><div class="ssc bootc"><button class="ch" id="btouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="currentColor" stroke-width="5"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#5fd4ff"/></svg><span><b>TOUCH</b><small>Phone &amp; tablet</small></span></button>
+<button class="ch" id="bkb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="currentColor" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#5fd4ff" stroke-width="5"/><path d="M103 18v14" stroke="#5fd4ff" stroke-width="5"/></svg><span><b>KEYBOARD</b><small>Keyboard &amp; mouse</small></span></button></div></div>
 <div id="mm" class="ov"><div class="mmfx" aria-hidden="true"><i class="vig"></i></div><div id="pnw"><button id="pnb" aria-haspopup="dialog" hidden>PATCH NOTES</button><small id="verl"></small></div>
 <div id="logo" role="img" aria-label="Physics American Football"><svg viewBox="0 0 640 300" class="lg">
 <defs><linearGradient id="lgM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f7fa"/><stop offset=".46" stop-color="#b9c2cc"/><stop offset=".5" stop-color="#6c7682"/><stop offset=".72" stop-color="#9aa4ae"/><stop offset="1" stop-color="#e3e8ed"/></linearGradient>
@@ -693,7 +699,7 @@ addEventListener('mouseup',e=>{if(e.button===2)aimOn=false;if(e.button===0)prima
 lockEl.addEventListener('mousedown',e=>{if(mode!=='kb'||paused)return;if(e.button===2)aimOn=true;if(e.button===0)primaryDown();if(document.pointerLockElement!==lockEl){try{const r=lockEl.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(e){}}});
 addEventListener('mousemove',e=>{if(document.pointerLockElement!==lockEl||paused)return;camYaw-=e.movementX*.006;camPitch=Math.max(-.6,Math.min(1.2,camPitch+e.movementY*.006));});
 addEventListener('wheel',e=>{camDist=Math.max(1.8,Math.min(8,camDist+e.deltaY*.003));});
-addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
+addEventListener('resize',()=>{frame.pz=0;renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
 function contact(){return Math.min(parts.foot1.position.y-fh[1],parts['foot-1'].position.y-fh[-1])<.2;}
 function flat(){return Math.max(parts.foot1.position.y-fh[1],parts['foot-1'].position.y-fh[-1])<.085;}
 function low(ft){ft.computeAABB();ft.toe.computeAABB();return Math.min(ft.aabb.lowerBound.y,ft.toe.aabb.lowerBound.y)-(ft===parts.foot1?fh[1]:fh[-1]);}
@@ -2038,7 +2044,7 @@ function jersey(d,num,name,bg,ink2){for(const m of d.decals||[]){m.parent.remove
 function applyProf(p){const P=player.cur;P.sty=p?p.style:null;P.at=p?{...p.att}:null;P.app=p?migLook(p.look):{...DEFLOOK};P.bio=p?bioOf(p):null;P.bm=p?bioMods(P.bio):null;P.bd=p?Object.fromEntries((p.badges||[]).map(id=>[id,btier(p,id)])):{};kit(player,P.app,null);shape(player,P.bio);P.num=p&&p.num>=0?p.num:null;P.nm=p&&p.last;jersey(player,P.num,P.nm);}
 // ---------- menus: control pick -> QUICK PLAY / CAREER MODE -> career hub -> creator ----------
 let pendMode=null,ED=null,TAB='bio';
-const show=id=>{for(const x of['mm','set','mode','car','cre','pre','fin','upg','teams','comb','dft','slots'])$m(x).hidden=x!==id;};
+const show=id=>{for(const x of['boot','mm','set','mode','car','cre','pre','fin','upg','teams','comb','dft','slots'])$m(x).hidden=x!==id;};
 // ---------- the 3D preview: a second, tiny renderer showing the actual ragdoll's parts in their standing pose, in your gear ----------
 const PVW={r:null};
 function pvInit(){if(PVW.r)return;const r=PVW.r=new THREE.WebGLRenderer({canvas:$m('pv3'),antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio));
@@ -2096,10 +2102,14 @@ function mates(p,c=p.team){const L=lgEnsure(p);return L.rost[c].filter(id=>id!==
 let HTAB='over';
 function carUI(){const p=PROF;if(p&&p.draft&&!p.season){newSeason(p,1);saveProf(p);}hubUI();}
 const posLbl=()=>{const b=$m('cpos');if(b&&PROF)b.textContent='Offence: '+{qb:'Quarterback',wr:'Wide Receiver',rb:'Running Back'}[PROF.pos||STYLES[PROF.style][4]];};   // position is its own choice; playstyle never changes it
+const HCATS=[['over','Overview',['over'],['cnew']],['match','Match Day',['next','sched'],['ccomb','cplay','csim']],['player','My Player',['player','attr','stats'],['cupg','cedit','cpos']],['league','League',['team','stand'],['cteams']]];   // [id, label, tabs, hub actions]; Main Menu stays in every category
+let HCAT='over';
 function hubUI(){posLbl();const p=PROF,T=[['over','Overview'],['player','Player'],['attr','Ratings'],['team','Team'],['sched','Schedule'],['stand','Standings'],['stats','Stats'],['next','Next Match']];
- $m('htabs').innerHTML=p?T.map(([k,l])=>`<button data-t="${k}" class="${k===HTAB?'on':''}">${l}</button>`).join(''):'';
+ const C=HCATS.find(c=>c[2].includes(HTAB))||HCATS[0];HCAT=C[0];
+ $m('htabs').innerHTML=p?`<div class="hcats">${HCATS.map(c=>`<button data-c="${c[0]}" class="${c[0]===HCAT?'on':''}">${c[1]}</button>`).join('')}</div>`+(C[2].length>1?`<div class="hsub">${T.filter(([k])=>C[2].includes(k)).map(([k,l])=>`<button data-t="${k}" class="${k===HTAB?'on':''}">${l}</button>`).join('')}</div>`:''):'';
  const S=p&&p.season,n=p&&p.draft?nextGame(p):null,c=p?club(p.team??0):null;
  for(const[id,v]of[['ccomb',!p||!!p.draft],['cplay',!n],['csim',!n],['cupg',!p],['cedit',!p],['cteams',!p]])$m(id).hidden=v;
+ if(p)for(const id of['ccomb','cplay','csim','cupg','cedit','cpos','cteams','cnew'])if(!C[3].includes(id))$m(id).hidden=true;else if(id==='cpos'||id==='cnew')$m(id).hidden=false;   // only this category's actions
  $m('cnew').textContent=p?'New Career':'Create Player';$m('cempty').textContent=p?(p.draft?'':'Complete the combine and the draft to join a club.'):'No player yet. Create one to start your career.';
  $m('cupg').textContent=p&&p.up?`Upgrade Player · ${p.up} pts`:'Upgrade Player';
  if(!p){for(const id of['hbadge','hpos','hfirst','hlast','hteam','hovr','hxpt','hchips','hmain'])$m(id).innerHTML='';$m('hxp').style.width='0';return;}
@@ -2128,16 +2138,19 @@ const TABS={
  stats:(p,S)=>`<h3>Statistics</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px"><div><h4>Season ${S?S.year:''}</h4>${rowS(S?S.st:zst(),STL)}</div><div><h4>Career · ${p.career.gp} games</h4>${rowS(p.career,STL)}</div></div>`,
  next:(p,S,n)=>nextCard(p,S,n)};
 function bracket(p,S){const P=S.po;return`<div class="brk">${[0,1,2,3].map(r=>`<div class="col"><small style="color:#aaa;letter-spacing:.14em">${RNAME[r].toUpperCase()}</small>${(P.rounds[r]||Array.from({length:8>>r},()=>null)).map(G=>!G?'<div class="bg"><div><span>TBD</span></div><div><span>TBD</span></div></div>':`<div class="bg${G.t.includes(p.team)?' me':''}">${G.t.map((t,j)=>`<div class="${G.s?(G.s[j]>G.s[1-j]?'w':'l'):''}"><span>${P.seeds.indexOf(t)+1} ${club(t).ab}</span><span>${G.s?G.s[j]:''}</span></div>`).join('')}</div>`).join('')}</div>`).join('')}</div>`;}
-{$m('htabs').onclick=e=>{const b=e.target.closest('button');if(b){HTAB=b.dataset.t;hubUI();}};$m('csim').onclick=simMine;}
+{$m('htabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.c){const C=HCATS.find(c=>c[0]===b.dataset.c);HTAB=C[2][0];}else HTAB=b.dataset.t;hubUI();};$m('csim').onclick=simMine;}
 function carUI_old(){}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 {const mmGo=(m,b)=>{if(mmGo.t)return;b.classList.add('prs');$m('mm').classList.add('out');mmGo.t=setTimeout(()=>{mmGo.t=0;b.classList.remove('prs');$m('mm').classList.remove('out');pendMode=m;setInput(m);show('mode');},380);};   // press, fade to black, then the existing flow
- pendMode=(()=>{try{return localStorage.getItem('rafInput')==='touch'?'touch':'kb';}catch(e){return'kb';}})();const setSync=()=>{$m('ctouch').classList.toggle('on',pendMode==='touch');$m('ckb').classList.toggle('on',pendMode==='kb');$m('ctouch').setAttribute('aria-pressed',pendMode==='touch');$m('ckb').setAttribute('aria-pressed',pendMode==='kb');};
-for(const[id,m]of[['ctouch','touch'],['ckb','kb']])$m(id).onclick=()=>{pendMode=m;setInput(m);setSync();};   // Settings: choosing a scheme just saves it
+ const savedInput=(()=>{try{const v=localStorage.getItem('rafInput');return v==='touch'||v==='kb'?v:null;}catch(e){return null;}})();   // only an explicit, valid choice counts
+pendMode=savedInput||'kb';const setSync=()=>{$m('ctouch').classList.toggle('on',pendMode==='touch');$m('ckb').classList.toggle('on',pendMode==='kb');$m('ctouch').setAttribute('aria-pressed',pendMode==='touch');$m('ckb').setAttribute('aria-pressed',pendMode==='kb');};
+for(const[id,m]of[['ctouch','touch'],['ckb','kb']])$m(id).onclick=()=>{pendMode=m;setInput(m);perfMode(m);setSync();};   // Settings: choosing a scheme just saves it
 const mmNav=(b,fn)=>{if(mmNav.t)return;b.classList.add('prs');$m('mm').classList.add('out');mmNav.t=setTimeout(()=>{mmNav.t=0;b.classList.remove('prs');$m('mm').classList.remove('out');fn();},300);};   // press, fade, then the screen
 var NAVFROM='mm';   // where Back on a shared screen (career slots, clubs) returns to
 $m('mplay').onclick=e=>mmNav(e.currentTarget,()=>show('mode'));$m('mhub').onclick=e=>mmNav(e.currentTarget,()=>{NAVFROM='mm';if(PROF){show('car');carUI();}else slotsUI();});
 $m('mteams').onclick=e=>mmNav(e.currentTarget,()=>{NAVFROM='mm';show('teams');teamsUI();});$m('mset').onclick=e=>mmNav(e.currentTarget,()=>{setSync();show('set');$m(pendMode==='touch'?'ctouch':'ckb').focus();});$m('mupd').onclick=()=>$m('pnb').click();$m('setback').onclick=()=>show('mm');
+for(const[id,m]of[['btouch','touch'],['bkb','kb']])$m(id).onclick=()=>{pendMode=m;setInput(m);perfMode(m);setSync();show('mm');$m('mplay').focus();};   // chosen: save it and switch the controls + graphics profile right now
+if(savedInput)perfMode(savedInput);else{show('boot');}   // first launch (or a missing / invalid saved value): you must choose
  addEventListener('keydown',e=>{if($m('mm').hidden||mode)return;const B=[$m('ctouch'),$m('ckb')],i=B.indexOf(document.activeElement);if(/Arrow(Left|Right|Up|Down)/.test(e.key)){e.preventDefault();B[(i+1)%2].focus();}});
  $m('mquick').onclick=()=>{useClubs(null);show(null);applyProf(null);startGame(pendMode);};$m('mcar').onclick=()=>{NAVFROM='mode';slotsUI();};$m('mback').onclick=()=>show('mm');
  $m('cplay').onclick=preMatch;$m('pback').onclick=()=>{show('car');carUI();};$m('pgo').onclick=kickOff;$m('fagain').onclick=preMatch;$m('fagain').textContent='Next Match';$m('fhub').onclick=()=>{show('car');carUI();};
@@ -2338,7 +2351,7 @@ const PROMPT={back:{kb:'ESC',t:'←'},close:{kb:'ESC',t:'✕'},confirm:{kb:'ENTE
 // what each prompt triggers, per screen: the first visible id wins (ESC = back / close, ENTER = confirm, R = reset)
 const ACT={back:['pnx','setback','bres','oback','mback','cprev','pback','uback','tback','kback','sback','fhub','cback'],confirm:['ogo','pgo','cnext','dskip','dgo','fagain'],reset:['ureset']};
 const ACTP={pnx:'close',bres:'close',oback:'back'};
-let INPUT=(()=>{try{return localStorage.getItem('rafInput')||'kb';}catch(e){return'kb';}})();
+let INPUT=(()=>{try{return localStorage.getItem('rafInput')==='touch'?'touch':'kb';}catch(e){return'kb';}})();   // prompts only; the boot screen asks when the saved value isn't valid
 const vis=el=>el&&!el.closest('[hidden]')&&el.offsetParent!==null&&!el.disabled;
 function setInput(m){INPUT=m==='touch'?'touch':'kb';try{localStorage.setItem('rafInput',INPUT);}catch(e){}document.body.dataset.input=INPUT;prompts();}
 function prompts(root=document){const k=INPUT==='touch'?'t':'kb';for(const el of root.querySelectorAll('.kp[data-p]')){const v=PROMPT[el.dataset.p][k];if(el.textContent!==v)el.textContent=v;}}   // only writes on change, so the observer can't loop
@@ -2349,8 +2362,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='2.40';
+const GAME_VER='2.50';
 const PATCH=[
+ {version:'2.50',title:'Controls First & Career Hub Categories',date:'2026-10-28',changes:{UI:['First launch asks Touch or Keyboard before the main menu; the choice is saved, switches the graphics profile straight away, and can be changed in Settings (a missing or invalid saved value asks again instead of assuming Keyboard)','Career hub organised into Overview, Match Day, My Player and League: each shows only its own pages and actions; Main Menu is always there'],Performance:['Outside a match the 3D view is switched off completely (it used to keep its last frame behind the menus); a paused match is drawn once instead of every frame'],'Bug Fixes':['The match no longer flickers through the menus after returning from a career game']}},
  {version:'2.40',title:'Touch Performance II',date:'2026-10-28',changes:{Performance:['Touch: each helmet\'s 16 pieces are merged by look into a few meshes; helmets were about 140 of a match\'s ~225 draw calls (the stadium itself was already cheap)','Touch: never more than 10 physics steps in one frame, so one slow frame can no longer snowball into a stutter','Touch: renders at 95% internal resolution, 90% only after sustained slowness, never lower; menus, HUD and text stay native','Less garbage per physics step in the joint and muscle code (smoother frame pacing on every device); shaders are prepared when teams are set up instead of mid-play']}},
  {version:'2.30',title:'Touch Performance',date:'2026-10-28',changes:{Performance:['Touch: physics solver does 24 passes per step instead of 30 (the solver is about 80% of physics time; 24 is the lowest that plays identically); AI decisions run at 200 Hz while physics and muscles stay at 400 Hz','Touch: adaptive quality judged on 3-second windows: if it can\'t hold about 45 fps it pulls in far scenery, and steps back up after 8 easy seconds','Touch now renders at native resolution (up to 2x); it used to be capped at 1.5x'],Visuals:['Touch: soft contact shadows under every player and the ball, so nobody floats without the shadow map'],'Bug Fixes':['Keyboard settings are unchanged']}},
  {version:'2.20',title:'Running Game',date:'2026-10-28',changes:{Gameplay:['Handoff plays line up in a pistol 5 yards deep (was 15), so the back reaches the line before the defence reaches him'],AI:['Receivers block on run plays: each takes a different defender, fits between him and the back and drives him off the runner\'s line; Strength decides the push, the defender\'s Strength and Awareness his chance to shed the block','Backs read the line: the called gap, one either side, or the cutback, whichever is least crowded (blocked defenders count less); Agility sets how fast he re-reads, Awareness how well']}},
@@ -2525,8 +2539,9 @@ const DT=1/400;let acc=0,last=performance.now();
 const tgt=new THREE.Vector3(0,1,0);let camCD=3.6;
 function frame(now){
  requestAnimationFrame(frame);
- if(!mode){last=now;return;}   // other menus are opaque: nothing drawn; the main menu films the stadium
- if(paused){last=now;renderer.render(scene,cam);return;}        // paused: frozen frame, no physics
+ const cv=renderer.domElement,on=!!mode;if(cv.hidden===on)cv.hidden=!on;   // no match: the 3D canvas is not shown at all (its last frame can't leak through a menu)
+ if(!mode){last=now;return;}   // menus: no physics, no AI, no rendering
+ if(paused){last=now;if(!frame.pz){frame.pz=1;renderer.render(scene,cam);}return;}frame.pz=0;   // paused: one frozen frame, then nothing
  acc+=Math.min(.05,(now-last)/1000);last=now;if(window.DBGFREEZE)acc=0;   // test hook
  const D=active();
  for(const d of D){use(d);sense();}

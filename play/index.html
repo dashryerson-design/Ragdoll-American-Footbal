@@ -1309,7 +1309,21 @@ const playPre=()=>playOn&&playState==='pre';
 const H=d=>d===curD?held:d.held;   // the swapped-in doll's live state is in the globals
 // ---------- defender: reads the receiver with a reaction delay, mirrors with a cushion, sometimes bites on cuts,
 // jams early, plays the ball in the air (deflects, sometimes intercepts), and tackles the ball carrier ----------
-function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d.cur.role==='qb'&&d.pel.position.z<0)),Rc=car||c.mark||player,P=pel.position,RP=Rc.pel.position,RV=Rc.pel.velocity;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;
+// ===== team defence: one plan per moment (every 0.2 s), built from predicted intercepts; each defender gets one job =====
+const r01=d=>(E(d,'awr')+1)/2;   // 0..1 rating helper
+function dSpeed(d){return 7.2*(1+.13*E(d,'spd'))*(.85+.15*Math.min(1,(d.cur.stam??1)/.4));}   // the sprint his legs actually give him
+function intercept(d,C,V){const P=d.pel.position,vd=dSpeed(d),hz=.9+1.6*r01(d),rx=(d.cur.rd??.25)*.6;let t=Math.hypot(C.x-P.x,C.z-P.z)/vd,x=C.x,z=C.z;   // where he can meet the carrier: look ahead only as far as his awareness reads it
+ for(let i=0;i<6;i++){const k=Math.min(t,hz);x=cl(C.x+V.x*k,-FW/2+.8,FW/2-.8);z=C.z+V.z*k;t=Math.hypot(x-P.x,z-P.z)/vd+rx;}return{t,x,z};}   // sideline: the runner can't go past it, so neither does the aim point
+function defPlan(car){const now=performance.now();if(defPlan.car===car&&now-defPlan.t<200)return defPlan.m;
+ const C=car.pel.position,V=car.pel.velocity,D=roster.filter(d=>d.cur.side==='d'&&!d.limp),past=C.z>LOS+.5,m=new Map();   // past the line: no forward pass left, it's a run
+ const I=D.map(d=>({d,...intercept(d,C,V)})).sort((a,b)=>a.t-b.t),front=D.filter(d=>d.pel.position.z>C.z+1).length;
+ let jobs=['attack','angle'];for(const o of I){const c=o.d.cur;let j;
+  if(c.kind==='deep'&&o.d!==I[0].d&&front>1)j='last';   // the safety stays the last line until the carrier is on him or nobody else is in front
+  else if(jobs.length)j=jobs.shift();
+  else j=!past&&c.mark&&c.mark!==car&&!c.mark.limp?'cover':'contain';   // a pass is still possible: stay on your man; otherwise wall off the outside
+  m.set(o.d,{j,x:o.x,z:o.z,t:o.t});}
+ defPlan.car=car;defPlan.t=now;defPlan.m=m;return m;}
+function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d.cur.role==='qb'&&d.pel.position.z<LOS-1.5&&d.cur.st!=='run'&&Math.hypot(d.pel.velocity.x,d.pel.velocity.z)<4.5)),Rc=car||c.mark||player,P=pel.position,RP=Rc.pel.position,RV=Rc.pel.velocity;c.t=(c.t||0)+dt;for(const k in keys)keys[k]=false;
  const face=(x,z)=>{camYaw=Math.atan2(x-P.x,z-P.z)+Math.PI;};
  // move to (x,z) running exactly like the player (face the way he runs, sprint unless it's a short adjustment); only tiny last-metre fixes are a shuffle facing the receiver
  let want=null,wantRun=false;const goTo=(x,z,run,look)=>{const mx=x-P.x,mz=z-P.z,d=Math.hypot(mx,mz);want=d<.45?null:[x,z];wantRun=run&&d>1.5;if(d<.45){if(look)face(look.x,look.z);return;}
@@ -1317,10 +1331,10 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
   else{face(x,z);keys.w=true;keys.shift=run&&d>1.5;}};
  if(c.st==='pre'){if(c.mark)face(RP.x,RP.z);else face(P.x,P.z-5);return;}
  if(fumT&&!car){goTo(ball.position.x,ball.position.z,true,null);if(dv===0)plantCut(want,wantRun,29.4);return;}   // loose ball: dive on it
- if(c.st==='down'){if(dv===0&&!cur.tkS&&!limp)c.st='cover';return;}
+ if(c.st==='down'){if(dv===0&&!cur.tkS&&!limp){c.st='cover';c.aim=null;}return;}
  const hist=c.hist||(c.hist=[]);hist.push([c.t,RP.x,RP.z,RV.x,RV.z]);while(hist.length>2&&hist[1][0]<c.t-c.rd)hist.shift();const S=hist[0];   // what he "sees": the receiver c.rd seconds ago
  const inAir=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.3;
- if(!inAir)c.seen=0;else if(!c.seen)c.seen=c.t;if(inAir&&c.st!=='ball'&&!held&&c.t-c.seen>.1*(1-AT('rea'))){c.st='ball';c.canInt=Math.random()<cl(.3*(1+1.2*AT('int')),.05,.75);catchOn=true;cur.catchT0=1e15;}   // no catch boost for him
+ if(!inAir)c.seen=0;else if(!c.seen)c.seen=c.t;if(inAir&&c.st!=='ball'&&!held&&c.t-c.seen>.1*(1-AT('rea'))&&(()=>{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z,t=0;for(;t<5&&!(vy<0&&y<1.6)&&y>.09;t+=.04){vy-=9.82*.04;x+=vx*.04;y+=vy*.04;z+=vz*.04;}return Math.hypot(x-P.x,z-P.z)/dSpeed(curD)<t+.7+.5*r01(curD)||c.kind==='deep'&&z>P.z-4;})()){c.st='ball';c.canInt=Math.random()<cl(.3*(1+1.2*AT('int')),.05,.75);catchOn=true;cur.catchT0=1e15;}   // no catch boost for him
  if(held&&c.st!=='int'){c.st='int';c.intT=c.t;}
  if(c.st==='ball'){if(!inAir){catchOn=false;c.st=car?'chase':'cover';}
   else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);
@@ -1340,9 +1354,16 @@ function defThink(dt){const c=cur,car=roster.find(d=>d.cur.side==='o'&&H(d)&&!(d
   goTo(tx,tz,true,RP);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);   // jam: hands on him early in the route
   if(dd<1.1&&c.t<3.5&&c.t>(c.pushT||0)){c.pushT=c.t+1.2+Math.random();const kk=(1.2+Math.random())*(1+.4*AT('str'))*(1-.3*E(Rc,'str'));for(const b of Rc.list){b.velocity.x+=dx/dd*kk;b.velocity.z+=dz/dd*kk;}}}
- if(c.st==='chase'){if(!car){c.st='cover';}if(c.t<c.biteEnd)goTo(P.x+c.biteV[0],P.z+c.biteV[1],true,null);else goTo(RP.x+RV.x*.5,RP.z+RV.z*.5,true,null);
+ if(c.st==='chase'){if(!car){c.st='cover';}else{const J=defPlan(car).get(curD)||{j:'attack',x:RP.x,z:RP.z},a=c.aim||(c.aim=[J.x,J.z]),k=Math.min(1,dt*(2.5+3*(AT('agi')+1)/2));   // the aim point eases: a cut re-aims him, it doesn't teleport his target
+  let tx=J.x,tz=J.z;
+  if(J.j==='angle'){const C=RP,L=Math.hypot(RV.x,RV.z)||1;tx=J.x+RV.x/L*1.2;tz=J.z+RV.z/L*1.2;}   // second man: aim a stride further along his path, cutting off the lane instead of trailing the first tackler
+  if(J.j==='last'){const L=Math.hypot(RV.x,RV.z)||1,cush=cl(Math.hypot(RP.x-P.x,RP.z-P.z)*.45,2.5,7);tx=cl(RP.x+RV.x*.5,-FW/2+1,FW/2-1);tz=Math.max(RP.z+cush,Math.min(P.z,RP.z+9));}   // between him and the goal: give ground slowly, never let him get behind
+  if(J.j==='contain'){const sd=Math.sign(RP.x||1),edge=Math.abs(RP.x)>FW/2-6?0:1;tx=RP.x+sd*3*edge;tz=RP.z+3.5;}   // outside shoulder and in front: force him back inside to help
+  if(J.j==='cover'&&c.mark){const M=c.mark.pel.position;tx=M.x;tz=M.z+2;}
+  a[0]+=(tx-a[0])*k;a[1]+=(tz-a[1])*k;
+  if(c.t<c.biteEnd)goTo(P.x+c.biteV[0],P.z+c.biteV[1],true,null);else goTo(a[0],a[1],true,J.j==='last'||J.j==='cover'?RP:null);
   const dx=RP.x-P.x,dz=RP.z-P.z,dd=Math.hypot(dx,dz);
-  if(dd<aiTrig()&&dv===0&&!cur.tkS&&!(c.t<c.biteEnd)&&!Rc.limp){if(startTackle(Rc,aiType(Rc)))c.st='down';}}   // tackle: dive into him, he goes limp for a moment
+  if(dd<aiTrig()&&dv===0&&!cur.tkS&&!(c.t<c.biteEnd)&&!Rc.limp){if(startTackle(Rc,aiType(Rc)))c.st='down';}}}   // anyone in range still takes the shot: tackle: dive into him, he goes limp for a moment
  if(c.st==='int'&&c.t-c.intT<1.5)goTo(P.x,P.z-6,true,null);   // picked it off: a few strides back the other way
  if(dv===0)plantCut(want,wantRun,29.4);}   // plants and changes direction hard (3 g)
 const active=()=>roster;
@@ -2270,8 +2291,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='1.90';
+const GAME_VER='2.00';
 const PATCH=[
+ {version:'2.00',title:'Team Defence',date:'2026-10-28',changes:{AI:['Defenders work as a unit: once there is a runner, the best-placed defender attacks, the next takes a cut-off angle, the safety stays the last line between him and the goal, and the rest keep their man (while a pass is still possible) or hold contain on the outside','Predictive pursuit: each defender aims at where he can actually meet the runner, from his own speed, stamina and reaction; how far ahead he reads depends on Awareness; aim points ease instead of snapping on cuts and respect the sideline','Thrown balls: only defenders who can actually get there (or the safety over the top) leave their man to play it'],'Bug Fixes':['A quarterback running at or past the line, or scrambling, is now treated as a runner (it used to take him reaching midfield)']}},
  {version:'1.90',title:'Pre-Play Breakdown & Uniforms',date:'2026-10-28',changes:{UI:['After you pick a play card: a 6-second breakdown with a wide formation camera, a countdown, and a scouting card on every player (offence under the feet, defence over the helmet)','Each card shows name, playstyle, OVR and one strength earned from real ratings (a label needs 70+ in what it describes)','Routes are always drawn in full before the snap, with run lanes and QB keepers in green; they fade out at the snap'],Visuals:['Home and away uniforms: home in club colour, away in white with club-colour trim, helmet and numbers; if two kits would still look alike, one side switches to an alternate','Detroit, Boston, Las Vegas and Nashville have new colours so no two clubs share a look'],'Player Creation':['Randomise now picks a style (Classic, Stealth, Bold, Clean or Vibrant) and dresses the outfit from one coordinated palette; left and right compression always match']}},
  {version:'1.80',title:'Play Cards & Playbook',date:'2026-10-28',changes:{Gameplay:['Career offence: every new possession you pick one of three play cards: RUN, DEEP PASS or MID / FLASHY','A playbook of 400+ plays built from 6 formations, 22 route types, 10 deep and 12 mid concepts, 4 run lanes, 3 backfield sets, quick and delayed handoffs, QB keepers and draws, and rollouts','The card you pick sets the formation, every player\'s spot and route, the run lane and handoff timing, and who the QB looks for first; the AI still reads the defence','Cards favour plays you haven\'t seen in recent possessions; the AI offence calls its own play from the same book'],UI:['Play cards with a diagram drawn from the actual play: spots, routes, handoff and running lane','Pick with a click, a tap or keys 1 / 2 / 3; the clock and the snap wait while you choose']}},
  {version:'1.70',title:'Running Backs & Position Choice',date:'2026-10-28',changes:{'Career Mode':['Player Hub: choose your offensive position (Quarterback, Wide Receiver or Running Back), separate from your playstyle and saved with your career','Quick Play position toggle also offers RB'],Gameplay:['Run plays: some downs are an Inside Run or Outside Run with a running back beside and behind the QB; passing plays are unchanged','The RB is one of your four players for that play only (you, if you picked RB, otherwise the slot receiver), so it stays 4v4','Handoff: the back runs the mesh past the QB and possession really moves to him; one exchange per play, and a blown handoff just plays on'],AI:['AI backs hit the called gap, then use the normal ball-carrier AI: bend away from tacklers and juke'],UI:['Play call shown at the line; as RB you are told to get to the QB for the handoff']}},

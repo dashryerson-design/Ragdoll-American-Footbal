@@ -2388,8 +2388,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.03';
+const GAME_VER='3.04';
 const PATCH=[
+ {version:'3.04',title:'Clearer Combine Courses',date:'2026-10-28',changes:{'Career Mode':['Running drills show one objective at a time: the next zone pulses bright with a light pillar, the one after is only a faint hint, completed ones flash green and disappear','A ground arrow just ahead of you always points at the current objective and follows you as you move','Movement Fundamentals is now four short stages (move, sprint, one marked turn, stop in the box), each with its own instruction and control hint; the 40-yard dash is one lane with a single finish line; the three-cone cuts are numbered','Ball Security still makes you read the dummy line yourself: the arrow points straight ahead there, not at the open gap']}},
  {version:'3.03',title:'Mouse Unlock',date:'2026-10-28',changes:{'Bug Fixes':['The mouse is released automatically whenever a menu is showing (match results, main menu, Combine, pause, any screen); no more pressing ESC just to get the cursor back','It is captured only during a live keyboard match, and Resume captures it again straight away']}},
  {version:'3.02',title:'Skip Combine',date:'2026-10-28',changes:{'Career Mode':['Skip Combine on the Combine screen (before any drill): after a confirmation you go straight to the scouting report with a standard mid-level evaluation, clearly marked as estimated','Estimated results sit in a fixed middle band (a C workout); your ratings, OVR and player never change, and you can still run drills afterwards (a real result replaces that drill\'s estimate)']}},
  {version:'3.01',title:'Impact Camera',date:'2026-10-28',changes:{Visuals:['Tackles, broken tackles, big hits and hard stance collisions give the camera a short, subtle shake','Strength comes from the hit\'s real severity and fades smoothly with distance from the camera: full within 3 m, faint by 15 m, none past 24 m','Purely visual: the camera always returns to its exact follow position, and simultaneous reports of one hit count once']}},
@@ -2445,13 +2446,13 @@ const pband=(v,good,poor)=>cl((poor-v)/(poor-good)*100,0,100);   // linear: at "
 const GRADE=s=>s>=93?'A+':s>=85?'A':s>=75?'B':s>=62?'C':s>=50?'D':'F';
 const STATIONS=['Movement & Athletic Testing','Ball Security & Running','Passing & Receiving','Defence','Contact & Physics','Situational Football'];
 const DRILLS=[
- {id:'move',st:0,kind:'MOVEMENT',name:'Movement Fundamentals',eng:'course',gate:1,at:['spd','acc','agi'],keys:['move','look','sprint'],obj:'Run the course through each lit gate, stay off the cones, and stop inside the final box. The clock starts at the first gate: move around freely before that.',
-  cps:[[0,6],[0,13],[-6,18],[-6,26],[3,31],[6,24],[1,20],[1,15,'stop']],cones:[[-1.6,13],[1.6,13],[-6,22],[1.5,30.5],[4.5,26],[3.6,18]]},
- {id:'dash',st:0,kind:'SPEED',name:'40-Yard Dash',eng:'dash',at:['spd','acc'],keys:['move','sprint'],obj:'From a standstill, sprint through the far cones. The clock starts when you move. Speed sets your top end, Acceleration how fast you get there.'},
- {id:'cone3',st:0,kind:'AGILITY',name:'Three-Cone Drill',eng:'course',at:['agi','acc','spd'],keys:['move','sprint'],obj:'Up and back to the first cone, then around it to the far cone and home. Brake before each cut: overshooting costs more than slowing down.',
-  cps:[[0,4.6],[0,.4],[0,4.6],[-4.6,4.6],[-.3,4.9],[0,.4,'line']],cones:[[0,4.6],[-4.6,4.6]],cut:1},
- {id:'carry',st:1,kind:'BALL SECURITY',name:'Ball Security & Evasion',eng:'course',at:['car','bhd','agi','spd'],keys:['move','sprint','juke'],ball:1,chase:1,obj:'You have the ball. Read the dummies: one of the three gaps is blocked, take an open one. Then beat the pursuing defender to the line with a juke or a better angle. Keep the ball.',
-  cps:[[0,7],['gap',17],[0,34,'line']]},
+ {id:'move',st:0,kind:'MOVEMENT',name:'Movement Fundamentals',eng:'course',gate:1,at:['spd','acc','agi'],keys:['move','look','sprint'],obj:'Four short stages: move, sprint, turn, stop. Follow the bright zone and the arrow on the ground.',
+  cps:[{x:0,z:6,r:1.7,msg:'Move to the highlighted zone.',keys:['move','look']},{x:0,z:24,r:2,msg:'Hold sprint and run to the far zone. The clock is running.',keys:['sprint']},{x:-7,z:27,r:1.7,msg:'Turn left, around the outside of the cones, to the next zone.',keys:['move']},{x:-7,z:15,r:1.9,type:'stop',msg:'Ease off and stop inside the box.',keys:['move']}],cones:[[1.7,25.6],[1,27.8],[0,29]]},
+ {id:'dash',st:0,kind:'SPEED',name:'40-Yard Dash',eng:'dash',at:['spd','acc'],keys:['move','sprint'],obj:'From a standstill, sprint across the bright finish line. The clock starts when you move. Speed sets your top end, Acceleration how fast you get there.'},
+ {id:'cone3',st:0,kind:'AGILITY',name:'Three-Cone Drill',eng:'course',at:['agi','acc','spd'],keys:['move','sprint'],obj:'Five sharp cuts between two cones. Brake before each turn: overshooting costs more than slowing down.',
+  cps:[{x:0,z:3.9,r:.8,msg:'Turn 1: up to cone 1.'},{x:0,z:.3,r:.8,msg:'Turn 2: cut back to the start.'},{x:0,z:3.9,r:.8,msg:'Turn 3: back up to cone 1.'},{x:-4.6,z:3.9,r:.8,msg:'Turn 4: cut left along the cones to cone 2.'},{x:0,z:.4,w:3,type:'line',msg:'Turn 5: come home across the start line.'}],cones:[[0,4.6],[-4.6,4.6]],cut:1},
+ {id:'carry',st:1,kind:'BALL SECURITY',name:'Ball Security & Evasion',eng:'course',at:['car','bhd','agi','spd'],keys:['move','sprint','juke'],ball:1,chase:1,obj:'Carry the ball through the dummy line and past one defender. Keep the ball the whole way.',
+  cps:[{x:0,z:7,r:1.7,msg:'Carry the ball to the zone.'},{type:'gap',z:17,msg:'Read the dummies: one gap is stacked. Run through an open one.'},{x:0,z:34,w:7,type:'line',msg:'Beat the defender to the line. Juke if he closes.',keys:['juke']}]},
  {id:'vision',st:1,kind:'RUNNING BACK',name:'Running Back Vision',eng:'scen',at:['spd','agi','awr','car'],keys:['move','sprint','juke','snap'],side:'off',pos:'rb',reps:3,pick:p=>p.slots.some(s=>s.rb),obj:'Live run plays. Take the handoff, follow your blockers and choose the open lane: inside or bounce it outside. Snap with GO when ready.'},
  {id:'pass',st:2,kind:'PASSING',name:'QB Passing Fundamentals',eng:'pass',at:['tha','thp'],keys:['aim','throw'],obj:'Five throws at lit targets, short to deep. Aim with the arc, hold the throw longer for more speed. Accuracy shrinks the miss; Throw Power how hard you can drive it.'},
  {id:'qbmove',st:2,kind:'QUARTERBACK',name:'Throwing on the Move',eng:'scen',at:['tha','thp','awr'],keys:['move','aim','throw','snap'],side:'off',pos:'qb',reps:3,pick:p=>p.roll,obj:'Rollout plays: snap, roll toward the sideline, and hit a receiver on the run. Throwing into a defender gets picked off.'},
@@ -2472,31 +2473,51 @@ function runnerBot(){const r=bot(0);r.cur={ai:true,role:'dr',team:'red',side:'o'
 function drillStart(i){const d=DRILLS[i];drillBase();
  DRILL={i,d,t:0,ph:'set',rep:0,pts:[],T0:0,w:0,fb:[]};drillHud(d);placeAt(player,0,DR_Z);use(player);camYaw=Math.PI;
  if(d.eng==='course'){const D=DRILL;D.k=0;D.brush=0;D.cones=(d.cones||[]).map(([x,z])=>({x,z:DR_Z+z,m:dCone(x,DR_Z+z)}));
-  if(d.cps[1][0]==='gap'){const open=[-5,0,5],blk=open[Math.random()*3|0];D.gapOpen=open.filter(x=>x!==blk);for(const x of[-7.5,-2.5,2.5,7.5])D.cones.push({x,z:DR_Z+17,m:dCone(x,DR_Z+17,0x666666)});for(const dx of[-1.2,0,1.2])D.cones.push({x:blk+dx,z:DR_Z+17,m:dCone(blk+dx,DR_Z+17,0xff3b2a)});}   // the dummy line: three gaps, one stacked
-  D.rings=d.cps.map(c=>c[0]==='gap'?null:dRing(c[0],DR_Z+c[1],c[2]==='stop'?1.4:1,0x555555));
+  if(d.cps[1].type==='gap'){const open=[-5,0,5],blk=open[Math.random()*3|0];D.gapOpen=open.filter(x=>x!==blk);D.blk=blk;for(const x of[-7.5,-2.5,2.5,7.5])D.cones.push({x,z:DR_Z+17,m:dCone(x,DR_Z+17,0x666666)});for(const dx of[-1.2,0,1.2])D.cones.push({x:blk+dx,z:DR_Z+17,m:dCone(blk+dx,DR_Z+17,0xff3b2a)});}   // the dummy line: three gaps, one stacked
+  guideInit(d.cps);
   if(d.ball)grabBall();if(d.chase){const r=D.run=runnerBot();placeAt(r,(Math.random()-.5)*8,DR_Z+30);use(r);camYaw=0;limp=false;r.cur.T=null;use(player);}
-  courseLight();dstat('Gate 1 starts the clock');}
- if(d.eng==='dash'){for(const x of[-2.5,2.5]){dCone(x,DR_Z);dCone(x,DR_Z+40*YD,0xffd23f);}dstat('0.00 s');}
+  dstat(d.gate?'The clock starts at stage 2':'The clock starts when you move');}
+ if(d.eng==='dash'){for(const x of[-2.5,2.5])dCone(x,DR_Z);dMk(new THREE.BoxGeometry(5,.02,.12),0xffffff,0,.02,DR_Z);guideInit([{x:0,z:40*YD,w:2.5,type:'line',msg:''}]);dstat('0.00 s');}   // one lane: a start line, one bright finish line
  if(d.eng==='pass'){DRILL.tg=[[-6,DR_Z+12*YD],[7,DR_Z+20*YD],[0,DR_Z+30*YD],[-9,DR_Z+24*YD],[4,DR_Z+38*YD]].map(([x,z])=>({x,z,m:dRing(x,z,2.2,0x555555)}));grabBall();drillAim();}
  if(d.eng==='jugs'){dMk(new THREE.BoxGeometry(.6,.6,.9),0x333333,0,1.6,DR_Z+22);dstat('0 / 6');}
  if(d.eng==='runner'){DRILL.run=runnerBot();DRILL.made=0;tackRep();}
  if(d.eng==='scen')scenRep();}
 // ---------- course engine: ordered gates, cones you shouldn't touch, an optional ball and chaser ----------
-function courseLight(){const D=DRILL;D.rings.forEach((m,j)=>m&&m.material.color.setHex(j===D.k?0xffd23f:j<D.k?0x3ee07a:0x555555));}
-function courseTick(dt){const D=DRILL,d=D.d,P=pel.position,c=d.cps[D.k],now=D.t;
- if(D.ph==='set'&&(d.gate?D.k===1:Math.hypot(P.x,P.z-DR_Z)>.6)){D.ph='run';D.T0=D.t;}   // the movement course starts at gate 1 (practise before it); the rest start when you move
- for(const o of D.cones){const hit=Math.hypot(P.x-o.x,P.z-o.z)<.5;if(hit&&!o.h){o.h=1;D.brush++;o.m.material.color.setHex(0xffffff);}if(!hit)o.h=0;}   // brushing a cone is a mistake (once per touch)
+// ---------- guidance: only the next objective is bright (pulsing zone + light pillar, or a finish line); a ground arrow ahead of you points at it ----------
+const GCOL={on:0x2fd8ff,dim:0x8a96a3,done:0x3ee07a};
+function guideInit(cps){const D=DRILL;D.k=0;D.G=cps.map(c=>{const z=DR_Z+c.z,o={c};
+  if(c.type==='line'){o.m=dMk(new THREE.BoxGeometry((c.w||4)*2,.02,.35),GCOL.dim,c.x||0,.03,z);}
+  else if(c.type!=='gap'){o.m=dRing(c.x,z,c.r||1.2,GCOL.dim);o.m.geometry.dispose();o.m.geometry=new THREE.RingGeometry((c.r||1.2)*.7,c.r||1.2,48);o.f=dMk(new THREE.CircleGeometry((c.r||1.2)*.8,36),GCOL.on,c.x,.025,z);o.f.rotation.x=-Math.PI/2;o.f.material.opacity=0;}
+  return o;});
+ D.pil=dMk(new THREE.CylinderGeometry(.06,.06,2.6,8),GCOL.on,0,1.3,0);D.pil.material.opacity=.45;
+ const sh=new THREE.Shape([new THREE.Vector2(0,.55),new THREE.Vector2(.38,0),new THREE.Vector2(.13,0),new THREE.Vector2(.13,-.45),new THREE.Vector2(-.13,-.45),new THREE.Vector2(-.13,0),new THREE.Vector2(-.38,0)]);
+ D.arr=dMk(new THREE.ShapeGeometry(sh).rotateX(-Math.PI/2).scale(1.35,1,1.35),GCOL.on,0,.05,0);D.arr.material.depthWrite=false;guideShow();}
+function guideShow(){const D=DRILL,k=D.k;D.G.forEach((o,j)=>{if(!o.m)return;const on=j===k;o.m.visible=j>=k||o.fl>0;if(j>k){o.m.material.color.setHex(GCOL.dim);o.m.material.opacity=j===k+1?.35:.18;o.m.scale.setScalar(o.c.type==='line'?1:.75);}if(on){o.m.material.color.setHex(GCOL.on);o.m.material.opacity=.95;o.m.scale.setScalar(1);}if(o.f)o.f.material.opacity=on?.3:0;});   // upcoming: faint; next-after only a hint; done: gone
+ const c=D.d.cps?D.d.cps[k]:null,cc=c||D.G[k]&&D.G[k].c;if(cc&&cc.msg)$m('dinst').innerHTML=`${cc.msg}<div class="hks">${hintHTML(cc.keys||D.d.keys)}</div>`;}
+function guideNext(){const D=DRILL,o=D.G[D.k];if(o&&o.m){o.fl=.35;o.m.material.color.setHex(GCOL.done);if(o.f){o.f.material.color.setHex(GCOL.done);o.f.material.opacity=.35;}}D.k++;guideShow();}   // reached: a short green flash, then the next one lights up
+function guideTick(dt){const D=DRILL,P=pel.position,t=D.t;for(const o of D.G){if(o.fl>0){o.fl-=dt;if(o.fl<=0&&o.m){o.m.visible=false;if(o.f)o.f.visible=false;}}}
+ const o=D.G[D.k];if(!o){D.arr.visible=D.pil.visible=false;return;}const c=o.c,z=DR_Z+c.z,pu=1+.07*Math.sin(t*5);
+ let tx=c.x,tz=z;if(c.type==='line'||c.type==='gap'){tx=cl(P.x,(c.x||0)-(c.w||3),(c.x||0)+(c.w||3));}   // a line: aim straight across it (a gap: straight ahead; reading it is the drill)
+ if(o.m&&c.type!=='line'){o.m.scale.setScalar(pu);}if(o.m)o.m.material.opacity=.75+.2*Math.sin(t*5);
+ D.pil.visible=c.type!=='gap'&&c.type!=='line';D.pil.position.set(c.x||0,1.3,z);
+ const dx=tx-P.x,dz=tz-P.z,d=Math.hypot(dx,dz);D.arr.visible=d>2.6;if(d>2.6){const k=Math.min(2.7,d-1.4);D.arr.position.set(P.x+dx/d*k,.05,P.z+dz/d*k);D.arr.rotation.y=Math.atan2(dx,dz);D.arr.material.opacity=.55+.3*Math.sin(t*4);}}
+// ---------- course engine: stages in order (zone / stop box / line / gap read), cones you shouldn't touch, an optional ball and chaser ----------
+function courseTick(dt){const D=DRILL,d=D.d,P=pel.position,c=d.cps[D.k];guideTick(dt);
+ if(D.ph==='set'&&(d.gate?D.k===1:Math.hypot(P.x,P.z-DR_Z)>.6)){D.ph='run';D.T0=D.t;}   // movement: the clock starts at stage 2 (stage 1 is practice); the rest start when you move
+ for(const o of D.cones){const hit=Math.hypot(P.x-o.x,P.z-o.z)<.5;if(hit&&!o.h){o.h=1;D.brush++;o.m.material.color.setHex(0xffffff);}if(!hit)o.h=0;}
  if(d.ball&&!held&&!D.fumble){D.fumble=1;return drillDone(8,'FUMBLED',['You lost the ball: it has to stay in your arms the whole way (Carrying and Ball Handling help hold it through contact).']);}
- if(D.run){const r=D.run,R=r.pel.position;r.cur.T=[P.x+pel.velocity.x*.5,P.z+pel.velocity.z*.5];if(!D.tag&&Math.hypot(R.x-P.x,R.z-P.z)<.9&&D.k>=2){D.tag=1;dstat('TAGGED by the defender');}}   // the chaser pursues where you're going
- if(c[0]==='gap'){if(P.z>DR_Z+c[1]){const ok=D.gapOpen.some(x=>Math.abs(P.x-x)<1.7);if(!ok)D.fb.push('You ran into the stacked gap instead of an open one.');else D.fb.push('Good read: you took an open gap.');D.gapOk=ok;D.k++;}}
- else{const dd=Math.hypot(P.x-c[0],P.z-(DR_Z+c[1])),stop=c[2]==='stop',line=c[2]==='line',pz=D.k?d.cps[D.k-1][1]:0,up=c[1]>pz;
-  if(line?(up?P.z>DR_Z+c[1]:P.z<DR_Z+c[1])&&Math.abs(P.x-c[0])<4:stop?dd<1.2&&Math.hypot(pel.velocity.x,pel.velocity.z)<1:dd<1.1){D.k++;}}   // a finish line counts when you cross it the way you're running
- if(D.k>=d.cps.length){const t=D.t-D.T0,len=d.cps.reduce((a,c,j)=>j?a+Math.hypot((c[0]==='gap'?0:c[0])-(d.cps[j-1][0]==='gap'?0:d.cps[j-1][0]),c[1]-d.cps[j-1][1]):0,0);
-  let perf=pband(t,len/(d.cut?4.4:5.2),len/(d.cut?2.4:2.8))-8*D.brush-(D.tag?25:0)-(D.gapOk===false?30:0);
-  const fb=[...D.fb];if(D.brush)fb.push(`${D.brush} cone${D.brush>1?'s':''} touched: slow into the turn and cut around them.`);if(D.tag)fb.push('The defender got a hand on you: change your angle earlier or juke as he closes.');if(!D.brush&&!D.tag)fb.push('Clean run, no cones touched.');
+ if(D.run){const r=D.run,R=r.pel.position;r.cur.T=[P.x+pel.velocity.x*.5,P.z+pel.velocity.z*.5];if(!D.tag&&Math.hypot(R.x-P.x,R.z-P.z)<.9&&D.k>=2){D.tag=1;dstat('TAGGED by the defender');}}
+ if(c){const z=DR_Z+c.z,pz=D.k?DR_Z+d.cps[D.k-1].z:DR_Z,up=c.z>(D.k?d.cps[D.k-1].z:0),sp=Math.hypot(pel.velocity.x,pel.velocity.z);let ok=false;
+  if(c.type==='gap'){if(P.z>z){const gi=P.x<-2.5?-5:P.x>2.5?5:0,g=gi!==D.blk;D.fb.push(g?'Good read: you took an open gap.':'You ran into the stacked gap instead of an open one.');D.gapOk=g;ok=true;}}
+  else if(c.type==='line')ok=(up?P.z>z:P.z<z)&&Math.abs(P.x-(c.x||0))<(c.w||4);
+  else if(c.type==='stop'){const dd=Math.hypot(P.x-c.x,P.z-z);if(dd<c.r&&sp<.9)ok=true;else if(dd<c.r&&!D.ins){D.ins=1;dstat('In the box: now stop');}if(dd>c.r+.8&&D.ins){D.ins=0;D.over=(D.over||0)+1;dstat('Overshot: come back into the box');}}   // stopping is the skill: it only counts once you're still inside
+  else ok=Math.hypot(P.x-c.x,P.z-z)<c.r;
+  if(ok){guideNext();}}
+ if(D.k>=d.cps.length){const t=D.t-D.T0,pts=d.cps.map(c=>[c.x||0,c.z]),len=pts.reduce((a,q,j)=>j?a+Math.hypot(q[0]-pts[j-1][0],q[1]-pts[j-1][1]):a,0)-(d.gate?Math.hypot(pts[0][0],pts[0][1]):0);
+  let perf=pband(t,len/(d.cut?4.4:5.2),len/(d.cut?2.4:2.8))-8*D.brush-(D.tag?25:0)-(D.gapOk===false?30:0)-6*(D.over||0);
+  const fb=[...D.fb];if(D.brush)fb.push(`${D.brush} cone${D.brush>1?'s':''} touched: slow into the turn and go around them.`);if(D.over)fb.push('You overshot the stop box: ease off sooner.');if(D.tag)fb.push('The defender got a hand on you: change your angle earlier or juke as he closes.');if(!D.brush&&!D.tag&&!D.over)fb.push('Clean run.');
   return drillDone(perf,`${t.toFixed(2)} s`,fb);}
- if(D.k!==D.lk){D.lk=D.k;courseLight();}
- if(D.ph==='run')dstat(`${(D.t-D.T0).toFixed(2)} s · gate ${Math.min(D.k+1,d.cps.length)}/${d.cps.length}${D.brush?` · cones ${D.brush}`:''}`);
+ if(D.ph==='run'&&!D.ins)dstat(`${(D.t-D.T0).toFixed(2)} s · stage ${Math.min(D.k+1,d.cps.length)}/${d.cps.length}${D.brush?` · cones ${D.brush}`:''}`);
  if(D.t>90)drillDone(0,'DNF',['Time ran out.']);}
 // ---------- scenario engine: a real 4v4 play from the playbook, you in the right role; scored from what actually happened ----------
 function scenRep(){const D=DRILL,d=D.d,off=d.side==='off'||d.side==='both'&&D.rep===0;
@@ -2530,7 +2551,7 @@ function drillTick(){const D=DRILL,now=performance.now(),dt=Math.min(.05,(now-(D
  if(eng==='intro')return introTick(dt);
  if(eng==='course')return courseTick(dt);
  if(eng==='scen')return scenTick(dt);
- if(eng==='dash'){if(D.ph==='set'&&P.z>DR_Z+.3){D.ph='run';D.T0=D.t;}if(D.ph==='run'){dstat(tm());if(P.z>=DR_Z+40*YD){const t=D.t-D.T0,b=t<5.4?'Elite':t<5.7?'Excellent':t<6.0?'Good':t<6.4?'Average':'Below average';drillDone(pband(t,5.1,6.9),t.toFixed(2)+' s',[`In-game band: ${b}.`]);}}if(D.t>25)drillDone(0,'DNF',['You didn\'t reach the far cones.']);}
+ if(eng==='dash'){guideTick(dt);if(D.ph==='set'&&P.z>DR_Z+.3){D.ph='run';D.T0=D.t;}if(D.ph==='run'){dstat(tm());if(P.z>=DR_Z+40*YD){const t=D.t-D.T0,b=t<5.4?'Elite':t<5.7?'Excellent':t<6.0?'Good':t<6.4?'Average':'Below average';drillDone(pband(t,5.1,6.9),t.toFixed(2)+' s',[`In-game band: ${b}.`]);}}if(D.t>25)drillDone(0,'DNF',['You didn\'t reach the far cones.']);}
  if(eng==='pass'){const tg=D.tg[D.rep%D.tg.length];
   if(D.ph==='set'&&!held&&world.bodies.includes(ball)){D.ph='fly';D.w=0;}
   if(D.ph==='fly'){D.w+=dt;if(ball.position.y<.2||D.w>5){const miss=Math.hypot(ball.position.x-tg.x,ball.position.z-tg.z),pt=cl(100-miss*11,0,100);D.pts.push(pt);D.fb.push(`Throw ${D.rep+1}: ${miss.toFixed(1)} m off`);dstat(`${miss.toFixed(1)} m off · ${Math.round(pt)} pts`);D.ph='gap';D.w=0;}}

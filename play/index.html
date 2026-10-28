@@ -1583,7 +1583,7 @@ function markTick(){xpTick();readOpen();const on=playOn&&mode;youRing.visible=on
 function playTick(){if(!playOn)return;if(!$m('pcs').hidden){playTick.t=performance.now();resetT=performance.now();return;}readTick();const tn=performance.now();if(MATCH){MATCH.clock=Math.max(0,MATCH.clock-Math.min(.5,(tn-(playTick.t||tn))/1000));if((MATCH.clock|0)!==playTick.c){playTick.c=MATCH.clock|0;hud();}}playTick.t=tn;   // the game clock runs whenever the match isn't paused
  if(MATCH&&MATCH.clock<=0&&(playState==='pre'||playEnd&&tn>playEnd)){flip=null;endMatch();return;}   // time's up: the play in progress finishes, then the final whistle
  if(playEnd){if(performance.now()>playEnd){playEnd=0;if(flip!==null){DRIVE++;ORG.off=NEXT||(ORG.off==='blue'?'red':'blue');NEXT=null;LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();}else if(NEWSERIES&&ORG.four&&!ORG.free&&!DRILL){NEWSERIES=0;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
- if(playState==='pre'&&player.cur.side==='d'&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
+ if(playState==='pre'&&player.cur.side==='d'&&!CINE.on&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
  if(playState!=='live')return;handoffTick();const car=roster.find(H),ot=ORG.off;if(car)playTick.g=0;
  if(car&&car!==playTick.lc){if(MATCH&&playTick.lc){const S=MATCH.st;if(car===player){if(player.cur.side==='d')S.int++;else{S.rec++;MATCH.caught=1;}}if(car===player&&player.cur.side!=='d')player.cur.yacT=performance.now()+2000;else if(playTick.lc===player&&car.cur.side==='o')S.comp++;}playTick.lc=car;}   // who caught it from whom
  if(fumT){if(car){fumT=0;if(car.cur.team!==POSS()){crowdEvent('turnover',POSS());RET=car.cur.team===ot?null:{team:car.cur.team};toast('FUMBLE! '+TFULL[car.cur.team]+' BALL','#ff5a4a');hud();}else toast('RECOVERED');}   // loose ball: whoever falls on it has it, and the play goes on
@@ -1597,7 +1597,7 @@ function playTick(){if(!playOn)return;if(!$m('pcs').hidden){playTick.t=performan
   else if(car.limp)tally(car,p.z),downAt(p.z,car.cur.role==='qb'&&p.z<LOS?'SACKED':'TACKLED');return;}
  if(!world.bodies.includes(ball))return;const q=roster.find(d=>d.cur.role==='qb');
  if(q&&!H(q)&&!fumT&&!RET&&ball.position.y<.2&&!playTick.g)playTick.g=performance.now();if(playTick.g&&performance.now()-playTick.g>500)downAt(LOS,'INCOMPLETE');}   // thrown and it hit the turf: dead half a second later
-function playStart(){if(!playPre()||!$m('pcs').hidden||PRE)return;playState='live';EVT=performance.now();PASS=null;for(const d of roster){if(d.cur.ai&&d.cur.role==='wr'){d.cur.st='route';d.cur.i=0;}if(d.cur.ai&&d.cur.side==='d')d.cur.st='cover';}routeVis=false;if(routeMesh.visible)RFADE=performance.now();}
+function playStart(){if(CINE.on||!playPre()||!$m('pcs').hidden||PRE)return;playState='live';EVT=performance.now();PASS=null;for(const d of roster){if(d.cur.ai&&d.cur.role==='wr'){d.cur.st='route';d.cur.i=0;}if(d.cur.ai&&d.cur.side==='d')d.cur.st='cover';}routeVis=false;if(routeMesh.visible)RFADE=performance.now();}
 // R: everyone back to the line, the ball to the QB, a new route; nothing moves until 2
 // receiver split wide on the 50, QB 15 yd behind the line, defender 20 yd in front of the receiver
 function resetPlay(){if(!playOn)return;RET=null;if(MATCH)MATCH.caught=0;for(const d of roster)d.cur.tkd=0;fumT=0;for(const d of roster)d.cur.stam=Math.min(1,(d.cur.stam??1)+.35);playTick.g=0;playEnd=0;resetT=performance.now();hud();losMesh.position.z=LOS;fdMesh.position.z=FD;losMesh.visible=fdMesh.visible=true;
@@ -2429,8 +2429,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.16';
+const GAME_VER='3.17';
 const PATCH=[
+ {version:'3.17',title:'Coached Drills',date:'2026-10-28',changes:{Career:['Every Combine drill now opens with the Head Coach: camera shots of the drill, what it measures and the controls, then a ghost example player shows how it is done','Each explanation stays up at least 2 seconds after it is fully shown; skip a briefing on purpose with the Skip button / Backspace','Your attempt, clock and score only start after the briefing']}},
  {version:'3.16',title:'Read Timer',date:'2026-10-28',changes:{Career:['Each line of the Combine intro now stays up at least 2.5 seconds before you can move on']}},
  {version:'3.15',title:'Combine Arrival',date:'2026-10-28',changes:{Career:['New Combine opening: the Head Coach briefs you and four other prospects in a short directed cutscene','New dialogue panel: advance with Space, Enter or a tap, or skip the intro on purpose with the Skip button / Backspace','The Combine screen now points you to your next drill']}},
  {version:'3.14',title:'Audio Fix',date:'2026-10-28',changes:{Audio:['Fixed: no sound at all in the embedded / sandboxed version of the game (the sound files could not load there)','Sound now unlocks from any key, click or tap, so keyboard-only and iPhone players hear it too']}},
@@ -2534,7 +2535,8 @@ function drillStart(i){const d=DRILLS[i];drillBase();
  if(d.eng==='pass'){DRILL.tg=[[-6,DR_Z+12*YD],[7,DR_Z+20*YD],[0,DR_Z+30*YD],[-9,DR_Z+24*YD],[4,DR_Z+38*YD]].map(([x,z])=>({x,z,m:dRing(x,z,2.2,0x555555)}));grabBall();drillAim();}
  if(d.eng==='jugs'){dMk(new THREE.BoxGeometry(.6,.6,.9),0x333333,0,1.6,DR_Z+22);dstat('0 / 6');}
  if(d.eng==='runner'){DRILL.run=runnerBot();DRILL.made=0;tackRep();}
- if(d.eng==='scen')scenRep();}
+ if(d.eng==='scen')scenRep();
+ drillBrief(DRILL);}
 // ---------- course engine: ordered gates, cones you shouldn't touch, an optional ball and chaser ----------
 // ---------- guidance: only the next objective is bright (pulsing zone + light pillar, or a finish line); a ground arrow ahead of you points at it ----------
 const GCOL={on:0x2fd8ff,dim:0x8a96a3,done:0x3ee07a};
@@ -2599,9 +2601,8 @@ function drillAim(){const D=DRILL,k=D.rep%D.tg.length;D.tg.forEach((t,j)=>t.m.ma
 function tackRep(){const D=DRILL,r=D.run,id=D.d.id;const fast=id==='contact'?[0,.12,.25][D.rep]:0;
  placeAt(r,id==='contact'?0:(Math.random()-.5)*12,DR_Z+(id==='contact'?14:18));use(r);camYaw=0;limp=false;grabBall();r.cur.T=id==='contact'?[(Math.random()-.5)*1.2,DR_Z-10]:[(Math.random()-.5)*16,DR_Z-8];r.cur.t=0;r.cur.boost=fast;r.cur.straight=id==='contact';
  use(player);placeAt(player,0,DR_Z);use(player);camYaw=Math.PI;D.ph='rep';D.w=0;D.near=99;D.minV=99;dstat(`Rep ${D.rep+1} / 3`);}
-function drillThink(dt){const c=cur,P=pel.position;for(const k in keys)keys[k]=false;c.t=(c.t||0)+dt;if(limp||!c.T)return;const tx=c.T[0]+(c.straight?0:Math.sin(c.t*2.2)*1.2),dx=tx-P.x,dz=c.T[1]-P.z;camYaw=Math.atan2(dx,dz)+Math.PI;keys.w=true;keys.shift=true;if(dv===0)plantCut([tx,c.T[1]],true,24);}   // the runner weaves toward a spot behind you (straight at you on the contact station)
-function drillTick(){const D=DRILL,now=performance.now(),dt=Math.min(.05,(now-(D.lt||now))/1000);D.lt=now;D.t+=dt;if(D.ph==='done')return;use(player);const P=pel.position,id=D.d.id,eng=D.d.eng,tm=()=>(D.t-D.T0).toFixed(2)+' s';
- if(eng==='intro')return introTick(dt);
+function drillThink(dt){const c=cur,P=pel.position;for(const k in keys)keys[k]=false;if(CINE.on)return;c.t=(c.t||0)+dt;if(limp||!c.T)return;const tx=c.T[0]+(c.straight?0:Math.sin(c.t*2.2)*1.2),dx=tx-P.x,dz=c.T[1]-P.z;camYaw=Math.atan2(dx,dz)+Math.PI;keys.w=true;keys.shift=true;if(dv===0)plantCut([tx,c.T[1]],true,24);}   // the runner weaves toward a spot behind you (straight at you on the contact station)
+function drillTick(){const D=DRILL,now=performance.now(),dt=Math.min(.05,(now-(D.lt||now))/1000);D.lt=now;if(D.brief){if(D.d.eng==='intro')introTick(dt);else coachTick(dt);return;}D.t+=dt;if(D.ph==='done')return;use(player);const P=pel.position,id=D.d.id,eng=D.d.eng,tm=()=>(D.t-D.T0).toFixed(2)+' s';
  if(eng==='course')return courseTick(dt);
  if(eng==='scen')return scenTick(dt);
  if(eng==='dash'){guideTick(dt);if(D.ph==='set'&&P.z>DR_Z+.3){D.ph='run';D.T0=D.t;}if(D.ph==='run'){dstat(tm());if(P.z>=DR_Z+40*YD){const t=D.t-D.T0,b=t<5.4?'Elite':t<5.7?'Excellent':t<6.0?'Good':t<6.4?'Average':'Below average';drillDone(pband(t,5.1,6.9),t.toFixed(2)+' s',[`In-game band: ${b}.`]);}}if(D.t>25)drillDone(0,'DNF',['You didn\'t reach the far cones.']);}
@@ -2626,10 +2627,13 @@ function drillDone(perf,label,fb){const D=DRILL;D.ph='done';const d=D.d,attr=d.a
  dstat(`<span style="color:#ffd23f">${label}</span> · ${off?'SCORE':'PRACTICE'} ${sc} (${GRADE(sc)})${fb&&fb.length?`<small>${fb[fb.length-1]}</small>`:''}`);setTimeout(()=>{toMenu();show('comb');combUI(d.id);},3200);}
 function drillEnd(){const D=DRILL;DRILL=null;$m('dhud').hidden=true;window.DBGCAM=null;while(drillG.children.length)drillG.remove(drillG.children[0]);
  for(const x of roster)if(x!==player)showDoll(x,false);roster=[player];if(D&&D.d.eng==='scen'){ORG.four=false;ORG.free=true;PLAY=null;playOn=false;CALL={run:null,done:true};document.body.classList.remove('play');routeMesh.visible=losMesh.visible=fdMesh.visible=false;}}
-// ---------- arrival cinematic: the Head Coach briefs a group of prospects (you among them), five directed shots, a bottom dialogue panel.
-// Actors are pooled bots on a cheap idle brain (look + sway, no gameplay AI); everything is cleaned up by drillEnd. Space / Enter / tap: finish the line, then advance
+// ---------- coach briefings: one shared presenter for the arrival cinematic and every drill. A briefing is a list of lines; each line has the coach's
+// text, a camera shot, and optionally a demonstration script for the ghost example player. Flow per line: camera moves -> text types on -> 2 s reading
+// (counted only once the text is fully shown, in game time, so pausing can't skip it) -> the ghost demonstrates -> continue. Last line: the camera eases
+// back into the live gameplay camera, then the drill hands you control. Drill logic, clocks and bots stay frozen while CINE.on.
+const V3=()=>new THREE.Vector3(),CINE={on:false,p:V3(),l:V3(),fp:V3(),fl:V3(),tp:V3(),tl:V3(),gp:V3(),gl:V3(),w:V3()};
+const READ_S=2.0,TYPE_CPS=48;
 const INTRO={id:'intro',st:0,kind:'ARRIVAL',name:'Welcome to the Physics Combine',eng:'intro',at:['spd'],keys:[],obj:''};
-const CINE={on:false,p:new THREE.Vector3(),l:new THREE.Vector3(),fp:new THREE.Vector3(),fl:new THREE.Vector3(),tp:new THREE.Vector3(),tl:new THREE.Vector3()};
 const COACH_Z=6;   // the coach stands 6 m upfield of the group, facing it
 // shots, relative to (0, DR_Z): [from pos, to pos, from look, to look] - each drifts slowly for the length of its line
 const SHOTS=[[[-10,6,-9],[-7.5,4.6,-7],[0,1,2.5],[0,1.1,2.8]],   // 0 establishing: the whole group and the coach
@@ -2643,42 +2647,152 @@ const CLINES=[[0,()=>'Alright, bring it in. Welcome to the Pre-Draft Combine.'],
  [3,()=>`${PROF.first} ${PROF.last}. ${tcase(STYLES[PROF.style][0])}. Your first attempt at every drill is the one that goes on the record. You can run any of them again, but only for practice.`],
  [1,()=>'Your score is mostly what you show out here, with your ratings making up the rest. Every grade goes to every club, and it moves your draft stock.'],
  [4,()=>'I\'ll walk you through each drill before you run it. Station one is waiting. Let\'s go to work.']];
+
+function coachRun(o){const C=CINE;Object.assign(C,{on:true,lines:o.lines,end:o.end,ret:o.ret!==false,k:-1,t0:performance.now(),lastIn:0,ph:'line',spec:null});
+ C.gp.copy(cam.position);C.p.copy(cam.position);cam.getWorldDirection(C.w);C.l.copy(cam.position).add(C.w);C.gl.copy(C.l);
+ $m('cisk').firstElementChild.textContent=o.skip||'SKIP';$m('cidt').innerHTML=o.lines.map(()=>'<i></i>').join('');
+ document.body.classList.add('cine');$m('dhud').hidden=true;$m('cine').hidden=false;requestAnimationFrame(()=>$m('cine').classList.add('in'));
+ C.key=e=>{if(e.repeat)return;if(e.key==='Backspace'){e.preventDefault();return coachFinish(true);}if(e.key===' '||e.key==='Enter'||e.key.toLowerCase()==='e'||e.key==='ArrowRight'){e.preventDefault();coachAdv();}};
+ C.tap=e=>{if(!e.target.closest('#cisk'))coachAdv();};C.skip=e=>{e.stopPropagation();coachFinish(true);};
+ addEventListener('keydown',C.key);$m('cine').addEventListener('pointerup',C.tap);$m('cisk').addEventListener('click',C.skip);coachLine(0);}
+function coachAdv(){const C=CINE,n=performance.now();if(!C.on||C.ph!=='line'||n-C.lastIn<220||n-C.t0<600)return;C.lastIn=n;
+ const L=C.text;if(C.ch<L.length){C.ch=L.length;return;}if(!C.ready)return;coachNext();}   // first press finishes the typing; the next one only works once the line is ready
+function coachNext(){const C=CINE;if(C.k<C.lines.length-1)return coachLine(C.k+1);
+ if(!C.ret)return coachFinish();C.ph='ret';C.rl=0;C.fp.copy(C.p);C.fl.copy(C.l);$m('cine').classList.remove('in');}   // ease back into the gameplay camera
+function coachLine(k){const C=CINE,L=C.lines[k];Object.assign(C,{k,ch:0,rt:0,lt:0,dlt:0,demo:false,done:!(L.demo||L.rdemo),idle:0});C.text=typeof L.t==='function'?L.t():L.t;
+ [...$m('cidt').children].forEach((d,i)=>d.className=i<k?'done':i===k?'on':'');$m('cist').textContent=`${k+1} / ${C.lines.length}`;$m('citx').textContent='';coachShot(L.cam);}
+function coachShot(sp){const C=CINE;if(!sp||sp===C.spec)return;C.spec=sp;C.bl=0;C.fp.copy(C.p);C.fl.copy(C.l);C.cut=false;
+ if(sp.s){const P=sp.s[0];C.cut=Math.hypot(P[0]-C.p.x,P[1]-C.p.y,P[2]-C.p.z)>8;}if(C.cut)$m('cine').querySelector('.ci-fd').classList.add('on');}   // a long move would sweep through people: dip to black and cut
+const ghWho=k=>k==='g'?GH[0]:k==='r'?GH[1]:k==='p'?player:null;
+function camPose(sp,u,dt){const C=CINE,e=u*u*(3-2*u);
+ if(sp.s){const S=sp.s;C.tp.set(S[0][0]+(S[1][0]-S[0][0])*e,S[0][1]+(S[1][1]-S[0][1])*e,S[0][2]+(S[1][2]-S[0][2])*e);C.tl.set(S[2][0]+(S[3][0]-S[2][0])*e,S[2][1]+(S[3][1]-S[2][1])*e,S[2][2]+(S[3][2]-S[2][2])*e);return;}
+ const d=sp.b?null:ghWho(sp.t),P=sp.b?ball.position:d&&d.pel.position;if(!P)return;const f=1-Math.exp(-dt*(sp.f||3));   // tracking: follow the subject smoothly, never jitter with it
+ C.tp.x+=(P.x+sp.o[0]-C.tp.x)*f;C.tp.y+=(P.y*0+sp.o[1]-C.tp.y)*f;C.tp.z+=(P.z+sp.o[2]-C.tp.z)*f;C.tl.x+=(P.x+sp.k[0]-C.tl.x)*f;C.tl.y+=(sp.k[1]-C.tl.y)*f;C.tl.z+=(P.z+sp.k[2]-C.tl.z)*f;}
+function coachTick(dt){const C=CINE;if(!C.on)return;use(player);for(const k in keys)keys[k]=false;   // no input reaches your player
+ if(C.ph==='ret'){C.rl+=dt;const u=Math.min(1,C.rl/.9),e=u*u*(3-2*u);C.p.lerpVectors(C.fp,C.gp,e);C.l.lerpVectors(C.fl,C.gl,e);if(u>=1)coachFinish();return;}
+ const L=C.lines[C.k];C.lt+=dt;if(C.cut&&C.bl<.25){C.bl+=dt;if(C.bl>=.25){$m('cine').querySelector('.ci-fd').classList.remove('on');C.fp.copy(C.tp);}}
+ // camera: tracking shots seed their smoothing from the current pose; blend from where the camera was over 1 s (cuts: from black)
+ const sp=C.demo&&L.dcam?L.dcam:L.cam;coachShot(sp);if(C.bl===0&&sp.t&&C.tp.distanceTo(C.p)>0&&!C.seeded){C.tp.copy(C.p);C.tl.copy(C.l);}C.seeded=1;
+ C.bl+=C.cut?0:dt;camPose(sp,Math.min(1,C.lt/9),dt);if(C.cut&&C.bl>=.25){C.p.copy(C.tp);C.l.copy(C.tl);}else{const w=Math.min(1,C.bl/1),bw=w*w*(3-2*w);C.p.lerpVectors(C.fp,C.tp,bw);C.l.lerpVectors(C.fl,C.tl,bw);}
+ // text, reading period, demonstration
+ const T=C.text;C.ch=Math.min(T.length,C.ch+dt*TYPE_CPS);$m('citx').textContent=T.slice(0,C.ch|0);const typed=C.ch>=T.length;if(typed)C.rt+=dt;
+ const read=C.rt>=READ_S&&C.lt>=(L.min||0);
+ if(read&&!C.done&&!C.demo){C.demo=true;C.dlt=0;if(L.demo&&GH[0])GH[0].cur.q=L.demo.map(x=>({...x}));if(L.rdemo&&GH[1])GH[1].cur.q=L.rdemo.map(x=>({...x}));}
+ if(C.demo){C.dlt+=dt;const busy=GH.some(g=>g&&g.cur.q.length);if(!busy)C.hold=(C.hold||0)+dt;else C.hold=0;if(C.hold>.7||C.dlt>16){C.demo=false;C.done=true;C.hold=0;}}   // brief hold on the result; a stuck demo can't block the briefing
+ C.ready=read&&C.done;if(C.ready){C.idle+=dt;if(C.idle>7)return coachNext();}
+ $m('cinx').className=C.ready?'rdy':'';$m('cinx').innerHTML=!typed?'':!read?`READ · ${Math.max(0,Math.min(READ_S,READ_S-C.rt,(L.min||0)-C.lt+READ_S)).toFixed(1)}s`:C.demo?'WATCH THE EXAMPLE':INPUT==='touch'?'TAP TO CONTINUE':'<kbd>SPACE</kbd>CONTINUE';}
+function coachFinish(skipped){const C=CINE;if(!C.on)return;C.on=false;removeEventListener('keydown',C.key);$m('cine').removeEventListener('pointerup',C.tap);$m('cisk').removeEventListener('click',C.skip);
+ $m('cine').classList.remove('in');$m('cine').hidden=true;$m('cine').querySelector('.ci-fd').classList.remove('on');document.body.classList.remove('cine');ghostsClear();const f=C.end;C.end=null;f&&f(skipped);}
+// ---------- ghost example player: a pooled doll, translucent, colliding only with the ground (and the other ghost), elite ratings, driven by a short
+// script through the real movement / throwing / tackling code. It is never your player, never scored, and is removed when the briefing ends
+const GH=[],GHAT=Object.fromEntries(AK.map(k=>[k,92]));
+function ghost(i,x,z,face,col){use(player);const g=bot(7+i);g.cur={ai:true,role:'demo',team:'ghost',side:'g',q:[],at:GHAT,t:0};showDoll(g,true);shape(g,null);
+ kit(g,{...DEFLOOK,skin:i?3:1},col||[0x2fa36b,0x1d5a3e]);jersey(g,null);
+ const mats=[];for(const b of g.list){b.collisionFilterGroup=i?32:16;b.collisionFilterMask=1|(i?16:32);mats.push(b.mesh.material);}   // the ground and the other ghost only: never its own limbs, never a real playerfor(const m of g.kitM||[])m.traverse(o=>{if(o.material)mats.push(...[].concat(o.material));});
+ for(const m of mats){m.transparent=true;m.opacity=.55;}g.gm=mats;placeAt(g,x,z);use(g);camYaw=face;yaw=face-Math.PI;limp=false;use(player);roster.push(g);GH[i]=g;return g;}
+function ghostsClear(){for(const g of GH){if(!g)continue;use(g);if(held)held=false;dv=0;cur.tkS=null;limp=false;use(player);for(const m of g.gm||[]){m.opacity=1;m.transparent=false;}showDoll(g,false);roster=roster.filter(x=>x!==g);}GH.length=0;
+ const B=CINE.ball;if(B){use(player);if(B.pl){held=false;grabBall();}else if(B.inW){if(!world.bodies.includes(ball))world.addBody(ball);ball.position.copy(B.p);ball.velocity.set(0,0,0);ball.angularVelocity.set(0,0,0);}else if(world.bodies.includes(ball))world.removeBody(ball);CINE.ball=null;}}   // the ball goes back exactly where the drill had it
+// script steps: go (walk / run to a spot, optionally stopping in it), wait, face, place, grab (take the ball), throw (perfect solved throw at a spot),
+// feed (the machine fires at a spot), catch (scripted clean catch when the ball reaches the hands), drop, stance, tackle (pursue with a lead, real tackle move)
+function demoThink(dt){const c=cur,P=pel.position;for(const k in keys)keys[k]=false;const s=c.q[0];if(!s){if(c.stance){c.low=.3;c.blkQ=1;c.blkT=performance.now();}return;}s.t=(s.t||0)+dt;const nx=()=>c.q.shift();
+ if(s.go){const dx=s.go[0]-P.x,dz=s.go[1]-P.z,d=Math.hypot(dx,dz),sp=Math.hypot(pel.velocity.x,pel.velocity.z);
+  if(d<(s.r||.7)&&(!s.stop||sp<.8))return nx();if(s.t>12)return nx();camYaw=Math.atan2(dx,dz)+Math.PI;keys.w=!(s.stop&&d<(s.r||.7));keys.shift=!!s.run&&d>(s.brake??2.2);if(s.run)plantCut([s.go[0],s.go[1]],keys.shift,24);return;}
+ if(s.wait!=null){if(s.t>=s.wait)nx();return;}
+ if(s.face){camYaw=Math.atan2(s.face[0]-P.x,s.face[1]-P.z)+Math.PI;if(s.t>.35)nx();return;}
+ if(s.place){use(curD);placeAt(curD,s.place[0],s.place[1]);limp=false;dv=0;cur.tkS=null;camYaw=s.yaw??Math.PI;yaw=camYaw-Math.PI;return nx();}
+ if(s.grab){for(const d of roster)if(d!==curD&&H(d)){const me=curD;use(d);held=false;use(me);}if(!held)grabBall();return nx();}
+ if(s.throw){if(!held)return nx();camYaw=Math.atan2(s.throw[0]-P.x,s.throw[2]-P.z)+Math.PI;if(s.t<.35)return;c.T=new V(s.throw[0],s.throw[1],s.throw[2]);c.arrive=qbClock+(s.ft||1.1);throwBall();return nx();}
+ if(s.feed){const F=new V(0,1.75,DR_Z+21.4),T=new V(s.feed[0],s.feed[1],s.feed[2]);if(world.bodies.includes(ball))world.removeBody(ball);world.addBody(ball);ball.position.copy(F);ball.velocity.copy(solveVel(F,T,s.ft||1.2));ball.angularVelocity.set(0,0,0);ball.wakeUp&&ball.wakeUp();return nx();}
+ if(s.catch){c.catchOn=true;catchOn=true;const Cp=chest.position,d=ball.position.distanceTo(Cp);if(d<1.05||s.t>4&&d<2.5){grabBall();catchOn=false;return nx();}if(s.t>5)return nx();
+  const dx=ball.position.x-P.x,dz=ball.position.z-P.z;camYaw=Math.atan2(dx,dz)+Math.PI;return;}
+ if(s.fall){limp=true;curD.limpT=performance.now()+4000;return nx();}   // the scripted result of losing the contact battle
+ if(s.drop){if(held){held=false;}if(world.bodies.includes(ball))world.removeBody(ball);return nx();}
+ if(s.stance){c.stance=true;c.low=.3;c.blkQ=1;c.blkT=performance.now();if(s.face2)camYaw=Math.atan2(s.face2[0]-P.x,s.face2[1]-P.z)+Math.PI;if(s.t>=s.stance)nx();return;}
+ if(s.tackle){const R=GH[1];if(!R)return nx();const Q=R.pel.position,V2=R.pel.velocity,d=Math.hypot(Q.x-P.x,Q.z-P.z);
+  if(s.hit){if(s.t-s.hit>.35&&!R.limp){const me=curD;use(R);limp=true;R.limpT=performance.now()+4000;R.cur.q.length=0;use(me);}if(s.t-s.hit>1.2)nx();return;}   // the result: he goes down
+  const lead=Math.min(1.2,d/7),tx=Q.x+V2.x*lead,tz=Q.z+V2.z*lead;camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=d>3;   // cut him off: run at where he will be
+  if(d<(s.type==='power'?2.0:2.3)&&startTackle(R,s.type||'wrap'))s.hit=s.t;if(s.t>10)nx();return;}
+ nx();}
+// ---------- the briefings, per drill. Positions are world coordinates; DZ(z) = z metres down the drill lane
+const KL=k=>HK[k][INPUT==='touch'?1:0],DZ=z=>DR_Z+z,ST=(p0,p1,l0,l1)=>({s:[p0,p1,l0,l1]}),TR=(t,o,k,f)=>({t,o,k,f});
+const shSide=TR('g',[7.5,2.4,0],[0,1.1,2]),shBehind=TR('g',[1.4,2.4,-5.5],[0,1.1,6]);
+function birdShot(){const R=roster.filter(d=>d.cur.side!=='g'),cx=R.reduce((a,d)=>a+d.pel.position.x,0)/R.length,cz=R.reduce((a,d)=>a+d.pel.position.z,0)/R.length;return ST([cx-4,15,cz-15],[cx-2,14,cz-13],[cx,0,cz+3],[cx,0,cz+4]);}
+function myRoute(){const P=player.pel.position,R=player.cur.route;return R&&R.length?R:[[P.x,P.z+8],[P.x+(P.x>0?-6:6),P.z+12]];}
+function rbPath(){const P=player.pel.position,q=roster.find(d=>d.cur.role==='qb'&&d!==player),Q=q?q.pel.position:{x:0,z:LOS-4},gx=CALL&&CALL.gx!=null?CALL.gx:0;return[[Q.x+(Math.sign(gx-Q.x)||1)*.7,Q.z+.6],[gx,LOS+1],[gx,LOS+9*YD]];}
+const BRIEF={
+ move:D=>[{t:`Movement Fundamentals shows the scouts how you move before anything else. Four short stages. The bright zone and the arrow on the ground always point to the next one.`,cam:ST([-9,7,DZ(-7)],[-7.5,6.4,DZ(-5.5)],[-2,0,DZ(15)],[-2,0,DZ(16)])},
+  {t:`Stage one: walk to the first zone with ${KL('move')}. No rush, the clock hasn't started.`,cam:shBehind,demo:[{go:[0,DZ(6)]}]},
+  {t:`Stage two is timed. Hold ${KL('sprint')} and run flat out to the far zone.`,cam:shSide,demo:[{go:[0,DZ(24)],run:true,r:1.5,brake:1}]},
+  {t:`Stage three: turn left around the outside of the cones to the next zone. Don't clip them.`,cam:ST([-15,9,DZ(16)],[-14,9,DZ(17)],[-3,0,DZ(24)],[-3,0,DZ(24)]),demo:[{go:[-7,DZ(27)],run:true,r:1.4,brake:3}]},
+  {t:`Last one: ease off and come to a full stop inside the box. Running through it doesn't count.`,cam:TR('g',[-6,3,-4],[0,.8,-2]),demo:[{go:[-7,DZ(15)],run:true,stop:true,r:1.5,brake:4.5}]}],
+ dash:D=>[{t:`The 40-yard dash. Pure straight-line speed, and the number every club looks at first. The clock starts the moment you move and stops at the bright finish line.`,cam:ST([-12,4,DZ(2)],[-12,4.5,DZ(6)],[0,0,DZ(14)],[0,0,DZ(18)])},
+  {t:`Hold ${KL('sprint')} from the first step and stay in your lane. Speed sets your top end, Acceleration how quickly you get there.`,cam:TR('g',[9,2.6,1],[0,1,3],2.5),demo:[{wait:.4},{go:[1.6,DZ(40*YD+3)],run:true,r:1.6,brake:0}]}],
+ cone3:D=>[{t:`The three-cone drill measures change of direction: five sharp cuts between these two cones.`,cam:ST([-2.3,9,DZ(-6)],[-2.3,8.5,DZ(-5)],[-2.3,0,DZ(3)],[-2.3,0,DZ(3)])},
+  {t:`Brake before every turn and drive out of it. Overshooting a cone costs more time than slowing down.`,cam:ST([-11,5.5,DZ(2)],[-10.5,5.5,DZ(2.5)],[-2.3,0,DZ(2.3)],[-2.3,0,DZ(2.4)]),
+   demo:[{go:[0,DZ(3.9)],run:true,r:.8,brake:1.6},{go:[0,DZ(.3)],run:true,r:.8,brake:1.6},{go:[0,DZ(3.9)],run:true,r:.8,brake:1.6},{go:[-4.6,DZ(3.9)],run:true,r:.8,brake:1.6},{go:[0,DZ(-.2)],run:true,r:1.2,brake:0}]}],
+ carry:D=>{const gx=D.gapOpen?D.gapOpen[0]:0;return[{t:`Ball security. Keep the ball in your arms the whole way: Carrying and Ball Handling are what hold it through contact.`,cam:shBehind,demo:[{grab:1},{go:[1.4,DZ(7)],run:true,r:1.4}]},
+  {t:`The dummy line has one stacked gap, marked red. Read it and run through an open one.`,cam:ST([gx+7,6,DZ(9)],[gx+6.5,6,DZ(10)],[gx,0,DZ(17)],[gx,0,DZ(17)]),demo:[{go:[gx,DZ(14.5)],run:true,r:1},{go:[gx,DZ(20)],run:true,r:1.2}]},
+  {t:`Then beat the defender to the line. If he closes on you, ${KL('juke')}.`,cam:shSide,demo:[{go:[gx*.5,DZ(35)],run:true,r:1.5,brake:0},{drop:1}]}];},
+ vision:D=>[{t:`Running back vision. Live run plays: take the handoff, follow your blockers, and pick the open lane, inside or bounce it outside.`,cam:birdShot()},
+  {t:`The example shows this play's path: mesh with the quarterback, then hit the hole the play is designed for.`,cam:birdShot(),dcam:TR('g',[0,6,-9],[0,0,4]),demo:rbPath().map(w=>({go:w,run:true,r:1}))},
+  {t:`You snap it with ${KL('snap')} when you're ready. Three reps, and every one is graded.`,cam:TR('p',[0,3,-6],[0,1,4])}],
+ pass:D=>{const T=D.tg;return[{t:`Quarterback passing. Five throws at the lit targets, short to deep.`,cam:ST([2,7,DZ(-8)],[1.5,7.5,DZ(-7)],[0,0,DZ(20)],[0,0,DZ(22)])},
+  {t:`Aim with the arc, then hold ${KL('throw')} longer for more speed. Accuracy shrinks the miss, and Throw Power is how hard you can drive it.`,cam:TR('g',[1.2,2.2,-4.5],[0,1,8]),dcam:ST([5,5,DZ(-4)],[5,5,DZ(-3)],[T[0].x,0,T[0].z],[T[0].x,0,T[0].z]),demo:[{grab:1},{face:[T[0].x,T[0].z]},{throw:[T[0].x,.25,T[0].z],ft:1.0},{wait:1.4}]},
+  {t:`The deep ones need more air and more power. Same rules: put it in the ring.`,cam:TR('g',[1.2,2.2,-4.5],[0,1,8]),dcam:ST([6,8,DZ(4)],[6,9,DZ(8)],[T[4].x,0,T[4].z],[T[4].x,0,T[4].z]),demo:[{grab:1},{face:[T[4].x,T[4].z]},{throw:[T[4].x,.25,T[4].z],ft:2.1},{wait:2.3}]}];},
+ qbmove:D=>{const P=player.pel.position,rx=PLAY&&PLAY.roll!=null?PLAY.roll:P.x+6;return[{t:`Throwing on the move. Rollout plays: snap with ${KL('snap')}, roll toward the sideline, and hit a receiver on the run.`,cam:birdShot()},
+  {t:`Here's the rollout path for this play. Get your eyes downfield while you move.`,cam:birdShot(),dcam:TR('g',[-3,4,-8],[0,1,6]),demo:[{go:[P.x,P.z-2.2],run:true,r:.8},{go:[rx,P.z-3],run:true,r:1},{face:[rx,P.z+15]}]},
+  {t:`Never throw into a defender: that gets picked off. If nobody's open, keep moving.`,cam:TR('p',[0,3,-6],[0,1,6])}];},
+ routes:D=>[{t:`Routes and separation. Run your route, win at the break and get open. Hold ${KL('route')} any time to see it.`,cam:birdShot()},
+  {t:`This is your route on this play. Sell it, then break hard at the turn.`,cam:birdShot(),dcam:TR('g',[0,7,-9],[0,0,5]),demo:myRoute().map(w=>({go:w,run:true,r:1,brake:1.6}))},
+  {t:`The quarterback throws to whoever is open. When the ball comes, hold ${KL('catch')}.`,cam:TR('p',[0,3,-6],[0,1,6])}],
+ jugs:D=>[{t:`Catching and ball tracking. Six balls from the machine: to your chest, to each side, and deep over your head.`,cam:ST([-8,4,DZ(10)],[-7.5,4.2,DZ(11)],[0,1,DZ(8)],[0,1,DZ(8)])},
+  {t:`Get your body under the flight path and hold ${KL('catch')} as it arrives. Hands, not chest.`,cam:TR('g',[3.5,2,-4],[0,1.2,6]),demo:[{feed:[1.6,1.35,DZ(0)],ft:1.1},{catch:1},{wait:.7},{drop:1}]},
+  {t:`The deep ones go over your head. Turn, run to where it's coming down, and look it in.`,cam:TR('g',[4,2.6,6],[0,1.2,-4]),demo:[{feed:[1.6,1.4,DZ(-6)],ft:2.0},{go:[1.6,DZ(-6)],run:true,r:.5,brake:1.2},{catch:1},{wait:.7},{drop:1}]}],
+ pursuit:D=>[{t:`Defensive pursuit. A ball carrier is loose. Take an angle that cuts him off instead of chasing his back.`,cam:ST([-14,8,DZ(4)],[-13,8,DZ(6)],[0,0,DZ(14)],[0,0,DZ(14)])},
+  {t:`Watch the angle: run to where he's going, not where he is. Getting to him is the score; a tackle is a bonus.`,cam:ST([-14,8,DZ(4)],[-13,8,DZ(6)],[0,0,DZ(12)],[0,0,DZ(12)]),dcam:TR('g',[-7,5,-6],[3,0,6],2),demo:[{tackle:1,type:'wrap'}],rdemo:[{go:[10,DZ(6)],run:true,r:1,brake:0}]}],
+ tack:D=>[{t:`Tackling fundamentals. Close under control, then ${KL('tackle')} to dive in and wrap him up.`,cam:ST([-9,4,DZ(4)],[-8.5,4,DZ(5)],[1,0,DZ(8)],[1,0,DZ(8)]),dcam:TR('g',[-6,3,2],[0,1,3],2.5),demo:[{wait:.3},{tackle:1,type:'wrap'}],rdemo:[{go:[1.4,DZ(-8)],r:1}]},
+  {t:`${KL('hit')} is the big shoulder hit: more impact, but it can bounce off. Angle, speed and Strength decide the result.`,cam:ST([-9,4,DZ(4)],[-8.5,4,DZ(5)],[1,0,DZ(8)],[1,0,DZ(8)]),dcam:TR('g',[-6,3,2],[0,1,3],2.5),demo:[{place:[1.4,DZ(0)]},{wait:.6},{tackle:1,type:'power'}],rdemo:[{place:[1.4,DZ(18)],yaw:0},{go:[1.4,DZ(-8)],run:true,r:1}]}],
+ cover:D=>{const W=roster.filter(d=>d.cur.side==='o'&&d.cur.role==='wr').sort((a,b)=>Math.abs(b.pel.position.x)-Math.abs(a.pel.position.x))[0],R=W&&W.cur.route?W.cur.route:[[player.pel.position.x,player.pel.position.z-8]];
+  return[{t:`Coverage and interceptions. You take the outside receiver on live pass plays.`,cam:birdShot()},
+  {t:`Mirror his route and stay between him and the quarterback. Here's how it looks against this play.`,cam:birdShot(),dcam:TR('g',[0,8,10],[0,0,-4]),demo:R.map(w=>({go:[w[0]-Math.sign(w[0]||1)*1.2,w[1]+1.2],run:true,r:1.2,brake:1.4}))},
+  {t:`When it's thrown, go for the ball and hold ${KL('catch')} to pick it off. A breakup counts too.`,cam:TR('p',[0,3,6],[0,1,-6])}];},
+ contact:D=>[{t:`Contact, strength and physics. Runners come straight at you, each one a little faster.`,cam:ST([-7,3,DZ(5)],[-6.5,3.2,DZ(6)],[1.4,1,DZ(4)],[1.4,1,DZ(4)])},
+  {t:`Hold ${KL('stance')} to sink into a wide base. Your arms reach for him, grab and pull. Momentum, angle and Strength decide who gives.`,cam:ST([-6,2.6,DZ(3)],[-5.5,2.6,DZ(3.5)],[1.4,1,DZ(3)],[1.4,1,DZ(3)]),demo:[{stance:4.5,face2:[1.4,DZ(10)]}],rdemo:[{wait:.8},{go:[1.4,DZ(1.1)],r:.5},{wait:.45},{fall:1},{wait:1.4}]}],
+ aware:D=>{const P=player.pel.position;return[{t:`Awareness and reaction. Live plays, run or pass, and you won't know which until it happens.`,cam:birdShot()},
+  {t:`Read it first. On a run, close on the carrier and get him down with ${KL('tackle')}.`,cam:birdShot(),dcam:TR('g',[0,6,9],[0,0,-4]),demo:[{go:[P.x,P.z+1.5],r:.6},{wait:.4},{go:[P.x*.4,LOS+1],run:true,r:1}]},
+  {t:`On a pass, stay with your man and react to the throw. Getting fooled by the fake is what the scouts are watching for.`,cam:TR('p',[0,3,6],[0,1,-6])}];},
+ full:D=>{const pos=ORG.pos;return[{t:`The full play challenge. One snap on offence at your position, one on defence. Use everything you've shown today.`,cam:birdShot()},
+  {t:`On offence you know the job. Here's this play.`,cam:birdShot(),dcam:TR('g',[0,7,-9],[0,0,5]),demo:(pos==='rb'?rbPath():pos==='qb'?[[player.pel.position.x,player.pel.position.z-2.2]]:myRoute()).map(w=>({go:w,run:true,r:1}))},
+  {t:`Then you flip to defence: read it, close on a runner or stay with your man. Snap with ${KL('snap')} when you're ready.`,cam:TR('p',[0,3,-6],[0,1,6])}];}};
+// where each ghost starts for each drill: [x, z, facing] (facing PI = downfield)
+const GSTART={move:[1.4,DZ(-.6)],dash:[1.6,DZ(0)],cone3:[0,DZ(.3)],carry:[1.4,DZ(0)],pass:[1.4,DZ(-.3)],jugs:[1.6,DZ(0)],pursuit:[1.4,DZ(0)],tack:[1.4,DZ(0)],contact:[1.4,DZ(0)]};
+const RSTART={pursuit:[-9,DZ(26),2.6],tack:[1.4,DZ(18),0],contact:[1.4,DZ(10),0]};
+function drillBrief(D){const d=D.d,f=BRIEF[d.id];if(!f||(PROF.combine||{}).brief===false)return false;
+ const P=player.pel.position,g=GSTART[d.id]||[P.x,P.z],r=RSTART[d.id];
+ CINE.ball={pl:H(player),inW:world.bodies.includes(ball),p:ball.position.clone()};
+ ghost(0,g[0],g[1],d.side==='def'||d.id==='contact'?0:Math.PI);if(r)ghost(1,r[0],r[1],r[2],[0x8a2a2a,0x4a1515]);
+ if(d.id==='contact'){GH[0].cur.stance=false;}
+ D.brief=true;coachRun({lines:f(D),skip:'SKIP BRIEFING',end:sk=>{D.brief=false;use(player);if(d.eng==='runner')tackRep();if(d.eng==='scen'&&D.sc){D.sc.start=performance.now();resetT=performance.now();}
+  $m('dhud').hidden=false;toast(sk?'BRIEFING SKIPPED · YOUR TURN':'YOUR TURN','#ffd23f');}});return true;}
 function introStart(){drillBase();DRILL={d:INTRO,t:0,ph:'run',fb:[]};$m('dhud').hidden=true;
- const R=[[-3.3,.5],[-1.65,-.25],[1.65,-.25],[3.3,.5]],NUM=[12,33,47,81],K=[[0x3a3f4a,0x22262e],[0x2d3644,0x1c222b],[0x444a55,0x262a31],[0x343a46,0x1f242c]];roster=[player];
+ const R=[[-3.3,.5],[-1.65,-.25],[1.65,-.25],[3.3,.5]],NUM=[12,33,47,81],KC=[[0x3a3f4a,0x22262e],[0x2d3644,0x1c222b],[0x444a55,0x262a31],[0x343a46,0x1f242c]];roster=[player];
  R.forEach(([x,z],i)=>{use(player);const r=bot(i);   // bot() saves the current globals as the player's: they must BE the player's
   r.cur={ai:true,role:'cine',team:'blue',side:'o',ph:Math.random()*6.3,sw:.6+Math.random()*.5};showDoll(r,true);shape(r,{h:70+i*2.5|0,w:195+i*14,ws:72+i*2});
-  kit(r,{...DEFLOOK,skin:(i*2+1)%SKC.length},K[i]);jersey(r,NUM[i],null,K[i][0],0xffffff);placeAt(r,x,DR_Z+z);for(const b of r.list){b.collisionFilterGroup=8;b.collisionFilterMask=7;}roster.push(r);});
+  kit(r,{...DEFLOOK,skin:(i*2+1)%SKC.length},KC[i]);jersey(r,NUM[i],null,KC[i][0],0xffffff);placeAt(r,x,DR_Z+z);for(const b of r.list){b.collisionFilterGroup=8;b.collisionFilterMask=7;}roster.push(r);});
  use(player);const c=bot(4);c.cur={ai:true,role:'cine',team:'red',side:'d',coach:true,ph:0,sw:1};showDoll(c,true);shape(c,{h:74,w:232,ws:76});kit(c,{...DEFLOOK,skin:2},[0x14171c,0x2b3038]);jersey(c,null);
  for(const m of c.kitM||[])if(m.parent===c.parts.head.mesh)m.visible=false;   // no helmet on the coach
  {const H=c.parts.head,h=H.shapes[0].halfExtents,M=new THREE.MeshLambertMaterial({color:0x1b2230}),cap=new THREE.Mesh(new THREE.BoxGeometry(h.x*2.12,h.y*.55,h.z*2.12),M),brim=new THREE.Mesh(new THREE.BoxGeometry(h.x*1.9,.04,h.z*1.3),M);
   cap.position.y=h.y*.78;brim.position.set(0,h.y*.5,h.z*1.55);H.mesh.add(cap,brim);c.kitM.push(cap,brim);}   // a ball cap with a brim: reads as a coach, and shows which way he faces (the next kit() removes it)
  placeAt(c,0,DR_Z+COACH_Z);for(const b of c.list){b.collisionFilterGroup=8;b.collisionFilterMask=7;}roster.push(c);
  placeAt(player,0,DR_Z);use(player);camYaw=Math.PI;
- const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.52,40),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.75,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.set(0,.02,DR_Z);drillG.add(ring);   // marks you in the group
- Object.assign(CINE,{on:true,k:-1,ch:0,ring,t0:performance.now(),lastIn:0});CINE.p.set(-10,6,DR_Z-9);CINE.l.set(0,1,DR_Z+2.5);
- $m('cidt').innerHTML=CLINES.map(()=>'<i></i>').join('');document.body.classList.add('cine');$m('cine').hidden=false;requestAnimationFrame(()=>$m('cine').classList.add('in'));cineLine(0);
- const adv=()=>{const n=performance.now();if(n-CINE.lastIn<220||n-CINE.t0<600)return;CINE.lastIn=n;const L=CLINES[CINE.k][1]();if(CINE.ch<L.length)CINE.ch=L.length;else if(n-CINE.ls<CINE_MIN)return;else if(CINE.k<CLINES.length-1)cineLine(CINE.k+1);else introEnd();};   // a line can be finished early, but not left before CINE_MIN
- CINE.key=e=>{if(e.repeat)return;if(e.key==='Backspace'){e.preventDefault();return introEnd();}if(e.key===' '||e.key==='Enter'||e.key.toLowerCase()==='e'||e.key==='ArrowRight'){e.preventDefault();adv();}};
- CINE.tap=e=>{if(e.target.closest('#cisk'))return;adv();};CINE.skip=e=>{e.stopPropagation();introEnd();};
- addEventListener('keydown',CINE.key);$m('cine').addEventListener('pointerup',CINE.tap);$m('cisk').addEventListener('click',CINE.skip);}
-const CINE_MIN=2500;   // ms every line stays up before it can be advanced, so it actually gets read
-function cineLine(k){CINE.ls=performance.now();const S=SHOTS[CLINES[k][0]][0];CINE.k=k;CINE.ch=0;CINE.lt=0;CINE.cutDone=0;CINE.fp.copy(CINE.p);CINE.fl.copy(CINE.l);
- CINE.cut=k>0&&Math.hypot(S[0]-CINE.p.x,S[1]-CINE.p.y,DR_Z+S[2]-CINE.p.z)>6;if(CINE.cut)$m('cine').querySelector('.ci-fd').classList.add('on');   // a long move would sweep through the players: dip to black and cut instead
- [...$m('cidt').children].forEach((d,i)=>d.className=i<k?'done':i===k?'on':'');$m('cist').textContent=`${k+1} / ${CLINES.length}`;}
-function introTick(dt){const C=CINE;if(!C.on)return;C.lt+=dt;use(player);for(const k in keys)keys[k]=false;camYaw=Math.PI;   // you stand in line facing the coach; no inputs reach your player
- const L=CLINES[C.k][1](),S=SHOTS[CLINES[C.k][0]],u=Math.min(1,C.lt/9),e=u*u*(3-2*u),w=C.cut?1:Math.min(1,C.lt/1.5),bw=w*w*(3-2*w);
- if(C.cut&&C.lt<.25)return;if(C.cut&&!C.cutDone){C.cutDone=1;$m('cine').querySelector('.ci-fd').classList.remove('on');}   // held black, then the new shot fades up
- C.tp.set(S[0][0]+(S[1][0]-S[0][0])*e,S[0][1]+(S[1][1]-S[0][1])*e,DR_Z+S[0][2]+(S[1][2]-S[0][2])*e);C.tl.set(S[2][0]+(S[3][0]-S[2][0])*e,S[2][1]+(S[3][1]-S[2][1])*e,DR_Z+S[2][2]+(S[3][2]-S[2][2])*e);
- C.p.lerpVectors(C.fp,C.tp,bw);C.l.lerpVectors(C.fl,C.tl,bw);   // ease out of the last shot, then drift
- const was=C.ch|0;C.ch=Math.min(L.length,C.ch+dt*48);if((C.ch|0)!==was||!C.lt||dt>0){const n=C.ch|0;$m('citx').textContent=L.slice(0,n);}
- const wait=Math.max(0,CINE_MIN-(performance.now()-C.ls)),rdy=C.ch>=L.length&&!wait;$m('cinx').className=rdy?'rdy':'';$m('cinx').innerHTML=wait?`READ · ${(wait/1000).toFixed(1)}s`:INPUT==='touch'?'TAP TO CONTINUE':'<kbd>SPACE</kbd>CONTINUE';
- if(rdy&&(C.done=C.done||C.lt)&&C.lt-C.done>7){C.done=0;if(C.k<CLINES.length-1)cineLine(C.k+1);else introEnd();}else if(!rdy)C.done=0;   // never stuck: a finished line moves on by itself after 7 s
- C.ring.position.x=pel.position.x;C.ring.position.z=pel.position.z;C.ring.material.opacity=.5+.25*Math.sin(C.lt*3);}
+ const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.52,40),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.75,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.set(0,.02,DR_Z);drillG.add(ring);CINE.ring=ring;   // marks you in the group
+ const abs=S=>({s:S.map((v,i)=>[v[0],v[1],DR_Z+v[2]])});DRILL.brief=true;cam.position.set(-10,6,DR_Z-9);cam.lookAt(0,1,DR_Z+2.5);
+ coachRun({lines:CLINES.map(([sh,t])=>({t,cam:abs(SHOTS[sh]),min:2.5})),skip:'SKIP INTRO',ret:false,end:()=>introEnd()});}
+function introTick(dt){coachTick(dt);const r=CINE.ring;if(r){r.position.x=player.pel.position.x;r.position.z=player.pel.position.z;r.material.opacity=.5+.25*Math.sin(performance.now()/333);}}
 // idle actor: face the speaker with a slow, individual sway; the coach turns along the line as he talks
 function cineThink(dt){const c=cur,P=pel.position,t=performance.now()/1000;for(const k in keys)keys[k]=false;
  if(c.coach){const x=Math.sin(t*.35)*2.4;camYaw=Math.atan2(x-P.x,DR_Z-P.z)+Math.PI;}else camYaw=Math.atan2(-P.x,DR_Z+COACH_Z-P.z)+Math.PI+Math.sin(t*.4*c.sw+c.ph)*.14;}
-function introEnd(){const C=CINE;if(!C.on)return;C.on=false;removeEventListener('keydown',C.key);$m('cine').removeEventListener('pointerup',C.tap);$m('cisk').removeEventListener('click',C.skip);
- $m('cine').classList.remove('in');$m('cine').hidden=true;document.body.classList.remove('cine');C.ring.geometry.dispose();C.ring.material.dispose();
+function introEnd(){coachFinish();const r=CINE.ring;if(r){r.geometry.dispose();r.material.dispose();CINE.ring=null;}
  PROF.combine=PROF.combine||{};PROF.combine.intro=1;saveProf(PROF);if(DRILL)DRILL.ph='done';toMenu();setTimeout(()=>{show('comb');combUI();},250);}   // a beat later, so the tap that ended it can't land on the Combine screen's buttons
 // skipped Combine: every drill not yet on tape gets a standard mid-level estimate (a "C" workout). Ratings nudge it a little inside a fixed 62-70 band (always a C),
 // so it is never elite and never poor; nothing about the player changes, and it's generated once per drill (coming back doesn't re-roll)
@@ -2800,7 +2914,7 @@ function frame(now){
  for(const d of D){use(d);sense();}
  if(LOWFX&&acc>10*DT)acc=10*DT;   // touch: drop the backlog instead of spiralling (sim time stays exact per step)
  while(acc>=DT){
-  frame.sub=(frame.sub||0)+1;for(const d of D){use(d);if(cur.ai&&(!LOWFX||frame.sub%2===0))(RET?liveThink:cur.role==='cine'?cineThink:cur.role==='dr'?drillThink:cur.role==='wr'?wrThink:cur.role==='rb'?rbThink:cur.role==='df'?defThink:qbThink)(LOWFX?2*DT:DT);control(DT);for(const k in joints)drive(joints[k]);}
+  frame.sub=(frame.sub||0)+1;for(const d of D){use(d);if(cur.ai&&(!LOWFX||frame.sub%2===0))(RET?liveThink:cur.role==='cine'?cineThink:cur.role==='demo'?demoThink:cur.role==='dr'?drillThink:cur.role==='wr'?wrThink:cur.role==='rb'?rbThink:cur.role==='df'?defThink:qbThink)(LOWFX?2*DT:DT);control(DT);for(const k in joints)drive(joints[k]);}
   world.step(DT);acc-=DT;
   for(const d of D){use(d);for(const b of list){b.computeAABB();const pen=-b.aabb.lowerBound.y;if(pen>.004){b.position.y+=pen;if(b.velocity.y<0)b.velocity.y=0;}const w=b.angularVelocity,m=w.norm();if(m>25)w.scale(25/m,w);if(!(m===m)||!isFinite(b.position.x)||!isFinite(b.position.y)){reset();break;}}}}
  for(const d of D){use(d);for(const b of list){b.mesh.position.copy(b.position);b.mesh.quaternion.copy(b.quaternion);}}
@@ -2820,7 +2934,7 @@ function frame(now){
   if(birdK>.001&&route){const AR=roster.filter(d=>d.cur.route).flatMap(d=>[[d.cur.x0,LOS],...d.cur.route]),xs=AR.length?AR.map(p=>p[0]):[routeX],zs=AR.length?AR.map(p=>p[1]):[0];let cx=(Math.min(...xs)+Math.max(...xs))/2,cz=(Math.min(...zs)+Math.max(...zs))/2,span=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs),20);if(PRE){const P=roster.map(d=>d.pel.position),X=P.map(p=>p.x),Z=P.map(p=>p.z);cx=(Math.min(...X)+Math.max(...X))/2;cz=(Math.min(...Z)+Math.max(...Z))/2+3;span=cl(Math.max(Math.max(...X)-Math.min(...X),Math.max(...Z)-Math.min(...Z))*.7,16,26);}   // breakdown: the whole formation, close enough to read
    const k=birdK*birdK*(3-2*birdK),bp=PRE?new THREE.Vector3(cx,span*.62+5,cz-span*.95):new THREE.Vector3(cx,span*1.15+8,cz-span*.35),lk=new THREE.Vector3(cx,0,cz);
    const look=new THREE.Vector3(pvx,pvy,pvz).lerp(lk,k);cam.position.lerp(bp,k);cam.lookAt(look);}}
- if(CINE.on){cam.position.copy(CINE.p);cam.lookAt(CINE.l);}else if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,window.DBGLY||.8,pel.position.z);}   // test hook: side view
+ if(CINE.on){CINE.gp.copy(cam.position);CINE.gl.set(pvx,pvy,pvz);cam.position.copy(CINE.p);cam.lookAt(CINE.l);}else if(window.DBGCAM){cam.position.set(pel.position.x+DBGCAM[0],DBGCAM[1],pel.position.z+DBGCAM[2]);cam.lookAt(pel.position.x,window.DBGLY||.8,pel.position.z);}   // test hook: side view
  sun.position.set(pel.position.x+5,12,pel.position.z+4);sun.target.position.set(pel.position.x,0,pel.position.z);
  cam.updateMatrixWorld();preTick(performance.now());blobTick();touchAdapt(frame.fdt||0);shakeApply();renderer.render(scene,cam);shakeRestore();
 }

@@ -1442,7 +1442,7 @@ const ROUTE_W=[['DEEP_POST',3],['DIG',3],['DEEP_CROSS',3],['LONG_SLANT',2],['SHA
 // ================= PLAYBOOK: 300+ plays built once at load from formation x route-concept x run-lane primitives; career offence picks one per possession =================
 Object.assign(ROUTES,{SLANT:[[0,2],[-8,9]],OUT:[[0,10],[8,10]],IN:[[0,10],[-14,10]],QUICK_OUT:[[0,5],[7,5]],SPEED_OUT:[[0,8],[10,8]],HITCH:[[0,7],[-1,6]],OUT_UP:[[0,6],[4,7],[4,40]],SLANT_GO:[[0,3],[-3,7],[-3,40]],
  WHEEL:[[5,2],[9,7],[9,40]],ZIG:[[0,8],[-5,12],[1,16]],WHIP:[[0,6],[-4,6],[3,6]],FLAT:[[5,2],[12,4]],POST_CORNER:[[0,12],[-4,20],[6,32]],FADE:[[3,10],[6,40]],DRAG:[[0,3],[-24,5]]});   // yards; +x = toward his own sideline
-const routeOf=(n,x0)=>{const out=Math.sign(x0)||1;return ROUTES[n].map(([x,z])=>[x0+out*x*YD,LOS+Math.min(z*YD,GOAL_Z+5-LOS)]);};
+const routeOf=(n,x0)=>{const out=Math.sign(x0)||1;return ROUTES[n].map(([x,z])=>[cl(x0+out*x*YD,-FW/2+1.8,FW/2-1.8),LOS+Math.min(z*YD,GOAL_Z+5-LOS)]);};
 const PB_DEEP=new Set(['GO','SEAM','DEEP_POST','CORNER','FADE','POST_CORNER','DEEP_CROSS','OUT_UP','SLANT_GO','WHEEL']);
 const PLAYBOOK=(()=>{const L=[],mir=(F,m)=>F.map(([x,z])=>[x*m,z]),side=m=>m>0?'LEFT':'RIGHT',tc=s=>s.replace(/_/g,' ');
  const PF=[['TRIPS',[[15,0],[10.5,-1],[6,-1]]],['2x1',[[14,0],[8.5,-1],[-14,0]]],['BUNCH',[[11,0],[9,-1.2],[13,-1.2]]],['SPREAD',[[16,0],[-9,-1],[-16,0]]],['STACK',[[12,0],[12,-2.2],[-13,0]]],['TIGHT',[[5,0],[-5,0],[15,0]]]];
@@ -1488,7 +1488,7 @@ routeMesh.add(rtGlow,rtCore);routeMesh.visible=false;scene.add(routeMesh);   // 
 // (receivers in the same play don't repeat a route)
 const ROUTE_SHORT=['SHALLOW_CROSS','LONG_SLANT','CURL','COMEBACK'],ROUTE_DEEP=['GO','SEAM','DEEP_POST','CORNER'];   // YAC specialists lean short (room to run after the catch), deep threats lean vertical
 function pickRoute(x0,used,sty){const A=SAI[sty]||{},W=ROUTE_W.map(([k,w])=>[k,w*(A.short&&ROUTE_SHORT.includes(k)?3:A.deep&&ROUTE_DEEP.includes(k)?3.5:1)]);let n;for(let t=0;t<12;t++){let r=Math.random()*W.reduce((a,b)=>a+b[1],0);n=W[0][0];for(const[k,w]of W){if((r-=w)<0){n=k;break;}}if(!used.includes(n))break;}used.push(n);
- const out=Math.sign(x0);return[ROUTES[n].map(([x,z])=>[x0+out*x*YD,LOS+Math.min(z*YD,GOAL_Z+5-LOS)]),n];}
+ const out=Math.sign(x0)||1;return[ROUTES[n].map(([x,z])=>[cl(x0+out*x*YD,-FW/2+1.8,FW/2-1.8),LOS+Math.min(z*YD,GOAL_Z+5-LOS)]),n];}
 // vague = the first leg plus just the start of the break; full = the whole route (shown in the bird's-eye view)
 // every receiver's route gets an arrow (yours and the bots'): vague = the first leg plus just the start of the break; full = the whole route
 function routeShape(full){if(!route)return;const RS=roster.filter(d=>d.cur.role==='wr'&&d.cur.route).map(d=>[d.cur.x0,d.cur.route]);if(!RS.length)RS.push([routeX,route]);
@@ -1623,7 +1623,7 @@ function applyOrg(){preEnd();if(!applyOrg.keep)NEWSERIES=0;if(!applyOrg.keep){OR
  if(playOn)resetPlay();else{routeMesh.visible=false;losMesh.visible=fdMesh.visible=false;playState='live';}}
 // receiver brain (runs with the WR swapped in): hold until GO, run the route, then once the ball is in the air go to where it comes down to catch height
 // run blocking: each receiver takes a different defender, fits between him and the back, and drives him off the runner's line; strength decides the push, the defender's strength / awareness his chance to shed
-function blockThink(dt){const c=cur,P=pel.position,now=performance.now();for(const k in keys)keys[k]=false;const R=(H(CALL.rb)||!CALL.done?CALL.rb:roster.find(H)||CALL.rb).pel.position;
+function blockThink(dt,run){const c=cur,P=pel.position,now=performance.now();for(const k in keys)keys[k]=false;const who=run||(CALL.rb&&(H(CALL.rb)||!CALL.done)?CALL.rb:roster.find(H)||CALL.rb);if(!who){keys.w=false;return;}const R=who.pel.position;
  if(!c.bt||c.bt.limp||now>(c.btT||0)){const taken=roster.filter(d=>d!==curD&&d.cur.blk).map(d=>d.cur.bt);let best=null,bs=1e9;
   for(const d of roster){if(d.cur.side!=='d'||d.limp||taken.includes(d))continue;const q=d.pel.position,s=Math.hypot(q.x-R.x,q.z-R.z)+.6*Math.hypot(q.x-P.x,q.z-P.z)-(d===c.bt?2.5:0);if(s<bs){bs=s;best=d;}}   // closest threat to the back he can reach; sticks with his man unless another is clearly worse
   c.bt=best;c.btT=now+600;}
@@ -1633,15 +1633,30 @@ function blockThink(dt){const c=cur,P=pel.position,now=performance.now();for(con
  if(dd<1.2&&now>(T.cur.shedT||0)){const k=cl(5+3*AT('str')-2.5*E(T,'str'),1.5,9)*dt,mr=kgOf(T)/kgOf(curD);   // engaged: per second, strength vs strength
   for(const b of T.list){b.velocity.x-=ux*k;b.velocity.z-=uz*k;}for(const b of list){b.velocity.x+=ux*k*mr*.5;b.velocity.z+=uz*k*mr*.5;}   // the blocker gets pushed back too
   if(Math.random()<dt*cl(.3+.35*E(T,'str')+.2*E(T,'awr')-.3*AT('str'),.06,.9))T.cur.shedT=now+900;}}   // he works free for a moment
-function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;if(c.blk&&CALL.run&&playState==='live'&&!held&&!fumT)return blockThink(dt);for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
+// ---------- after the route: find open space. Every 0.5-0.8 s (Awareness) score a few nearby spots: room from defenders, a clean lane from the QB,
+// spacing from teammates, a useful depth, inside the field. Keep the current spot unless a clearly better one appears (no zig-zagging).
+function findSpace(c,P){const now=performance.now(),q=roster.find(x=>x.cur.role==='qb'),Q=q&&q.pel.position;if(!Q)return null;
+ if(c.sp&&now<c.spT)return c.sp;const aw=(AT('awr')+1)/2;c.spT=now+800-300*aw;
+ const D=roster.filter(x=>x.cur.side==='d'),T=roster.filter(x=>x!==curD&&x.cur.side==='o'&&x.cur.role!=='qb'),scr=q.cur.st==='run';
+ const score=(x,z)=>{if(Math.abs(x)>FW/2-2.2||z<LOS+1.5||z>GOAL_Z+7)return -1e9;let sep=6,lane=4,sp=8;
+  for(const d of D){const p=d.pel.position;sep=Math.min(sep,Math.hypot(p.x-x,p.z-z));const sx=x-Q.x,sz=z-Q.z,L=sx*sx+sz*sz||1,u=cl(((p.x-Q.x)*sx+(p.z-Q.z)*sz)/L,0,1);lane=Math.min(lane,Math.hypot(Q.x+sx*u-p.x,Q.z+sz*u-p.z));}
+  for(const t of T)sp=Math.min(sp,Math.hypot(t.pel.position.x-x,t.pel.position.z-z));
+  const depth=z-LOS,dz=depth<4?(4-depth)*.6:depth>26?(depth-26)*.25:0,sc=scr?-.08*Math.abs(x-Q.x-Math.sign(P.x-Q.x||1)*6):0;   // scramble: drift with the QB
+  return sep*1.1+lane*.9+Math.min(sp,6)*.5-dz-.18*Math.hypot(x-P.x,z-P.z)+sc+(Math.random()-.5)*1.6*(1-aw);};   // a lower-Awareness receiver reads it less cleanly
+ let best=c.sp,bs=c.sp?score(c.sp[0],c.sp[1])+.8:-1e9;
+ for(let i=0;i<9;i++){const a=i*Math.PI/4,r=i===8?0:4.5,x=P.x+Math.sin(a)*r,z=P.z+Math.cos(a)*r*(i%4===0?1:.8),s2=score(x,z);if(s2>bs){bs=s2;best=[x,z];}}
+ c.sp=best;return best;}
+function wrThink(dt){const c=cur;c.t=(c.t||0)+dt;if(playEnd&&!held){for(const k in keys)keys[k]=false;return;}   // whistle: everyone pulls up
+ if(c.blk&&CALL.run&&playState==='live'&&!held&&!fumT)return blockThink(dt);
+ {const car=playState==='live'&&!held&&!fumT&&c.st!=='ball'&&roster.find(H);if(car&&car!==curD&&car.cur.team===c.team&&(car.cur.role!=='qb'||car.pel.position.z>LOS))return blockThink(dt,car);}   // a teammate has it in the open: block for him
+ for(const k in keys)keys[k]=false;let tx=null,tz=null,sprint=true;
  const P=pel.position,inAir=world.bodies.includes(ball)&&ball.velocity.norm()>3&&ball.position.y>.25,route=c.route;
  if(held&&c.st!=='caught'){c.st='caught';c.t=0;}
  if((c.st==='route'||c.st==='after')&&inAir){let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);for(let t=0;t<5&&!(vy<0&&y<1.3)&&y>.09;t+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}
   const me=Math.hypot(x-P.x,z-P.z);c.go=roster.every(d=>d===curD||d.cur.role!=='wr'||Math.hypot(d.pel.position.x-x,d.pel.position.z-z)>=me);}   // only the receiver nearest where it comes down goes for it
  if((c.st==='route'||c.st==='after')&&inAir&&c.go){c.st='ball';catchOn=true;cur.catchT0=performance.now();}
  if(c.st==='route'){const W=route[c.i];if(Math.hypot(W[0]-P.x,W[1]-P.z)<1.1*(1-.35*AT('rte'))){if(c.i<route.length-1)c.i++;else c.st='after';}else{tx=W[0];tz=W[1];}}
- if(c.st==='after'){const a=route[route.length-2]||[c.x0,LOS],b=route[route.length-1],stop=/CURL|COMEBACK|HITCH/.test(c.rname);   // breaking routes settle and face the QB; the rest keep running
-  if(!stop){const L=Math.hypot(b[0]-a[0],b[1]-a[1])||1;tx=P.x+(b[0]-a[0])/L*5;tz=P.z+(b[1]-a[1])/L*5;}}
+ if(c.st==='after'){const S=findSpace(c,P);if(S){const d=Math.hypot(S[0]-P.x,S[1]-P.z);if(d>.9){tx=S[0];tz=S[1];sprint=d>4;}else{const q=roster.find(x=>x.cur.role==='qb');if(q)camYaw=Math.atan2(q.pel.position.x-P.x,q.pel.position.z-P.z)+Math.PI;}}}   // route done: work to open space and show the QB your numbers
  if(c.st==='ball'){if(!world.bodies.includes(ball)&&!held){c.st='after';catchOn=false;}
   else{let x=ball.position.x,y=ball.position.y,z=ball.position.z,vx=ball.velocity.x,vy=ball.velocity.y,vz=ball.velocity.z;const h=.02,k=Math.pow(.9,h);   // where it comes down through catch height
    let tA=0;for(;tA<5&&!(vy<0&&y<1.3)&&y>.09;tA+=h){vx*=k;vy*=k;vz*=k;vy-=9.82*h;x+=vx*h;y+=vy*h;z+=vz*h;}
@@ -1723,7 +1738,8 @@ function rbThink(dt){const c=cur,P=pel.position;if(held||c.st==='caught'){if(P.z
     const sc=mn-.12*Math.abs(x-gx0)+(x===c.gx?.5:0)+(Math.random()-.5)*nz;if(sc>bs){bs=sc;best=x;}}
    c.gx=best;c.rdT=now+450-220*(AT('agi')+1)/2;}   // agile backs re-read (and cut) sooner
   camYaw=Math.atan2(c.gx-P.x,LOS+2-P.z)+Math.PI;keys.w=keys.shift=true;held&&(c.st='caught');return;}return wrThink(dt);}
- for(const k in keys)keys[k]=false;if(playState!=='live'){camYaw=Math.PI;return;}const q=roster.find(d=>d.cur.role==='qb');if(!q||CALL.done){keys.w=true;camYaw=Math.PI;return;}if(performance.now()-EVT<CALL.delay*1000){camYaw=Math.PI;return;}c.gx=null;const Q=q.pel.position,tx=Q.x+(Math.sign(CALL.gx-Q.x)||1)*.45,tz=Q.z+.6;   // delayed handoffs sit a beat first   // the mesh point: just in front of the QB, on the side the run goes
+ for(const k in keys)keys[k]=false;if(playState!=='live'){camYaw=Math.PI;return;}const q=roster.find(d=>d.cur.role==='qb');if(!q||CALL.done){const car=roster.find(H);if(car&&car!==curD&&car.cur.team===c.team&&(car.cur.role!=='qb'||car.pel.position.z>LOS))return blockThink(dt,car);if(car===q&&playState==='live'){c.st='after';const S=findSpace(c,P);if(S&&Math.hypot(S[0]-P.x,S[1]-P.z)>.9){camYaw=Math.atan2(S[0]-P.x,S[1]-P.z)+Math.PI;keys.w=true;}}return;}   // no handoff: block, or show as the check-down
+ if(performance.now()-EVT<CALL.delay*1000){camYaw=Math.PI;return;}c.gx=null;const Q=q.pel.position,tx=Q.x+(Math.sign(CALL.gx-Q.x)||1)*.45,tz=Q.z+.6;   // delayed handoffs sit a beat first   // the mesh point: just in front of the QB, on the side the run goes
  camYaw=Math.atan2(tx-P.x,tz-P.z)+Math.PI;keys.w=true;keys.shift=Math.hypot(tx-P.x,tz-P.z)>1.5;}
 // the exchange: real possession moves from QB to RB once the back is in the pocket (belly to the ball), one way, once per play
 function handoffTick(){if(!CALL.run||CALL.done||playState!=='live')return;const rb=CALL.rb,q=roster.find(d=>d.cur.role==='qb'),now=performance.now();
@@ -2389,8 +2405,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.05';
+const GAME_VER='3.06';
 const PATCH=[
+ {version:'3.06',title:'Smarter Receivers',date:'2026-10-28',changes:{AI:['After a route, receivers find open space instead of running on: they weigh room from defenders, a clear lane from the QB, spacing from teammates and depth, then settle facing the QB; Awareness sets how often and how well they read it','When the QB scrambles, receivers drift with him; once a teammate has the ball in the open, the others block for him; running backs without the ball block or show as the check-down','Everyone pulls up when the play is dead'],'Bug Fixes':['Route waypoints are kept inside the sidelines, so receivers no longer run off the pitch']}},
  {version:'3.05',title:'New Play Each Series',date:'2026-10-28',changes:{Gameplay:['You choose a new play card at every new possession and after every first down (a new series); 2nd to 4th down keep the current play','The AI offence also calls a fresh play each series; recently shown plays are never dealt again straight away']}},
  {version:'3.04',title:'Clearer Combine Courses',date:'2026-10-28',changes:{'Career Mode':['Running drills show one objective at a time: the next zone pulses bright with a light pillar, the one after is only a faint hint, completed ones flash green and disappear','A ground arrow just ahead of you always points at the current objective and follows you as you move','Movement Fundamentals is now four short stages (move, sprint, one marked turn, stop in the box), each with its own instruction and control hint; the 40-yard dash is one lane with a single finish line; the three-cone cuts are numbered','Ball Security still makes you read the dummy line yourself: the arrow points straight ahead there, not at the open gap']}},
  {version:'3.03',title:'Mouse Unlock',date:'2026-10-28',changes:{'Bug Fixes':['The mouse is released automatically whenever a menu is showing (match results, main menu, Combine, pause, any screen); no more pressing ESC just to get the cursor back','It is captured only during a live keyboard match, and Resume captures it again straight away']}},

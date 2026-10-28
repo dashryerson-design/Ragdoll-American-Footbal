@@ -345,7 +345,20 @@ body.touch #phud #pcard .n{max-width:120px}
 .pdg{width:100%;height:auto;max-height:min(34vh,260px);border-radius:3px}.pdg .fd{fill:#0f2a17}.pdg .yl{stroke:#ffffff22;stroke-width:.25}.pdg .los{stroke:#62bfff;stroke-width:.45}
 .pdg polyline{fill:none;stroke-width:.8;stroke-linejoin:round;stroke-linecap:round}.pdg .rt{stroke:#e8edf2}.pdg .rt.pri{stroke:var(--c);stroke-width:1.1}.pdg .run{stroke:var(--c);stroke-width:1.2}.pdg .hand{stroke:#fff;stroke-dasharray:1 .8}
 .pdg .wr{fill:#0b0f15;stroke:#fff;stroke-width:.5}.pdg .wr.pri{stroke:var(--c)}.pdg .rb{fill:var(--c)}.pdg .qb{fill:#fff}
-#ppc{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}#ppc .ppk{position:absolute;left:0;top:0;will-change:transform}
+#ppc{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+.ppk.riv .in{border-color:#ffd23f;border-left-color:#ffd23f;box-shadow:0 6px 18px #000a,0 0 0 1px #ffd23f,0 0 12px #ffd23f55}.ppk.nem .in{border-color:#ff3b3b;border-left-color:#ff3b3b;box-shadow:0 6px 18px #000a,0 0 0 1.5px #ff3b3b,0 0 16px #ff3b3b77}
+.ppk .rvb{position:absolute;top:-7px;right:-7px;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font:900 10px/1 system-ui;color:#111;background:#ffd23f;box-shadow:0 1px 4px #000c}.ppk.nem .rvb{background:#ff3b3b;color:#fff}.ppk .in{position:relative}
+#ppc .rvt{position:absolute;left:50%;top:calc(58px + env(safe-area-inset-top,0px));transform:translateX(-50%);padding:3px 10px;border:1px solid #ffd23f66;border-radius:3px;background:#0b0e14d9;font:700 12px "Barlow Condensed";letter-spacing:.16em;color:#ffd23f;white-space:nowrap}
+#rvm{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:6;pointer-events:none;text-align:center;font-family:"Barlow Condensed";animation:rvIn 2.6s ease forwards}#rvm b{display:block;font:italic 800 clamp(22px,4vw,34px)/1 "Barlow Condensed";letter-spacing:.04em;color:#ffd23f;text-shadow:0 2px 12px #000}#rvm span{display:inline-block;margin-top:4px;padding:2px 10px;background:#0b0e14cc;border-radius:3px;font:600 14px "Barlow Condensed";color:#e8eef5}#rvm.nem b{color:#ff5a4a}
+@keyframes rvIn{0%{opacity:0;transform:translate(-50%,8px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+.rvcard{margin:0 0 14px;padding:14px 16px;border:1px solid #ffffff1a;border-left:4px solid var(--rc,#ffd23f);border-radius:4px;background:linear-gradient(100deg,#141a24,#0e1219);font-family:"Barlow Condensed"}
+.rvcard h2{margin:0;font:italic 800 clamp(24px,4vw,34px)/1 "Barlow Condensed";letter-spacing:.03em;color:var(--rc,#ffd23f)}.rvcard .rvk{font:700 12px "Barlow Condensed";letter-spacing:.2em;color:#9aa8b8}.rvcard p{margin:6px 0 0;font:500 16px/1.35 "Barlow Condensed";color:#dde5ee}
+.rvlv{display:inline-flex;gap:3px;vertical-align:middle;margin-left:8px}.rvlv i{width:14px;height:5px;border-radius:2px;background:#ffffff22}.rvlv i.on{background:var(--rc,#ffd23f)}
+.rvrow{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font:600 15px "Barlow Condensed";color:#b8c4d2}.rvrow b{color:#fff}
+details.rv{margin:0 0 10px;border:1px solid #ffffff18;border-left:4px solid var(--rc,#ffd23f);border-radius:4px;background:#11161e}details.rv summary{list-style:none;cursor:pointer;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-family:"Barlow Condensed"}details.rv summary::-webkit-details-marker{display:none}
+details.rv summary b{font:700 19px "Barlow Condensed";color:#fff}details.rv summary em{font:600 13px "Barlow Condensed";letter-spacing:.12em;color:var(--rc,#ffd23f);font-style:normal;text-transform:uppercase}details.rv summary span{grid-column:1/3;font:500 15px "Barlow Condensed";color:#b8c4d2}
+details.rv ol{margin:0;padding:4px 14px 12px 34px;font:500 15px/1.5 "Barlow Condensed";color:#cfd8e3}details.rv ol li.k{color:#ffd23f}details[open].rv summary{border-bottom:1px solid #ffffff12}
+.rvempty{padding:22px;border:1px dashed #ffffff26;border-radius:4px;text-align:center;font:500 16px/1.4 "Barlow Condensed";color:#9aa8b8}#ppc .ppk{position:absolute;left:0;top:0;will-change:transform}
 .ppk .in{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:7px;align-items:center;min-width:92px;max-width:148px;padding:4px 9px 5px 6px;background:linear-gradient(180deg,#151c27f0,#080b10e8);border:1px solid #ffffff1c;border-left:2px solid var(--k);border-radius:3px;box-shadow:0 6px 18px #000a,inset 0 1px 0 #ffffff12;font-family:"Barlow Condensed","Arial Narrow",sans-serif;color:#fff;opacity:0;transform:translateY(var(--dy)) scale(.94);animation:ppIn .38s cubic-bezier(.2,.8,.2,1) forwards}
 .ppk.o{--k:#62bfff;--dy:6px}.ppk.d{--k:#ff6a5a;--dy:-6px}.ppk.you .in{box-shadow:0 6px 18px #000a,0 0 0 1px var(--k),0 0 14px color-mix(in srgb,var(--k) 45%,transparent)}
 .ppk b{grid-row:1/4;font:800 25px/1 "Barlow Condensed";letter-spacing:-.01em;padding-right:7px;border-right:1px solid #ffffff1f;align-self:stretch;display:grid;place-items:center}.ppk span{display:flex;flex-direction:column;min-width:0}
@@ -412,7 +425,7 @@ body.cine #tc,body.cine #phud,body.cine #xphud{display:none!important}
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
 <div id="pnm" class="ov" hidden role="dialog" aria-modal="true" aria-labelledby="pnhd"><div class="pnbox"><div class="pnh"><h2 id="pnhd">PATCH NOTES<small id="pnsub"></small></h2><button id="pnx">CLOSE</button></div><div id="pnl"></div></div></div>
 <div id="pcs" class="ov" hidden role="dialog" aria-label="Choose your play"><div class="pch"><small>// NEW POSSESSION</small><h2>CHOOSE YOUR PLAY</h2></div><div id="pcards"></div></div>
-<div id="ppc" hidden aria-hidden="true"></div><div id="ppn" hidden aria-hidden="true"></div>
+<div id="ppc" hidden aria-hidden="true"></div><div id="rvm" hidden aria-live="polite"></div><div id="ppn" hidden aria-hidden="true"></div>
 <div id="set" class="ov scr" hidden><div class="crumb">// SETTINGS</div><h2 class="ttl">SETTINGS</h2><section class="sset"><h4>CONTROLS</h4><p class="note">How you play: changes the on-screen controls and the button prompts. Saved on this device.</p><div class="ssc"><button class="ch" id="ctouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="currentColor" stroke-width="5"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#5fd4ff"/></svg><span><b>TOUCH</b><small>Phone &amp; tablet</small></span></button>
 <button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="currentColor" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#5fd4ff" stroke-width="5"/><path d="M103 18v14" stroke="#5fd4ff" stroke-width="5"/></svg><span><b>KEYBOARD</b><small>Keyboard &amp; mouse</small></span></button></div><p class="note">Touch button positions and sizes: pause during a game → Edit Button Layout.</p></section><button class="ghost" id="setback">BACK</button></div>
 <div id="cskip" class="ov scr" hidden role="dialog" aria-labelledby="cskt"><div class="sset"><h4>PRE-DRAFT COMBINE</h4><h2 class="ttl" id="cskt">Skip the Combine?</h2><p class="note">You go straight to your scouting report with a standard, mid-level evaluation: solid but unspectacular results, clearly marked as estimated. Your ratings, OVR and player don't change. You can still run any drill afterwards; a real result replaces that drill's estimate.</p><div class="row"><button class="pri" id="cskyes">Skip Combine</button><button class="ghost" id="cskno">Return to the tutorial</button></div></div></div>
@@ -428,12 +441,12 @@ body.cine #tc,body.cine #phud,body.cine #xphud{display:none!important}
 <div class="cbtop"><h1>Create Your Player</h1><div id="cbprog"></div></div>
 <div class="cbgrid"><div class="cbl" id="cbl"></div><div class="cbr"><div class="pvbox" id="pvc"></div><div class="cams" id="cams"><button data-c="front">Front</button><button data-c="side">Side</button><button data-c="back">Back</button><button data-c="head">Helmet</button><button data-c="spin">⟲ Spin</button></div><div class="pvi" id="pvi"></div></div></div>
 <div class="cbfoot"><span id="cerr"></span><button class="mrow" id="ccan">Exit</button><button class="mrow" id="cprev">Back</button><button class="mrow pri2" id="cnext">Continue</button></div></div>
-<div id="pre" class="ov scr mad" hidden><div class="vt">//CAREER · MATCHUP</div><div class="mgrid">
+<div id="pre" class="ov scr mad" hidden><div class="vt">//CAREER · MATCHUP</div><div id="rivpre" hidden></div><div class="mgrid">
 <div class="mleft"><h1>Career Match</h1><div class="sub" id="pvs"></div><div class="sub">4 v 4 · 4:00 game clock</div><div class="note" style="color:#ddd;font:500 16px/1.4 'Barlow Condensed'">You start on offence at your own 25. When the ball changes hands both teams swap sides, so you play offence and defence. Most points when the 6-minute clock runs out wins.</div>
 <div class="mlist" style="margin-top:16px"><button class="mrow pri2" id="pgo">Kick Off</button><button class="mrow" id="pback">Back</button></div></div>
 <div class="mmid" id="pline"></div><div class="mright"><div class="pvbox" id="pvp"></div><div class="pvi" id="pvip"></div></div></div>
 <div class="hints"><button data-act="confirm"><i class="kp" data-p="confirm"></i> Select</button><button data-act="back"><i class="kp" data-p="back"></i> Back</button></div></div>
-<div id="fin" class="ov scr mad" hidden><div class="vt">//CAREER · POST GAME</div><div class="fwrap" id="fwrap">
+<div id="fin" class="ov scr mad" hidden><div class="vt">//CAREER · POST GAME</div><div id="rivfin" hidden></div><div class="fwrap" id="fwrap">
 <div class="fhead"><div><div class="res" id="fres"></div><div class="fsc"><span class="ftb">BLU</span><b id="fb"></b><span class="fx">FINAL</span><b id="fr"></b><span class="ftr">RED</span></div></div><div class="gbox"><div id="fgr" class="grade"></div><small>GRADE</small></div></div>
 <div class="fgrid"><div class="fpn"><h4>Player Stats</h4><div id="fst"></div></div><div class="fpn"><h4>Objectives</h4><div id="fobj"></div><h4 style="margin-top:14px">XP Breakdown</h4><div id="fxp"></div></div>
 <div class="fpn"><h4>Progress</h4><div class="lvrow"><b id="flv"></b><div class="lbar"><i id="fbar"></i></div></div><div class="note" id="fnext"></div><div id="flup" class="lup" hidden></div>
@@ -909,7 +922,7 @@ function resolveHit(tk,car,S){S.hit=1;const now=performance.now(),c=TK[S.type];f
  if(S.type==='low')p+=.03*cl((inOf(car)-inOf(tk))/4,-1,1);   // getting under a taller runner
  if(car.cur.ai&&cosA>.4&&E(car,'str')>0)p-=.06*E(car,'str');   // a strong runner lowers his shoulder into it
  p=cl(p*(.85+.15*Math.min(1,(tk.cur.stam??1)/.4))-.03*BT(car,'brk')+.03*BT(tk,'tkl'),.08,.94);
- const ok=Math.random()<p,up=(b,f)=>{b.velocity.y+=f;};S.res=ok?'down':'broken';car.cur.lastTk={ok,by:tk,t:now,type:S.type,sev};if(ok)crowdEvent('hit',sev);hitSound(car.chest.position,sev,car);{const C=car.chest.position;impactFx(C.x,C.y,C.z,sev/4.5*(S.type==='power'?1.15:1),ok);}   // the hit itself: severity is the velocity change it puts on the carrier
+ const ok=Math.random()<p,up=(b,f)=>{b.velocity.y+=f;};S.res=ok?'down':'broken';car.cur.lastTk={ok,by:tk,t:now,type:S.type,sev};if(ok)crowdEvent('hit',sev);if(ok)rivEv(sev>=4.5?'bh':'tk',tk,car);hitSound(car.chest.position,sev,car);{const C=car.chest.position;impactFx(C.x,C.y,C.z,sev/4.5*(S.type==='power'?1.15:1),ok);}   // the hit itself: severity is the velocity change it puts on the carrier
  const legs=n=>/thigh|shin|foot|toe/.test(n),upper=n=>/chest|abdomen|head|neck|uarm/.test(n),fx=ux*dV,fz=uz*dV;
  if(ok){
   for(const[n,b]of Object.entries(car.parts)){let k=1;
@@ -1198,7 +1211,7 @@ function aimOne(){if(!held||!aimOn)chargeT=-1;if(!held||!aimOn||limp)return;aimL
  for(;n<60;n++){a.setXYZ(n,x,y,z);if(y<.09)break;vx*=dmp;vy*=dmp;vz*=dmp;vy-=9.82*dt;x+=vx*dt;y+=vy*dt;z+=vz*dt;}   // same gravity + damping as the ball body
  for(let i=n+1;i<60;i++)a.setXYZ(i,x,Math.max(.09,y),z);a.needsUpdate=true;}
 function startThrow(){if(held&&aimOn&&thr<0&&!limp)thr=0;}
-function throwBall(){if(!held||limp)return;if(MATCH&&curD===player)MATCH.st.att++;EVT=performance.now();PASS={tg:cur.ai?cur.tg:null,contest:0,int:0};const p=bpt(handR(),0,-.02,.07),v=throwVel();if(!cur.ai)aimErr(v);held=false;aimOn=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;
+function throwBall(){if(!held||limp)return;if(MATCH&&curD===player)MATCH.st.att++;EVT=performance.now();PASS={tg:cur.ai?cur.tg:null,contest:0,int:0,by:curD};const p=bpt(handR(),0,-.02,.07),v=throwVel();if(!cur.ai)aimErr(v);held=false;aimOn=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;
  chest.velocity.x-=v.x*.42/15.7;chest.velocity.y-=v.y*.42/15.7;chest.velocity.z-=v.z*.42/15.7;   // the ball's momentum pushes back on the thrower
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.velocity.copy(v);const d=v.unit();ball.quaternion.setFromVectors(new V(0,1,0),d);
  ball.angularVelocity.set(d.x*25,d.y*25,d.z*25);world.addBody(ball);ball.wakeUp();}   // nose-first spiral
@@ -1589,9 +1602,9 @@ function playTick(){if(!playOn)return;if(!$m('pcs').hidden){playTick.t=performan
  if(fumT){if(car){fumT=0;if(car.cur.team!==POSS()){crowdEvent('turnover',POSS());RET=car.cur.team===ot?null:{team:car.cur.team};toast('FUMBLE! '+TFULL[car.cur.team]+' BALL','#ff5a4a');hud();}else toast('RECOVERED');}   // loose ball: whoever falls on it has it, and the play goes on
   else{if(performance.now()-fumT>500&&ball.position.y<.35){let best=null,bd=1e9;for(const d of roster){const P=d.pel.position,dd=Math.hypot(P.x-ball.position.x,P.z-ball.position.z)-.5*E(d,'rea');if(dd<bd){bd=dd;best=d;}}
    if(best&&bd<1.4){const me=curD;use(best);grabBall();use(me);}}return;}}   // the scramble: whoever gets there first (quick reactions help) falls on it
- if(car&&car.cur.team!==POSS()){crowdEvent('turnover',POSS());RET={team:car.cur.team};toast('INTERCEPTED! '+TFULL[car.cur.team]+' BALL','#ff5a4a');hud();}   // a pick is live: he can run it back, everyone switches jobs on the spot
+ if(car&&car.cur.team!==POSS()){crowdEvent('turnover',POSS());rivEv('int',car,PASS&&PASS.by);RET={team:car.cur.team};toast('INTERCEPTED! '+TFULL[car.cur.team]+' BALL','#ff5a4a');hud();}   // a pick is live: he can run it back, everyone switches jobs on the spot
  if(car){const p=car.pel.position,D=DIR(),tm=car.cur.team;
-  if(p.z*D>GOAL_Z){if(!RET)tally(car,p.z,1);else if(MATCH&&car===player)MATCH.st.dtd++;SCORE[tm]+=7;crowdEvent('td',tm);flip=-25*YD;NEXT=tm===ot?null:ot;playOver(RET?'PICK SIX! '+TFULL[tm]:TFULL[tm]+' TOUCHDOWN!',hx(TEAM[tm][0]));}   // after a pick six the team that threw it gets it back
+  if(p.z*D>GOAL_Z){if(!RET)tally(car,p.z,1);else if(MATCH&&car===player)MATCH.st.dtd++;SCORE[tm]+=7;crowdEvent('td',tm);rivTD(tm,car);flip=-25*YD;NEXT=tm===ot?null:ot;playOver(RET?'PICK SIX! '+TFULL[tm]:TFULL[tm]+' TOUCHDOWN!',hx(TEAM[tm][0]));}   // after a pick six the team that threw it gets it back
   else if(RET&&(Math.abs(p.x)>FW/2||car.limp)){flip=p.z>GOAL_Z?-30*YD:-p.z;NEXT=tm;playOver((car.limp?'DOWNED':'OUT OF BOUNDS')+' · '+TFULL[tm]+' BALL','#ff5a4a');}   // return over: their ball where he went down (a pick downed in his own end zone is a touchback)
   else if(Math.abs(p.x)>FW/2){tally(car,p.z);downAt(p.z,'OUT OF BOUNDS');}
   else if(car.limp)tally(car,p.z),downAt(p.z,car.cur.role==='qb'&&p.z<LOS?'SACKED':'TACKLED');return;}
@@ -1779,8 +1792,9 @@ function strengthOf(at,role){const g=role==='qb'?['qb','o']:role==='df'?['d']:['
 function cardOf(d){const c=d.cur,me=d===player&&PROF,at=me?PROF.att:c.at||{},st=me?PROF.style:c.sty,S=st!=null&&STYLES[st];
  return{nm:(me?PROF.last:c.nm)||c.lab||'',sty:S?tcase(S[0]):'',ovr:S?ovr(at,st):'',str:strengthOf(at,c.role),pos:c.role==='df'?c.lab||'DEF':c.role.toUpperCase(),side:c.side==='d'?'d':'o',you:d===player};}
 function preStart(){preEnd();preTick.t=performance.now();const box=$m('ppc');box.innerHTML='';box.classList.remove('out');PRE={el:0,n:0,cards:[]};
- roster.forEach((d,i)=>{const k=cardOf(d),el=document.createElement('div');el.className='ppk '+k.side+(k.you?' you':'');
-  el.innerHTML=`<div class="in" style="animation-delay:${80+i*55}ms"><b>${k.ovr}</b><span><i>${k.pos}${k.you?' · YOU':''}</i><em>${esc(k.nm)}</em></span><small>${esc(k.sty)}</small><u>${esc(k.str)}</u></div>`;box.appendChild(el);PRE.cards.push({d,el,o:k.side==='o',x:null,y:null});});
+ const RM=rivMarks();if(RM.team)box.insertAdjacentHTML('beforeend',`<div class="rvt">⚔ RIVALRY GAME · ${RLV[RM.team].toUpperCase()}</div>`);
+ roster.forEach((d,i)=>{const k=cardOf(d),el=document.createElement('div'),mk=d!==player&&d.cur.pid&&RM.pl[d.cur.pid];el.className='ppk '+k.side+(k.you?' you':'')+(mk?' '+mk:'');
+  el.innerHTML=`<div class="in" style="animation-delay:${80+i*55}ms"><b>${k.ovr}</b><span><i>${k.pos}${k.you?' · YOU':''}</i><em>${esc(k.nm)}</em></span><small>${esc(k.sty)}</small><u>${esc(k.str)}</u>${mk?`<i class="rvb" title="${mk==='nem'?'Nemesis':'Rival'}">${mk==='nem'?'✕':'★'}</i>`:''}</div>`;box.appendChild(el);PRE.cards.push({d,el,o:k.side==='o',x:null,y:null});});
  box.hidden=false;$m('ppn').hidden=false;}
 function preEnd(){if(!PRE)return;PRE=null;const box=$m('ppc');box.classList.add('out');$m('ppn').hidden=true;setTimeout(()=>{if(!PRE){box.hidden=true;box.innerHTML='';box.classList.remove('out');}},380);}
 const _pv=new THREE.Vector3();
@@ -2161,16 +2175,16 @@ function advance(p){const S=p.season;
 function startPO(S){const st=standings(S),seed=st.map(x=>x.i);S.po={seeds:seed,r:0,rounds:[SEEDPAIR.map(([a,b])=>({t:[seed[a-1],seed[b-1]],s:null}))]};}   // every club qualifies: 1 v 16, 2 v 15 ... winners move up the bracket
 // your own game simulated (no XP, no stats): the team plays without you
 function simMine(){const p=PROF,n=nextGame(p);if(!n){const S=p.season;if(S&&S.po&&S.champ==null){while(S.champ==null)advance(p);saveProf(p);carUI();}return;}   // knocked out: the rest of the bracket plays out
- const S=p.season,[x,y]=simScore(S.rat[p.team],S.rat[n.op],n.ctx.k==='po');record(p,n.ctx,x,y);saveProf(p);carUI();}
+ const S=p.season,[x,y]=simScore(S.rat[p.team],S.rat[n.op],n.ctx.k==='po');rivGame(p,`sim-${S.year}-${n.ctx.k}${n.ctx.k==='po'?n.ctx.r:n.ctx.w}-${n.ctx.g}`,n.ctx,n.op,x,y,1);record(p,n.ctx,x,y);saveProf(p);carUI();}
 function newSeasonGo(){const p=PROF;if(p.season&&p.season.champ!=null)offseason(p);newSeason(p,(p.season?p.season.year:0)+1);saveProf(p);carUI();}
 // teammates: three named club-mates, two-way roles like yours, rated around the club
 function mates(p,c=p.team){const L=lgEnsure(p);return L.rost[c].filter(id=>id!=='U').map(id=>{const P=L.pl[id];return{n:P.first+' '+P.last,pos:tcase(STYLES[P.style][0])+' · '+DEV[P.dev][0],num:P.num,ovr:ovr(P.att,P.style)};});}
 let HTAB='over';
 function carUI(){const p=PROF;if(p&&p.draft&&!p.season){newSeason(p,1);saveProf(p);}hubUI();}
 const posLbl=()=>{const b=$m('cpos');if(b&&PROF)b.textContent='Offence: '+{qb:'Quarterback',wr:'Wide Receiver',rb:'Running Back'}[PROF.pos||STYLES[PROF.style][4]];};   // position is its own choice; playstyle never changes it
-const HCATS=[['over','Overview',['over'],['cnew']],['match','Match Day',['next','sched'],['ccomb','cplay','csim']],['player','My Player',['player','attr','stats'],['cupg','cedit','cpos']],['league','League',['team','stand'],['cteams']]];   // [id, label, tabs, hub actions]; Main Menu stays in every category
+const HCATS=[['over','Overview',['over'],['cnew']],['match','Match Day',['next','sched'],['ccomb','cplay','csim']],['player','My Player',['player','attr','stats'],['cupg','cedit','cpos']],['league','League',['team','stand','riv'],['cteams']]];   // [id, label, tabs, hub actions]; Main Menu stays in every category
 let HCAT='over';
-function hubUI(){posLbl();const p=PROF,T=[['over','Overview'],['player','Player'],['attr','Ratings'],['team','Team'],['sched','Schedule'],['stand','Standings'],['stats','Stats'],['next','Next Match']];
+function hubUI(){posLbl();const p=PROF,T=[['over','Overview'],['player','Player'],['attr','Ratings'],['team','Team'],['sched','Schedule'],['stand','Standings'],['stats','Stats'],['next','Next Match'],['riv','Rivalries']];
  const C=HCATS.find(c=>c[2].includes(HTAB))||HCATS[0];HCAT=C[0];
  $m('htabs').innerHTML=p?`<div class="hcats">${HCATS.map(c=>`<button data-c="${c[0]}" class="${c[0]===HCAT?'on':''}">${c[1]}</button>`).join('')}</div>`+(C[2].length>1?`<div class="hsub">${T.filter(([k])=>C[2].includes(k)).map(([k,l])=>`<button data-t="${k}" class="${k===HTAB?'on':''}">${l}</button>`).join('')}</div>`:''):'';
  const S=p&&p.season,n=p&&p.draft?nextGame(p):null,c=p?club(p.team??0):null;
@@ -2202,7 +2216,8 @@ const TABS={
  sched:(p,S)=>!S?'<h3>Schedule</h3><p class="note">Your season starts after the draft.</p>':`<h3>Season ${S.year} Schedule</h3><table class="gt"><tr><th>Wk</th><th>Opponent</th><th></th><th style="text-align:right">Result</th></tr>${S.weeks.map((wk,w)=>{const g=wk.findIndex(x=>x.includes(p.team)),pr=wk[g],home=pr[0]===p.team,op=home?pr[1]:pr[0],r=S.res[w][g];let res='';if(r){const m=home?r[0]:r[1],t=home?r[1]:r[0];res=`<span class="${m>t?'W':m<t?'L':'T'}">${m>t?'W':m<t?'L':'T'}</span> ${m}-${t}`;}return`<tr class="${w===S.week?'cur':''}"><td>${w+1}</td><td>${tn(op)}</td><td>${home?'vs':'@'}</td><td class="n">${res||(w===S.week?'NEXT':'')}</td></tr>`;}).join('')}</table>${S.po?'<h4>Playoffs</h4>'+bracket(p,S):''}`,
  stand:(p,S)=>!S?'<h3>Standings</h3><p class="note">Your season starts after the draft.</p>':`<h3>Season ${S.year} Standings</h3><table class="gt"><tr><th>Seed</th><th>Club</th><th>W-L-T</th><th style="text-align:right">PF</th><th style="text-align:right">PA</th><th style="text-align:right">Diff</th></tr>${standings(S).map((x,i)=>`<tr class="${x.i===p.team?'me':''}"><td>${i+1}</td><td>${tn(x.i)}</td><td>${x.w}-${x.l}-${x.t}</td><td class="n">${x.pf}</td><td class="n">${x.pa}</td><td class="n">${x.pf-x.pa>0?'+':''}${x.pf-x.pa}</td></tr>`).join('')}</table><p class="note">All 16 clubs make the playoffs, seeded by wins: 1 v 16, 2 v 15 … winners move up the bracket to the Championship.</p>${S.po?bracket(p,S):''}`,
  stats:(p,S)=>`<h3>Statistics</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px"><div><h4>Season ${S?S.year:''}</h4>${rowS(S?S.st:zst(),STL)}</div><div><h4>Career · ${p.career.gp} games</h4>${rowS(p.career,STL)}</div></div>`,
- next:(p,S,n)=>nextCard(p,S,n)};
+ next:(p,S,n)=>nextCard(p,S,n),
+ riv:p=>rivHub(p)};
 function bracket(p,S){const P=S.po;return`<div class="brk">${[0,1,2,3].map(r=>`<div class="col"><small style="color:#aaa;letter-spacing:.14em">${RNAME[r].toUpperCase()}</small>${(P.rounds[r]||Array.from({length:8>>r},()=>null)).map(G=>!G?'<div class="bg"><div><span>TBD</span></div><div><span>TBD</span></div></div>':`<div class="bg${G.t.includes(p.team)?' me':''}">${G.t.map((t,j)=>`<div class="${G.s?(G.s[j]>G.s[1-j]?'w':'l'):''}"><span>${P.seeds.indexOf(t)+1} ${club(t).ab}</span><span>${G.s?G.s[j]:''}</span></div>`).join('')}</div>`).join('')}</div>`).join('')}</div>`;}
 {$m('htabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.c){const C=HCATS.find(c=>c[0]===b.dataset.c);HTAB=C[2][0];}else HTAB=b.dataset.t;hubUI();};$m('csim').onclick=simMine;}
 function carUI_old(){}
@@ -2429,8 +2444,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.18';
+const GAME_VER='3.19';
 const PATCH=[
+ {version:'3.19',title:'Rivalries',date:'2026-10-28',changes:{Career:['Rivalries build from real games: club rivals from close finishes, streaks and playoff knockouts; personal rivals from repeated one-on-one battles','New Rivalries tab in League, a RIVALRY GAME card before big matchups and a rivalry recap after them','Your rivals wear a gold marker on the pre-snap player cards, a nemesis a red one']}},
  {version:'3.18',title:'Hit Sounds',date:'2026-10-28',changes:{Audio:['Tackles now sound like tackles: light, heavy and huge hits, chosen by how hard the collision really was, in varied clips']}},
  {version:'3.17',title:'Coached Drills',date:'2026-10-28',changes:{Career:['Every Combine drill now opens with the Head Coach: camera shots of the drill, what it measures and the controls, then a ghost example player shows how it is done','Each explanation stays up at least 2 seconds after it is fully shown; skip a briefing on purpose with the Skip button / Backspace','Your attempt, clock and score only start after the briefing']}},
  {version:'3.16',title:'Read Timer',date:'2026-10-28',changes:{Career:['Each line of the Combine intro now stays up at least 2.5 seconds before you can move on']}},
@@ -2843,15 +2859,96 @@ function draftShow(){const p=PROF,D=p.draft,ord=D.order,ov=D.overall,first=Math.
 {$m('ccomb').onclick=()=>{if(!PROF)return;if(PROF.draft)return draftShow();if(!(PROF.combine||{}).intro)return introStart();show('comb');combUI();};$m('kback').onclick=()=>{show('car');carUI();};$m('dskip').onclick=()=>draftShow.skip();$m('dgo').onclick=()=>{show('car');carUI();};
  $m('cskyes').onclick=skipCombine;$m('cskno').onclick=()=>{show('comb');combUI();};
  $m('clist').onclick=e=>{const b=e.target.closest('button');if(b)drillStart(+b.dataset.i);};}
-function preMatch(){if(!PROF)return;if(!PROF.draft){show('comb');combUI();return;}const nx=nextGame(PROF);if(!nx){HTAB='next';show('car');carUI();return;}show('pre');const my=PROF.team??0,op=nx.op;preMatch.op=op;preMatch.ctx=nx.ctx;preMatch.home=nx.home;const A=club(my),B=club(op);$m('pvs').innerHTML=`<span style="color:${hx(A.acc)}">${A.ic} ${A.city} ${A.name}</span> vs <span style="color:${hx(B.acc)}">${B.ic} ${B.city} ${B.name}</span>`;pvShow('pvp',PROF);$m('pvip').innerHTML=pviHTML(PROF);
+// ===== rivalries: one service, one source of truth (PROF.riv). Only raw history is stored - each meeting with your club's opponent, and each
+// head-to-head duel between YOU and a specific league player (stable id P###, so it follows him through trades). Records, streaks, intensity and
+// every sentence shown are derived from that history on demand, so nothing is ever counted twice; a game id is processed exactly once.
+const RLV=['','Emerging','Heating Up','Bitter Rivals','Legendary'],RCOL=['#9aa8b8','#ffd23f','#ffb23f','#ff6a3d','#ff3b3b'];
+const RIV_CFG={team:{lv:[4,10,20,34],routine:1,routineDecay:.35,close:1.2,tie:1,blowout:.6,po:3.5,elim:2,final:6,streak:1.5,streakCap:4.5,sim:.5},
+ pl:{lv:[3.5,8,14,24],perEvent:.6,eventCap:4,int:2,po:1.5,minEvents:2,minGamesForMark:2,nemLv:3}};   // weights: tune here; levels = score thresholds for Emerging / Heating / Bitter / Legendary
+function rivEnsure(p){if(!p.riv)p.riv={v:1,seen:{},tm:{},pl:{}};return p.riv;}   // old saves: an empty history, nothing invented
+function rivLevel(sc,lv){let l=0;for(const t of lv)if(sc>=t)l++;return l;}
+// team: everything derived from the stored meetings
+function rivTeam(p,c){const G=(rivEnsure(p).tm[c]||{g:[]}).g,C=RIV_CFG.team;let w=0,l=0,t=0,sc=0,reg=0,big=null,run=0,best=0;
+ for(const g of G){const m=g.my-g.th,k=g.sim?C.sim:1;g.r==='w'?w++:g.r==='l'?l++:t++;
+  let x=g.k==='po'?C.po+C.elim+(g.rd===3?C.final:0):C.routine/(1+C.routineDecay*reg++);if(Math.abs(m)<=7&&m)x+=C.close;if(!m)x+=C.tie;if(Math.abs(m)>=21)x+=C.blowout;sc+=x*k;
+  if(m>0&&(!big||m>big.my-big.th))big=g;run=g.r==='t'?0:(Math.sign(run)===(g.r==='w'?1:-1)?run+(g.r==='w'?1:-1):(g.r==='w'?1:-1));best=Math.max(best,Math.abs(run));}
+ sc+=Math.min(C.streakCap,Math.max(0,best-2)*C.streak);const last=G[G.length-1]||null,po=G.filter(g=>g.k==='po');
+ return{c,g:G,w,l,t,n:G.length,sc:+sc.toFixed(2),lv:rivLevel(sc,C.lv),run,last,big,po,elimMe:po.filter(g=>g.r==='l').pop()||null,elimThem:po.filter(g=>g.r==='w').pop()||null};}
+// player duels: you vs one specific player
+function rivPl(p,id){const E=(rivEnsure(p).pl[id]||{g:[]}).g,C=RIV_CFG.pl;let me=0,them=0,sc=0;
+ for(const e of E){me+=e.me;them+=e.th;sc+=Math.min(C.eventCap,e.me+e.th)*C.perEvent+(e.ev.includes('int')||e.ev.includes('int-')?C.int:0)+(e.po?C.po:0);}
+ const lv=E.length?rivLevel(sc,C.lv):0;return{id,g:E,n:E.length,me,them,sc:+sc.toFixed(2),lv,mark:lv>=C.nemLv?'nem':lv>=1&&E.length>=C.minGamesForMark?'riv':null,last:E[E.length-1]||null};}
+const rivName=(p,id)=>{const P=p.lg&&p.lg.pl[id];return P?`#${P.num} ${P.first[0]}. ${P.last}`:id;};
+const rivWhen=g=>`Season ${g.y} · ${g.k==='po'?RNAME[g.rd]:'Week '+(g.w+1)}`;
+// statements: only what the saved history supports
+function rivLines(R,B){const o=[];if(R.elimMe&&(!R.elimThem||R.g.indexOf(R.elimMe)>R.g.indexOf(R.elimThem)))o.push(`They eliminated you in the ${RNAME[R.elimMe.rd]} (Season ${R.elimMe.y}).`);
+ else if(R.elimThem)o.push(`You ended their playoff run in the ${RNAME[R.elimThem.rd]} (Season ${R.elimThem.y}).`);
+ if(R.run>=2)o.push(`You have won the last ${R.run} meetings.`);else if(R.run<=-2)o.push(`They have won the last ${-R.run} meetings.`);
+ o.push(R.w===R.l?`The head-to-head is tied at ${R.w}-${R.l}${R.t?'-'+R.t:''}.`:R.w>R.l?`You lead the head-to-head ${R.w}-${R.l}${R.t?'-'+R.t:''}.`:`${B} lead the head-to-head ${R.l}-${R.w}${R.t?'-'+R.t:''}.`);return o;}
+const rivRes=g=>`${g.r==='w'?'W':g.r==='l'?'L':'T'} ${g.my}-${g.th}`;
+function rivGame(p,id,ctx,op,my,th,sim,dl){const RV=rivEnsure(p),S=p.season;if(!S||RV.seen[id])return;RV.seen[id]=1;
+ const T0=rivTeam(p,op),pls0={},g={id,y:S.year,k:ctx.k,w:ctx.w,rd:ctx.r,my,th,r:my>th?'w':my<th?'l':'t',sim};
+ if(ctx.k==='po'&&my===th){g.my+=7;g.r='w';}   // playoff ties go your way in overtime (same rule as the bracket)
+ if(g.k==='po')g.mom=g.rd===3?(g.r==='w'?'Won the Championship':'Lost the Championship'):(g.r==='w'?`Eliminated them in the ${RNAME[g.rd]}`:`Eliminated by them in the ${RNAME[g.rd]}`);
+ (RV.tm[op]||(RV.tm[op]={g:[]})).g.push(g);
+ if(dl)for(const pid in dl.pl){const d=dl.pl[pid];if(d.me+d.th<RIV_CFG.pl.minEvents)continue;pls0[pid]=rivPl(p,pid);(RV.pl[pid]||(RV.pl[pid]={g:[]})).g.push({id,y:S.year,c:op,me:d.me,th:d.th,ev:d.ev.slice(0,12),po:g.k==='po'?1:0,r:g.r});}
+ RV.last={id,op,sum:rivSummary(p,op,T0,g,pls0)};}   // the post-game card, frozen once: reopening the screen shows the same story
+function rivSummary(p,op,T0,g,pls0){const T=rivTeam(p,op),B=club(op).name,o={hd:null,tx:[],lv0:T0.lv,lv:T.lv,rec:`${T.w}-${T.l}${T.t?'-'+T.t:''}`,pl:[]};
+ const rel=T.lv>=1||T0.lv>=1||g.k==='po';
+ if(g.k==='po'&&g.rd===3&&g.r==='w')o.hd=['CHAMPIONS',`You beat the ${B} for the title.`];
+ else if(g.k==='po'&&g.r==='w'&&T0.elimMe)o.hd=['REVENGE SECURED',`You knocked out the team that eliminated you in Season ${T0.elimMe.y}.`];
+ else if(g.k==='po'&&g.r==='w')o.hd=['LEGACY MOMENT',`You ended the ${B}' playoff run.`];
+ else if(g.k==='po')o.hd=['SEASON OVER',`The ${B} eliminated you in the ${RNAME[g.rd]}.`];
+ else if(g.r==='w'&&T0.run<=-2)o.hd=['THE STREAK ENDS',`The ${B}' ${-T0.run}-game winning streak in this matchup is over.`];
+ else if(g.r==='w'&&T0.last&&T0.last.r==='l')o.hd=['REVENGE SECURED',`You beat the team that beat you last time (${rivRes(T0.last)}).`];
+ else if(g.r==='w'&&T.run>=3)o.hd=['THE STREAK CONTINUES',`You have won the last ${T.run} meetings.`];
+ else if(T.w===T.l&&T.n>1)o.hd=['STILL UNSETTLED',`The head-to-head is tied at ${o.rec}.`];
+ else if(g.r==='l'&&T.run<=-2)o.hd=['THEIR STREAK GROWS',`The ${B} have won the last ${-T.run} meetings.`];
+ else o.hd=g.r==='w'?['ROUND TO YOU',`You take this meeting with the ${B}.`]:g.r==='l'?['ROUND TO THEM',`The ${B} take this one.`]:['DEAD EVEN',`Nothing settled today.`];
+ if(T.lv!==T0.lv)o.tx.push(`Rivalry intensity: ${RLV[T0.lv]||'none'} → ${RLV[T.lv]||'none'}`);
+ for(const pid in pls0){const a=pls0[pid],b=rivPl(p,pid),e=b.last;o.pl.push(`${rivName(p,pid)}: ${e.me>e.th?'you won the duel':e.me<e.th?'he won the duel':'an even duel'} (${e.me}-${e.th})${b.mark!==a.mark&&b.mark?` · now your ${b.mark==='nem'?'NEMESIS':'RIVAL'}`:''}`);}
+ o.show=rel||o.pl.some(x=>x.includes('now your'))||Object.keys(pls0).some(pid=>rivPl(p,pid).mark);return o;}
+// pre-drive markers: computed once per match from the service (cleared when the match ends)
+function rivMarks(){if(!MATCH||!PROF)return{pl:{},team:0};if(MATCH.rvm)return MATCH.rvm;const p=PROF,L=p.lg,M={pl:{},team:rivTeam(p,preMatch.op).lv};
+ if(L)for(const id in rivEnsure(p).pl){const P=L.pl[id];if(!P)continue;const r=rivPl(p,id);if(r.mark)M.pl[id]=r.mark;}return MATCH.rvm=M;}
+// in-match duel events: only between YOU and a specific opposing league player; one per kind per play
+function rivEv(kind,a,b){if(!MATCH||!PROF||!a||!b||a===b)return;const meA=a===player,meB=b===player;if(!meA&&!meB)return;const o=meA?b:a;if(!o.cur.pid||o.cur.team===player.cur.team)return;
+ const D=MATCH.riv||(MATCH.riv={pl:{},k:{}}),key=kind+'|'+EVT+'|'+o.cur.pid;if(D.k[key])return;D.k[key]=1;const R=D.pl[o.cur.pid]||(D.pl[o.cur.pid]={me:0,th:0,ev:[]}),w=kind==='int'?3:kind==='bh'?2:1;
+ if(meA)R.me+=w;else R.th+=w;R.ev.push(meA?kind:kind+'-');rivMoment(kind,meA,o);}
+function rivTD(tm,car){if(!MATCH||!PROF||tm!==player.cur.team)return;const T=rivTeam(PROF,preMatch.op);if(T.lv<1||MATCH.rvTD)return;MATCH.rvTD=1;
+ if(T.last&&T.last.r==='l')rivShow('REVENGE IN PROGRESS',`First score against the ${club(preMatch.op).name}`);else if(T.run>=2)rivShow('THE STREAK LIVES',`${T.run} straight wins in this matchup, and counting`);}
+function rivMoment(kind,meA,o){const mk=rivMarks().pl[o.cur.pid];if(!mk||kind==='tk')return;const r=rivPl(PROF,o.cur.pid),nm=rivName(PROF,o.cur.pid);
+ if(kind==='int')meA?rivShow(r.me>r.them?'STILL THEIR KRYPTONITE':'STATEMENT MADE',`You picked off your ${mk==='nem'?'nemesis':'rival'} ${nm}`):rivShow('RIVALRY MOMENT',`${nm} picks you off`,1);
+ else if(kind==='bh')meA?rivShow('STATEMENT MADE',`Huge hit on ${nm}`):rivShow('RIVALRY MOMENT',`${nm} lays you out`,1);}
+function rivShow(t,sub,bad){const now=performance.now();if(now-(rivShow.t||0)<5000)return;rivShow.t=now;const e=$m('rvm');e.className=bad?'nem':'';e.innerHTML=`<b>${t}</b><span>${esc(sub)}</span>`;e.hidden=false;e.style.animation='none';void e.offsetWidth;e.style.animation='';clearTimeout(rivShow.h);rivShow.h=setTimeout(()=>e.hidden=true,2700);}   // small, above the field, never over the score; at most one every 5 s
+const rivPips=l=>`<span class="rvlv">${[1,2,3,4].map(i=>`<i class="${i<=l?'on':''}"></i>`).join('')}</span>`;
+function rivPre(p,op,ctx){const T=rivTeam(p,op),B=club(op),L=p.lg,box=$m('rivpre');const mine=L?L.rost[op].filter(id=>id!=='U').map(id=>[id,rivPl(p,id)]).filter(x=>x[1].mark):[];
+ if(T.lv<1&&!mine.length){box.hidden=true;box.innerHTML='';return;}
+ const tie=T.n&&T.w===T.l,hd=ctx.k==='po'&&ctx.r===3?'ONE GAME TO SETTLE IT':ctx.k==='po'&&T.po.length?'PLAYOFF HISTORY':ctx.k==='po'?'WIN OR GO HOME':T.elimMe&&T.last===T.elimMe?'TIME FOR REVENGE':T.run<=-2?'END THE STREAK':T.run>=2?'THE STREAK CONTINUES':tie?'THE RIVALRY IS TIED':T.last&&T.last.r==='l'?'TIME FOR REVENGE':mine.length?'PERSONAL BUSINESS':'BRAGGING RIGHTS';
+ box.style.setProperty('--rc',RCOL[Math.max(T.lv,mine.some(x=>x[1].mark==='nem')?3:1)]);
+ box.innerHTML=`<div class="rvcard"><div class="rvk">⚔ RIVALRY GAME${T.lv?' · '+RLV[T.lv].toUpperCase()+rivPips(T.lv):''}</div><h2>${hd}</h2>
+  ${T.n?`<div class="rvrow"><span>Head-to-head <b>${T.w}-${T.l}${T.t?'-'+T.t:''}</b></span>${T.last?`<span>Last meeting <b>${rivRes(T.last)}</b> · ${rivWhen(T.last)}</span>`:''}</div><p>${rivLines(T,'The '+B.name).join(' ')}</p>`:''}
+  ${mine.map(([id,r])=>`<p>${r.mark==='nem'?'✕ Nemesis':'★ Rival'} on the field: <b>${esc(rivName(p,id))}</b> · duels ${r.me}-${r.them} in ${r.n} games</p>`).join('')}</div>`;box.hidden=false;}
+function rivFin(p,M){const box=$m('rivfin'),RV=p.riv,L=RV&&RV.last;if(!L||L.id!==M.id||!L.sum.show){box.hidden=true;box.innerHTML='';return;}const o=L.sum;
+ box.style.setProperty('--rc',RCOL[Math.max(1,o.lv)]);box.innerHTML=`<div class="rvcard"><div class="rvk">⚔ RIVALRY · ${club(L.op).name.toUpperCase()}${o.lv?' · '+RLV[o.lv].toUpperCase()+rivPips(o.lv):''}</div><h2>${o.hd[0]}</h2><p>${esc(o.hd[1])}</p>
+  <div class="rvrow"><span>Head-to-head <b>${o.rec}</b></span>${o.tx.map(t=>`<span>${esc(t)}</span>`).join('')}</div>${o.pl.map(t=>`<p>${esc(t)}</p>`).join('')}</div>`;box.hidden=false;}
+function rivHub(p){const RV=rivEnsure(p),T=Object.keys(RV.tm).map(c=>rivTeam(p,+c)).filter(r=>r.lv>=1).sort((a,b)=>b.sc-a.sc),P=Object.keys(RV.pl).map(id=>rivPl(p,id)).filter(r=>r.lv>=1).sort((a,b)=>b.sc-a.sc);
+ const tc=r=>{const B=club(r.c),def=r.g.filter(g=>g.mom).pop()||r.big;return`<details class="rv" style="--rc:${RCOL[r.lv]}"><summary><b>${B.ic} ${B.city} ${B.name}</b><em>${RLV[r.lv]}${rivPips(r.lv)}</em><span>${r.w}-${r.l}${r.t?'-'+r.t:''} · ${r.n} meetings · last ${rivRes(r.last)} · ${rivLines(r,'They').join(' ')}${def?` · Defining: ${def.mom?esc(def.mom):'biggest win '+rivRes(def)} (${rivWhen(def)})`:''}</span></summary>
+  <ol>${r.g.map(g=>`<li class="${g.mom?'k':''}">${rivWhen(g)}: ${rivRes(g)}${g.sim?' (simulated)':''}${g.mom?' · '+esc(g.mom):''}</li>`).join('')}</ol></details>`;};
+ const pc=r=>{const P=p.lg&&p.lg.pl[r.id],tm=P&&P.team>=0?club(P.team).name:'not on a club';return`<details class="rv" style="--rc:${RCOL[r.lv]}"><summary><b>${r.mark==='nem'?'✕':'★'} ${esc(rivName(p,r.id))} · ${esc(tm)}</b><em>${r.mark==='nem'?'Nemesis':RLV[r.lv]}${rivPips(r.lv)}</em><span>Duels ${r.me}-${r.them} over ${r.n} games · ${r.me>r.them?'you have the upper hand':r.me<r.them?'he has the upper hand':'dead even'} · last: ${r.last.me}-${r.last.th} in Season ${r.last.y}</span></summary>
+  <ol>${r.g.map(e=>`<li class="${e.po?'k':''}">Season ${e.y} vs ${club(e.c).name}${e.po?' (playoffs)':''}: duel ${e.me}-${e.th} · ${[['tk','tackle'],['bh','big hit'],['int','interception']].map(([k,n])=>{const a=e.ev.filter(x=>x===k).length,b=e.ev.filter(x=>x===k+'-').length;return a||b?`${n}s ${a}-${b}`:'';}).filter(Boolean).join(', ')}</li>`).join('')}</ol></details>`;};
+ return`<h3>Rivalries</h3>${!T.length&&!P.length?`<div class="rvempty">No rivalries yet.<br>They build from real games: close finishes, streaks, playoff knockouts and championship meetings make club rivals; repeated one-on-one battles (tackles, big hits, interceptions) with the same opposing player make personal rivals.</div>`:''}
+  ${T.length?`<h4>Club rivalries</h4>${T.map(tc).join('')}`:''}${P.length?`<h4>Personal rivalries</h4>${P.map(pc).join('')}`:''}`;}
+function preMatch(){if(!PROF)return;if(!PROF.draft){show('comb');combUI();return;}const nx=nextGame(PROF);if(!nx){HTAB='next';show('car');carUI();return;}show('pre');const my=PROF.team??0,op=nx.op;preMatch.op=op;preMatch.ctx=nx.ctx;preMatch.home=nx.home;rivPre(PROF,op,nx.ctx);const A=club(my),B=club(op);$m('pvs').innerHTML=`<span style="color:${hx(A.acc)}">${A.ic} ${A.city} ${A.name}</span> vs <span style="color:${hx(B.acc)}">${B.ic} ${B.city} ${B.name}</span>`;pvShow('pvp',PROF);$m('pvip').innerHTML=pviHTML(PROF);
  const pos={qb:'QB',wr:'WR',rb:'RB / WR'}[PROF.pos||STYLES[PROF.style][4]];$m('pline').innerHTML=`<div class="tbl"><div class="th"><span>${club(PROF.team??0).name} · your team</span><span></span><span></span></div>${[['YOU · '+esc(PROF.last.toUpperCase()),pos+' on offence · CB on defence'],...mates(PROF).map(m=>['#'+m.num+' '+m.n+' · '+m.ovr,m.pos])].map(([a,b])=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">${a}</span><span>${b}</span></div>`).join('')}
  <div class="th" style="margin-top:10px"><span>${club(preMatch.op).name} · opponents</span><span></span><span></span></div>${mates(PROF,op).map(m=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span style="color:#fff">#${m.num} ${m.n} · ${m.ovr}</span><span>${m.pos}</span></div>`).join('')}</div>`;}
-function kickOff(){show(null);useClubs(PROF.team??0,preMatch.op,preMatch.home!==false);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:PROF.pos||STYLES[PROF.style][4]});lgEnsure(PROF);BADJ.blue=BADJ.red=0;MATCH={ctx:preMatch.ctx,id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj((PROF.pos||STYLES[PROF.style][4])==='qb')};newGame();applyOrg();
+function kickOff(){$m('rvm').hidden=true;show(null);useClubs(PROF.team??0,preMatch.op,preMatch.home!==false);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:PROF.pos||STYLES[PROF.style][4]});lgEnsure(PROF);BADJ.blue=BADJ.red=0;MATCH={ctx:preMatch.ctx,id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj((PROF.pos||STYLES[PROF.style][4])==='qb')};newGame();applyOrg();
  $m('pcard').hidden=false;$m('pcard').innerHTML=`<span class="o">${ovr(PROF.att,PROF.style)}</span><span><span class="n">#${PROF.num} ${esc(PROF.last)}</span><small>${STYLES[PROF.style][0]}</small></span>`;xpHudStart();}
 function endMatch(){const M=MATCH,S=M.st,me=ORG.you,op=me==='blue'?'red':'blue',r=SCORE[me]>SCORE[op]?'w':SCORE[me]<SCORE[op]?'l':'t';M.my=SCORE[me];M.their=SCORE[op];
  MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;xpHudStop();toMenu();
  const X=xpFor(S,r,M.obj),p=PROF,dup=p.lastMatch===M.id,L0=p.lvl,X0=p.lxp;let ups=0;
  if(!dup){const C=p.career;C.gp++;C[r]++;for(const k of STK)C[k]=(C[k]||0)+S[k];p.lastMatch=M.id;ups=addXP(p,X.total);
+  if(M.ctx&&p.season)rivGame(p,M.id,M.ctx,preMatch.op,M.my,M.their,0,M.riv);
   if(M.ctx&&p.season&&record(p,M.ctx,M.my,M.their)){for(const k of STK)p.season.st[k]+=S[k];}saveProf(p);}   // result into the season once; season stats only for games that counted   // awarded exactly once per match id, then saved straight away
  show('fin');finUI(M,S,r,X,L0,X0,ups,dup);}
 // ---------- stats, XP, grades, levels ----------
@@ -2869,7 +2966,7 @@ const XPN=l=>500+150*(l-1),UP_PER=3;   // XP to the next level; upgrade points p
 function addXP(p,x){x=Math.max(0,x|0);p.xp+=x;p.lxp+=x;let n=0;while(p.lxp>=XPN(p.lvl)&&p.lvl<99){p.lxp-=XPN(p.lvl);p.lvl++;p.up+=UP_PER;n++;}return n;}
 const fmtS=S=>[['Comp / Att',`${S.comp}/${S.att}`],['Pass Yds',S.pyd],['Pass TD',S.ptd],['Receptions',S.rec],['Rec Yds',S.recy],['Rec TD',S.rectd],['Rush Yds',S.rush],['Rush TD',S.rtd],['Tackles',S.tak],['Stops',S.stop],['Pass Def',S.pd],['INT',S.int],['Def TD',S.dtd]];
 function finUI(M,S,r,X,L0,X0,ups,dup){const p=PROF;{const A=club(p.team??0),B=club(preMatch.op);$m('fwrap').querySelector('.ftb').textContent=A.ab;$m('fwrap').querySelector('.ftb').style.background=hx(A.jer);$m('fwrap').querySelector('.ftr').textContent=B.ab;$m('fwrap').querySelector('.ftr').style.background=hx(B.jer);}$m('fres').textContent=r==='w'?'VICTORY':r==='l'?'DEFEAT':'TIE GAME';$m('fres').className='res '+r;$m('fb').textContent=SCORE.blue;$m('fr').textContent=SCORE.red;
- $m('fgr').textContent=X.grade;$m('fgr').className='grade g'+X.grade[0];
+ $m('fgr').textContent=X.grade;$m('fgr').className='grade g'+X.grade[0];rivFin(p,M);
  $m('fst').innerHTML=fmtS(S).map(([l,v])=>`<div class="sr${v&&v!=='0/0'?'':' z'}"><span>${l}</span><b>${v}</b></div>`).join('');
  $m('fobj').innerHTML=M.obj.map((o,i)=>`<div class="ob${X.done[i]?' ok':''}"><i>${X.done[i]?'✓':''}</i><span>${o[2]} <em>${Math.min(objVal(S,o[0]),o[1])}/${o[1]}</em></span><b>+${o[3]}</b></div>`).join('');
  $m('fxp').innerHTML=X.rows.map(([l,v])=>`<div><span>${l}</span><b class="${v<0?'neg':''}">${v>0?'+':''}${v}</b></div>`).join('')+`<div class="tot"><span>XP Earned</span><b>+${X.total}</b></div>`+(dup?'<div class="note">Already awarded for this match.</div>':'');

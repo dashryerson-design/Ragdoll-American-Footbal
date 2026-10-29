@@ -22,6 +22,7 @@ PAF_LIBS=/path/to/folder-with-three.min.js-and-cannon.min.js NODE_PATH=/path/to/
 | `exhibition-play.test.js` | Exhibition match end to end: menu, picker, real build, results, record, career byte-identical, quitting records nothing, career match still awards XP; no emulator needed |
 | `online.test.js` | Phase D online prototype: two browsers (separate accounts) connect through a Firestore room and a real WebRTC channel; guest controls one red non-QB player with their build, mirrors the host, keys and commands reach the host, match end, nothing saved, disconnect handover to AI, sign-in required. Prints latency / bandwidth metrics |
 | `runs.test.js` | 1v1 Runs: mode picker in and out, Team Play list unchanged, best non-QB of each club by `ovr()`, QB builds blocked, WR / man-cover CB roles and AI QB, real reps with roles alternating, catches only from the game reception event, first to 5 (both sides), quitting, Team Play afterwards; no emulator needed (slow: plays real reps) |
+| `music.test.js` | Menu music: starts on the main menu, keeps playing (same track, no restart) through submenus, silent from kickoff to the final whistle in every mode, resumes after, one audio element after repeated matches, tracks alternate when one ends, blocked autoplay starts on the first click; no emulator needed |
 | `offline.test.js` | the account screen with Firebase unreachable (no emulator needed) |
 
 `PW` can point at a Playwright install if `require('playwright')` does not resolve.

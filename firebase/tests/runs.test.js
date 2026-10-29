@@ -36,7 +36,7 @@ ok('catchesMatchReceptions',now.me===cm&&now.op===co,JSON.stringify([now,cm,co])
 ok('incompletionsDoNotCount',ends.filter(e=>!e.caught).every((e,i)=>true)&&ends.reduce((n,e)=>n+(e.caught?1:0),0)===now.me+now.op);
 ok('onlyOffenceReceptionsCounted',ev.filter(e=>!e.end).every(e=>e.side==='o'&&e.role!=='qb'));
 console.log('REPS',JSON.stringify(ends));
-r2=await roles();ok('rolesSwapOnField',(r2.wr==='me')?(r2.me==='wr'&&r2.mySide==='o'):(r2.mySide==='d'&&r2.op.some(o=>o[1]==='wr'&&o[3]===star.id)&&r2.qb[0][0]==='red'),JSON.stringify(r2));
+r2=await roles();ok('neverAHandoff',await p.evaluate(()=>!roster.some(d=>d.cur.role==='rb')));ok('rolesSwapOnField',(r2.wr==='me')?(r2.me==='wr'&&r2.mySide==='o'):(r2.mySide==='d'&&r2.op.some(o=>o[1]==='wr'&&o[3]===star.id)&&r2.qb[0][0]==='red'),JSON.stringify(r2));
 // first to 5: set 4-x and award one more real-path rep end
 await p.evaluate(()=>{RUNS.c.me=4;RUNS.c.op=2;RUNS.wr='me';RUNS.caught=true;playEnd=performance.now()-1;});
 for(let i=0;i<150&&!(await p.isVisible('#exr'));i++)await p.waitForTimeout(400);

@@ -453,7 +453,7 @@ body.cer>*:not(canvas):not(#cer){visibility:hidden!important}#cer{position:fixed
 #mm .ch.cat svg{width:32px;height:32px}#mm .ch.cat b{font-size:22px;letter-spacing:.12em}#mm .ch.cat.pri b{font-size:32px}#mm .ch.cat.pri svg{width:42px;height:42px;color:var(--cy,#5fd4ff)}#mm .ch.cat small{letter-spacing:.14em}
 @media (max-aspect-ratio:4/5){#pick.cats{width:min(92vw,420px)}#pick.cats .ch{min-height:58px;padding:8px 14px!important}#mm .ch.cat b{font-size:18px}#mm .ch.cat small{font-size:10px}#pick.cats .ch.pri{min-height:70px}}
 @media (max-height:480px){#pick.cats{gap:6px;width:min(80vw,620px)}#pick.cats .ch{min-height:46px;padding:6px 12px!important}#pick.cats .ch.pri{min-height:54px}#mm .ch.cat small{display:none}#mm .ch.cat b{font-size:17px}#mm .ch.cat.pri b{font-size:22px}}
-#set,#acct{justify-content:flex-start;padding-top:max(6vh,24px)}#acctb h4{margin:0 0 8px}#acctb .acf{display:flex;flex-direction:column;gap:10px;margin:10px 0}.acb{display:block;width:100%;margin:8px 0 0;padding:11px;font:700 15px var(--fd);letter-spacing:.12em;text-transform:uppercase;color:var(--tx);background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--rad);cursor:pointer}.acb.pri2{background:var(--ac);border-color:var(--ac);color:#fff}.acb.danger{background:#b3261e;border-color:#b3261e;color:#fff}.acb:disabled{opacity:.5}.actabs{display:flex;gap:4px}.actabs button{flex:1;padding:8px 4px;font:700 12px var(--fd);letter-spacing:.1em;color:var(--tx2);background:none;border:0;border-bottom:2px solid var(--ln2);cursor:pointer}.actabs button.on{color:var(--tx);border-color:var(--ac)}.acerr{color:#ff6b61;font-weight:700}.acok{color:#5fd38a;font-weight:700}.acchk{display:flex;gap:8px;align-items:center;font-size:14px}#acctb a{color:var(--ac)}.acid{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}.acid b{font:700 26px var(--fd)}.acid em{font-style:normal;font-weight:700}.acid em.ok{color:#5fd38a}.acid em.no{color:#ffb347}.sset{width:min(100%,640px);background:var(--pn);border:1px solid var(--ln);border-top:3px solid var(--ac);border-radius:4px;padding:16px 18px}.sset h4{margin:0 0 4px;font:700 13px system-ui;letter-spacing:.24em;color:var(--mu)}
+#set,#acct{justify-content:flex-start;padding-top:max(6vh,24px)}#acctb h4{margin:0 0 8px}#acctb .acf{display:flex;flex-direction:column;gap:10px;margin:10px 0}.acb{display:block;width:100%;margin:8px 0 0;padding:11px;font:700 15px var(--fd);letter-spacing:.12em;text-transform:uppercase;color:var(--tx);background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--rad);cursor:pointer}.acb.pri2{background:var(--ac);border-color:var(--ac);color:#fff}.acb.danger{background:#b3261e;border-color:#b3261e;color:#fff}.acb:disabled{opacity:.5}.actabs{display:flex;gap:4px}.actabs button{flex:1;padding:8px 4px;font:700 12px var(--fd);letter-spacing:.1em;color:var(--tx2);background:none;border:0;border-bottom:2px solid var(--ln2);cursor:pointer}.actabs button.on{color:var(--tx);border-color:var(--ac)}.acerr{color:#ff6b61;font-weight:700}.acok{color:#5fd38a;font-weight:700}.acchk{display:flex;gap:8px;align-items:center;font-size:14px}#acctb a{color:var(--ac)}.acid{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}.acid b{font:700 26px var(--fd)}.acid em{font-style:normal;font-weight:700}.acid em.ok{color:#5fd38a}.acid em.no{color:#ffb347}.accs{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--ln)}.accs>span{font:700 18px var(--fd);width:18px;color:var(--tx2)}.accs>div{flex:1;min-width:0;font-size:14px}.accs small{display:block;color:var(--tx2)}.accs button{padding:7px 10px;font:700 12px var(--fd);letter-spacing:.1em;color:var(--tx);background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--rad);cursor:pointer}#acctb h4{margin-top:14px}.sset{width:min(100%,640px);background:var(--pn);border:1px solid var(--ln);border-top:3px solid var(--ac);border-radius:4px;padding:16px 18px}.sset h4{margin:0 0 4px;font:700 13px system-ui;letter-spacing:.24em;color:var(--mu)}
 .ssc{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.ssc .ch{flex:1 1 200px;width:auto;flex-direction:row;justify-content:flex-start;gap:14px;padding:14px 18px;font:700 15px system-ui}.ssc .ch svg{width:40px;max-height:48px}.ssc .ch small{display:block;font:600 11px system-ui;letter-spacing:.14em;color:var(--mu)}
 .ssc .ch.on{border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac);background:var(--pn2)}.ssc .ch.on::after{content:"✓";margin-left:auto;color:var(--ac2);font-size:18px}
 .hgrp{display:block;margin:8px 0 0;font:700 11px "Barlow Condensed";letter-spacing:.3em;color:#ffffff66}.hgrp:first-child{margin-top:0}
@@ -2079,7 +2079,7 @@ const em=e=>{const c=(e&&e.code)||'';return ERR[c]||(c.includes('network')?ERR['
 async function boot(){if(fb)return fb;if(booting)return booting;
  booting=FB.load().then(f=>{if(window.PAF_EMU){f.Au.connectAuthEmulator(f.auth,PAF_EMU.auth,{disableWarnings:true});f.F.connectFirestoreEmulator(f.db,PAF_EMU.fsHost,PAF_EMU.fsPort);}   // test hook: the local Firebase emulators
   fb=f;f.Au.onAuthStateChanged(f.auth,u=>onUser(u).catch(e=>{S.err=em(e);render();}));return f;}).catch(e=>{booting=null;throw e;});return booting;}
-async function onUser(u){S.user=u||null;if(u&&S.claiming)return;S.prof=null;if(!u){S.mode='out';S.tab='in';remember(null);render();label();return;}
+async function onUser(u){S.user=u||null;if(u&&S.claiming)return;S.prof=null;C.heads=null;C.pick=null;if(!u){S.mode='out';S.tab='in';remember(null);render();label();return;}
  S.mode='wait';render();try{const s=await fb.F.getDocFromServer(fb.F.doc(fb.db,'users',u.uid));S.prof=s.exists()?s.data():null;}catch(e){S.err=em(e);}
  S.mode=localDel()===u.uid?'del':S.prof?'in':'name';remember({u:S.prof&&S.prof.username,e:u.email});render();label();}
 const localDel=()=>{try{return localStorage.getItem(DELKEY);}catch(e){return null;}};
@@ -2112,8 +2112,52 @@ async function purge(u){const F=fb.F,db=fb.db;try{localStorage.setItem(DELKEY,u.
  for(let i=0;i<CLOUD_SLOTS;i++){const h=F.doc(db,'users',u.uid,'careers',String(i)),s=await F.getDoc(h);if(!s.exists())continue;const P=await F.getDocs(F.collection(db,'users',u.uid,'careers',String(i),'parts'));for(const d of P.docs)await F.deleteDoc(d.ref);await F.deleteDoc(h);}
  const pr=await F.getDoc(F.doc(db,'users',u.uid));const b=F.writeBatch(db);if(pr.exists()){b.delete(F.doc(db,'users',u.uid));b.delete(F.doc(db,'usernames',pr.data().username));}await b.commit();
  await fb.Au.deleteUser(u);try{localStorage.removeItem(DELKEY);}catch(e){}remember(null);S.prof=null;}
+// ---- cloud careers: five cloud slots, each a small head (summary + revision) plus the save split into immutable parts.
+// Nothing moves unless the player presses Upload or Download. A head only ever points at parts that are fully written, and
+// whatever a transfer would overwrite (on the device or in the cloud) goes to this device's recovery list first.
+const PART=350000,C={heads:null,pick:null};
+const hash=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);};
+const rid=n=>{const a='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',r=crypto.getRandomValues(new Uint8Array(n));return[...r].map(x=>a[x%62]).join('');};
+const cref=(...p)=>fb.F.doc(fb.db,'users',fb.auth.currentUser.uid,'careers',...p);
+const blob=p=>{const q=JSON.parse(saveJSON(p));delete q.cloud;delete q.slot;return JSON.stringify(q);};
+const sumOf=(p,j)=>{const c=p.draft?club(p.team):null;return{n:`${p.first} ${p.last}`.slice(0,60),lvl:p.lvl|0,ovr:ovr(p.att,p.style)|0,team:c?c.ab:'',yr:p.season?p.season.year|0:0,len:j.length,h:hash(j)};};
+async function heads(){const F=fb.F;C.heads=await Promise.all([...Array(CLOUD_SLOTS).keys()].map(async i=>{const s=await F.getDoc(cref(String(i)));return s.exists()?s.data():null;}));}
+async function fetchSave(h,k){const F=fb.F;let j='';for(const id of h.parts){const s=await F.getDoc(cref(String(k),'parts',id));if(!s.exists())throw{code:'cloud-broken'};j+=s.data().d;}
+ if(j.length!==h.sum.len||hash(j)!==h.sum.h)throw{code:'cloud-broken'};return j;}
+async function tidy(k,keep){const F=fb.F,P=await F.getDocs(F.collection(fb.db,'users',fb.auth.currentUser.uid,'careers',String(k),'parts'));for(const d of P.docs)if(!d.id.startsWith(keep+'_'))await F.deleteDoc(d.ref).catch(()=>{});}   // leftovers of replaced or interrupted uploads
+const linked=k=>[...Array(NSLOT).keys()].map(i=>loadProf(i)).find(p=>p&&p.cloud&&p.cloud.s===k&&C.heads[k]&&p.cid===C.heads[k].careerId);
+async function upload(i,k){const F=fb.F,p=loadProf(i);if(!p)return;const h=C.heads[k];
+ if(h&&h.careerId!==p.cid){if(!confirm(`Replace "${h.sum.n}" in cloud slot ${k+1} with "${p.first} ${p.last}"? A copy of the cloud career is kept in this device's recovery list.`))return;REC.keep(await fetchSave(h,k).catch(()=>null));await F.deleteDoc(cref(String(k)));}
+ else if(h&&!(p.cloud&&p.cloud.s===k&&p.cloud.rev===h.rev))throw{code:'cloud-newer'};
+ if(!p.cid){p.cid=rid(20);saveProf(p);}
+ const j=blob(p),gen=rid(12),ids=[];if(j.length>64*PART)throw{code:'cloud-big'};for(let n=0;n*PART<j.length||n===0;n++){const id=`${gen}_car_${n}`;await F.setDoc(cref(String(k),'parts',id),{d:j.slice(n*PART,(n+1)*PART)});ids.push(id);}
+
+ let rev;try{rev=await F.runTransaction(fb.db,async t=>{const s=await t.get(cref(String(k))),cur=s.exists()?s.data():null;
+   if(cur&&(cur.careerId!==p.cid||!p.cloud||cur.rev!==p.cloud.rev))throw{code:'cloud-newer'};   // someone else wrote this slot meanwhile
+   const r=cur?cur.rev+1:1;t.set(cref(String(k)),{careerId:p.cid,rev:r,gen,parts:ids,fmt:SAVE_FMT,gameVer:GAME_VER,sum:sumOf(p,j),updatedAt:F.serverTimestamp(),...(h&&h.careerId!==p.cid?{replaced:true}:{})});return r;});}
+ catch(e){for(const id of ids)await F.deleteDoc(cref(String(k),'parts',id)).catch(()=>{});throw e;}   // the head did not change: drop only the parts just written
+ const q=loadProf(i);q.cloud={s:k,rev};saveProf(q);await tidy(k,gen);await heads();S.msg=`Uploaded "${p.first} ${p.last}" to cloud slot ${k+1}.`;}
+async function download(k){const h=C.heads[k];if(!h)return;const j=await fetchSave(h,k);let p;try{p=JSON.parse(j);}catch(e){throw{code:'cloud-broken'};}
+ p.v===1||(()=>{throw{code:'cloud-broken'};})();if(p.sv!==SAVE_FMT)throw{code:'cloud-old'};
+ const L=[...Array(NSLOT).keys()],same=L.find(i=>{const q=loadProf(i);return q&&q.cid===h.careerId;});let i=same;
+ if(same!=null){const q=loadProf(same);if(q.cloud&&q.cloud.rev===h.rev&&q.cloud.s===k){S.msg='This device already has the latest cloud copy.';return;}
+  if(!confirm(`Replace "${q.first} ${q.last}" on this device (slot ${same+1}) with the cloud copy? The device copy is kept in the recovery list.`))return;REC.keep(saveJSON(q));}
+ else{i=L.find(x=>!loadProf(x));if(i==null){S.err='All 5 slots on this device are in use. Delete a career there first.';return;}}
+ p.cid=h.careerId;p.cloud={s:k,rev:h.rev};p.slot=i;if(!saveProf(p)||!loadProf(i))throw{code:'cloud-broken'};S.msg=`Downloaded "${p.first} ${p.last}" to slot ${i+1} on this device.`;}
+async function cdel(k){const h=C.heads[k];if(!h||!confirm(`Delete "${h.sum.n}" from cloud slot ${k+1}? A copy is kept in this device's recovery list.`))return;
+ REC.keep(await fetchSave(h,k).catch(()=>null));await fb.F.deleteDoc(cref(String(k)));await tidy(k,'~');await heads();S.msg=`Cloud slot ${k+1} cleared.`;}
+Object.assign(ERR,{'cloud-newer':'The cloud copy changed since this device last synced it. Download it first, or upload to another cloud slot.','cloud-broken':'That cloud save is incomplete or damaged, so nothing was changed. Upload it again from a device that has it.',
+ 'cloud-old':'That cloud save is from an older save format and cannot be used.','cloud-big':'This career is too large to upload.','permission-denied':'The cloud refused this. Make sure your email is verified, then press "I have verified it".'});
+Object.assign(A,{cload:()=>run(heads),up:d=>{C.pick=+d.i;render();},upto:d=>{const i=C.pick;C.pick=null;run(()=>upload(i,+d.k));},upx:()=>{C.pick=null;render();},
+ down:d=>run(()=>download(+d.k)),cdel:d=>run(()=>cdel(+d.k))});
+function cloudHTML(){if(!C.heads)return`<h4>CLOUD CAREERS</h4>${btn('cload','Show my cloud careers')}`;const loc=[...Array(NSLOT).keys()].map(i=>[i,loadProf(i)]).filter(x=>x[1]);
+ const row=(h,k)=>h?`<b>${esc(h.sum.n)}</b> · LVL ${h.sum.lvl} · ${h.sum.ovr} OVR${h.sum.team?' · '+esc(h.sum.team):''}<small> rev ${h.rev}${h.updatedAt&&h.updatedAt.toDate?' · '+h.updatedAt.toDate().toLocaleString():''}</small>`:'<i>Empty</i>';
+ if(C.pick!=null){const p=loadProf(C.pick);return`<h4>UPLOAD "${esc(p?p.first+' '+p.last:'')}" TO…</h4>${C.heads.map((h,k)=>btn('upto',`Cloud slot ${k+1}: ${h?'replace '+esc(h.sum.n)+(p&&h.careerId===p.cid?' (update)':''):'empty'}`,'',` data-k="${k}"`)).join('')}${btn('upx','Cancel')}`;}
+ return`<h4>CLOUD CAREERS (${C.heads.filter(Boolean).length}/5)</h4>${C.heads.map((h,k)=>`<div class="accs"><span>${k+1}</span><div>${row(h,k)}</div>${h?`<button data-aa="down" data-k="${k}"${S.busy?' disabled':''}>Download</button><button data-aa="cdel" data-k="${k}"${S.busy?' disabled':''}>✕</button>`:''}</div>`).join('')}
+ <h4>ON THIS DEVICE</h4>${loc.length?loc.map(([i,p])=>`<div class="accs"><span>${i+1}</span><div><b>${esc(p.first)} ${esc(p.last)}</b> · LVL ${p.lvl}${p.cloud?`<small> linked to cloud slot ${p.cloud.s+1}</small>`:''}</div><button data-aa="up" data-i="${i}"${S.busy?' disabled':''}>Upload</button></div>`).join(''):'<p class="note">No careers on this device.</p>'}
+ ${btn('cload','Refresh')}<p class="note">Uploads and downloads happen only when you press them. Anything they replace is kept in the recovery list on the Careers screen.</p>`;}
 // ---- view
-const btn=(a,l,cls='')=>`<button class="acb ${cls}" data-aa="${a}"${S.busy?' disabled':''}>${l}</button>`;
+const btn=(a,l,cls='',x='')=>`<button class="acb ${cls}" data-aa="${a}"${x}${S.busy?' disabled':''}>${l}</button>`;
 const fld=(id,l,t='text',ac='',val='')=>`<label>${l}<input id="${id}" type="${t}" autocomplete="${ac}" value="${esc(val)}" ${t==='checkbox'?'':'maxlength="120"'}></label>`;
 const PRIV=`<h4>PRIVACY NOTICE</h4><p class="note">An account is optional: guest play keeps everything on this device.</p>
  <p class="note"><b>What we store</b> if you create one: your email address, your username, the date you joined and, when cloud saves arrive, the career saves you choose to upload. Passwords are handled by Google's Firebase Authentication and are never seen or stored by PAF.</p>
@@ -2130,7 +2174,7 @@ function render(){const b=$m('acctb');if(!b)return;const u=S.user,msg=(S.err?`<p
  else if(S.mode==='name')h=`<p class="note">Signed in as <b>${esc(u.email)}</b>. Choose your username to finish setting up the account.</p><div class="fld2 acf">${fld('acun','Username','text','username',S.pend||'')}</div>${btn('claim','Save username','pri2')}${btn('signout','Sign out')}${btn('delask','Delete this account')}`;
  else if(S.mode==='in')h=`<div class="acid"><b>${esc(S.prof.username)}</b><span>${esc(u.email)}</span><em class="${u.emailVerified?'ok':'no'}">${u.emailVerified?'✓ Email verified':'Email not verified yet'}</em></div>
   ${u.emailVerified?'':`<p class="note">Open the link we emailed you. Cloud saves will need a verified email.</p>${btn('resend','Resend verification email')}${btn('recheck','I have verified it')}`}
-  <p class="note">Cloud saves are coming in a later update. Your careers stay on this device until then.</p>${btn('signout','Sign out')}${btn('privacy','Privacy notice')}${btn('delask','Delete account')}`;
+  ${u.emailVerified?cloudHTML():'<p class="note">Verify your email to use cloud careers.</p>'}${btn('signout','Sign out')}${btn('privacy','Privacy notice')}${btn('delask','Delete account')}`;
  else if(S.mode==='delask'){const want=S.prof?S.prof.username:'delete';h=`<h4>DELETE ACCOUNT</h4><p class="note">This permanently deletes your username, your profile and every career saved in the cloud for this account, then the login itself. <b>Careers saved on this device are not touched.</b></p>
   <div class="fld2 acf">${fld('acdty',`Type ${esc(want)} to confirm`,'text','off')}${fld('acdpw','Password','password','current-password')}</div>${btn('del','Delete my account permanently','danger')}${btn('delcancel','Cancel')}`;}
  else if(S.mode==='del')h=`<p class="acerr">An account deletion on this device did not finish. Finish it to remove the remaining cloud data.</p><div class="fld2 acf">${fld('acdty',`Type ${esc(S.prof?S.prof.username:'delete')} to confirm`,'text','off')}${fld('acdpw','Password','password','current-password')}</div>${btn('del','Finish deleting the account','danger')}${btn('signout','Sign out')}`;
@@ -2138,7 +2182,7 @@ function render(){const b=$m('acctb');if(!b)return;const u=S.user,msg=(S.err?`<p
 function label(){const e=$m('macsub');if(!e)return;const k=known();e.textContent=S.prof?`Signed in as ${S.prof.username}`:k&&k.u?`Signed in as ${k.u}`:k?'Signed in · finish setup':'Guest · optional online account';}
 function open(){show('acct');if(!fb){S.mode='loading';render();boot().catch(()=>{S.mode='fail';render();});}else render();}
 // a device that was signed in before reconnects in the background (guests never load Firebase)
-function init(){label();$m('acctb').addEventListener('click',e=>{const t=e.target.closest('[data-aa]');if(!t)return;e.preventDefault();const a=t.dataset.aa;if(a==='tab')return A.tab(t.dataset.t);if(a==='retry')return open();if(A[a])A[a]();});
+function init(){label();$m('acctb').addEventListener('click',e=>{const t=e.target.closest('[data-aa]');if(!t)return;e.preventDefault();const a=t.dataset.aa;if(a==='tab')return A.tab(t.dataset.t);if(a==='retry')return open();if(A[a])A[a](t.dataset);});
  $m('acctb').addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.tagName!=='INPUT')return;e.preventDefault();e.stopPropagation();const p=$m('acctb').querySelector('.pri2,.danger');if(p)p.click();});
  if(known()||localDel())setTimeout(()=>boot().catch(()=>{}),1500);}
 return{init,open,state:()=>S,nameOk,boot};})();
@@ -2150,6 +2194,7 @@ const REC=(()=>{let dbp=null;const db=()=>dbp||(dbp=new Promise((ok,no)=>{try{co
   slot:i=>tx('readonly',st=>st.get('slot'+i)),
   async trash(i,j){clearTimeout(T[i]);await tx('readwrite',st=>{st.put({id:'del'+Date.now(),i,j,at:Date.now()});st.delete('slot'+i);});const all=(await tx('readonly',st=>st.getAll()))||[];const D=all.filter(r=>r.id.startsWith('del')).sort((a,b)=>b.at-a.at);for(const r of D.slice(5))await tx('readwrite',st=>st.delete(r.id));},
   deleted:async()=>((await tx('readonly',st=>st.getAll()))||[]).filter(r=>r.id.startsWith('del')).sort((a,b)=>b.at-a.at),
+  keep:j=>j&&tx('readwrite',st=>st.put({id:'del'+Date.now(),i:-1,j,at:Date.now()})),   // a copy that a cloud transfer replaced
   drop:id=>tx('readwrite',st=>st.delete(id))};})();
 
 let PROF=null;

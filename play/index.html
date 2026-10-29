@@ -192,7 +192,7 @@
 .prs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.prs button{font:700 16px "Barlow Condensed"!important;letter-spacing:.02em!important;text-transform:none;background:#1f1f23!important;border:1px solid #ffffff22!important;padding:10px 14px!important}.prs button:hover{border-color:var(--ac2)!important}.tg{display:flex;gap:8px;align-items:center;font:600 15px "Barlow Condensed";color:#ddd}
 .cbr .pvbox{height:min(56vh,500px)}.cams{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:6px 0}.cams button{font:600 13px "Barlow Condensed"!important;letter-spacing:.06em!important;background:#1f1f23!important;border:1px solid #ffffff1a!important;padding:4px 10px!important}.cams .on{border-color:var(--ac2)!important}
 .cbfoot{width:min(100%,1320px);display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;border-top:1px solid #ffffff1a;padding-top:10px}.cbfoot .mrow{font-size:18px!important;padding:9px 18px!important}#cerr{flex:1;color:var(--err);font:600 15px "Barlow Condensed"}
-#sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;padding-bottom:50px}
+#srec{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}#srec .hgrp{width:100%}#sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;padding-bottom:50px}
 .slot{position:relative;text-align:left;display:flex!important;flex-direction:column;gap:8px;background:linear-gradient(110deg,color-mix(in srgb,var(--j,#222) 45%,#111),#10151c 65%)!important;border:1px solid #ffffff18!important;border-left:4px solid var(--a,#555)!important;padding:12px 14px!important;letter-spacing:0!important;text-transform:none;color:#fff!important;min-height:120px;transition:transform .12s,box-shadow .12s}
 .slot:hover,.slot.hv{transform:translateY(-2px);box-shadow:0 0 0 2px var(--ac2)}.slot>small{font:700 11px "Barlow Condensed";letter-spacing:.3em;color:#ffffff99}
 .slot.empty{background:#101012!important;border:1px dashed #ffffff33!important;align-items:center;justify-content:center}.slot.empty b{font:800 22px "Barlow Condensed";color:#ccc}.slot.empty span{color:#666;font:600 13px "Barlow Condensed"}
@@ -550,7 +550,7 @@ body.cine #tc,body.cine #phud,body.cine #xphud{display:none!important}
 <div class="brow"><div class="otc" id="dotc"></div><div class="prev" id="dprev"></div></div></div>
 <div id="dreveal" hidden><div class="rk" id="drk"></div><div class="rgrid"><div class="pvbox" id="pvd"></div><div class="rinfo" id="dinfo"></div></div><button class="mrow pri2" id="dgo">Begin Your Career</button></div>
 <button id="dskip">Skip to my pick ›</button></div>
-<div id="slots" class="ov scr mad" hidden><div class="vt">//CAREER · PLAYERS</div><div class="cbtop"><h1>Select Player</h1><div class="sub" style="font:600 14px 'Barlow Condensed';letter-spacing:.2em;color:#aaa">10 SLOTS · EACH WITH ITS OWN CAREER</div></div>
+<div id="slots" class="ov scr mad" hidden><div class="vt">//CAREER · PLAYERS</div><div class="cbtop"><h1>Select Player</h1><div class="sub" style="font:600 14px 'Barlow Condensed';letter-spacing:.2em;color:#aaa">5 SLOTS · EACH WITH ITS OWN CAREER</div></div><div id="srec" class="srec" hidden></div>
 <div class="cbgrid"><div id="sgrid"></div><div class="cbr"><div class="pvbox" id="pvsl"></div><div class="pvi" id="spvi"></div></div></div>
 <div class="hints"><button id="sback"><i class="kp" data-p="back"></i> Back</button></div></div>
 <canvas id="pv3"></canvas>
@@ -2046,12 +2046,25 @@ function styleAt(i){const[, ,up,dn]=STYLES[i],two=i===7,a={};for(const k of AK)a
  for(let n=0;diff&&n<5000;n++){const k=free[n%free.length],st=Math.sign(diff);if(a[k]+st<A_MIN||a[k]+st>80)continue;a[k]+=st;diff-=st;}return a;}
 const ovr=(a,st)=>{let t=0,w=0;for(const k of AK){const x=STYLES[st][2].includes(k)?3:1;t+=a[k]*x;w+=x;}return Math.round(t/w);};   // weighted to what the playstyle is for
 // ---------- the saved player (localStorage; version field so career progression can extend it) ----------
-const PKEY='rafCareerPlayer',SKC=[0xf1c9a5,0xe0b48a,0xc68642,0x8d5524,0x5c3a21,0x3b2414],GLC=[null,0xffffff,0x111111,0xffd23f,0xff5a1f],CLC=[0x111111,0xffffff,0xff5a1f,0x2a6fdb];
+const PKEY='pafCareer',SAVE_FMT=2,SKC=[0xf1c9a5,0xe0b48a,0xc68642,0x8d5524,0x5c3a21,0x3b2414],GLC=[null,0xffffff,0x111111,0xffd23f,0xff5a1f],CLC=[0x111111,0xffffff,0xff5a1f,0x2a6fdb];
 // ---------- 10 player slots: every slot is its own storage key; a profile always saves back into the slot it came from ----------
-const NSLOT=10,skey=i=>PKEY+'#'+i;let SLOT=0;
-function loadProf(i=SLOT){try{const p=JSON.parse(localStorage.getItem(skey(i))||'null');if(p)p.slot=i;if(p&&p.v===1&&p.att&&AK.every(k=>p.att[k]>=A_MIN&&p.att[k]<=100))return normProf(p);}catch(e){}return null;}
-function saveProf(p){try{const i=p.slot??SLOT;p.slot=i;localStorage.setItem(skey(i),JSON.stringify(p));return true;}catch(e){return false;}}
-function migrateSlots(){try{const old=localStorage.getItem(PKEY);if(old){if(!localStorage.getItem(skey(0)))localStorage.setItem(skey(0),old);localStorage.removeItem(PKEY);}}catch(e){}}   // the old single save becomes slot 1
+const NSLOT=5,skey=i=>PKEY+'#'+i,okSlot=i=>Number.isInteger(i)&&i>=0&&i<NSLOT;let SLOT=0;   // exactly five careers: every read, write and delete goes through okSlot
+function loadProf(i=SLOT){if(!okSlot(i))return null;try{const p=JSON.parse(localStorage.getItem(skey(i))||'null');if(p)p.slot=i;if(p&&p.v===1&&p.sv===SAVE_FMT&&p.att&&AK.every(k=>p.att[k]>=A_MIN&&p.att[k]<=100))return normProf(p);}catch(e){}return null;}
+// the saved form leaves out season.aw.cache (the awards evaluation, rebuilt by awEval on first use: same inputs, same result)
+const saveJSON=p=>JSON.stringify(p,function(k,v){return k==='cache'&&this&&this.pg&&this.done?undefined:v;});
+function saveProf(p){const i=p.slot??SLOT;if(!okSlot(i))return false;p.slot=i;p.sv=SAVE_FMT;let ok=false;const j=saveJSON(p);try{localStorage.setItem(skey(i),j);ok=true;}catch(e){}REC.mirror(i,j);return ok;}   // the IndexedDB mirror is written even if localStorage is full
+// one-time reset of the pre-5-slot playtest saves: removes ONLY the old career keys (input mode and touch layout stay)
+function legacyWipe(){try{if(localStorage.getItem('pafSaveFmt'))return;for(let i=0;i<10;i++)localStorage.removeItem('rafCareerPlayer#'+i);localStorage.removeItem('rafCareerPlayer');localStorage.setItem('pafSaveFmt',String(SAVE_FMT));}catch(e){}}
+// ---------- recovery copies (IndexedDB): the last good save of every slot, and the newest 5 deleted careers ----------
+const REC=(()=>{let dbp=null;const db=()=>dbp||(dbp=new Promise((ok,no)=>{try{const r=indexedDB.open('paf-recovery',1);r.onupgradeneeded=()=>r.result.createObjectStore('saves',{keyPath:'id'});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);}catch(e){no(e);}}));
+ const tx=(mode,f)=>db().then(d=>new Promise((ok,no)=>{const t=d.transaction('saves',mode),st=t.objectStore('saves'),r=f(st);t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error);})).catch(()=>null);
+ const T={};
+ return{mirror(i,j){clearTimeout(T[i]);T[i]=setTimeout(()=>tx('readwrite',st=>st.put({id:'slot'+i,i,j,at:Date.now()})),800);},   // coalesced: a burst of saves writes once
+  slot:i=>tx('readonly',st=>st.get('slot'+i)),
+  async trash(i,j){clearTimeout(T[i]);await tx('readwrite',st=>{st.put({id:'del'+Date.now(),i,j,at:Date.now()});st.delete('slot'+i);});const all=(await tx('readonly',st=>st.getAll()))||[];const D=all.filter(r=>r.id.startsWith('del')).sort((a,b)=>b.at-a.at);for(const r of D.slice(5))await tx('readwrite',st=>st.delete(r.id));},
+  deleted:async()=>((await tx('readonly',st=>st.getAll()))||[]).filter(r=>r.id.startsWith('del')).sort((a,b)=>b.at-a.at),
+  drop:id=>tx('readwrite',st=>st.delete(id))};})();
+
 let PROF=null;
 // in the match: ratings onto the player's doll, skin / gloves / cleats onto its parts, number and name onto the jersey
 // ================= BUILD MODEL: biometrics, caps, badges, equipment (one place for every calculation) =================
@@ -2402,11 +2415,19 @@ function slotsUI(){show('slots');const L=[...Array(NSLOT).keys()].map(i=>[i,load
   const c=p.draft?club(p.team):null,S=p.season,rec=S?standings(S).find(x=>x.i===p.team):null,C=p.career;
   return`<button class="slot" data-i="${i}" style="--j:${c?hx(c.jer):'#2a2a2e'};--a:${c?hx(c.acc):'#555'}"><small>SLOT ${i+1}</small><div class="sh"><span class="ic3">${c?c.ic:'?'}</span><div><b>${esc(p.first)} ${esc(p.last)}</b><span>#${p.num} · ${tcase(STYLES[p.style][0])}</span></div><em>${ovr(p.att,p.style)}<small>OVR</small></em></div>
    <div class="ss"><span>LVL <b>${p.lvl}</b></span><span>${c?c.ab:'UNDRAFTED'}</span><span>${S?`S${S.year} ${S.week<20?'WK '+(S.week+1):S.champ!=null?'FINAL':'PO'}`:'—'}</span><span>${rec?`${rec.w}-${rec.l}${rec.t?'-'+rec.t:''}`:'0-0'}</span><span>${C.gp} GP</span><span>${(C.pyd|0)+(C.rush|0)+(C.recy|0)} YDS</span><span>${(C.ptd|0)+(C.rtd|0)+(C.rectd|0)+(C.dtd|0)} TD</span><span>${p.titles?'🏆 '+p.titles:''}</span></div><i class="del" data-del="${i}" title="Delete this player">✕</i></button>`;}).join('');
- const first=L.find(x=>x[1]);slotPrev(first?first[0]:-1,first&&first[1]);}
+ const first=L.find(x=>x[1]);slotPrev(first?first[0]:-1,first&&first[1]);recUI(L);}
+// recovery: a slot whose save vanished or broke (its mirror is still there), and careers deleted on purpose (newest 5)
+async function recUI(L){const out=[];for(const[i,p]of L)if(!p){const m=await REC.slot(i);if(m){const q=prevOf(m.j);if(q)out.push(`<button class="mrow" data-rs="${i}">Restore slot ${i+1}: ${esc(q)} (last saved ${new Date(m.at).toLocaleString()})</button>`);}}
+ for(const d of await REC.deleted()){const q=prevOf(d.j);if(q)out.push(`<button class="mrow" data-rd="${d.id}">Recover deleted: ${esc(q)} (deleted ${new Date(d.at).toLocaleString()})</button>`);}
+ const box=$m('srec');if(box){box.innerHTML=out.length?`<small class="hgrp">RECOVERY</small>${out.join('')}`:'';box.hidden=!out.length;}}
+function prevOf(j){try{const p=JSON.parse(j);return`${p.first} ${p.last} · LVL ${p.lvl}`;}catch(e){return null;}}
+async function recRestore(j){const L=[...Array(NSLOT).keys()].filter(i=>!loadProf(i));if(!L.length){alert('All 5 slots are in use. Delete a career first to recover this one.');return false;}let p;try{p=JSON.parse(j);}catch(e){return false;}p.slot=L[0];p.sv=SAVE_FMT;if(!saveProf(p))return false;return L[0];}
 function slotPrev(i,p){if(!p){$m('spvi').innerHTML='<p class="mutd">Pick an empty slot to create a player. Every slot keeps its own career, club, season and progress.</p>';$m('pvsl').innerHTML='';return;}
  $m('spvi').innerHTML=pviHTML(p);pvShow('pvsl',p);for(const b of document.querySelectorAll('.slot'))b.classList.toggle('hv',+b.dataset.i===i);}
 {$m('sgrid').addEventListener('pointerover',e=>{const b=e.target.closest('.slot');if(b&&!b.classList.contains('empty')&&!b.classList.contains('hv'))slotPrev(+b.dataset.i,loadProf(+b.dataset.i));});
- $m('sgrid').onclick=e=>{const del=e.target.closest('[data-del]');if(del){const i=+del.dataset.del,p=loadProf(i);if(p&&confirm(`Delete ${p.first} ${p.last} (slot ${i+1})? This cannot be undone.`)){try{localStorage.removeItem(skey(i));}catch(x){}if(PROF&&PROF.slot===i)PROF=null;slotsUI();}return;}
+ $m('srec').onclick=async e=>{const a=e.target.closest('[data-rs]'),d=e.target.closest('[data-rd]');if(a){const i=+a.dataset.rs,m=await REC.slot(i);if(m&&!loadProf(i)){let p;try{p=JSON.parse(m.j);}catch(x){}if(p){p.slot=i;saveProf(p);}}slotsUI();}
+  else if(d){const all=await REC.deleted(),r=all.find(x=>x.id===d.dataset.rd);if(r){const s2=await recRestore(r.j);if(s2!==false)await REC.drop(r.id);}slotsUI();}};
+ $m('sgrid').onclick=async e=>{const del=e.target.closest('[data-del]');if(del){const i=+del.dataset.del,p=loadProf(i);if(p&&confirm(`Delete ${p.first} ${p.last} (slot ${i+1})? A recovery copy is kept on this device (newest 5 deleted careers).`)){await REC.trash(i,saveJSON(p));try{localStorage.removeItem(skey(i));}catch(x){}if(PROF&&PROF.slot===i)PROF=null;slotsUI();}return;}
   const b=e.target.closest('.slot');if(!b)return;SLOT=+b.dataset.i;PROF=loadProf(SLOT);HTAB='over';if(PROF){show('car');carUI();}else openCre(true);};   // each slot opens its own save
  $m('sback').onclick=()=>show(NAVFROM);}
 // ================= THREE-STAGE CREATOR: 1 Biometrics · 2 Build (playstyle, ratings, badges) · 3 Equipment · Review =================
@@ -2608,8 +2629,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.31';
+const GAME_VER='3.32';
 const PATCH=[
+ {version:'3.32',title:'Five Career Slots',date:'2026-10-29',changes:{Career:['Career mode now has 5 save slots (playtest saves from earlier versions were reset)','Every career keeps a recovery copy on this device: restore a lost slot or one of your 5 most recently deleted careers from the Select Player screen','Saves are about half the size: the awards cache is rebuilt on load instead of stored']}},
  {version:'3.31',title:'Build Lock',date:'2026-10-29',changes:{Career:['Height, weight, wingspan, playstyle and starting ratings are locked until your player reaches Level 20','Name, number, equipment, appearance and upgrades stay open; the lock lifts the moment you hit Level 20']}},
  {version:'3.30',title:'Rivalries Everywhere',date:'2026-10-29',changes:{Career:['Rivalries now form from season-long competition: close award races, swapping places on the leaderboards, 1st-and-2nd award finishes, close stat races and best-vs-best meetings (played or simulated)','A rivalry can form in your first season; it still needs real evidence (two kinds of competition, a 1-2 award finish or repeated duels)','League rivalries between other players appear in the Rivalries tab']}},
  {version:'3.29',title:'Simulated XP',date:'2026-10-29',changes:{Career:['Simulated games now earn XP: 40% of what your simulated performance would earn in a played game (same stats, objectives and result bonus)','Level-ups and upgrade points from simulated XP work as normal; played games still pay 100%']}},
@@ -4119,7 +4141,7 @@ function resetUps(){const p=PROF;if(!p.paid||!confirm(`Reset all upgrades? You g
 {$m('utabs').onclick=e=>{const b=e.target.closest('[data-ut]');if(b){UTAB=b.dataset.ut;upgTabs();}};$m('ubdg').onclick=e=>{const b=e.target.closest('[data-bf]');if(b){BFLT=b.dataset.bf;bdgUI();}};
  $m('fup').onclick=$m('cupg').onclick=()=>{if(!PROF)return;show('upg');upgUI();upgTabs();pvShow('pvu',PROF);};$m('uback').onclick=()=>{show('car');carUI();};$m('udev').onclick=()=>{develop();bdgCheck(PROF);if(UTAB==='bdg')bdgUI();};$m('ureset').onclick=resetUps;
  $m('ulist').onclick=e=>{const b=e.target.closest('.ur');if(b){USEL=b.dataset.k;upgUI();}};}
-migrateSlots();PROF=null;
+legacyWipe();PROF=null;
 // stamina meter
 // stamina meter (yours)
 {const st=$m('stam').firstElementChild;setInterval(()=>{const v=player.cur.stam??1;st.style.width=v*100+'%';st.style.background=v<.4?'#ff5a4a':'#fff';},120);}

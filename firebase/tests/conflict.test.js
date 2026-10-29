@@ -1,4 +1,5 @@
 const {chromium}=require(process.env.PW||'playwright');const path=require('path'),L=(process.env.PAF_LIBS||'')+'/',FBD=require.resolve('firebase/package.json').replace('package.json','');
+const tc=async(p,sel)=>{const t=await p.evaluate(s=>{const e=document.querySelector(s),pn=e&&e.closest('[data-pane]');return pn&&pn.hidden?pn.dataset.pane:null;},sel);if(t)await p.click(`#acctb [data-aa="atab"][data-t="${t}"]`);return p.click(sel);};   // the account dashboard has tabs: open the one holding the button
 const AU='http://127.0.0.1:9099',FS='http://127.0.0.1:8080/v1/projects/paf-accounts/databases/(default)/documents',PJ='paf-accounts';
 const R={};const ok=(k,v,x)=>{R[k]=!!v;console.log(v?'PASS':'FAIL',k,v?'':(x||''));};
 const adm=(path,opt={})=>fetch(FS+path,{...opt,headers:{Authorization:'Bearer owner','Content-Type':'application/json'}});
@@ -11,7 +12,7 @@ const dev=async(name)=>{const ctx=await b.newContext({viewport:{width:1280,heigh
  const D={p,ctx,ans:true,dlg:[]};p.on('dialog',d=>{D.dlg.push(d.message());D.ans?d.accept():d.dismiss();});
  D.st=()=>p.evaluate(()=>{const s=ACCT.state();return{mode:s.mode,err:s.err,msg:s.msg,busy:s.busy};});
  D.idle=async m=>{for(let i=0;i<200;i++){const s=await D.st();if(!s.busy&&s.mode!=='loading'&&s.mode!=='wait'&&(!m||s.mode===m))return s;await p.waitForTimeout(200);}return D.st();};
- D.fill=async o=>{for(const[k,v]of Object.entries(o))await p.fill('#'+k,v);};D.click=(a,x='')=>p.click(`#acctb [data-aa="${a}"]${x}`);
+ D.fill=async o=>{for(const[k,v]of Object.entries(o))await p.fill('#'+k,v);};D.click=(a,x='')=>tc(p,`#acctb [data-aa="${a}"]${x}`);
  D.act=async(a,x)=>{await D.click(a,x);return D.idle();};
  D.up=async(i,k)=>{await D.click('up',`[data-i="${i}"]`);return D.act('upto',`[data-k="${k}"]`);};
  D.loc=i=>p.evaluate(i=>{const q=loadProf(i);return q&&{n:q.first,cid:q.cid,cloud:q.cloud,lvl:q.lvl};},i);

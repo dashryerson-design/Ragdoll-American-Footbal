@@ -1,4 +1,5 @@
 const {chromium}=require(process.env.PW||'playwright');const path=require('path'),L=(process.env.PAF_LIBS||'')+'/',FBD=require.resolve('firebase/package.json').replace('package.json','');
+const tc=async(p,sel)=>{const t=await p.evaluate(s=>{const e=document.querySelector(s),pn=e&&e.closest('[data-pane]');return pn&&pn.hidden?pn.dataset.pane:null;},sel);if(t)await p.click(`#acctb [data-aa="atab"][data-t="${t}"]`);return p.click(sel);};   // the account dashboard has tabs: open the one holding the button
 const AU='http://127.0.0.1:9099',FS='http://127.0.0.1:8080/v1/projects/paf-accounts/databases/(default)/documents',PJ='paf-accounts';
 const R={};const ok=(k,v,x)=>{R[k]=!!v;console.log(v?'PASS':'FAIL',k,v?'':(x||''));};
 const adm=(q,opt={})=>fetch(FS+q,{...opt,headers:{Authorization:'Bearer owner','Content-Type':'application/json'}});
@@ -13,7 +14,7 @@ await p.evaluate(()=>{setInput('kb');pendMode='kb';SLOT=0;openCre(true);ED.first
 const dlg=[];p.on('dialog',d=>{dlg.push(d.message());d.accept();});
 const st=()=>p.evaluate(()=>{const s=ACCT.state(),u=s.user;return{mode:s.mode,err:s.err,msg:s.msg,busy:s.busy,uid:u&&u.uid,ver:u&&u.emailVerified,prov:u?u.providerData.map(x=>x.providerId).sort().join(','):'',name:s.prof&&s.prof.username};});
 const idle=async m=>{for(let i=0;i<150;i++){const s=await st();if(!s.busy&&s.mode!=='loading'&&s.mode!=='wait'&&(!m||s.mode===m))return s;await p.waitForTimeout(200);}return st();};
-const fill=async o=>{for(const[k,v]of Object.entries(o))await p.fill('#'+k,v);};const act=async(a,x='')=>{await p.click(`#acctb [data-aa="${a}"]${x}`);return idle();};
+const fill=async o=>{for(const[k,v]of Object.entries(o))await p.fill('#'+k,v);};const act=async(a,x='')=>{await tc(p,`#acctb [data-aa="${a}"]${x}`);return idle();};
 const snapL=()=>p.evaluate(()=>JSON.stringify([0,1,2,3,4].map(i=>localStorage.getItem('pafCareer#'+i))));
 const parts=async(u,k)=>((await (await adm(`/users/${u}/careers/${k}/parts`)).json()).documents||[]).length;
 const head=async(u,k)=>{const r=await adm(`/users/${u}/careers/${k}`);return r.status===200?await r.text():null;};
@@ -40,7 +41,7 @@ await fill({acun:'gary_two'});s=await act('claim');ok('otherNameOk',s.mode==='in
 // email/password user with a cloud career links Google
 await p.click('#acctb [data-t="new"]');await fill({acun:'emailer',acem:'e@x.com',acpw:'password1',acpw2:'password1'});await p.check('#acok');s=await act('create');const eUid=s.uid;
 const oob=(await (await fetch(`${AU}/emulator/v1/projects/${PJ}/oobCodes`)).json()).oobCodes;await fetch(oob.find(o=>o.email==='e@x.com').oobLink);await act('recheck');
-await act('cload');await p.click('#acctb [data-aa="up"][data-i="0"]');s=await act('upto','[data-k="0"]');const H0=await head(eUid,0);ok('emailUserUploaded',!!H0,s.err);const L0=await snapL();   // from here on, no sign-in may change a device career
+await act('cload');await tc(p,'#acctb [data-aa="up"][data-i="0"]');s=await act('upto','[data-k="0"]');const H0=await head(eUid,0);ok('emailUserUploaded',!!H0,s.err);const L0=await snapL();   // from here on, no sign-in may change a device career
 await tok('g-e','e@x.com','Emma');s=await act('glink');ok('linkGoogle',s.uid===eUid&&s.prov==='google.com,password'&&s.name==='emailer'&&/linked/.test(s.msg),JSON.stringify(s));
 await act('signout');await tok('g-e','e@x.com','Emma');s=await act('google');
 ok('googleReachesSameAccount',s.mode==='in'&&s.uid===eUid&&s.name==='emailer'&&(await head(eUid,0))===H0);

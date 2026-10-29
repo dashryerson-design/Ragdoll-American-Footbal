@@ -1,4 +1,5 @@
 const {chromium}=require(process.env.PW||'playwright');const path=require('path'),L=(process.env.PAF_LIBS||'')+'/',FBD=require.resolve('firebase/package.json').replace('package.json','');
+const tc=async(p,sel)=>{const t=await p.evaluate(s=>{const e=document.querySelector(s),pn=e&&e.closest('[data-pane]');return pn&&pn.hidden?pn.dataset.pane:null;},sel);if(t)await p.click(`#acctb [data-aa="atab"][data-t="${t}"]`);return p.click(sel);};   // the account dashboard has tabs: open the one holding the button
 const AU='http://127.0.0.1:9099',FS='http://127.0.0.1:8080/v1/projects/paf-accounts/databases/(default)/documents',PJ='paf-accounts';
 const R={};const ok=(k,v)=>{R[k]=v;console.log(v?'PASS':'FAIL',k);};
 const adm=(path,opt={})=>fetch(FS+path,{...opt,headers:{Authorization:'Bearer owner','Content-Type':'application/json'}});
@@ -14,7 +15,7 @@ const snap=()=>p.evaluate(()=>JSON.stringify(Object.keys(localStorage).filter(k=
 ok('guestNoNetwork',gst.length===0);if(gst.length)console.log(gst);await p.evaluate(()=>show('mm'));ok('guestLabel',(await p.textContent('#macsub')).startsWith('Guest'));
 const st=()=>p.evaluate(()=>{const s=ACCT.state();return{mode:s.mode,err:s.err,msg:s.msg,busy:s.busy,prof:s.prof,ver:s.user&&s.user.emailVerified};});
 const idle=async(m)=>{for(let i=0;i<60;i++){const s=await st();if(!s.busy&&s.mode!=='loading'&&s.mode!=='wait'&&(!m||s.mode===m))return s;await p.waitForTimeout(250);}return st();};
-const fill=async o=>{for(const[k,v]of Object.entries(o))await p.fill('#'+k,v);};const click=a=>p.click(`#acctb [data-aa="${a}"]`);
+const fill=async o=>{for(const[k,v]of Object.entries(o))await p.fill('#'+k,v);};const click=a=>tc(p,`#acctb [data-aa="${a}"]`);
 await p.click('#macct');let s=await idle('out');ok('openSignedOut',s.mode==='out'&&await p.isVisible('#acct'));
 await p.click('#acctb [data-t="new"]');
 await fill({acun:'Bad Name',acem:'a@x.com',acpw:'password1',acpw2:'password1'});await p.check('#acok');await click('create');s=await idle();ok('badName',/3-16/.test(s.err)&&s.mode==='out');

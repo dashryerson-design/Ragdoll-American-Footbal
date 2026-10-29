@@ -1,4 +1,5 @@
 const {chromium}=require(process.env.PW||'playwright');const path=require('path'),L=(process.env.PAF_LIBS||'')+'/',FBD=require.resolve('firebase/package.json').replace('package.json','');
+const tc=async(p,sel)=>{const t=await p.evaluate(s=>{const e=document.querySelector(s),pn=e&&e.closest('[data-pane]');return pn&&pn.hidden?pn.dataset.pane:null;},sel);if(t)await p.click(`#acctb [data-aa="atab"][data-t="${t}"]`);return p.click(sel);};   // the account dashboard has tabs: open the one holding the button
 const AU='http://127.0.0.1:9099',FS='http://127.0.0.1:8080/v1/projects/paf-accounts/databases/(default)/documents',PJ='paf-accounts';
 const R={};const ok=(k,v)=>{R[k]=v;console.log(v?'PASS':'FAIL',k);};
 const adm=(path,opt={})=>fetch(FS+path,{...opt,headers:{Authorization:'Bearer owner','Content-Type':'application/json'}});
@@ -12,7 +13,7 @@ let p=await go();p.on('dialog',d=>{R.lastDialog=d.message();(R.dlg=R.dlg||[]).pu
 await p.evaluate(()=>{setInput('kb');pendMode='kb';for(const[i,n]of[[0,'Alpha'],[1,'Bravo']]){SLOT=i;openCre(true);ED.first=n;ED.last='Test';saveCre();}show('mm');});
 const st=()=>p.evaluate(()=>{const s=ACCT.state();return{mode:s.mode,err:s.err,msg:s.msg,busy:s.busy};});
 const idle=async(m)=>{for(let i=0;i<80;i++){const s=await st();if(!s.busy&&s.mode!=='loading'&&s.mode!=='wait'&&(!m||s.mode===m))return s;await p.waitForTimeout(250);}return st();};
-const fill=async o=>{for(const[k,v]of Object.entries(o))await p.fill('#'+k,v);};const click=(a,x='')=>p.click(`#acctb [data-aa="${a}"]${x}`);
+const fill=async o=>{for(const[k,v]of Object.entries(o))await p.fill('#'+k,v);};const click=(a,x='')=>tc(p,`#acctb [data-aa="${a}"]${x}`);
 await p.click('#macct');await idle('out');await p.click('#acctb [data-t="new"]');await fill({acun:'cloud_1',acem:'c@x.com',acpw:'password1',acpw2:'password1'});await p.check('#acok');await click('create');await idle('in');
 ok('noCloudUnverified',(await p.textContent('#acctb')).includes('Verify your email'));
 const oob=(await (await fetch(`${AU}/emulator/v1/projects/${PJ}/oobCodes`)).json()).oobCodes;await fetch(oob.find(o=>o.email==='c@x.com').oobLink);await click('recheck');await idle();

@@ -46,7 +46,10 @@ await t('client-chosen updatedAt is refused',setDoc(cd(A,'alice','2'),head(1,'ge
 await t('update rev 1 -> 2 accepted',setDoc(cd(A,'alice','0'),head(2,'gen0002B')),true);
 await t('stale write (rev 2 again) refused',setDoc(cd(A,'alice','0'),head(2,'gen0003C')),false);
 await t('skipping a revision (2 -> 4) refused',setDoc(cd(A,'alice','0'),head(4,'gen0003C')),false);
-await t('changing careerId refused',setDoc(cd(A,'alice','0'),head(3,'gen0003C',{careerId:'other'})),false);
+await t('changing careerId without replaced refused',setDoc(cd(A,'alice','0'),head(3,'gen0003C',{careerId:'other'})),false);
+await t('replaced must be a boolean',setDoc(cd(A,'alice','0'),head(3,'gen0003C',{careerId:'other',replaced:'yes'})),false);
+await t('replacement with replaced:true and rev+1 accepted (slot 3)',setDoc(cd(A,'alice','3'),head(1)).then(()=>setDoc(cd(A,'alice','3'),head(2,'gen0002B',{careerId:'other',replaced:true}))),true);
+await t('stale replacement (rev 2 again) refused',setDoc(cd(A,'alice','0'),head(2,'gen0003C',{careerId:'other',replaced:true})),false);
 await t('unknown head field refused',setDoc(cd(A,'alice','0'),head(3,'gen0003C',{cheat:1})),false);
 await t('bob cannot read alice\'s career',getDoc(cd(B,'alice','0')),false);
 await t('bob cannot write alice\'s career',setDoc(cd(B,'alice','0'),head(3,'gen0003C')),false);

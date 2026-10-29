@@ -55,7 +55,8 @@ service cloud.firestore {
             && d.rev is int && d.gen is string && d.gen.matches('^[A-Za-z0-9]{8,32}$')
             && d.parts is list && d.parts.size() >= 1 && d.parts.size() <= 64
             && d.fmt is int && d.gameVer is string && d.gameVer.size() <= 12
-            && d.sum is map && d.updatedAt == request.time;
+            && d.sum is map && d.updatedAt == request.time
+            && (!('replaced' in d) || d.replaced is bool);
         }
         allow read: if isUser(uid) && slotOk();
         allow create: if isUser(uid) && verified() && slotOk()
@@ -63,7 +64,8 @@ service cloud.firestore {
         allow update: if isUser(uid) && verified() && slotOk()
           && validHead(request.resource.data)
           && request.resource.data.rev == resource.data.rev + 1
-          && request.resource.data.careerId == resource.data.careerId;
+          // a different career may take the slot only as an explicit replacement (one atomic update, so the old one stays until it commits)
+          && (request.resource.data.careerId == resource.data.careerId || request.resource.data.replaced == true);
         allow delete: if isUser(uid);
 
         match /parts/{part} {

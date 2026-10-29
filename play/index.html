@@ -2601,8 +2601,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.29';
+const GAME_VER='3.30';
 const PATCH=[
+ {version:'3.30',title:'Rivalries Everywhere',date:'2026-10-29',changes:{Career:['Rivalries now form from season-long competition: close award races, swapping places on the leaderboards, 1st-and-2nd award finishes, close stat races and best-vs-best meetings (played or simulated)','A rivalry can form in your first season; it still needs real evidence (two kinds of competition, a 1-2 award finish or repeated duels)','League rivalries between other players appear in the Rivalries tab']}},
  {version:'3.29',title:'Simulated XP',date:'2026-10-29',changes:{Career:['Simulated games now earn XP: 40% of what your simulated performance would earn in a played game (same stats, objectives and result bonus)','Level-ups and upgrade points from simulated XP work as normal; played games still pay 100%']}},
  {version:'3.28',title:'Simulated Stats',date:'2026-10-29',changes:{Career:['Simulated games now give your player real stats: passes, catches, runs, tackles and picks from the simulated game, weighted by your ratings','They count toward your season, career, league leaders and awards, exactly once per game']}},
  {version:'3.27',title:'Awards Night',date:'2026-10-29',changes:{Career:['A 3D end-of-season awards ceremony after the regular season: a lit stage with LED screens, a crowd and the league commissioner presenting real trophies','Rookie, Offensive and Defensive awards (plus any award you win) are handed out on stage; the rest are honoured on the big screen','The MVP gets its own gold trophy, lighting, entrance and celebration','Awards are now finalised when the regular season ends; skip a presentation with Enter or the whole night with Esc']}},
@@ -3067,7 +3068,16 @@ function awWeek(p,S,w){const A=awSeason(S);if(A.done[w])return;A.done[w]=1;   //
   for(const id in L){const T=A.ps[id]||(A.ps[id]=Object.fromEntries([...AWS.map(k=>[k,0]),['gp',0],['tm',{}]]));const c=p.lg.rost[a].includes(id)?a:b,ln=L[id],mg=c===a?r[0]-r[1]:r[1]-r[0];
    for(const k of AWS)T[k]+=ln[k];T.gp++;T.tm[c]=(T.tm[c]||0)+1;(A.pg[id]||(A.pg[id]=[])).push({w,c,mg,v:+lineVal(ln).toFixed(2),o:+offVal(ln).toFixed(2),d:+defVal(ln).toFixed(2),ln});}});
  const E=awEval(p,S,true);A.wk[w]=weeklyHonours(p,S,w);A.snap[w]={};for(const aw of AWARDS)if(E[aw.id])A.snap[w][aw.id]=E[aw.id].rank.slice(0,12).map(x=>x.id);
- achCheck(p,{week:w,S});}
+ rivWeek(p,S,w);achCheck(p,{week:w,S});}
+function rivSeason(p,S,res){const RV=rivEnsure(p),y=S.year,k='season'+y,A=awSeason(S);if(RV.seen[k])return;RV.seen[k]=1;   // once per season, after the award votes are counted
+ for(const r of res){if(!r.votes||r.votes.length<2)continue;const[v1,v2]=[r.votes[0][1],r.votes[1][1]],m=(v1-v2)/Math.max(1,v1);compAdd(p,r.votes[0][0],r.votes[1][0],y,'fin',r.id,0,{pl:2,m:+m.toFixed(2),v:[v1,v2]});if(r.votes[2])compAdd(p,r.votes[0][0],r.votes[2][0],y,'fin',r.id,0,{pl:3,m:1,v:[v1,r.votes[2][1]]});}
+ const wk=Object.keys(A.done).length,el=Object.keys(A.ps).filter(id=>A.ps[id].gp>=Math.max(1,Math.ceil(wk*.5)));
+ for(const st in STATN){const f=x=>st==='td'?x.ptd+x.rectd+x.rtd+x.dtd:x[st],top=el.filter(id=>f(A.ps[id])>0).sort((a,b)=>f(A.ps[b])-f(A.ps[a])).slice(0,2);if(top.length<2)continue;const x=f(A.ps[top[0]]),z=f(A.ps[top[1]]),d=(x-z)/Math.max(1,x);if(d<=RIV_CFG.comp.statClose)compAdd(p,top[0],top[1],y,'close',st,0,{d:+d.toFixed(3),v:[x,z]});}}   // same-category finishes only: rushing vs rushing, passing vs passing
+function rivWeek(p,S,w){const A=awSeason(S),y=S.year,cur=A.snap[w],prev=A.snap[w-1]||null;if(w<2||!cur)return;   // the first weeks are noise
+ for(const aw in cur){const R=cur[aw];if(R.length>=2)compAdd(p,R[0],R[1],y,'race',aw);if(prev&&prev[aw]){const P=prev[aw];for(let i=0;i<Math.min(3,R.length);i++)for(let j=i+1;j<Math.min(3,R.length);j++){const pi=P.indexOf(R[i]),pj=P.indexOf(R[j]);if(pi>=0&&pj>=0&&pi<3&&pj<3&&pi>pj)compAdd(p,R[i],R[j],y,'over',aw);}}}   // close races + every overtake near the top
+ const minGp=Math.max(1,Math.ceil((w+1)*.5)),el=Object.keys(A.ps).filter(id=>A.ps[id].gp>=minGp),SL=A.sl||(A.sl={});
+ for(const k in STATN){const f=x=>k==='td'?x.ptd+x.rectd+x.rtd+x.dtd:x[k],top=el.filter(id=>f(A.ps[id])>0).sort((a,b)=>f(A.ps[b])-f(A.ps[a])).slice(0,2);const old=SL[k];if(old&&top[0]&&old[0]!==top[0]&&old[0]===top[1])compAdd(p,top[0],top[1],y,'lead',k);SL[k]=top;}   // league lead changing hands between the same two
+ S.weeks[w].forEach(([a,b],g)=>{const r=S.res[w][g];if(!r)return;const best=c=>p.lg.rost[c].map(id=>(A.pg[id]||[]).find(x=>x.w===w&&x.c===c)&&[id,(A.pg[id]||[]).find(x=>x.w===w&&x.c===c).v]).filter(Boolean).sort((x,y)=>y[1]-x[1])[0],ba=best(a),bb=best(b);if(ba&&bb){compAdd(p,ba[0],bb[0],y,'h2h','n');if(Math.abs(r[0]-r[1])<=7)compAdd(p,ba[0],bb[0],y,'h2h','cl');}});}   // the best player on each side of every game, played or simulated
 // one value scale, each event counted once: a TD is 6 for whoever scored or threw it (the receiver and the passer are different players)
 const offVal=l=>l.pyd*.04+l.ptd*4-l.ithr*3+l.rush*.1+l.rtd*6+l.recy*.1+l.rec*.4+l.rectd*6,defVal=l=>l.tak*1+l.stop*.5+l.int*5+l.pd*1.5+l.dtd*6,lineVal=l=>offVal(l)+defVal(l);
 // award definitions: eligibility + an evaluation profile. Add / remove awards here only
@@ -3120,7 +3130,7 @@ function awFinal(p,S){const A=awSeason(S);if(A.final)return;const E=awEval(p,S,t
   const R=rng(hsh(S.year,aw.id)),pts={},top=e.rank.slice(0,8);for(let v=0;v<50;v++){const j=Object.fromEntries(Object.keys(aw.w).map(k=>[k,.65+R()*.7]));top.map(c=>({id:c.id,s:e.sc(c.x,j)})).sort((a,b)=>b.s-a.s||(a.id<b.id?-1:1)).slice(0,3).forEach((c,i)=>pts[c.id]=(pts[c.id]||0)+[5,3,1][i]);}
   const V=Object.entries(pts).sort((a,b)=>b[1]-a[1]||e.rank.findIndex(x=>x.id===a[0])-e.rank.findIndex(x=>x.id===b[0])),win=V[0][0],wx=e.rank.find(x=>x.id===win).x;
   res.push({id:aw.id,n:aw.n,win,nm:nmOf(p,win),c:wx.c,role:wx.role,votes:V.slice(0,5),why:awWhy(aw,wx),line:awLine(wx.T,wx.gp)});}
- A.final=res;p.awHist=p.awHist||[];if(!p.awHist.some(h=>h.y===S.year))p.awHist.unshift({y:S.year,res,champ:S.champ});
+ A.final=res;rivSeason(p,S,res);p.awHist=p.awHist||[];if(!p.awHist.some(h=>h.y===S.year))p.awHist.unshift({y:S.year,res,champ:S.champ});
  p.awPrev=p.awPrev||{};p.awPrev[S.year]=Object.fromEntries(Object.keys(A.ps).map(id=>[id,+(lineVal(A.ps[id])/(A.ps[id].gp||1)).toFixed(2)]));for(const y in p.awPrev)if(+y<S.year-1)delete p.awPrev[y];
  achCheck(p,{final:res,S});}
 const awLine=(T,gp)=>{const o=[`${gp} GP`];if(T.att)o.push(`${T.comp}/${T.att} · ${T.pyd} pass yds · ${T.ptd} TD · ${T.ithr} INT`);if(T.rec)o.push(`${T.rec} rec · ${T.recy} yds · ${T.rectd} TD`);if(T.rush)o.push(`${T.rush} rush yds · ${T.rtd} TD`);o.push(`${T.tak} tkl · ${T.int} INT · ${T.pd} PD`);return o.join(' · ');};
@@ -3221,8 +3231,23 @@ function histView(p){const H=p.awHist||[];if(!H.length)return'<p class="note">No
 // every sentence shown are derived from that history on demand, so nothing is ever counted twice; a game id is processed exactly once.
 const RLV=['','Emerging','Heating Up','Bitter Rivals','Legendary'],RCOL=['#9aa8b8','#ffd23f','#ffb23f','#ff6a3d','#ff3b3b'];
 const RIV_CFG={team:{lv:[4,10,20,34],routine:1,routineDecay:.35,close:1.2,tie:1,blowout:.6,po:3.5,elim:2,final:6,streak:1.5,streakCap:4.5,sim:.5},
- pl:{lv:[3.5,8,14,24],perEvent:.6,eventCap:4,int:2,po:1.5,minEvents:2,minGamesForMark:2,nemLv:3}};   // weights: tune here; levels = score thresholds for Emerging / Heating / Bitter / Legendary
-function rivEnsure(p){if(!p.riv)p.riv={v:1,seen:{},tm:{},pl:{}};return p.riv;}   // old saves: an empty history, nothing invented
+ pl:{lv:[3.5,8,14,24],perEvent:.6,eventCap:4,int:2,po:1.5,minEvents:2,minGamesForMark:2,nemLv:3},
+ comp:{raceWk:.3,raceCap:2.4,over:.7,overCap:3.5,mvpW:1,awW:.7,fin12:3,fin12Close:3,fin13:1.2,statLead:.5,statLeadCap:2.5,statClose:.08,statFin:2,h2h:.5,h2hClose:.5,h2hCap:3,minKinds:2}};   // competition weights: award races, lead changes, final placings, close stat finishes, best-vs-best meetings   // weights: tune here; levels = score thresholds for Emerging / Heating / Bitter / Legendary
+function rivEnsure(p){if(!p.riv)p.riv={v:1,seen:{},tm:{},pl:{}};if(!p.riv.comp)p.riv.comp={};return p.riv;}   // comp: season-long competition between two players (added in v3.30; old saves start empty)   // old saves: an empty history, nothing invented
+const rKey=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+const tmOf=(p,id)=>id==='U'?p.team:p.lg&&p.lg.pl[id]?p.lg.pl[id].team:null;
+function compAdd(p,a,b,y,kind,sub,n=1,data){if(!a||!b||a===b||tmOf(p,a)===tmOf(p,b))return;const RV=rivEnsure(p),E=(RV.comp[rKey(a,b)]||(RV.comp[rKey(a,b)]={}))[y]||(RV.comp[rKey(a,b)][y]={});const K=E[kind]||(E[kind]={});if(data){K[sub]=data;return;}K[sub]=(K[sub]||0)+n;}   // club-mates compete for the same awards but are not rivals
+const AWN=id=>(AWARDS.find(a=>a.id===id)||{n:id}).n,STATN={pyd:'Passing Yards',recy:'Receiving Yards',rush:'Rushing Yards',tak:'Tackles',int:'Interceptions',td:'Touchdowns'};
+// a pair's season-long competition -> score, evidence kinds, and sentences (all derived from the stored counts)
+function compScore(p,a,b){const C=RIV_CFG.comp,Y=(rivEnsure(p).comp[rKey(a,b)])||{};let sc=0;const kinds=new Set(),tx=[];let top2=false;
+ for(const y in Y){const E=Y[y];
+  for(const aw in E.race||{}){const x=Math.min(C.raceCap,E.race[aw]*C.raceWk)*(aw==='mvp'?C.mvpW:C.awW);sc+=x;kinds.add('race');tx.push(`${E.race[aw]} week${E.race[aw]>1?'s':''} 1-2 in the ${AWN(aw)} race (S${y})`);}
+  for(const aw in E.over||{}){sc+=Math.min(C.overCap,E.over[aw]*C.over)*(aw==='mvp'?C.mvpW:C.awW);kinds.add('over');tx.push(`traded places ${E.over[aw]}× in the ${AWN(aw)} race (S${y})`);}
+  for(const aw in E.fin||{}){const f=E.fin[aw],w=aw==='mvp'?C.mvpW:C.awW;if(f.pl===2){top2=true;sc+=(C.fin12+C.fin12Close*Math.max(0,1-f.m/.5))*w;tx.push(`finished 1st and 2nd for ${AWN(aw)} (S${y}, ${f.v[0]}-${f.v[1]} votes)`);}else{sc+=C.fin13*w;tx.push(`both top 3 for ${AWN(aw)} (S${y})`);}kinds.add('fin');}
+  for(const k in E.lead||{}){sc+=Math.min(C.statLeadCap,E.lead[k]*C.statLead);kinds.add('lead');tx.push(`swapped the league lead in ${STATN[k]} ${E.lead[k]}× (S${y})`);}
+  for(const k in E.close||{}){const f=E.close[k];sc+=C.statFin*(1-f.d/C.statClose)+.5;kinds.add('stat');tx.push(`${STATN[k]} race went to the wire: ${f.v[0]} vs ${f.v[1]} (S${y})`);}
+  if(E.h2h){const n=E.h2h.n||0,cl=E.h2h.cl||0;sc+=Math.min(C.h2hCap,n*C.h2h+cl*C.h2hClose);kinds.add('h2h');tx.push(`top performers when their teams met ${n}× (S${y}${cl?`, ${cl} close`:''})`);}}
+ return{sc,kinds,tx,top2};}
 function rivLevel(sc,lv){let l=0;for(const t of lv)if(sc>=t)l++;return l;}
 // team: everything derived from the stored meetings
 function rivTeam(p,c){const G=(rivEnsure(p).tm[c]||{g:[]}).g,C=RIV_CFG.team;let w=0,l=0,t=0,sc=0,reg=0,big=null,run=0,best=0;
@@ -3234,7 +3259,10 @@ function rivTeam(p,c){const G=(rivEnsure(p).tm[c]||{g:[]}).g,C=RIV_CFG.team;let 
 // player duels: you vs one specific player
 function rivPl(p,id){const E=(rivEnsure(p).pl[id]||{g:[]}).g,C=RIV_CFG.pl;let me=0,them=0,sc=0;
  for(const e of E){me+=e.me;them+=e.th;sc+=Math.min(C.eventCap,e.me+e.th)*C.perEvent+(e.ev.includes('int')||e.ev.includes('int-')?C.int:0)+(e.po?C.po:0);}
- const lv=E.length?rivLevel(sc,C.lv):0;return{id,g:E,n:E.length,me,them,sc:+sc.toFixed(2),lv,mark:lv>=C.nemLv?'nem':lv>=1&&E.length>=C.minGamesForMark?'riv':null,last:E[E.length-1]||null};}
+ const K=compScore(p,'U',id);sc+=K.sc;const lv=rivLevel(sc,C.lv),ev=E.length>=C.minGamesForMark||K.top2||K.kinds.size+(E.length?1:0)>=RIV_CFG.comp.minKinds;   // evidence: repeated duels, a 1-2 award finish, or two different kinds of competition
+ return{id,g:E,n:E.length,me,them,sc:+sc.toFixed(2),lv:ev?lv:0,mark:!ev||!lv?null:lv>=C.nemLv?'nem':'riv',last:E[E.length-1]||null,comp:K};}
+// two league players (neither is you): the same competition score and evidence rule
+function rivPair(p,a,b){const K=compScore(p,a,b),lv=rivLevel(K.sc,RIV_CFG.pl.lv),ev=K.top2||K.kinds.size>=RIV_CFG.comp.minKinds;return{a,b,sc:+K.sc.toFixed(2),lv:ev?lv:0,comp:K};}
 const rivName=(p,id)=>{const P=p.lg&&p.lg.pl[id];return P?`#${P.num} ${P.first[0]}. ${P.last}`:id;};
 const rivWhen=g=>`Season ${g.y} · ${g.k==='po'?RNAME[g.rd]:'Week '+(g.w+1)}`;
 // statements: only what the saved history supports
@@ -3267,7 +3295,7 @@ function rivSummary(p,op,T0,g,pls0){const T=rivTeam(p,op),B=club(op).name,o={hd:
  o.show=rel||o.pl.some(x=>x.includes('now your'))||Object.keys(pls0).some(pid=>rivPl(p,pid).mark);return o;}
 // pre-drive markers: computed once per match from the service (cleared when the match ends)
 function rivMarks(){if(!MATCH||!PROF)return{pl:{},team:0};if(MATCH.rvm)return MATCH.rvm;const p=PROF,L=p.lg,M={pl:{},team:rivTeam(p,preMatch.op).lv};
- if(L)for(const id in rivEnsure(p).pl){const P=L.pl[id];if(!P)continue;const r=rivPl(p,id);if(r.mark)M.pl[id]=r.mark;}return MATCH.rvm=M;}
+ if(L)for(const id of new Set([...Object.keys(rivEnsure(p).pl),...Object.keys(p.riv.comp).filter(k=>k.split('|').includes('U')).map(k=>k.split('|').find(x=>x!=='U'))])){const P=L.pl[id];if(!P)continue;const r=rivPl(p,id);if(r.mark)M.pl[id]=r.mark;}return MATCH.rvm=M;}
 // in-match duel events: only between YOU and a specific opposing league player; one per kind per play
 function rivEv(kind,a,b){if(!MATCH||!PROF||!a||!b||a===b)return;const meA=a===player,meB=b===player;if(!meA&&!meB)return;const o=meA?b:a;if(!o.cur.pid||o.cur.team===player.cur.team)return;
  const D=MATCH.riv||(MATCH.riv={pl:{},k:{}}),key=kind+'|'+EVT+'|'+o.cur.pid;if(D.k[key])return;D.k[key]=1;const R=D.pl[o.cur.pid]||(D.pl[o.cur.pid]={me:0,th:0,ev:[]}),w=kind==='int'?3:kind==='bh'?2:1;
@@ -3289,13 +3317,14 @@ function rivPre(p,op,ctx){const T=rivTeam(p,op),B=club(op),L=p.lg,box=$m('rivpre
 function rivFin(p,M){const box=$m('rivfin'),RV=p.riv,L=RV&&RV.last;if(!L||L.id!==M.id||!L.sum.show){box.hidden=true;box.innerHTML='';return;}const o=L.sum;
  box.style.setProperty('--rc',RCOL[Math.max(1,o.lv)]);box.innerHTML=`<div class="rvcard"><div class="rvk">⚔ RIVALRY · ${club(L.op).name.toUpperCase()}${o.lv?' · '+RLV[o.lv].toUpperCase()+rivPips(o.lv):''}</div><h2>${o.hd[0]}</h2><p>${esc(o.hd[1])}</p>
   <div class="rvrow"><span>Head-to-head <b>${o.rec}</b></span>${o.tx.map(t=>`<span>${esc(t)}</span>`).join('')}</div>${o.pl.map(t=>`<p>${esc(t)}</p>`).join('')}</div>`;box.hidden=false;}
-function rivHub(p){const RV=rivEnsure(p),T=Object.keys(RV.tm).map(c=>rivTeam(p,+c)).filter(r=>r.lv>=1).sort((a,b)=>b.sc-a.sc),P=Object.keys(RV.pl).map(id=>rivPl(p,id)).filter(r=>r.lv>=1).sort((a,b)=>b.sc-a.sc);
+function rivHub(p){const RV=rivEnsure(p),T=Object.keys(RV.tm).map(c=>rivTeam(p,+c)).filter(r=>r.lv>=1).sort((a,b)=>b.sc-a.sc),ids=new Set([...Object.keys(RV.pl),...Object.keys(RV.comp).filter(k=>k.split('|').includes('U')).map(k=>k.split('|').find(x=>x!=='U'))]),P=[...ids].filter(id=>p.lg&&p.lg.pl[id]).map(id=>rivPl(p,id)).filter(r=>r.lv>=1).sort((a,b)=>b.sc-a.sc);
+ const LG=Object.keys(RV.comp).filter(k=>!k.split('|').includes('U')).map(k=>rivPair(p,...k.split('|'))).filter(r=>r.lv>=1&&p.lg.pl[r.a]&&p.lg.pl[r.b]).sort((a,b)=>b.sc-a.sc).slice(0,8);
  const tc=r=>{const B=club(r.c),def=r.g.filter(g=>g.mom).pop()||r.big;return`<details class="rv" style="--rc:${RCOL[r.lv]}"><summary><b>${B.ic} ${B.city} ${B.name}</b><em>${RLV[r.lv]}${rivPips(r.lv)}</em><span>${r.w}-${r.l}${r.t?'-'+r.t:''} · ${r.n} meetings · last ${rivRes(r.last)} · ${rivLines(r,'They').join(' ')}${def?` · Defining: ${def.mom?esc(def.mom):'biggest win '+rivRes(def)} (${rivWhen(def)})`:''}</span></summary>
   <ol>${r.g.map(g=>`<li class="${g.mom?'k':''}">${rivWhen(g)}: ${rivRes(g)}${g.sim?' (simulated)':''}${g.mom?' · '+esc(g.mom):''}</li>`).join('')}</ol></details>`;};
- const pc=r=>{const P=p.lg&&p.lg.pl[r.id],tm=P&&P.team>=0?club(P.team).name:'not on a club';return`<details class="rv" style="--rc:${RCOL[r.lv]}"><summary><b>${r.mark==='nem'?'✕':'★'} ${esc(rivName(p,r.id))} · ${esc(tm)}</b><em>${r.mark==='nem'?'Nemesis':RLV[r.lv]}${rivPips(r.lv)}</em><span>Duels ${r.me}-${r.them} over ${r.n} games · ${r.me>r.them?'you have the upper hand':r.me<r.them?'he has the upper hand':'dead even'} · last: ${r.last.me}-${r.last.th} in Season ${r.last.y}</span></summary>
+ const pc=r=>{const P=p.lg&&p.lg.pl[r.id],tm=P&&P.team>=0?club(P.team).name:'not on a club';return`<details class="rv" style="--rc:${RCOL[r.lv]}"><summary><b>${r.mark==='nem'?'✕':'★'} ${esc(rivName(p,r.id))} · ${esc(tm)}</b><em>${r.mark==='nem'?'Nemesis':RLV[r.lv]}${rivPips(r.lv)}</em><span>${r.n?`Duels ${r.me}-${r.them} over ${r.n} games · ${r.me>r.them?'you have the upper hand':r.me<r.them?'he has the upper hand':'dead even'} · last: ${r.last.me}-${r.last.th} in Season ${r.last.y}`:'Season-long competition'}${r.comp.tx.length?' · '+esc(r.comp.tx.slice(0,3).join(' · ')):''}</span></summary>
   <ol>${r.g.map(e=>`<li class="${e.po?'k':''}">Season ${e.y} vs ${club(e.c).name}${e.po?' (playoffs)':''}: duel ${e.me}-${e.th} · ${[['tk','tackle'],['bh','big hit'],['int','interception']].map(([k,n])=>{const a=e.ev.filter(x=>x===k).length,b=e.ev.filter(x=>x===k+'-').length;return a||b?`${n}s ${a}-${b}`:'';}).filter(Boolean).join(', ')}</li>`).join('')}</ol></details>`;};
- return`<h3>Rivalries</h3>${!T.length&&!P.length?`<div class="rvempty">No rivalries yet.<br>They build from real games: close finishes, streaks, playoff knockouts and championship meetings make club rivals; repeated one-on-one battles (tackles, big hits, interceptions) with the same opposing player make personal rivals.</div>`:''}
-  ${T.length?`<h4>Club rivalries</h4>${T.map(tc).join('')}`:''}${P.length?`<h4>Personal rivalries</h4>${P.map(pc).join('')}`:''}`;}
+ return`<h3>Rivalries</h3>${!T.length&&!P.length?`<div class="rvempty">No rivalries yet.<br>They build from real games: close finishes, streaks, playoff knockouts and championship meetings make club rivals; repeated one-on-one battles (tackles, big hits, interceptions), tight award races, lead changes on the leaderboards and 1-2 award finishes against the same player make personal rivals.</div>`:''}
+  ${T.length?`<h4>Club rivalries</h4>${T.map(tc).join('')}`:''}${P.length?`<h4>Personal rivalries</h4>${P.map(pc).join('')}`:''}${LG.length?`<h4>League rivalries</h4>${LG.map(r=>`<details class="rv" style="--rc:${RCOL[r.lv]}"><summary><b>${esc(rivName(p,r.a))} vs ${esc(rivName(p,r.b))}</b><em>${RLV[r.lv]}${rivPips(r.lv)}</em><span>${esc(r.comp.tx.slice(0,3).join(' · '))}</span></summary></details>`).join('')}`:''}`;}
 // ===================== PRE-GAME BROADCAST INTRO =====================================================================================// A director picks 10 of the 50 combos below for every career match, from real data only, orders them into a broadcast arc and plays them
 // on the live scene: the real players standing in their real formation, the existing camera (through the CINE override the coach briefings
 // use), HTML overlays animated with CSS transforms. Nothing is spawned, physics keeps running untouched, the match clock is frozen (the same

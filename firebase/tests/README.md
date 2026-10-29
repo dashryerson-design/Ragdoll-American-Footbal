@@ -19,6 +19,7 @@ PAF_LIBS=/path/to/folder-with-three.min.js-and-cannon.min.js NODE_PATH=/path/to/
 | `conflict.test.js` | two devices: conflict screen, keep cloud / local / both, cancel, no free slot, concurrent uploads, races, interrupted uploads and deletion, quota, offline, hostile cloud fields, newer save format |
 | `google.test.js` | Google sign-in: first-time setup, username suggestion and conflicts, linking to an email account, email collisions, a Google login owned by another account, sign-out/in, deletion, failures, offline. The pop-up itself is replaced by the same Firebase call with an emulator token (the real pop-up needs apis.google.com) |
 | `exhibition.test.js` | career ids (added byte-for-byte, stable, duplicates split) and Exhibition data (read-only player copies, separate stats, no XP); no emulator needed |
+| `exhibition-play.test.js` | Exhibition match end to end: menu, picker, real build, results, record, career byte-identical, quitting records nothing, career match still awards XP; no emulator needed |
 | `offline.test.js` | the account screen with Firebase unreachable (no emulator needed) |
 
 `PW` can point at a Playwright install if `require('playwright')` does not resolve.

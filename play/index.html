@@ -2330,9 +2330,9 @@ function advance(p){const S=p.season;
  const win=R.map(G=>G.s[0]>G.s[1]?G.t[0]:G.t[1]);if(S.po.r===3){S.champ=win[0];if(win[0]===p.team){p.titles=(p.titles||0)+1;}const h=(p.awHist||[]).find(h=>h.y===S.year);if(h)h.champ=S.champ;awFinal(p,S);return;}
  const nx=[];for(let i=0;i<win.length;i+=2)nx.push({t:[win[i],win[i+1]],s:null});S.po.rounds.push(nx);S.po.r++;}
 function startPO(S){const st=standings(S),seed=st.map(x=>x.i);S.po={seeds:seed,r:0,rounds:[SEEDPAIR.map(([a,b])=>({t:[seed[a-1],seed[b-1]],s:null}))]};}   // every club qualifies: 1 v 16, 2 v 15 ... winners move up the bracket
-// your own game simulated: no XP, but you play it: your line is built from the simulated game like everyone else's (boxGame) and counts for season, career and awards
+// your own game simulated: 40% XP, and you play it: your line is built from the simulated game like everyone else's (boxGame) and counts for season, career and awards
 function simMine(){const p=PROF,n=nextGame(p);if(!n){const S=p.season;if(S&&S.po&&S.champ==null){while(S.champ==null)advance(p);saveProf(p);carUI();}return;}   // knocked out: the rest of the bracket plays out
- const S=p.season,[x,y]=simScore(S.rat[p.team],S.rat[n.op],n.ctx.k==='po');rivGame(p,`sim-${S.year}-${n.ctx.k}${n.ctx.k==='po'?n.ctx.r:n.ctx.w}-${n.ctx.g}`,n.ctx,n.op,x,y,1);record(p,n.ctx,x,y);saveProf(p);carUI();}
+ const S=p.season,[x,y]=simScore(S.rat[p.team],S.rat[n.op],n.ctx.k==='po');rivGame(p,`sim-${S.year}-${n.ctx.k}${n.ctx.k==='po'?n.ctx.r:n.ctx.w}-${n.ctx.g}`,n.ctx,n.op,x,y,1);p.simXP=null;record(p,n.ctx,x,y);saveProf(p);carUI();if(p.simXP)toast(`SIMULATED · ${p.simXP.grade} · +${p.simXP.xp} XP (40% of ${p.simXP.full})${p.simXP.ups?` · LEVEL ${p.lvl}!`:''}`,'#ffd23f');}   // the XP lands with the committed week
 function newSeasonGo(){const p=PROF;if(p.season&&p.season.champ!=null)offseason(p);newSeason(p,(p.season?p.season.year:0)+1);saveProf(p);carUI();}
 // teammates: three named club-mates, two-way roles like yours, rated around the club
 function mates(p,c=p.team){const L=lgEnsure(p);return L.rost[c].filter(id=>id!=='U').map(id=>{const P=L.pl[id];return{n:P.first+' '+P.last,pos:tcase(STYLES[P.style][0])+' · '+DEV[P.dev][0],num:P.num,ovr:ovr(P.att,P.style)};});}
@@ -2601,8 +2601,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.28';
+const GAME_VER='3.29';
 const PATCH=[
+ {version:'3.29',title:'Simulated XP',date:'2026-10-29',changes:{Career:['Simulated games now earn XP: 40% of what your simulated performance would earn in a played game (same stats, objectives and result bonus)','Level-ups and upgrade points from simulated XP work as normal; played games still pay 100%']}},
  {version:'3.28',title:'Simulated Stats',date:'2026-10-29',changes:{Career:['Simulated games now give your player real stats: passes, catches, runs, tackles and picks from the simulated game, weighted by your ratings','They count toward your season, career, league leaders and awards, exactly once per game']}},
  {version:'3.27',title:'Awards Night',date:'2026-10-29',changes:{Career:['A 3D end-of-season awards ceremony after the regular season: a lit stage with LED screens, a crowd and the league commissioner presenting real trophies','Rookie, Offensive and Defensive awards (plus any award you win) are handed out on stage; the rest are honoured on the big screen','The MVP gets its own gold trophy, lighting, entrance and celebration','Awards are now finalised when the regular season ends; skip a presentation with Enter or the whole night with Esc']}},
  {version:'3.26',title:'Sound Sync',date:'2026-10-29',changes:{Audio:['Hits, cheers and footsteps play from their first loud moment: the clips had up to 0.6 s of lead-in that made them land late','Big-play cheers start as the runner breaks 20 yards or moves the chains on 4th down, not at the whistle']}},
@@ -3056,11 +3057,13 @@ function boxGame(p,S,w,g,a,b,sa,sb,U){const R=rng(hsh(S.year,w,g,a,b)),L=p.lg,te
   for(let i=0;i<ints;i++){ln(pick(R,dd,id=>at(id).int+at(id).cov+(roleOf(p,id)==='def'?40:0))).int++;if(!qbLive)ln(qb).ithr++;}
   for(let i=0;i<pds;i++)ln(pick(R,dd,id=>at(id).cov+(roleOf(p,id)==='def'?30:0))).pd++;for(const id of dd)ln(id).stop+=Math.round(lines[id]?lines[id].tak*.3:0);};
  side(a,b,sa);side(b,a,sb);return lines;}
-function simCareer(p,ln,my,th){const C=p.career;C.gp++;C[my>th?'w':my<th?'l':'t']++;for(const k of STK)C[k]=(C[k]||0)+(ln[k]||0);}   // the same fields a played game adds (endMatch)
+const SIM_XP=.4;   // a simulated game pays 40% of what the same performance earns when played
+function simCareer(p,ln,my,th,w){const C=p.career,r=my>th?'w':my<th?'l':'t';C.gp++;C[r]++;for(const k of STK)C[k]=(C[k]||0)+(ln[k]||0);   // the same fields a played game adds (endMatch)
+ const X=xpFor(ln,r,mkObj(roleOf(p,'U')==='qb')),xp=Math.round(X.total*SIM_XP),L0=p.lvl,ups=addXP(p,xp);p.simXP={w,xp,full:X.total,grade:X.grade,ups,lvl0:L0};}   // the played-game XP rules (stats, objectives, result bonus), then x0.4
 function awSeason(S){return S.aw||(S.aw={bx0:S.week,ps:{},pg:{},wk:{},snap:{},final:null,done:{}});}
 function awWeek(p,S,w){const A=awSeason(S);if(A.done[w])return;A.done[w]=1;   // each week processed exactly once
  S.weeks[w].forEach(([a,b],g)=>{const r=S.res[w][g];if(!r)return;const U=p._ubox&&p._ubox.w===w&&(a===p.team||b===p.team)?p._ubox:null,L=boxGame(p,S,w,g,a,b,r[0],r[1],U);
-  const mine=a===p.team||b===p.team;if(mine&&!U&&L.U)simCareer(p,L.U,r[a===p.team?0:1],r[a===p.team?1:0]);   // your simulated game: its line goes into your season AND career, once (this week is processed once)
+  const mine=a===p.team||b===p.team;if(mine&&!U&&L.U)simCareer(p,L.U,r[a===p.team?0:1],r[a===p.team?1:0],w);   // your simulated game: its line goes into your season AND career, once (this week is processed once)
   for(const id in L){const T=A.ps[id]||(A.ps[id]=Object.fromEntries([...AWS.map(k=>[k,0]),['gp',0],['tm',{}]]));const c=p.lg.rost[a].includes(id)?a:b,ln=L[id],mg=c===a?r[0]-r[1]:r[1]-r[0];
    for(const k of AWS)T[k]+=ln[k];T.gp++;T.tm[c]=(T.tm[c]||0)+1;(A.pg[id]||(A.pg[id]=[])).push({w,c,mg,v:+lineVal(ln).toFixed(2),o:+offVal(ln).toFixed(2),d:+defVal(ln).toFixed(2),ln});}});
  const E=awEval(p,S,true);A.wk[w]=weeklyHonours(p,S,w);A.snap[w]={};for(const aw of AWARDS)if(E[aw.id])A.snap[w][aw.id]=E[aw.id].rank.slice(0,12).map(x=>x.id);

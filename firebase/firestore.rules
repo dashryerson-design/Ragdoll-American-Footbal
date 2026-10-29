@@ -1,0 +1,86 @@
+rules_version = '2';
+// PAF accounts: Cloud Firestore security rules (enforced by Google's servers).
+// Data model
+//   usernames/{name}                       {uid}                         unique username claim; the document ID is the name
+//   users/{uid}                            {username, createdAt, schema, privacyVer}
+//   users/{uid}/careers/{slot}             career head: summary + sync control; slot is "0".."4" (the five cloud careers)
+//   users/{uid}/careers/{slot}/parts/{id}  {d}: one piece of the career save; id = <generation>_<part>_<index>; immutable
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isUser(uid) { return signedIn() && request.auth.uid == uid; }
+    function verified() { return request.auth.token.email_verified == true; }
+    function validName(n) { return n is string && n.matches('^[a-z0-9_]{3,16}$'); }
+    function userPath(uid) { return /databases/$(database)/documents/users/$(uid); }
+    function namePath(n) { return /databases/$(database)/documents/usernames/$(n); }
+
+    // ---- usernames: claimed once, only for yourself, only together with your own user document
+    match /usernames/{name} {
+      allow get: if signedIn() && resource.data.uid == request.auth.uid;
+      allow list: if false;
+      allow create: if signedIn() && validName(name)
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid
+        && getAfter(userPath(request.auth.uid)).data.username == name;
+      allow update: if false;
+      // released only by its owner, and only when their user document no longer points at it (rename or account deletion)
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid
+        && (!existsAfter(userPath(request.auth.uid)) || getAfter(userPath(request.auth.uid)).data.username != name);
+    }
+
+    // ---- account profile: private to its owner
+    match /users/{uid} {
+      function validUser(d) {
+        return d.keys().hasOnly(['username', 'createdAt', 'schema', 'privacyVer'])
+          && d.keys().hasAll(['username', 'createdAt', 'schema', 'privacyVer'])
+          && validName(d.username) && d.createdAt is timestamp && d.schema is int && d.privacyVer is int;
+      }
+      function ownsName(n) { return getAfter(namePath(n)).data.uid == uid; }
+      allow get: if isUser(uid);
+      allow list: if false;
+      allow create: if isUser(uid) && validUser(request.resource.data) && ownsName(request.resource.data.username);
+      allow update: if isUser(uid) && validUser(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (request.resource.data.username == resource.data.username || ownsName(request.resource.data.username));
+      allow delete: if isUser(uid);
+
+      // ---- cloud careers: exactly five fixed slots, writes need a verified email, every write advances the revision by one
+      match /careers/{slot} {
+        function slotOk() { return slot in ['0', '1', '2', '3', '4']; }
+        function validHead(d) {
+          return d.keys().hasOnly(['careerId', 'rev', 'gen', 'parts', 'fmt', 'gameVer', 'sum', 'updatedAt', 'device', 'replaced'])
+            && d.keys().hasAll(['careerId', 'rev', 'gen', 'parts', 'fmt', 'gameVer', 'sum', 'updatedAt'])
+            && d.careerId is string && d.careerId.size() <= 40
+            && d.rev is int && d.gen is string && d.gen.matches('^[A-Za-z0-9]{8,32}$')
+            && d.parts is list && d.parts.size() >= 1 && d.parts.size() <= 64
+            && d.fmt is int && d.gameVer is string && d.gameVer.size() <= 12
+            && d.sum is map && d.updatedAt == request.time;
+        }
+        allow read: if isUser(uid) && slotOk();
+        allow create: if isUser(uid) && verified() && slotOk()
+          && validHead(request.resource.data) && request.resource.data.rev == 1;
+        allow update: if isUser(uid) && verified() && slotOk()
+          && validHead(request.resource.data)
+          && request.resource.data.rev == resource.data.rev + 1
+          && request.resource.data.careerId == resource.data.careerId;
+        allow delete: if isUser(uid);
+
+        match /parts/{part} {
+          allow read: if isUser(uid) && slotOk();
+          allow create: if isUser(uid) && verified() && slotOk()
+            && part.matches('^[A-Za-z0-9]{8,32}_[a-z]{3,8}_[0-9]{1,2}$')
+            && request.resource.data.keys().hasOnly(['d'])
+            && request.resource.data.d is string && request.resource.data.d.size() <= 360000;
+          allow update: if false;
+          allow delete: if isUser(uid);
+        }
+      }
+    }
+
+    // everything else: closed
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

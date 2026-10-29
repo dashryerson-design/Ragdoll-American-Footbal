@@ -2055,6 +2055,12 @@ const saveJSON=p=>JSON.stringify(p,function(k,v){return k==='cache'&&this&&this.
 function saveProf(p){const i=p.slot??SLOT;if(!okSlot(i))return false;p.slot=i;p.sv=SAVE_FMT;let ok=false;const j=saveJSON(p);try{localStorage.setItem(skey(i),j);ok=true;}catch(e){}REC.mirror(i,j);return ok;}   // the IndexedDB mirror is written even if localStorage is full
 // one-time reset of the pre-5-slot playtest saves: removes ONLY the old career keys (input mode and touch layout stay)
 function legacyWipe(){try{if(localStorage.getItem('pafSaveFmt'))return;for(let i=0;i<10;i++)localStorage.removeItem('rafCareerPlayer#'+i);localStorage.removeItem('rafCareerPlayer');localStorage.setItem('pafSaveFmt',String(SAVE_FMT));}catch(e){}}
+// ---------- online accounts (foundation only): Firebase loads on first use by an account feature; guests and offline play never touch the network.
+// These values identify the project publicly (every Firebase web app ships them); access is decided by firebase/firestore.rules on Google's servers
+const FB_CFG={apiKey:'AIzaSyChCBhZv76cQoXn150bRJxuktkQh9o--oA',authDomain:'paf-accounts.firebaseapp.com',projectId:'paf-accounts',storageBucket:'paf-accounts.firebasestorage.app',messagingSenderId:'646342063841',appId:'1:646342063841:web:a6485f197dd3f2ef80e9a0'},FB_VER='10.12.2',CLOUD_SLOTS=5;
+const FB=(()=>{let P=null;const u=n=>`https://www.gstatic.com/firebasejs/${FB_VER}/${n}.js`;
+ return{load(){return P||(P=Promise.all([import(u('firebase-app')),import(u('firebase-auth')),import(u('firebase-firestore'))]).then(([A,Au,F])=>{const app=A.initializeApp(FB_CFG);return{app,auth:Au.getAuth(app),db:F.getFirestore(app),Au,F};}).catch(e=>{P=null;throw e;}));},   // a failed load can be retried later; nothing else depends on it
+  loaded:()=>!!P};})();
 // ---------- recovery copies (IndexedDB): the last good save of every slot, and the newest 5 deleted careers ----------
 const REC=(()=>{let dbp=null;const db=()=>dbp||(dbp=new Promise((ok,no)=>{try{const r=indexedDB.open('paf-recovery',1);r.onupgradeneeded=()=>r.result.createObjectStore('saves',{keyPath:'id'});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);}catch(e){no(e);}}));
  const tx=(mode,f)=>db().then(d=>new Promise((ok,no)=>{const t=d.transaction('saves',mode),st=t.objectStore('saves'),r=f(st);t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error);})).catch(()=>null);

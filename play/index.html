@@ -2133,8 +2133,11 @@ const linked=(p,k,h)=>!!(p&&h&&p.cid===h.careerId&&p.cloud&&p.cloud.s===k&&p.clo
 const genAge=g=>{const t=parseInt(g.slice(0,-6),36);return t>0&&t<=Date.now()?Date.now()-t:Infinity;};
 const sumOf=(p,j)=>{const c=p.draft?club(p.team):null,Q=p.season,r=Q?standings(Q).find(x=>x.i===p.team):null;
  return{n:`${p.first} ${p.last}`.slice(0,60),lvl:p.lvl|0,xp:p.xp|0,ovr:ovr(p.att,p.style)|0,team:c?c.ab:'',yr:Q?Q.year|0:0,sw:Q?`S${Q.year} ${Q.week<20?'WK '+(Q.week+1):Q.champ!=null?'FINAL':'PO'}`:'',wl:r?`${r.w}-${r.l}${r.t?'-'+r.t:''}`:'',len:j.length,h:hash(j)};};
-async function head(k){const s=await tm(fb.F.getDocFromServer(cref(k)));const h=s.exists()?s.data():null;if(C.heads)C.heads[k]=h;return h;}
-async function heads(){const H=await Promise.all([...Array(CLOUD_SLOTS).keys()].map(k=>tm(fb.F.getDocFromServer(cref(k))).then(s=>s.exists()?s.data():null)));C.heads=H;}
+// cloud heads are shown in the page: force every field to its type (numbers, short strings) before anything uses them
+const clean=h=>{if(!h)return null;const s=h.sum&&typeof h.sum==='object'?h.sum:{},str=(v,n)=>String(v==null?'':v).slice(0,n);h.rev=h.rev|0;h.parts=Array.isArray(h.parts)?h.parts.map(x=>str(x,48)):[];h.careerId=str(h.careerId,40);h.gen=str(h.gen,32);
+ h.sum={n:str(s.n||'?',60),lvl:s.lvl|0,xp:s.xp|0,ovr:s.ovr|0,team:str(s.team,8),yr:s.yr|0,sw:str(s.sw,16),wl:str(s.wl,12),len:s.len|0,h:str(s.h,16)};return h;};
+async function head(k){const s=await tm(fb.F.getDocFromServer(cref(k)));const h=s.exists()?clean(s.data()):null;if(C.heads)C.heads[k]=h;return h;}
+async function heads(){const H=await Promise.all([...Array(CLOUD_SLOTS).keys()].map(k=>tm(fb.F.getDocFromServer(cref(k))).then(s=>s.exists()?clean(s.data()):null)));C.heads=H;}
 async function fetchSave(h,k){let j='';for(const id of h.parts){const s=await tm(fb.F.getDocFromServer(cref(k,'parts',id)));if(!s.exists())throw{code:'cloud-broken'};j+=s.data().d;}
  if(j.length!==h.sum.len||hash(j)!==h.sum.h)throw{code:'cloud-broken'};return j;}
 // leftovers: the generation a commit just replaced, and orphans older than 15 minutes (a younger one may be another device's upload in progress). Never the current head's
@@ -2157,7 +2160,7 @@ async function push(i,k,o){const F=fb.F,p=loadProf(i);if(!p)throw{code:'cloud-lo
  const q=loadProf(i);if(q){q.cid=p.cid;q.cloud={s:k,rev:cur?cur.rev+1:1,h:hash(j)};saveProf(q);}await tidy(k,cur&&cur.gen);return p;}
 // download cloud slot k (head h, the version the player saw) into device slot i
 async function pull(k,i,h){const j=await fetchSave(h,k);let p;try{p=JSON.parse(j);}catch(e){throw{code:'cloud-broken'};}
- if(p&&p.v===1&&p.sv!==SAVE_FMT)throw{code:'cloud-old'};if(!profOk(p))throw{code:'cloud-broken'};
+ if(p&&p.v===1&&p.sv>SAVE_FMT)throw{code:'cloud-new'};if(p&&p.v===1&&p.sv!==SAVE_FMT)throw{code:'cloud-old'};if(!profOk(p))throw{code:'cloud-broken'};
  const old=loadProf(i);if(old&&!await REC.keep(saveJSON(old)))throw{code:'rec-fail'};
  p.cid=h.careerId;p.slot=i;p.cloud={s:k,rev:h.rev};if(!saveProf(p))throw{code:'local-full'};const q=loadProf(i);if(!q)throw{code:'local-full'};q.cloud.h=hash(blob(q));saveProf(q);return q;}
 const free=()=>[...Array(NSLOT).keys()].find(x=>!loadProf(x));
@@ -2190,9 +2193,9 @@ async function keepBoth(){const c=C.conf,f=free();
  await push(c.i,g,{expect:null,fork:true});C.conf=null;S.msg=`Kept both: the device version is uploaded as a new cloud career in slot ${g+1}; cloud slot ${c.k+1} is unchanged.`;}
 Object.assign(ERR,{'cloud-newer':'The cloud copy changed on another device, so nothing was replaced. Refresh and try again.','cloud-broken':'That cloud save is incomplete or damaged, so nothing was changed. Upload it again from a device that has it.',
  'cloud-interrupted':'The upload did not finish, so nothing was replaced. The previous cloud version is still there. Try again.','conf-again':'The cloud version changed again on another device. Nothing was replaced: compare the new versions below.',
- 'cloud-old':'That cloud save is from an older save format and cannot be used.','cloud-big':'This career is too large to upload.','cloud-local':'That career is no longer on this device.',
+ 'cloud-old':'That cloud save is from an older save format and cannot be used.','cloud-new':'That cloud save was made by a newer version of the game. Update the game (reload the page), then download it.','cloud-big':'This career is too large to upload.','cloud-local':'That career is no longer on this device.',
  'rec-fail':'A recovery copy could not be saved on this device, so nothing was replaced.','local-full':'This device\'s storage is full, so the device save was not changed.',
- 'permission-denied':'The cloud refused this. Make sure your email is verified, then press "I have verified it".'});
+ 'permission-denied':'The cloud refused this change, so nothing was changed. If you just verified your email, press "I have verified it" and try again.'});
 Object.assign(A,{cload:()=>run(heads),up:d=>{C.pick=+d.i;render();},upto:d=>{const i=C.pick;C.pick=null;run(async()=>{if(!C.heads)await heads();await upload(i,+d.k);});},upx:()=>{C.pick=null;render();},
  down:d=>run(()=>download(+d.k)),cdel:d=>run(()=>cdel(+d.k)),ckc:()=>run(keepCloud),ckl:()=>run(keepLocal),ckb:()=>run(keepBoth),ckx:()=>{C.conf=null;S.msg='Cancelled: nothing was changed.';render();}});
 const dash=v=>v===''||v==null?'—':esc(String(v));

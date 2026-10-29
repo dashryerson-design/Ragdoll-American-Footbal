@@ -34,6 +34,6 @@ Free in your browser · keyboard & mouse or touch · no download
 | `index.html` | The website (landing page) |
 | `play/index.html` | The game: one file; three.js and cannon.js load from cdnjs |
 | `assets/` | Screenshots captured from the game |
-| `firebase/` | Account-system security rules (Firestore) and local emulator config; not part of the website |
+| `firebase/` | Account-system security rules (Firestore) and local emulator config; not part of the website. Tests: `firebase/tests/README.md` |
 
 Career saves are kept in your browser (localStorage) for this site.

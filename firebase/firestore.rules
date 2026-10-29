@@ -80,6 +80,22 @@ service cloud.firestore {
       }
     }
 
+    // ---- online test rooms: a WebRTC offer from a verified host, answered once by another verified player; deleted by the host once joined
+    match /rooms/{code} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn() && verified() && code.matches('^[A-Z2-9]{6}$')
+        && request.resource.data.keys().hasOnly(['host', 'offer', 'v', 'at'])
+        && request.resource.data.host == request.auth.uid
+        && request.resource.data.offer is string && request.resource.data.offer.size() <= 20000
+        && request.resource.data.v is string && request.resource.data.v.size() <= 12 && request.resource.data.at == request.time;
+      allow update: if signedIn() && verified() && !('guest' in resource.data) && request.auth.uid != resource.data.host
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['guest', 'answer'])
+        && request.resource.data.guest == request.auth.uid
+        && request.resource.data.answer is string && request.resource.data.answer.size() <= 20000;
+      allow delete: if signedIn() && resource.data.host == request.auth.uid;
+    }
+
     // everything else: closed
     match /{document=**} {
       allow read, write: if false;

@@ -20,6 +20,7 @@ PAF_LIBS=/path/to/folder-with-three.min.js-and-cannon.min.js NODE_PATH=/path/to/
 | `google.test.js` | Google sign-in: first-time setup, username suggestion and conflicts, linking to an email account, email collisions, a Google login owned by another account, sign-out/in, deletion, failures, offline. The pop-up itself is replaced by the same Firebase call with an emulator token (the real pop-up needs apis.google.com) |
 | `exhibition.test.js` | career ids (added byte-for-byte, stable, duplicates split) and Exhibition data (read-only player copies, separate stats, no XP); no emulator needed |
 | `exhibition-play.test.js` | Exhibition match end to end: menu, picker, real build, results, record, career byte-identical, quitting records nothing, career match still awards XP; no emulator needed |
+| `online.test.js` | Phase D online prototype: two browsers (separate accounts) connect through a Firestore room and a real WebRTC channel; guest controls one red non-QB player with their build, mirrors the host, keys and commands reach the host, match end, nothing saved, disconnect handover to AI, sign-in required. Prints latency / bandwidth metrics |
 | `offline.test.js` | the account screen with Firebase unreachable (no emulator needed) |
 
 `PW` can point at a Playwright install if `require('playwright')` does not resolve.

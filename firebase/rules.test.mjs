@@ -69,5 +69,23 @@ await t('alice deletes a part',deleteDoc(pd(A,'alice','0','gen0003C_core_0')),tr
 await t('alice deletes her career head',deleteDoc(cd(A,'alice','0')),true);
 await t('final step: profile + username deleted together',(()=>{const b=writeBatch(A);b.delete(doc(A,'users','alice'));b.delete(doc(A,'usernames','alice_2'));return b.commit();})(),true);
 await t('after deletion the name is claimable (carol takes it)',claim(ctx('carol'),'carol','alice_2'),true);
+// --- online test rooms
+const room=(db,c)=>doc(db,'rooms',c),C=ctx('carl');
+const rm=(host,extra={})=>({host,offer:'v=0 sdp',v:'3.34',at:serverTimestamp(),...extra});
+await t('verified host creates a room',setDoc(room(A,'ABC234'),rm('alice')),true);
+await t('unverified user cannot create a room',setDoc(room(U,'ABC235'),rm('ursula')),false);
+await t('room for someone else refused',setDoc(room(B,'ABC236'),rm('alice')),false);
+await t('bad room code refused',setDoc(room(A,'abc!!1'),rm('alice')),false);
+await t('extra room field refused',setDoc(room(A,'ABC237'),rm('alice',{guest:'bob'})),false);
+await t('oversized offer refused',setDoc(room(A,'ABC238'),rm('alice',{offer:'x'.repeat(20001)})),false);
+await t('signed-out user cannot read a room',getDoc(room(anon,'ABC234')),false);
+await t('rooms cannot be listed',getDocs(collection(B,'rooms')),false);
+await t('host cannot answer their own room',updateDoc(room(A,'ABC234'),{guest:'alice',answer:'a'}),false);
+await t('guest cannot change the offer',updateDoc(room(B,'ABC234'),{guest:'bob',answer:'a',offer:'evil'}),false);
+await t('guest answering as someone else refused',updateDoc(room(B,'ABC234'),{guest:'carl',answer:'a'}),false);
+await t('bob answers the room',updateDoc(room(B,'ABC234'),{guest:'bob',answer:'v=0 answer'}),true);
+await t('a second guest cannot take the room',updateDoc(room(C,'ABC234'),{guest:'carl',answer:'x'}),false);
+await t('guest cannot delete the room',deleteDoc(room(B,'ABC234')),false);
+await t('host deletes the room',deleteDoc(room(A,'ABC234')),true);
 await env.cleanup();
 for(const r of res)console.log(r.join(' | '));const f=res.filter(r=>r[0]==='FAIL').length;console.log(`\n${res.length-f}/${res.length} passed`);process.exit(f?1:0);

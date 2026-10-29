@@ -382,6 +382,7 @@ body.intro #pcs,body.intro #ppc,body.intro #ppn,body.intro #phud,body.intro #xph
 #ix{position:fixed;inset:0;z-index:28;pointer-events:none;font-family:"Barlow Condensed","Arial Narrow",sans-serif;color:#fff}#ix[hidden],#ixs[hidden]{display:none!important}
 #ix::before,#ix::after{content:'';position:absolute;left:0;right:0;height:7vh;background:#000}#ix::before{top:0}#ix::after{bottom:0}
 body.cer>*:not(canvas):not(#cer){visibility:hidden!important}#cer{position:fixed;inset:0;z-index:40;pointer-events:none}#cer[hidden]{display:none}#cerf{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}#cerbar{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));display:flex;gap:8px;pointer-events:auto}#cerbar button{height:28px;padding:0 12px;border-radius:14px;border:1px solid #ffffff33;background:#0008;color:#cfd8e3;font:700 12px "Barlow Condensed";letter-spacing:.14em;cursor:pointer}
+#cre .lk{position:relative}#cre .lk>*{opacity:.42;filter:grayscale(.7)}#cre .lk button,#cre .lk input{cursor:not-allowed}.lkb{display:grid;gap:4px;margin:0 0 10px;padding:10px 14px;border:1px solid #ffd23f55;border-left:4px solid #ffd23f;border-radius:4px;background:#1a1608;font:600 14px "Barlow Condensed";color:#cfd8e3}.lkb b{font:800 17px "Barlow Condensed";color:#ffe27a}.lkb i{display:block;height:5px;border-radius:3px;background:linear-gradient(90deg,#ffd23f var(--v),#ffffff18 var(--v))}
 #rph[hidden]{display:none}#rph{position:fixed;z-index:29;top:calc(3.5vh - 14px);left:max(16px,env(safe-area-inset-left));display:flex;gap:10px;align-items:center;font:700 13px "Barlow Condensed";letter-spacing:.14em;color:#fff;pointer-events:none}#rph i{font-style:normal;padding:3px 9px;border-radius:3px;background:#ffd23f;color:#111}#rph b{text-shadow:0 2px 8px #000}
 #rps{position:fixed;z-index:29;bottom:calc(3vh + env(safe-area-inset-bottom));right:max(16px,env(safe-area-inset-right));height:28px;padding:0 12px;border-radius:14px;border:1px solid #ffffff33;background:#0008;color:#cfd8e3;font:700 12px "Barlow Condensed";letter-spacing:.14em;cursor:pointer}
 #rpf{position:fixed;inset:0;z-index:28;pointer-events:none;background:#fff;opacity:0}#rpf.on{animation:rpF .4s ease-out}@keyframes rpF{0%{opacity:.55}100%{opacity:0}}body.rply{box-shadow:inset 0 0 0 3px #ffd23f55}
@@ -2414,10 +2415,15 @@ const STAGES=['','Biometrics','Attributes & Badges','Equipment & Appearance','Re
 function newED(){return recompute({v:1,slot:SLOT,first:'',last:'',num:88,style:2,base:styleAt(2),ups:{},bio:{...BIO0},badges:[],look:{...DEFLOOK}});}
 function openCre(fresh){ED=fresh||!PROF?newED():JSON.parse(JSON.stringify(PROF));ED.bio=bioOf(ED);ED.look=migLook(ED.look);ED.badges=ED.badges||[];ED.ups=ED.ups||{};recompute(ED);STG=1;SUB='style';GCAT='presets';show('cre');creUI();pvShow('pvc',ED);pvCam('front');}
 const freePts=()=>BUDGET-AK.reduce((t,k)=>t+ED.base[k],0);
-function creUI(){const e=ED;recompute(e);
+// initial build (height, weight, wingspan, playstyle, starting ratings) is fixed until YOUR player (the profile being edited) reaches level 20
+const CUST_LV=20,BUILD_K=['bio','style','base'],buildLocked=e=>!!(PROF&&e&&PROF.created===e.created&&(PROF.lvl||1)<CUST_LV);
+function buildRestore(e){for(const k of BUILD_K)e[k]=JSON.parse(JSON.stringify(PROF[k]));e.bio=bioOf(e);}   // any change that reached the draft by any path is undone here
+const lockBanner=()=>`<div class="lkb"><b>🔒 Reach Level ${CUST_LV} to unlock player customization.</b><span>Height, weight, wingspan, playstyle and starting ratings · Level ${PROF.lvl} / ${CUST_LV}</span><i style="--v:${Math.min(100,(PROF.lvl-1)/(CUST_LV-1)*100)}%"></i></div>`;
+function creUI(){const e=ED;if(buildLocked(e))buildRestore(e);recompute(e);
  $m('cbprog').innerHTML=[1,2,3,4].map(i=>`<button data-s="${i}" class="${i===STG?'on':i<STG?'done':''}"><b>${i<STG?'✓':i}</b><span>${STAGES[i]}</span></button>`).join('<i></i>');
  $m('cprev').textContent='‹ Back';$m('cprev').hidden=STG===1;$m('cnext').textContent=STG<4?`Continue · ${STAGES[STG+1]} ›`:(PROF&&PROF.created===e.created?'Save Changes':'Create Player');
  $m('cbl').className='cbl s'+STG;$m('cbl').innerHTML=[0,stage1,stage2,stage3,stage4][STG](e);$m('pvi').innerHTML=pviHTML(e);$m('cerr').textContent='';
+ if(buildLocked(e)&&(STG===1||STG===2&&SUB!=='sum')){const secs=[...$m('cbl').querySelectorAll('section.card')].filter(x=>STG===2||!/Identity/.test(x.querySelector('h3')?x.querySelector('h3').textContent:''));for(const x of secs){x.classList.add('lk');x.querySelectorAll('button,input,select').forEach(c=>c.disabled=true);}if(secs[0])secs[0].insertAdjacentHTML('beforebegin',lockBanner());}
  if(STG===1)padSync();}
 // ---------- stage 1: biometrics ----------
 function effRows(e){const bm=bioMods(e.bio),ks=['spd','acc','agi','str','sta','bhd','cth','int','cov','tak','thp'],sg=v=>v>0?`<em class="up">+${v}</em>`:v<0?`<em class="dn">${v}</em>`:'<em>0</em>';
@@ -2434,7 +2440,7 @@ function stage1(e){const b=e.bio,rd=(k,l,v,unit)=>`<div class="ms"><small>${l}</
   <button class="lnk" id="bioreset">Reset to neutral (6'0", 205 lb, 6'2")</button></section></div>
  <div class="c2"><section class="card"><h3>Build Effects</h3><p class="mutd">“Now” changes your ratings today. “Max cap” changes the highest rating you can ever upgrade to. They are different: a heavy build can be stronger now and also raise its strength ceiling, while lowering its speed ceiling.</p>${effRows(e)}</section><section class="card">${bioSummary(e)}</section></div>`;}
 function padSync(){const b=ED.bio,f=$m('padf'),hd=$m('padh');if(!hd)return;const x=(b.w-BIOR.w[0])/(BIOR.w[1]-BIOR.w[0]),y=1-(b.h-BIOR.h[0])/(BIOR.h[1]-BIOR.h[0]);hd.style.left=x*100+'%';hd.style.top=y*100+'%';f.style.width=x*100+'%';f.style.height=(1-y)*100+'%';}
-function setBio(k,v){const b=ED.bio;b[k]=v;ED.bio=bioOf(ED);if(k==='h')ED.bio.ws=cl(ED.bio.ws,Math.max(BIOR.ws[0],ED.bio.h-4),Math.min(BIOR.ws[1],ED.bio.h+8));
+function setBio(k,v){if(buildLocked(ED))return;const b=ED.bio;b[k]=v;ED.bio=bioOf(ED);if(k==='h')ED.bio.ws=cl(ED.bio.ws,Math.max(BIOR.ws[0],ED.bio.h-4),Math.min(BIOR.ws[1],ED.bio.h+8));
  recompute(ED);shape(PVW.d,ED.bio);const keep=document.activeElement&&document.activeElement.id;creUI();if(keep==='wsr')$m('wsr').focus();}
 // ---------- stage 2: playstyle, ratings, badges, summary ----------
 function stage2(e){const T=[['style','Playstyle'],['attr','Attributes'],['sum','Build Summary']];
@@ -2472,7 +2478,8 @@ function stage4(e){const L=e.look;return`<section class="card wide"><h3>Review</
 function validate(){const e=ED,nm=/^[A-Za-z][A-Za-z' .-]{0,13}$/;if(!nm.test((e.first||'').trim()))return[1,'Enter a first name (letters, up to 14).'];if(!nm.test((e.last||'').trim()))return[1,'Enter a last name (letters, up to 14).'];
  if(!(Number.isInteger(e.num)&&e.num>=0&&e.num<=99))return[1,'Jersey number must be 0-99.'];const fp=freePts();if(fp)return[2,fp>0?`Spend your remaining ${fp} attribute points.`:`You are ${-fp} points over budget.`];if(0)return[2,'Too many badges equipped.'];return[0,''];}
 function saveCre(){ED.slot=SLOT;ED.first=ED.first.trim();ED.last=ED.last.trim();const[st,er]=validate();if(er){STG=st;if(st===2)SUB='attr';creUI();$m('cerr').textContent=er;return;}ED.created=ED.created||Date.now();
- const nw=JSON.parse(JSON.stringify(ED));if(!nw.xp&&!nw.lvl){nw.xp=nw.lxp=nw.paid=nw.up=0;nw.lvl=1;nw.ups={};}
+ if(buildLocked(ED)){const ch=BUILD_K.some(k=>JSON.stringify(ED[k])!==JSON.stringify(k==='bio'?bioOf(PROF):PROF[k]));buildRestore(ED);recompute(ED);if(ch)setTimeout(()=>toast(`Build unchanged: reach Level ${CUST_LV} to unlock player customization`,'#ffd23f'),0);}   // rejected at save too: locked fields keep their saved values, everything else still saves
+  const nw=JSON.parse(JSON.stringify(ED));if(!nw.xp&&!nw.lvl){nw.xp=nw.lxp=nw.paid=nw.up=0;nw.lvl=1;nw.ups={};}
  if(PROF&&PROF.created===nw.created&&PROF.style!==nw.style){nw.up+=nw.paid;nw.paid=0;nw.ups={};}   // new playstyle: upgrades refunded, not lost
  normProf(nw);PROF=nw;if(!saveProf(PROF))$m('cerr').textContent='Saved for this session only (storage is blocked).';show('car');carUI();}
 function pvCam(m){const C=PVW.cam;if(!C)return;PVW.t=performance.now()+(m==='spin'?-1e9:1e9);PVW.yaw={front:0,back:Math.PI,side:Math.PI/2,head:-.4,spin:PVW.yaw}[m];if(m==='head'){C.position.set(0,1.82,1.7);C.lookAt(0,1.78,0);}else{C.position.set(0,1.05,5);C.lookAt(0,.98,0);}
@@ -2601,8 +2608,9 @@ function doAct(a){const id=ACT[a].find(id=>vis($m(id)));if(a==='confirm'){const 
   const a=e.key==='Escape'?'back':e.key==='Enter'?'confirm':(e.key==='r'||e.key==='R')&&vis($m('ureset'))?'reset':null;if(a&&doAct(a))e.preventDefault();});
  new MutationObserver(()=>prompts()).observe(document.body,{childList:true,subtree:true});document.body.dataset.input=INPUT;prompts();}
 // ================= VERSION + PATCH NOTES: a new update = bump GAME_VER and add its entry to PATCH (any order; shown newest first) =================
-const GAME_VER='3.30';
+const GAME_VER='3.31';
 const PATCH=[
+ {version:'3.31',title:'Build Lock',date:'2026-10-29',changes:{Career:['Height, weight, wingspan, playstyle and starting ratings are locked until your player reaches Level 20','Name, number, equipment, appearance and upgrades stay open; the lock lifts the moment you hit Level 20']}},
  {version:'3.30',title:'Rivalries Everywhere',date:'2026-10-29',changes:{Career:['Rivalries now form from season-long competition: close award races, swapping places on the leaderboards, 1st-and-2nd award finishes, close stat races and best-vs-best meetings (played or simulated)','A rivalry can form in your first season; it still needs real evidence (two kinds of competition, a 1-2 award finish or repeated duels)','League rivalries between other players appear in the Rivalries tab']}},
  {version:'3.29',title:'Simulated XP',date:'2026-10-29',changes:{Career:['Simulated games now earn XP: 40% of what your simulated performance would earn in a played game (same stats, objectives and result bonus)','Level-ups and upgrade points from simulated XP work as normal; played games still pay 100%']}},
  {version:'3.28',title:'Simulated Stats',date:'2026-10-29',changes:{Career:['Simulated games now give your player real stats: passes, catches, runs, tackles and picks from the simulated game, weighted by your ratings','They count toward your season, career, league leaders and awards, exactly once per game']}},

@@ -2071,7 +2071,12 @@ const profOk=p=>!!(p&&p.v===1&&p.sv===SAVE_FMT&&p.att&&AK.every(k=>p.att[k]>=A_M
 function loadProf(i=SLOT){if(!okSlot(i))return null;try{const p=JSON.parse(localStorage.getItem(skey(i))||'null');if(p)p.slot=i;if(profOk(p))return normProf(p);}catch(e){}return null;}
 // the saved form leaves out season.aw.cache (the awards evaluation, rebuilt by awEval on first use: same inputs, same result)
 const saveJSON=p=>JSON.stringify(p,function(k,v){return k==='cache'&&this&&this.pg&&this.done?undefined:v;});
-function saveProf(p){const i=p.slot??SLOT;if(!okSlot(i))return false;p.slot=i;p.sv=SAVE_FMT;let ok=false;const j=saveJSON(p);try{localStorage.setItem(skey(i),j);ok=true;}catch(e){}REC.mirror(i,j);return ok;}   // the IndexedDB mirror is written even if localStorage is full
+// ---- career ID: one stable id per career, so other modes and the cloud can refer to a career without loading or changing it
+const newCid=()=>{const a='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';return[...crypto.getRandomValues(new Uint8Array(20))].map(x=>a[x%62]).join('');};
+// once per boot: give every career without an id one, and split duplicates (e.g. a restored copy next to its original). Only the id is added: the rest of the save is rewritten byte for byte
+function ensureCids(){const seen=new Set();for(let i=0;i<NSLOT;i++){let raw,o;try{raw=localStorage.getItem(skey(i));o=raw&&JSON.parse(raw);}catch(e){continue;}if(!o||!profOk(o))continue;
+ if(o.cid&&!seen.has(o.cid)){seen.add(o.cid);continue;}const dup=!!o.cid;o.cid=newCid();if(dup)o.cloud=null;seen.add(o.cid);const j=JSON.stringify(o);try{localStorage.setItem(skey(i),j);}catch(e){}REC.mirror(i,j);}}
+function saveProf(p){const i=p.slot??SLOT;if(!okSlot(i))return false;p.slot=i;p.sv=SAVE_FMT;if(!p.cid)p.cid=newCid();let ok=false;const j=saveJSON(p);try{localStorage.setItem(skey(i),j);ok=true;}catch(e){}REC.mirror(i,j);return ok;}   // the IndexedDB mirror is written even if localStorage is full
 // one-time reset of the pre-5-slot playtest saves: removes ONLY the old career keys (input mode and touch layout stay)
 function legacyWipe(){try{if(localStorage.getItem('pafSaveFmt'))return;for(let i=0;i<10;i++)localStorage.removeItem('rafCareerPlayer#'+i);localStorage.removeItem('rafCareerPlayer');localStorage.setItem('pafSaveFmt',String(SAVE_FMT));}catch(e){}}
 // ---------- online accounts (foundation only): Firebase loads on first use by an account feature; guests and offline play never touch the network.
@@ -2302,6 +2307,20 @@ const REC=(()=>{let dbp=null;const db=()=>dbp||(dbp=new Promise((ok,no)=>{try{co
   drop:id=>tx('readwrite',st=>st.delete(id))};})();
 
 let PROF=null;
+// ================= EXHIBITION DATA (no XP, career players only) =================
+// Players: read-only copies of the career saves, taken when asked. Stats + history: their own key (pafExh), filed under the career id,
+// so a deleted career just leaves the picker while its past results stay. Nothing here ever writes a career save.
+const EXH=(()=>{const K='pafExh',HMAX=50,blank=()=>({v:1,s:{},h:[]});
+ const load=()=>{try{const o=JSON.parse(localStorage.getItem(K)||'null');if(o&&o.v===1&&o.s&&typeof o.s==='object'&&Array.isArray(o.h))return o;}catch(e){}return blank();};
+ const store=o=>{try{localStorage.setItem(K,JSON.stringify(o));return true;}catch(e){return false;}};
+ const num=x=>Number.isFinite(+x)?+x:0;
+ return{
+  players:()=>[...Array(NSLOT).keys()].map(i=>{const p=loadProf(i);return p&&p.cid?{slot:i,cid:p.cid,build:JSON.parse(JSON.stringify(p))}:null;}).filter(Boolean),   // copies: changing one never reaches the career
+  record(cid,m){if(!cid||!m)return false;const o=load(),us=num(m.us),them=num(m.them),res=us>them?'w':us<them?'l':'t',s=o.s[cid]||(o.s[cid]={gp:0,w:0,l:0,t:0,pf:0,pa:0,st:{}});
+   s.gp++;s[res]++;s.pf+=us;s.pa+=them;for(const k in m.st||{})s.st[k]=num(s.st[k])+num(m.st[k]);
+   o.h.unshift({cid,at:Date.now(),opp:String(m.opp||'').slice(0,40),us,them,res,st:{...(m.st||{})}});o.h.length=Math.min(o.h.length,HMAX);return store(o);},
+  stats:cid=>load().s[cid]||null,history:cid=>load().h.filter(r=>!cid||r.cid===cid),
+  orphans:()=>{const live=new Set(EXH.players().map(x=>x.cid));return Object.keys(load().s).filter(c=>!live.has(c));}};})();
 // in the match: ratings onto the player's doll, skin / gloves / cleats onto its parts, number and name onto the jersey
 // ================= BUILD MODEL: biometrics, caps, badges, equipment (one place for every calculation) =================
 // biometrics in inches / pounds; the neutral baseline (6'0", 205 lb, 6'2" wingspan) changes nothing
@@ -2657,7 +2676,8 @@ async function recUI(L){const out=[];for(const[i,p]of L)if(!p){const m=await REC
  for(const d of await REC.deleted()){const q=prevOf(d.j);if(q)out.push(`<button class="mrow" data-rd="${d.id}">Recover deleted: ${esc(q)} (deleted ${new Date(d.at).toLocaleString()})</button>`);}
  const box=$m('srec');if(box){box.innerHTML=out.length?`<small class="hgrp">RECOVERY</small>${out.join('')}`:'';box.hidden=!out.length;}}
 function prevOf(j){try{const p=JSON.parse(j);return`${p.first} ${p.last} · LVL ${p.lvl}`;}catch(e){return null;}}
-async function recRestore(j){const L=[...Array(NSLOT).keys()].filter(i=>!loadProf(i));if(!L.length){alert('All 5 slots are in use. Delete a career first to recover this one.');return false;}let p;try{p=JSON.parse(j);}catch(e){return false;}p.slot=L[0];p.sv=SAVE_FMT;if(!saveProf(p))return false;return L[0];}
+async function recRestore(j){const L=[...Array(NSLOT).keys()].filter(i=>!loadProf(i));if(!L.length){alert('All 5 slots are in use. Delete a career first to recover this one.');return false;}let p;try{p=JSON.parse(j);}catch(e){return false;}p.slot=L[0];p.sv=SAVE_FMT;if(p.cid&&[...Array(NSLOT).keys()].some(i=>{const q=loadProf(i);return q&&q.cid===p.cid;})){p.cid=newCid();p.cloud=null;}   // a recovered copy of a career that still exists becomes its own career
+ if(!saveProf(p))return false;return L[0];}
 function slotPrev(i,p){if(!p){$m('spvi').innerHTML='<p class="mutd">Pick an empty slot to create a player. Every slot keeps its own career, club, season and progress.</p>';$m('pvsl').innerHTML='';return;}
  $m('spvi').innerHTML=pviHTML(p);pvShow('pvsl',p);for(const b of document.querySelectorAll('.slot'))b.classList.toggle('hv',+b.dataset.i===i);}
 {$m('sgrid').addEventListener('pointerover',e=>{const b=e.target.closest('.slot');if(b&&!b.classList.contains('empty')&&!b.classList.contains('hv'))slotPrev(+b.dataset.i,loadProf(+b.dataset.i));});
@@ -4378,7 +4398,7 @@ function resetUps(){const p=PROF;if(!p.paid||!confirm(`Reset all upgrades? You g
 {$m('utabs').onclick=e=>{const b=e.target.closest('[data-ut]');if(b){UTAB=b.dataset.ut;upgTabs();}};$m('ubdg').onclick=e=>{const b=e.target.closest('[data-bf]');if(b){BFLT=b.dataset.bf;bdgUI();}};
  $m('fup').onclick=$m('cupg').onclick=()=>{if(!PROF)return;show('upg');upgUI();upgTabs();pvShow('pvu',PROF);};$m('uback').onclick=()=>{show('car');carUI();};$m('udev').onclick=()=>{develop();bdgCheck(PROF);if(UTAB==='bdg')bdgUI();};$m('ureset').onclick=resetUps;
  $m('ulist').onclick=e=>{const b=e.target.closest('.ur');if(b){USEL=b.dataset.k;upgUI();}};}
-legacyWipe();PROF=null;ACCT.init();
+legacyWipe();ensureCids();PROF=null;ACCT.init();
 // stamina meter
 // stamina meter (yours)
 {const st=$m('stam').firstElementChild;setInterval(()=>{const v=player.cur.stam??1;st.style.width=v*100+'%';st.style.background=v<.4?'#ff5a4a':'#fff';},120);}

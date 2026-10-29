@@ -9,7 +9,7 @@ await p.waitForTimeout(1200);
 const pickPlay=async()=>{for(let i=0;i<10;i++){if(await p.isVisible('#pcards button')){await p.click('#pcards button');return;}await p.waitForTimeout(300);}};
 const snap=()=>p.evaluate(()=>JSON.stringify([0,1,2,3,4].map(i=>localStorage.getItem('pafCareer#'+i))));const C0=await snap();
 const cid=await p.evaluate(()=>loadProf(0).cid);
-await p.evaluate(()=>show('mode'));ok('menuEntry',await p.isVisible('#mexh'));await p.click('#mexh');
+await p.evaluate(()=>show('mode'));ok('menuEntry',await p.isVisible('#mexh'));await p.click('#mexh');ok('modePicker',await p.isVisible('#exm'));await p.click('#xmteam');
 ok('pickerListsCareerPlayer',(await p.textContent('#xpl')).includes('Exa Mple')&&await p.isEnabled('#xgo'));
 await p.click('#xop [data-o="5"]');ok('opponentPicked',await p.evaluate(()=>XM.op===5));
 await p.click('#xgo');await p.waitForTimeout(1500);

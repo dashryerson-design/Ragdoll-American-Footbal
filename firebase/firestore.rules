@@ -96,16 +96,18 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.host == request.auth.uid;
     }
 
-    // ---- friends. Public profile: username + join date + Exhibition totals, nothing private; written only by its owner, matching their account
+    // ---- friends. Public profile: username + join date + game totals + avatar / calling card ids, nothing private; written only by its owner, matching their account
     function pair(a, b) { return a < b ? a + '_' + b : b + '_' + a; }
     function uname(uid) { return get(userPath(uid)).data.username; }
     function docPath(c, id) { return /databases/$(database)/documents/$(c)/$(id); }
     match /publicProfiles/{uid} {
       allow get: if signedIn();
       allow list: if false;
-      allow create, update: if isUser(uid) && request.resource.data.keys().hasOnly(['username', 'joined', 'stats'])
+      allow create, update: if isUser(uid) && request.resource.data.keys().hasOnly(['username', 'joined', 'stats', 'avatar', 'card'])
         && request.resource.data.username == uname(uid) && request.resource.data.joined == get(userPath(uid)).data.createdAt
-        && request.resource.data.stats is map && request.resource.data.stats.size() <= 4;
+        && request.resource.data.stats is map && request.resource.data.stats.size() <= 4
+        && (!('avatar' in request.resource.data) || request.resource.data.avatar is string && request.resource.data.avatar.matches('^[a-z0-9-]{1,16}$'))
+        && (!('card' in request.resource.data) || request.resource.data.card is string && request.resource.data.card.matches('^[a-z0-9-]{1,16}$'));   // avatar + calling card: ids of built-in designs, nothing uploaded
       allow delete: if isUser(uid);
     }
     // friend request {from}_{to}: one per pair and direction, not to yourself, not to a friend, not if they already asked you

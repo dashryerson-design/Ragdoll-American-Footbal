@@ -459,8 +459,10 @@ body.cer>*:not(canvas):not(#cer){visibility:hidden!important}#cer{position:fixed
 .netpeer{display:flex;flex-direction:column;padding:10px 12px;background:var(--bg2);border-left:4px solid var(--ac);border-radius:var(--rad)}.netpeer b{font:800 20px var(--fd)}.netpeer span{color:var(--tx2);font-size:13px}.netres{text-align:center;margin-bottom:10px}.netres b{display:block;font:800 30px var(--fd);letter-spacing:.2em}.netres b.w{color:#5fd38a}.netres b.l{color:#ff6b61}.netres span{font:700 18px var(--fd)}.netres small{display:block;color:var(--tx2)}
 #macbadge{position:absolute;top:8px;right:8px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#ff4d4d;color:#fff;font:800 12px/20px var(--fd);text-align:center;font-style:normal}#macbadge[hidden]{display:none}#macct{position:relative}
 .frrow{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;background:var(--bg2);border:1px solid var(--ln);border-radius:var(--rad)}.frrow b{font:700 16px var(--fd)}.frrow small{color:var(--tx2)}.frb{margin-left:auto;display:flex;gap:6px}.frb button,.frpick button,#netb .frb button{padding:6px 10px;font:700 12px var(--fd);letter-spacing:.08em;color:var(--tx);background:var(--pn);border:1px solid var(--ln2);border-radius:var(--rad);cursor:pointer}
-.frav{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:var(--ac);font:800 17px var(--fd);color:#fff}.frdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#6b7280;vertical-align:middle}.frdot.on{background:#3ee07a;box-shadow:0 0 6px #3ee07a}
-.frprof{display:flex;gap:12px;align-items:center;margin-bottom:8px}.frprof .frav{width:56px;height:56px;font-size:28px}.frprof b{font:800 24px var(--fd)}.frprof span{color:var(--tx2);font-size:13px}.frprof small{display:block;color:var(--tx2)}.frpick{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px;border:1px dashed var(--ac);border-radius:var(--rad)}
+.cav{flex:none;display:inline-block;width:36px;height:36px;line-height:0}.cav svg{width:100%;height:100%;border-radius:22%}.cav.big{width:60px;height:60px}.frrow{cursor:pointer}.frrow:hover{border-color:var(--ac)}
+.ccard{position:relative;overflow:hidden;border-radius:var(--rad);min-height:64px}.ccard .ccbg{position:absolute;inset:0;width:100%;height:100%}.ccard .cct{position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;text-shadow:0 1px 3px #000c}.ccard .cct b{display:block;font:800 22px var(--fd);color:#fff}.ccard .cct small{color:#fff;opacity:.85}.ccard.prof{margin:6px 0 10px}.ccard.mini{min-height:44px}.ccard.mini .cct{padding:6px 8px}.ccard.hdr{position:absolute;inset:0;border-radius:0;opacity:.55}.acdh{position:relative;overflow:hidden}.acdh>.cav,.acdh>.acht{position:relative}
+.cgh{display:block;margin:8px 0 4px;color:var(--tx2);font:700 10px var(--fd);letter-spacing:.2em}.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}.ccgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}.cpick{padding:3px;background:none;border:2px solid transparent;border-radius:10px;cursor:pointer}.cpick .cav{width:44px;height:44px}.cpick.on{border-color:var(--ac)}.ccgrid .cpick{padding:2px}
+.frpick{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px;border:1px dashed var(--ac);border-radius:var(--rad)}
 #frnote{position:fixed;right:12px;bottom:12px;z-index:70;display:flex;flex-direction:column;gap:6px;max-width:min(92vw,380px)}#frnote[hidden]{display:none}.frn{display:flex;gap:6px;align-items:center;padding:10px 12px;background:#10151cf2;border:1px solid var(--ln2);border-left:4px solid var(--ac);border-radius:var(--rad);color:#fff;font-size:14px;animation:acin .25s ease-out}.frn span{flex:1}.frn button{padding:5px 9px;font:700 12px var(--fd);color:#fff;background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--rad);cursor:pointer}
 #netwait{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#05080ccc;color:#fff;pointer-events:none}#netwait[hidden]{display:none}#netwait b{font:800 40px var(--fd);letter-spacing:.14em}#netwait span{color:var(--tx2);font:600 16px var(--fd);letter-spacing:.1em}#netwait::before{content:'';width:36px;height:36px;border:3px solid var(--ac);border-right-color:transparent;border-radius:50%;animation:acspin .8s linear infinite}
 #nethud{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:50;padding:6px 12px;background:#000a;border-radius:4px;font:700 14px var(--fd);letter-spacing:.06em;color:#fff;pointer-events:none}.exw{width:min(100%,860px)}.exw h4{margin:12px 0 6px;font:700 13px system-ui;letter-spacing:.24em;color:var(--mu)}.exgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}.exgrid .slot{min-height:96px;cursor:pointer}.exgrid .slot.on{outline:2px solid var(--ac);outline-offset:1px}.exop{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}.exop button{padding:10px 8px;text-align:left;background:linear-gradient(110deg,color-mix(in srgb,var(--j) 50%,#111),#10151c 70%);border:1px solid #ffffff18;border-left:4px solid var(--a);border-radius:var(--rad);color:#fff;cursor:pointer;font:700 14px var(--fd)}.exop button small{display:block;color:var(--tx2);font-size:11px}.exop .xovr{float:right;font-size:16px}.exop button.on{outline:2px solid var(--ac);outline-offset:1px}#xgo:disabled{opacity:.4}
@@ -2105,7 +2107,7 @@ function saveProf(p){if(p&&p._exh)return false;   // an Exhibition player is a r
 function legacyWipe(){try{if(localStorage.getItem('pafSaveFmt'))return;for(let i=0;i<10;i++)localStorage.removeItem('rafCareerPlayer#'+i);localStorage.removeItem('rafCareerPlayer');localStorage.setItem('pafSaveFmt',String(SAVE_FMT));}catch(e){}}
 // ---------- online accounts (foundation only): Firebase loads on first use by an account feature; guests and offline play never touch the network.
 // These values identify the project publicly (every Firebase web app ships them); access is decided by firebase/firestore.rules on Google's servers
-const FB_CFG={apiKey:'AIzaSyChCBhZv76cQoXn150bRJxuktkQh9o--oA',authDomain:'paf-accounts.firebaseapp.com',projectId:'paf-accounts',storageBucket:'paf-accounts.firebasestorage.app',messagingSenderId:'646342063841',appId:'1:646342063841:web:a6485f197dd3f2ef80e9a0',databaseURL:'https://paf-accounts-default-rtdb.firebaseio.com'},FB_VER='10.12.2',CLOUD_SLOTS=5;
+const FB_CFG={apiKey:'AIzaSyChCBhZv76cQoXn150bRJxuktkQh9o--oA',authDomain:'paf-accounts.firebaseapp.com',projectId:'paf-accounts',storageBucket:'paf-accounts.firebasestorage.app',messagingSenderId:'646342063841',appId:'1:646342063841:web:a6485f197dd3f2ef80e9a0'},FB_VER='10.12.2',CLOUD_SLOTS=5;
 const FB=(()=>{let P=null;const u=n=>`https://www.gstatic.com/firebasejs/${FB_VER}/${n}.js`;
  return{load(){return P||(P=Promise.all([import(u('firebase-app')),import(u('firebase-auth')),import(u('firebase-firestore'))]).then(([A,Au,F])=>{const app=A.initializeApp(FB_CFG);return{app,auth:Au.getAuth(app),db:F.getFirestore(app),Au,F};}).catch(e=>{P=null;throw e;}));},   // a failed load can be retried later; nothing else depends on it
   loaded:()=>!!P};})();
@@ -2298,10 +2300,10 @@ function render(){const b=$m('acctb');if(!b)return;if(S.mode==='in'&&S.prof&&S.u
  else if(S.mode==='in'){const P=S.prof,at=C.conf?'sav':S.atab||'pro',since=P.createdAt&&P.createdAt.toDate?P.createdAt.toDate().toLocaleDateString():'',loc=[...Array(NSLOT).keys()].map(i=>[i,loadProf(i)]).filter(x=>x[1]);
   const pane=(k,x)=>`<div class="acpane" data-pane="${k}"${at===k?'':' hidden'}>${x}</div>`;
   const card=([i,p])=>{const c=p.draft?club(p.team):null;return`<div class="acpc" style="--j:${c?hx(c.jer):'#2a2a2e'};--a:${c?hx(c.acc):'#555'}"><small>SLOT ${i+1}</small><b>${esc(p.first)} ${esc(p.last)}</b><span>#${p.num} · ${tcase(STYLES[p.style][0])}</span><em>${ovr(p.att,p.style)}<small>OVR</small></em><span>LVL ${p.lvl} · ${c?c.ab:'UNDRAFTED'}</span></div>`;};
-  h=`<div class="acdh"><div class="acav">${esc(P.username[0].toUpperCase())}</div><div class="acht"><b>${esc(P.username)}</b><span>${esc(u.email)}</span><div>${u.emailVerified?chip('ok','✓ Verified'):chip('warn','Email not verified')}${hasG(u)?chip('g','Google'):''}${hasPw(u)?chip('mu','Email + password'):''}</div>${since?`<small>Member since ${since}</small>`:''}</div></div>
+  h=`<div class="acdh">${COSM.card(FRIENDS.look().card,'','hdr')}${COSM.av(FRIENDS.look().avatar,P.username,'big')}<div class="acht"><b>${esc(P.username)}</b><span>${esc(u.email)}</span><div>${u.emailVerified?chip('ok','✓ Verified'):chip('warn','Email not verified')}${hasG(u)?chip('g','Google'):''}${hasPw(u)?chip('mu','Email + password'):''}</div>${since?`<small>Member since ${since}</small>`:''}</div></div>
   ${u.emailVerified?'':`<div class="acwarn"><p class="note">Open the link we emailed you. Cloud saves will need a verified email.</p>${btn('resend','Resend verification email')}${btn('recheck','I have verified it')}</div>`}
   <div class="actabs acmain">${[['pro','PROFILE'],['sav','SAVES'],['fr','FRIENDS'+((FRIENDS.state().inc.length+FRIENDS.state().invites.length)?' •':'')],['sec','SECURITY']].map(([k,l])=>`<button class="${k===at?'on':''}" data-aa="atab" data-t="${k}">${l}</button>`).join('')}</div>
-  ${pane('pro',`<h4>MY PLAYERS (${loc.length}/5)</h4>${loc.length?`<div class="acgrid">${loc.map(card).join('')}</div>`:'<div class="acempty"><b>＋</b><p class="note">No players on this device yet. Create one in Career Mode.</p></div>'}
+  ${pane('pro',FRIENDS.lookHTML()+`<h4>MY PLAYERS (${loc.length}/5)</h4>${loc.length?`<div class="acgrid">${loc.map(card).join('')}</div>`:'<div class="acempty"><b>＋</b><p class="note">No players on this device yet. Create one in Career Mode.</p></div>'}
    <h4>GAME MODES</h4><div class="acgrid"><button class="acmode" data-aa="gocar"><b>CAREER MODE</b><span>${loc.length}/5 slots used</span></button><button class="acmode" data-aa="goquick"><b>QUICK PLAY</b><span>Jump straight onto the field</span></button></div>`)}
   ${pane('sav',u.emailVerified?cloudHTML():'<div class="acempty"><b>☁</b><p class="note">Verify your email to use cloud careers.</p></div>')}
   ${pane('fr',FRIENDS.html())}
@@ -2320,82 +2322,140 @@ function init(){label();$m('acctb').addEventListener('click',e=>{if(e.target.clo
  addEventListener('online',render);addEventListener('offline',render);
  if(known()||localDel())setTimeout(()=>boot().catch(()=>{}),1500);}
 return{init,open,state:()=>S,nameOk,boot,_fb:()=>fb,render,tab:t=>{S.atab=t;render();}};})();
-// ===================== FRIENDS: requests, friend list, public profiles, online status, match invites =====================
+// ===================== ACCOUNT LOOK: avatars + calling cards (built-in designs, stored on the public profile as short ids) =====================
+// To add one: push an entry with a new id. Unknown ids (e.g. from a newer version) fall back to the defaults, so old clients never break.
+const COSM=(()=>{const SV=(b,v='0 0 64 64')=>`<svg viewBox="${v}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${b}</svg>`,hexc=c=>'#'+c.toString(16).padStart(6,'0');
+ const ini=n=>esc(String(n||'?').replace(/_/g,' ').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase()||'?');
+ const bg=(id,a,b)=>`<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#${id})"/>`;
+ const AV=[];
+ function init(){if(AV.length)return;   // built on first use: the clubs are defined further down the page
+ // team logos: the club badge on its own colours
+ CLUBS.forEach((_,i)=>{const c=club(i);AV.push({id:'t'+i,g:'Teams',n:c.city+' '+c.name,d:()=>SV(bg('gt'+i,hexc(c.jer),hexc(c.pant))+`<circle cx="32" cy="32" r="23" fill="none" stroke="${hexc(c.acc)}" stroke-width="3"/><text x="32" y="41" font-size="26" text-anchor="middle">${c.ic}</text>`)});});
+ // football
+ const F={ball:['#163d27','#0b2015',`<g transform="rotate(-35 32 32)"><ellipse cx="32" cy="32" rx="22" ry="13" fill="#8a4b22" stroke="#4d2710" stroke-width="2"/><path d="M14 32h6M44 32h6" stroke="#fff" stroke-width="2.5"/><path d="M24 32h16" stroke="#fff" stroke-width="2"/>${[26,29,32,35,38].map(x=>`<path d="M${x} 29v6" stroke="#fff" stroke-width="1.8"/>`).join('')}</g>`],
+  helmet:['#0b1e3f','#1e4f9b',`<path d="M12 38C12 21 24 12 37 13c12 1 18 11 17 24l-14 4-2 9H22c-6-2-10-6-10-12z" fill="#e8ecf2" stroke="#9aa6b5" stroke-width="2"/><path d="M33 13c-3 9-3 18 0 27" stroke="#c8102e" stroke-width="5" fill="none"/><path d="M40 41h14M42 47h10M47 36v15" stroke="#3a4757" stroke-width="2.5" fill="none"/><circle cx="24" cy="33" r="3" fill="#3a4757"/>`],
+  posts:['#0f3b6b','#081c33',`<path d="M32 58V40M14 40h36M14 40V10M50 40V10" stroke="#ffd23f" stroke-width="4" stroke-linecap="round" fill="none"/><ellipse cx="32" cy="22" rx="5" ry="3" fill="#8a4b22" transform="rotate(-30 32 22)"/>`],
+  trophy:['#3a2a00','#120c00',`<path d="M20 12h24v8c0 10-6 17-12 17S20 30 20 20z" fill="#ffd23f" stroke="#b88a00" stroke-width="2"/><path d="M20 15h-7c0 8 4 12 9 12M44 15h7c0 8-4 12-9 12" stroke="#ffd23f" stroke-width="3" fill="none"/><rect x="29" y="36" width="6" height="8" fill="#e0b52b"/><rect x="21" y="44" width="22" height="7" rx="2" fill="#b88a00"/>`],
+  whistle:['#262b33','#0d1014',`<circle cx="26" cy="38" r="13" fill="#c7d0db" stroke="#7d8896" stroke-width="2"/><rect x="26" y="25" width="26" height="9" rx="3" fill="#c7d0db" stroke="#7d8896" stroke-width="2"/><circle cx="26" cy="38" r="4" fill="#3a4757"/><path d="M14 30c-4-8 0-16 8-18" stroke="#ff5a1f" stroke-width="3" fill="none"/>`],
+  pylon:['#0b3a22','#05180e',`<path d="M24 54l5-42h6l5 42z" fill="#ff7a1a" stroke="#c4520a" stroke-width="2"/><rect x="18" y="52" width="28" height="5" rx="2" fill="#c4520a"/><path d="M27 30h10" stroke="#fff" stroke-width="3"/>`],
+  jersey:['#5a0b0b','#200303',`<path d="M20 12l-12 8 5 10 6-3v27h26V27l6 3 5-10-12-8c-2 4-6 6-12 6s-10-2-12-6z" fill="#e23b3b" stroke="#fff" stroke-width="2"/><text x="32" y="46" font-size="17" font-weight="900" fill="#fff" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif">88</text>`],
+  clock:['#14161a','#000',`<circle cx="32" cy="35" r="19" fill="#0e1116" stroke="#3ee07a" stroke-width="3"/><rect x="28" y="10" width="8" height="6" rx="2" fill="#3ee07a"/><path d="M32 35V22M32 35l9 6" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`]};
+ for(const k in F){const[a,b,ic]=F[k];AV.push({id:'f-'+k,g:'Football',n:k[0].toUpperCase()+k.slice(1),d:()=>SV(bg('gf'+k,a,b)+ic)});}
+ // initials designs (your own initials)
+ const I={shield:(t)=>SV(bg('gis','#1e9bff','#0b4f8a')+`<path d="M32 8l20 7v15c0 13-9 21-20 26C21 51 12 43 12 30V15z" fill="#0b2140" stroke="#ffd23f" stroke-width="3"/><text x="32" y="40" font-size="19" font-weight="900" fill="#fff" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif">${t}</text>`),
+  hex:(t)=>SV(bg('gih','#2b0b4a','#12021f')+`<path d="M32 7l21 12v26L32 57 11 45V19z" fill="none" stroke="#e040fb" stroke-width="3"/><text x="32" y="40" font-size="20" font-weight="900" fill="#fff" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif">${t}</text>`),
+  stripe:(t)=>SV(bg('gist','#c8102e','#5a0b0b')+`<path d="M-4 52L52-4M8 64L64 8" stroke="#fff" stroke-opacity=".18" stroke-width="7"/><text x="32" y="42" font-size="24" font-weight="900" fill="#fff" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif">${t}</text>`),
+  varsity:(t)=>SV(bg('giv','#1f5d3a','#0d2a19')+`<circle cx="32" cy="32" r="22" fill="#f2e6c9"/><circle cx="32" cy="32" r="18" fill="none" stroke="#1f5d3a" stroke-width="2" stroke-dasharray="3 3"/><text x="32" y="41" font-size="22" font-weight="900" fill="#1f5d3a" text-anchor="middle" font-family="Georgia,serif">${t}</text>`)};
+ for(const k in I)AV.push({id:'i-'+k,g:'Initials',n:k[0].toUpperCase()+k.slice(1),d:n=>I[k](ini(n))});
+ // graphics
+ const X={bolt:['#111','#2a2a2a','<path d="M36 6L16 36h13l-5 22 22-32H33z" fill="#ffd23f" stroke="#b88a00" stroke-width="2"/>'],
+  flame:['#2a0800','#000','<path d="M32 58c-12 0-18-9-16-19 2-8 9-11 8-20 7 4 9 10 8 15 3-3 4-7 3-11 8 6 13 14 11 23-2 8-7 12-14 12z" fill="#ff5a1f"/><path d="M32 56c-6 0-9-5-8-10 1-4 5-6 5-11 4 3 5 6 4 9 2-1 3-3 3-5 4 4 5 8 4 11-1 4-4 6-8 6z" fill="#ffd23f"/>'],
+  crown:['#1c1030','#07030f','<path d="M12 44l-2-24 12 10 10-16 10 16 12-10-2 24z" fill="#ffd23f" stroke="#b88a00" stroke-width="2"/><rect x="12" y="44" width="40" height="7" rx="2" fill="#e0b52b"/><circle cx="32" cy="34" r="3" fill="#c8102e"/>'],
+  star:['#0b1e3f','#020814','<path d="M32 8l7 15 16 2-12 11 3 16-14-8-14 8 3-16-12-11 16-2z" fill="#fff" stroke="#1e9bff" stroke-width="2.5"/>'],
+  target:['#3a0000','#120000','<circle cx="32" cy="32" r="22" fill="#fff"/><circle cx="32" cy="32" r="16" fill="#c8102e"/><circle cx="32" cy="32" r="10" fill="#fff"/><circle cx="32" cy="32" r="4" fill="#c8102e"/>'],
+  wings:['#0b3a4a','#03141a','<path d="M32 30c-8-10-20-12-26-10 6 2 9 6 9 6-4 0-7 2-8 4 5 0 9 2 11 4-3 1-5 3-5 5 8-2 14-4 19-9zM32 30c8-10 20-12 26-10-6 2-9 6-9 6 4 0 7 2 8 4-5 0-9 2-11 4 3 1 5 3 5 5-8-2-14-4-19-9z" fill="#9be7ff"/><circle cx="32" cy="34" r="5" fill="#fff"/>']};
+ for(const k in X){const[a,b,ic]=X[k];AV.push({id:'g-'+k,g:'Graphics',n:k[0].toUpperCase()+k.slice(1),d:()=>SV(bg('gg'+k,a,b)+ic)});}}
+ // calling cards: 300 x 80 banners
+ const CV=b=>`<svg class="ccbg" viewBox="0 0 300 80" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${b}</svg>`,lg=(id,s)=>`<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${s.map((c,i)=>`<stop offset="${i/(s.length-1)}" stop-color="${c}"/>`).join('')}</linearGradient></defs>`;
+ const CARDS=[
+  {id:'gridiron',n:'Gridiron',d:()=>CV(`<rect width="300" height="80" fill="#1d6b3d"/>${[0,1,2,3,4,5,6].map(i=>`<rect x="${i*50}" width="25" height="80" fill="#22794a"/>`).join('')}${[25,75,125,175,225,275].map(x=>`<path d="M${x} 0v80" stroke="#fff" stroke-opacity=".7" stroke-width="2"/>`).join('')}<text x="50" y="72" font-size="16" fill="#fff" fill-opacity=".55" font-weight="900" text-anchor="middle">20</text><text x="150" y="72" font-size="16" fill="#fff" fill-opacity=".55" font-weight="900" text-anchor="middle">50</text>`)},
+  {id:'lights',n:'Friday Night Lights',d:()=>CV(`${lg('cl',['#040b1a','#0b1e3f'])}<rect width="300" height="80" fill="url(#cl)"/><defs><radialGradient id="cg"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>${[40,110,190,260].map(x=>`<circle cx="${x}" cy="10" r="28" fill="url(#cg)"/><rect x="${x-9}" y="4" width="18" height="8" fill="#e8f1ff"/>`).join('')}<path d="M0 80h300v-12H0z" fill="#16452b"/>`)},
+  {id:'champion',n:'Champion',d:()=>CV(`${lg('cc',['#5a4100','#ffd23f','#b88a00'])}<rect width="300" height="80" fill="url(#cc)"/><path d="M-20 80L60 0h30L10 80zM70 80L150 0h12L82 80z" fill="#fff" fill-opacity=".22"/><text x="285" y="62" font-size="54" text-anchor="end">🏆</text>`)},
+  {id:'blitz',n:'Blitz',d:()=>CV(`<rect width="300" height="80" fill="#140303"/>${[...Array(12).keys()].map(i=>`<path d="M${i*34-40} 80L${i*34+20} 0h14L${i*34-26} 80z" fill="#c8102e"/>`).join('')}<path d="M0 0h300v6H0zM0 74h300v6H0z" fill="#ffd23f"/>`)},
+  {id:'playbook',n:'Playbook',d:()=>CV(`<rect width="300" height="80" fill="#1f2a24"/><g stroke="#e8efe9" stroke-width="2.5" fill="none" stroke-opacity=".85">${[[40,50],[90,30],[150,52]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7"/>`).join('')}${[[70,58],[130,22],[200,40],[245,25]].map(([x,y])=>`<path d="M${x-6} ${y-6}l12 12M${x+6} ${y-6}l-12 12"/>`).join('')}<path d="M40 43c10-20 30-25 50-20M150 45q30-30 60-12" stroke-dasharray="5 4"/><path d="M206 33l6 1-3 5"/></g>`)},
+  {id:'endzone',n:'End Zone',d:()=>CV(`${lg('ce',['#0b4f8a','#1e9bff'])}<rect width="300" height="80" fill="url(#ce)"/>${[...Array(16).keys()].map(i=>`<path d="M${i*22-10} 80L${i*22+30} 0" stroke="#fff" stroke-opacity=".12" stroke-width="8"/>`).join('')}<text x="150" y="54" font-size="34" font-weight="900" fill="#fff" fill-opacity=".25" text-anchor="middle" letter-spacing="8">END ZONE</text>`)},
+  {id:'frost',n:'Frozen Tundra',d:()=>CV(`${lg('cf',['#e6f8ff','#7fd3f2','#2b7ea1'])}<rect width="300" height="80" fill="url(#cf)"/>${[[20,0,60,40],[90,80,140,30],[170,0,230,50],[240,80,300,20]].map(([a,b,c,d])=>`<path d="M${a} ${b}L${c} ${d}L${(a+c)/2+20} ${(b+d)/2+10}z" fill="#fff" fill-opacity=".35"/>`).join('')}`)},
+  {id:'neon',n:'Neon Night',d:()=>CV(`<rect width="300" height="80" fill="#12021f"/>${[...Array(8).keys()].map(i=>`<path d="M0 ${i*12+4}h300" stroke="#e040fb" stroke-opacity="${.12+i*.05}" stroke-width="1"/>`).join('')}${[...Array(16).keys()].map(i=>`<path d="M${150+(i-8)*60} 80L150 30" stroke="#3ee0ff" stroke-opacity=".35" stroke-width="1"/>`).join('')}<path d="M0 30h300" stroke="#e040fb" stroke-width="2"/>`)},
+  {id:'hashmarks',n:'Hash Marks',d:()=>CV(`<rect width="300" height="80" fill="#0e1116"/>${[...Array(30).keys()].map(i=>`<path d="M${i*10+5} 14v10M${i*10+5} 56v10" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>`).join('')}<path d="M0 40h300" stroke="#ffd23f" stroke-width="3"/>`)},
+  {id:'heritage',n:'Heritage',d:()=>CV(`<rect width="300" height="80" fill="#f2e6c9"/><path d="M0 18h300M0 62h300" stroke="#7a1f1f" stroke-width="6"/><path d="M0 27h300M0 53h300" stroke="#1b2f5a" stroke-width="3"/><text x="150" y="47" font-size="12" fill="#7a1f1f" text-anchor="middle" letter-spacing="6" font-family="Georgia,serif">EST. ★ PHYSICS FOOTBALL</text>`)}];
+ const avOf=id=>(init(),AV).find(a=>a.id===id)||AV.find(a=>a.id==='i-shield'),cardOf=id=>CARDS.find(c=>c.id===id)||CARDS[0];
+ return{get AV(){init();return AV;},CARDS,ok:{a:id=>(init(),AV).some(a=>a.id===id),c:id=>CARDS.some(c=>c.id===id)},
+  av:(id,name,cls='')=>`<span class="cav ${cls}" title="${esc(avOf(id).n)}">${avOf(id).d(name)}</span>`,
+  card:(id,inner='',cls='')=>`<div class="ccard ${cls}">${cardOf(id).d()}<div class="cct">${inner}</div></div>`,cardName:id=>cardOf(id).n};})();
+// ===================== FRIENDS: requests, friend list, public profiles, match invites =====================
 // Firestore (keyed by uid, checked by the security rules): requests/{from_to}, friendships/{a_b} (uids sorted), invites/{to_from},
-// publicProfiles/{uid} (username, join date, Exhibition totals only: never an email or a career save). Online status: Realtime Database
-// status/{uid}, set "online" on connect and turned "offline" by the server itself when the connection drops (onDisconnect). Listeners, no polling.
-const FRIENDS=(()=>{const S={on:false,uid:null,name:null,friends:[],inc:[],out:[],invites:[],pres:{},tab:'list',view:null,msg:'',err:'',busy:false,notes:[]};
- let fb=null,R=null,rdb=null,unsubs=[],pu={},first={},meRef=null;const INV_MS=10*60000;
+// publicProfiles/{uid}: username, join date, avatar + calling card ids and game totals. Never an email or a career save.
+// Live listeners only for what must arrive by itself (incoming requests, invites); the friend list loads when the Friends tab is opened.
+const FRIENDS=(()=>{const S={on:false,uid:null,name:null,me:{},friends:[],inc:[],out:[],invites:[],tab:'list',view:null,msg:'',err:'',busy:false,notes:[],loaded:false,draft:null};
+ let fb=null,unsubs=[],first={};const INV_MS=10*60000;
  const pair=(a,b)=>a<b?a+'_'+b:b+'_'+a,other=f=>f.users[0]===S.uid?f.users[1]:f.users[0];
  const re=()=>{if(typeof ACCT!=='undefined')ACCT.render();badge();};
- function exhTotals(){let o={gp:0,w:0,l:0,t:0};try{const s=JSON.parse(localStorage.getItem('pafExh')||'{}').s||{};for(const k in s){for(const f of['gp','w','l','t'])o[f]+=s[k][f]|0;}}catch(e){}return o;}
- async function ensure(f,u,prof){if(S.on&&S.uid===u.uid)return;stop();fb=f;S.on=true;S.uid=u.uid;S.name=prof.username;
-  const F=f.F,db=f.db;
-  try{const us=await F.getDocFromServer(F.doc(db,'users',u.uid));await F.setDoc(F.doc(db,'publicProfiles',u.uid),{username:prof.username,joined:us.data().createdAt,stats:{exh:exhTotals()}});}catch(e){}   // what others may see, refreshed on sign-in
-  const q=(c,k)=>F.query(F.collection(db,c),F.where(k,'==',u.uid)),on=(name,qq,set)=>unsubs.push(F.onSnapshot(qq,s=>{const L=s.docs.map(d=>({id:d.id,...d.data()}));if(first[name])notify(name,L);first[name]=true;set(L);re();},()=>{}));
-  on('fr',F.query(F.collection(db,'friendships'),F.where('users','array-contains',u.uid)),L=>{S.friends=L;watch();});
-  on('inc',q('requests','to'),L=>S.inc=L);on('out',q('requests','from'),L=>S.out=L);on('inv',q('invites','to'),L=>S.invites=L.filter(x=>!x.at||x.at.toMillis()>Date.now()-INV_MS));
-  presence().catch(()=>{});}
- // new things since the last update → a notification
- function notify(name,L){const old=new Set((name==='fr'?S.friends:name==='inc'?S.inc:name==='out'?S.out:S.invites).map(x=>x.id));const add=L.filter(x=>!old.has(x.id));
+ const stats=()=>({exh:EXH.totals('s'),runs:EXH.totals('r'),on:EXH.totals('on')});
+ async function ensure(f,u,prof){if(S.on&&S.uid===u.uid)return;stop();fb=f;S.on=true;S.uid=u.uid;S.name=prof.username;const F=f.F,db=f.db;
+  try{const me=await F.getDocFromServer(F.doc(db,'publicProfiles',u.uid));S.me=me.exists()?{avatar:me.data().avatar,card:me.data().card}:{};
+   const us=await F.getDocFromServer(F.doc(db,'users',u.uid));await F.setDoc(F.doc(db,'publicProfiles',u.uid),{username:prof.username,joined:us.data().createdAt,stats:stats()},{merge:true});}catch(e){}   // refreshed on sign-in; the look is kept
+  re();
+  const on=(name,qq,set)=>unsubs.push(F.onSnapshot(qq,s=>{const L=s.docs.map(d=>({id:d.id,...d.data()}));if(first[name])notify(name,L);first[name]=true;set(L);re();},()=>{}));
+  on('inc',F.query(F.collection(db,'requests'),F.where('to','==',u.uid)),L=>S.inc=L);
+  on('inv',F.query(F.collection(db,'invites'),F.where('to','==',u.uid)),L=>S.invites=L.filter(x=>!x.at||x.at.toMillis()>Date.now()-INV_MS));}
+ // friend list + sent requests: read once when needed (Friends tab, after an action), not watched
+ async function load(){if(!fb)return;const F=fb.F,db=fb.db,q=(c,k,v,op='==')=>F.getDocs(F.query(F.collection(db,c),F.where(k,op,v)));
+  const[fr,out]=await Promise.all([q('friendships','users',S.uid,'array-contains'),q('requests','from',S.uid)]);const was=S.loaded?new Set(S.out.map(r=>r.to)):null;
+  S.friends=fr.docs.map(d=>({id:d.id,...d.data()}));S.out=out.docs.map(d=>({id:d.id,...d.data()}));
+  if(was)for(const f of S.friends){const o=other(f);if(was.has(o))note(`${f.names[o]} accepted your friend request.`,{});}
+  S.loaded=true;S.looks=S.looks||{};await Promise.all(S.friends.map(async f=>{const o=other(f);if(S.looks[o])return;try{const p=await F.getDoc(F.doc(db,'publicProfiles',o));S.looks[o]=p.exists()?{avatar:p.data().avatar,card:p.data().card}:{};}catch(e){S.looks[o]={};}}));re();}
+ function notify(name,L){const old=new Set((name==='inc'?S.inc:S.invites).map(x=>x.id)),add=L.filter(x=>!old.has(x.id));
   if(name==='inc')for(const r of add)note(`${r.fromName} sent you a friend request.`,{k:'req'});
-  if(name==='fr')for(const f of add){const o=other(f);if(S.out.some(r=>r.to===o))note(`${f.names[o]} accepted your friend request.`,{});}
   if(name==='inv')for(const v of add)note(`${v.fromName} invited you to ${v.mode==='runs'?'1v1 Runs':'an Exhibition'}.`,{k:'inv',id:v.id});}
  function note(text,o){const n={text,...o,t:Date.now()};S.notes.push(n);if(S.notes.length>4)S.notes.shift();drawNotes();if(!o.k)setTimeout(()=>{S.notes=S.notes.filter(x=>x!==n);drawNotes();},8000);}
  function drawNotes(){const e=$m('frnote');if(!e)return;e.hidden=!S.notes.length;e.innerHTML=S.notes.map((n,i)=>`<div class="frn"><span>${esc(n.text)}</span>${n.k==='inv'?`<button data-fn="acc" data-i="${i}">Accept</button><button data-fn="dec" data-i="${i}">Decline</button>`:n.k==='req'?`<button data-fn="see" data-i="${i}">View</button>`:''}<button data-fn="x" data-i="${i}">✕</button></div>`).join('');}
  function badge(){const n=S.inc.length+S.invites.length,e=$m('macbadge');if(e){e.hidden=!n;e.textContent=n;}}
- // online status
- async function presence(){if(!rdb){R=await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-database.js`);rdb=R.getDatabase(fb.app);if(window.PAF_EMU)R.connectDatabaseEmulator(rdb,'127.0.0.1',PAF_EMU.dbPort||9000);}
-  R.goOnline(rdb);meRef=R.ref(rdb,'status/'+S.uid);const c=R.onValue(R.ref(rdb,'.info/connected'),s=>{if(s.val()!==true||!meRef)return;R.onDisconnect(meRef).set({on:false,t:R.serverTimestamp()}).then(()=>R.set(meRef,{on:true,t:R.serverTimestamp()})).catch(()=>{});});
-  unsubs.push(c);watch();}
- function watch(){if(!rdb)return;const want=new Set(S.friends.map(other));for(const k in pu)if(!want.has(k)){pu[k]();delete pu[k];delete S.pres[k];}
-  for(const o of want)if(!pu[o])pu[o]=R.onValue(R.ref(rdb,'status/'+o),s=>{const v=s.val();S.pres[o]=!!(v&&v.on);re();},()=>{});}
- function stop(){for(const u of unsubs.splice(0))try{u();}catch(e){}for(const k in pu)try{pu[k]();}catch(e){}pu={};first={};
-  if(rdb&&meRef){R.set(meRef,{on:false,t:R.serverTimestamp()}).catch(()=>{});R.goOffline(rdb);}meRef=null;Object.assign(S,{on:false,uid:null,friends:[],inc:[],out:[],invites:[],pres:{},view:null,notes:[]});drawNotes();badge();}
- // actions
+ function stop(){for(const u of unsubs.splice(0))try{u();}catch(e){}first={};Object.assign(S,{on:false,uid:null,me:{},friends:[],inc:[],out:[],invites:[],view:null,notes:[],loaded:false,looks:{},draft:null});drawNotes();badge();}
  async function act(f){if(S.busy)return;S.busy=true;S.err=S.msg='';re();try{await f();}catch(e){S.err=e&&e.msg||(e&&NETERR[e.code]?netErr(e):e&&e.code==='permission-denied'?'That was refused. Refresh and try again.':`Something went wrong${e&&e.code?' ('+e.code+')':''}.`);}S.busy=false;re();}
  const err=m=>{throw{msg:m};};
  const add=raw=>act(async()=>{const F=fb.F,db=fb.db,n=String(raw||'').trim().toLowerCase();if(!/^[a-z0-9_]{3,16}$/.test(n))err('Usernames are 3-16 letters, numbers or _.');if(n===S.name)err('That is your own username.');
-  const s=await F.getDoc(F.doc(db,'usernames',n));if(!s.exists())err(`No player called ${n}.`);const to=s.data().uid;
+  if(!S.loaded)await load();const s=await F.getDoc(F.doc(db,'usernames',n));if(!s.exists())err(`No player called ${n}.`);const to=s.data().uid;
   if(S.friends.some(f=>f.users.includes(to)))err(`You are already friends with ${n}.`);if(S.out.some(r=>r.to===to))err(`You already sent ${n} a request.`);if(S.inc.some(r=>r.from===to))err(`${n} already sent you a request: accept it under Requests.`);
-  await F.setDoc(F.doc(db,'requests',S.uid+'_'+to),{from:S.uid,to,fromName:S.name,toName:n,at:F.serverTimestamp()});S.msg=`Friend request sent to ${n}.`;S.tab='out';});
+  await F.setDoc(F.doc(db,'requests',S.uid+'_'+to),{from:S.uid,to,fromName:S.name,toName:n,at:F.serverTimestamp()});S.msg=`Friend request sent to ${n}.`;S.tab='out';await load();});
  const accept=id=>act(async()=>{const F=fb.F,db=fb.db,r=S.inc.find(x=>x.id===id);if(!r)err('That request is gone.');const u=[r.from,r.to].sort(),b=F.writeBatch(db);
-  b.set(F.doc(db,'friendships',pair(r.from,r.to)),{users:u,names:{[r.from]:r.fromName,[r.to]:r.toName},at:F.serverTimestamp()});b.delete(F.doc(db,'requests',id));await b.commit();S.msg=`You and ${r.fromName} are now friends.`;S.tab='list';});
- const drop=(id,m)=>act(async()=>{await fb.F.deleteDoc(fb.F.doc(fb.db,'requests',id));S.msg=m;});
- const remove=o=>act(async()=>{const f=S.friends.find(x=>x.users.includes(o));if(!f||!confirm(`Remove ${f.names[o]} from your friends?`))return;await fb.F.deleteDoc(fb.F.doc(fb.db,'friendships',f.id));S.msg=`${f.names[o]} removed.`;S.view=null;});
+  b.set(F.doc(db,'friendships',pair(r.from,r.to)),{users:u,names:{[r.from]:r.fromName,[r.to]:r.toName},at:F.serverTimestamp()});b.delete(F.doc(db,'requests',id));await b.commit();S.msg=`You and ${r.fromName} are now friends.`;S.tab='list';await load();});
+ const drop=(id,m)=>act(async()=>{await fb.F.deleteDoc(fb.F.doc(fb.db,'requests',id));S.msg=m;await load();});
+ const remove=o=>act(async()=>{const f=S.friends.find(x=>x.users.includes(o));if(!f||!confirm(`Remove ${f.names[o]} from your friends?`))return;await fb.F.deleteDoc(fb.F.doc(fb.db,'friendships',f.id));S.msg=`${f.names[o]} removed.`;S.view=null;await load();});
  const profile=o=>act(async()=>{const s=await fb.F.getDocFromServer(fb.F.doc(fb.db,'publicProfiles',o));S.view=s.exists()?{uid:o,...s.data()}:{uid:o,username:(S.friends.find(x=>x.users.includes(o))||{names:{}}).names[o]||'?',missing:1};});
- // invite: host a private room in that mode, then tell the friend its code
- const invite=(o,mode)=>act(async()=>{if(!S.pres[o])err('Your friend is offline.');const c=await NET.hostRoom(mode);const F=fb.F;
+ const invite=(o,mode)=>act(async()=>{const c=await NET.hostRoom(mode),F=fb.F;
   await F.setDoc(F.doc(fb.db,'invites',o+'_'+S.uid),{from:S.uid,to:o,fromName:S.name,mode,code:c,at:F.serverTimestamp()});NET.invited=o;show('net');netUI();});
  async function answer(i,yes){const n=S.notes[i];S.notes.splice(i,1);drawNotes();if(!n||!n.id)return;const F=fb.F,db=fb.db,ref=F.doc(db,'invites',n.id);
-  let v=null;try{v=await F.runTransaction(db,async t=>{const s=await t.get(ref);if(!s.exists())return null;const d=s.data();t.delete(ref);return d;});}catch(e){}   // the invite is used once: whoever deletes it first wins
+  let v=null;try{v=await F.runTransaction(db,async t=>{const s=await t.get(ref);if(!s.exists())return null;const d=s.data();t.delete(ref);return d;});}catch(e){}   // used once: whoever deletes it first wins
   if(!yes)return;if(!v||(v.at&&v.at.toMillis()<Date.now()-INV_MS)){note('That invite has expired.',{});return;}
   NET.mode=v.mode;show('net');NET.result=null;try{await NET.joinRoom(v.code);}catch(e){NET.msg=e&&e.code==='net-noroom'?'That invite has expired: the room is closed.':netErr(e);NET.err=true;}netUI();}
- // the Friends tab inside the account dashboard
- function html(){const st=o=>`<i class="frdot ${S.pres[o]?'on':''}" title="${S.pres[o]?'Online':'Offline'}"></i>`,av=n=>`<span class="frav">${esc((n||'?')[0].toUpperCase())}</span>`,B=(a,l,x='')=>`<button data-fa="${a}"${x}${S.busy?' disabled':''}>${l}</button>`;
-  const m=(S.err?`<p class="acerr">${esc(S.err)}</p>`:'')+(S.msg?`<p class="acok">${esc(S.msg)}</p>`:'');
-  if(S.view){const v=S.view,x=v.stats&&v.stats.exh,pct=x&&x.gp?Math.round(100*x.w/x.gp):0;return m+`<div class="frprof">${av(v.username)}<div><b>${esc(v.username)}</b> ${st(v.uid)} <span>${S.pres[v.uid]?'Online':'Offline'}</span>${v.joined&&v.joined.toDate?`<small>Joined ${v.joined.toDate().toLocaleDateString()}</small>`:''}</div></div>
-   ${v.missing?'<p class="note">This player has no public profile yet.</p>':x&&x.gp?`<h4>EXHIBITION</h4>${[['Games played',x.gp],['Wins',x.w],['Losses',x.l],['Ties',x.t],['Win %',pct+'%']].map(([l,n])=>`<div class="acrow"><span>${l}</span><b>${n}</b></div>`).join('')}`:'<p class="note">No Exhibition games played yet.</p>'}${B('back','Back')}`;}
+ // the look: saved on the public profile as two ids
+ const saveLook=()=>act(async()=>{const d=S.draft||{},a=COSM.ok.a(d.avatar)?d.avatar:S.me.avatar,c=COSM.ok.c(d.card)?d.card:S.me.card,F=fb.F,o={};if(a)o.avatar=a;if(c)o.card=c;
+  await F.setDoc(F.doc(fb.db,'publicProfiles',S.uid),o,{merge:true});S.me={...S.me,...o};S.draft=null;S.msg='Profile look saved.';});
+ const look=()=>({avatar:S.draft&&S.draft.avatar||S.me.avatar,card:S.draft&&S.draft.card||S.me.card});
+ // views
+ const B=(a,l,x='')=>`<button data-fa="${a}"${x}${S.busy?' disabled':''}>${l}</button>`,msgs=()=>(S.err?`<p class="acerr">${esc(S.err)}</p>`:'')+(S.msg?`<p class="acok">${esc(S.msg)}</p>`:'');
+ function statRows(t,x){if(!x||!x.gp)return'';const pct=Math.round(100*x.w/x.gp);return`<h4>${t}</h4>${[['Games played',x.gp],['Wins',x.w],['Losses',x.l],...(x.t?[['Ties',x.t]]:[]),['Win rate',pct+'%']].map(([l,n])=>`<div class="acrow"><span>${l}</span><b>${n}</b></div>`).join('')}`;}
+ function profHTML(v){const s=v.stats||{},rows=statRows('EXHIBITION',s.exh)+statRows('1V1 RUNS',s.runs)+statRows('ONLINE',s.on);
+  return COSM.card(v.card,`${COSM.av(v.avatar,v.username,'big')}<div><b>${esc(v.username)}</b>${v.joined&&v.joined.toDate?`<small>Joined ${v.joined.toDate().toLocaleDateString()}</small>`:''}</div>`,'prof')+(v.missing?'<p class="note">This player has no public profile yet.</p>':rows||'<p class="note">No games recorded yet.</p>');}
+ function html(){if(!S.loaded&&S.on&&!S.busy){S.loaded=true;load().catch(()=>{S.loaded=false;});}
+  if(S.view)return msgs()+profHTML(S.view)+B('back','Back');
   const tabs=[['list',`Friends (${S.friends.length})`],['inc',`Requests (${S.inc.length})`],['out',`Sent (${S.out.length})`]].map(([k,l])=>`<button class="${S.tab===k?'on':''}" data-fa="tab" data-t="${k}">${l}</button>`).join('');
-  let L='';
-  if(S.tab==='list')L=S.friends.length?S.friends.map(f=>{const o=other(f);return`<div class="frrow">${av(f.names[o])}<b>${esc(f.names[o])}</b>${st(o)}<span class="frb">${B('prof','Profile',` data-u="${o}"`)}${S.pres[o]?B('inv','Invite',` data-u="${o}"`):''}${B('rm','Remove',` data-u="${o}"`)}</span></div>`;}).join(''):'<p class="note">No friends yet. Add someone by username above.</p>';
-  else if(S.tab==='inc')L=S.inc.length?S.inc.map(r=>`<div class="frrow">${av(r.fromName)}<b>${esc(r.fromName)}</b><span class="frb">${B('acc','Accept',` data-id="${r.id}"`)}${B('dec','Decline',` data-id="${r.id}"`)}</span></div>`).join(''):'<p class="note">No incoming requests.</p>';
-  else L=S.out.length?S.out.map(r=>`<div class="frrow">${av(r.toName)}<b>${esc(r.toName)}</b><small>pending</small><span class="frb">${B('can','Cancel',` data-id="${r.id}"`)}</span></div>`).join(''):'<p class="note">No pending requests.</p>';
-  const pick=S.pick?`<div class="frpick"><span>Invite ${esc(S.pick.n)} to:</span>${B('invm','1v1 Runs',' data-m="runs"')}${B('invm','Exhibition',' data-m="exh"')}${B('invx','Cancel')}</div>`:'';
-  return m+`<div class="netrow"><div class="fld2"><label>Add a friend by username<input id="frq" maxlength="16" autocomplete="off"></label></div>${B('add','Send request')}</div><div class="actabs">${tabs}</div>${pick}${L}`;}
+  let L='';const lk=o=>(S.looks||{})[o]||{};
+  if(S.tab==='list')L=S.friends.length?S.friends.map(f=>{const o=other(f);return`<div class="frrow" data-fa="prof" data-u="${o}" title="View profile">${COSM.av(lk(o).avatar,f.names[o])}<b>${esc(f.names[o])}</b><span class="frb">${B('inv','Invite',` data-u="${o}"`)}${B('rm','Remove',` data-u="${o}"`)}</span></div>`;}).join(''):'<p class="note">No friends yet. Add someone by username above.</p>';
+  else if(S.tab==='inc')L=S.inc.length?S.inc.map(r=>`<div class="frrow">${COSM.av(null,r.fromName)}<b>${esc(r.fromName)}</b><span class="frb">${B('acc','Accept',` data-id="${r.id}"`)}${B('dec','Decline',` data-id="${r.id}"`)}</span></div>`).join(''):'<p class="note">No incoming requests.</p>';
+  else L=S.out.length?S.out.map(r=>`<div class="frrow">${COSM.av(null,r.toName)}<b>${esc(r.toName)}</b><small>pending</small><span class="frb">${B('can','Cancel',` data-id="${r.id}"`)}</span></div>`).join(''):'<p class="note">No pending requests.</p>';
+  const pick=S.pick?`<div class="frpick"><span>Invite ${esc(S.pick.n)} to:</span>${B('invm','1v1 Runs',' data-m="runs"')}${B('invm','Exhibition',' data-m="exh"')}${B('invx','Cancel')}<small>They will see it if PAF is open.</small></div>`:'';
+  return msgs()+`<div class="netrow"><div class="fld2"><label>Add a friend by username<input id="frq" maxlength="16" autocomplete="off"></label></div>${B('add','Send request')}</div><div class="actabs">${tabs}</div>${pick}${L}`;}
+ // the Customise section on the Profile tab
+ function lookHTML(){if(!S.on)return'';const L=look(),dirty=!!S.draft,g={};for(const a of COSM.AV)(g[a.g]=g[a.g]||[]).push(a);
+  return`<h4>CUSTOMISE</h4>${COSM.card(L.card,`${COSM.av(L.avatar,S.name,'big')}<div><b>${esc(S.name)}</b><small>${esc(COSM.cardName(L.card))}</small></div>`,'prof')}
+   <h4>AVATAR</h4>${Object.entries(g).map(([k,A])=>`<small class="cgh">${k.toUpperCase()}</small><div class="cgrid">${A.map(a=>`<button class="cpick${a.id===(L.avatar||'i-shield')?' on':''}" data-fa="av" data-v="${a.id}" title="${esc(a.n)}">${COSM.av(a.id,S.name)}</button>`).join('')}</div>`).join('')}
+   <h4>CALLING CARD</h4><div class="ccgrid">${COSM.CARDS.map(c=>`<button class="cpick${c.id===(L.card||COSM.CARDS[0].id)?' on':''}" data-fa="cc" data-v="${c.id}">${COSM.card(c.id,`<small>${esc(c.n)}</small>`,'mini')}</button>`).join('')}</div>
+   <div class="netrow">${B('look',dirty?'Save look':'Saved','')}${dirty?B('lookx','Undo'):''}</div>`;}
  function click(e){const t=e.target.closest('[data-fa]');if(!t||t.disabled)return;e.preventDefault();e.stopPropagation();const a=t.dataset.fa,d=t.dataset;S.err=S.msg='';
   if(a==='tab'){S.tab=d.t;S.pick=null;return re();}if(a==='back'){S.view=null;return re();}if(a==='add')return add($m('frq').value);
   if(a==='acc')return accept(d.id);if(a==='dec')return drop(d.id,'Request declined.');if(a==='can')return drop(d.id,'Request cancelled.');
   if(a==='rm')return remove(d.u);if(a==='prof')return profile(d.u);
   if(a==='inv'){const f=S.friends.find(x=>x.users.includes(d.u));S.pick={u:d.u,n:f?f.names[d.u]:''};return re();}if(a==='invx'){S.pick=null;return re();}
-  if(a==='invm'){const p=S.pick;S.pick=null;return invite(p.u,d.m);}}
- // account deletion: remove everything friend-related that belongs to this account
+  if(a==='invm'){const p=S.pick;S.pick=null;return invite(p.u,d.m);}
+  if(a==='av'||a==='cc'){S.draft={...(S.draft||{}),[a==='av'?'avatar':'card']:d.v};return re();}if(a==='lookx'){S.draft=null;return re();}if(a==='look')return saveLook();}
  async function wipe(F,db,uid){const del=async qq=>{for(const d of(await F.getDocs(qq)).docs)await F.deleteDoc(d.ref).catch(()=>{});};
   await del(F.query(F.collection(db,'friendships'),F.where('users','array-contains',uid)));for(const k of['from','to'])await del(F.query(F.collection(db,'requests'),F.where(k,'==',uid)));
-  for(const k of['from','to'])await del(F.query(F.collection(db,'invites'),F.where(k,'==',uid)));await F.deleteDoc(F.doc(db,'publicProfiles',uid)).catch(()=>{});stop();}
+  for(const k of['from','to'])await del(F.query(F.collection(db,'invites'),F.where(k,'==',uid)));await F.deleteDoc(F.doc(db,'publicProfiles',uid));stop();}
  document.addEventListener('click',e=>{const t=e.target.closest('[data-fn]');if(!t)return;const i=+t.dataset.i,a=t.dataset.fn;
   if(a==='acc')return answer(i,true);if(a==='dec')return answer(i,false);if(a==='see'){S.notes.splice(i,1);drawNotes();S.tab='inc';ACCT.open();ACCT.tab('fr');return;}S.notes.splice(i,1);drawNotes();});
- return{ensure,stop,html,click,wipe,state:()=>S};})();
+ return{ensure,stop,html,lookHTML,click,wipe,load,state:()=>S,look};})();
+
 
 // ---------- recovery copies (IndexedDB): the last good save of every slot, and the newest 5 deleted careers ----------
 const REC=(()=>{let dbp=null;const db=()=>dbp||(dbp=new Promise((ok,no)=>{try{const r=indexedDB.open('paf-recovery',1);r.onupgradeneeded=()=>r.result.createObjectStore('saves',{keyPath:'id'});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);}catch(e){no(e);}}));
@@ -2422,6 +2482,8 @@ const EXH=(()=>{const K='pafExh',HMAX=50,blank=()=>({v:1,s:{},h:[]});
   record(cid,m){if(!cid||!m)return false;const o=load(),us=num(m.us),them=num(m.them),res=us>them?'w':us<them?'l':'t',s=o.s[cid]||(o.s[cid]={gp:0,w:0,l:0,t:0,pf:0,pa:0,st:{}});
    s.gp++;s[res]++;s.pf+=us;s.pa+=them;for(const k in m.st||{})s.st[k]=num(s.st[k])+num(m.st[k]);
    o.h.unshift({cid,at:Date.now(),opp:String(m.opp||'').slice(0,40),us,them,res,st:{...(m.st||{})}});o.h.length=Math.min(o.h.length,HMAX);return store(o);},
+  tally(k,res){const o=load(),x=o[k]||(o[k]={gp:0,w:0,l:0,t:0});x.gp++;if(x[res]!=null)x[res]++;return store(o);},   // 1v1 Runs ('r') and online ('on') results: totals only
+  totals(k){const o=load(),z={gp:0,w:0,l:0,t:0};if(k==='s'){for(const c in o.s)for(const f in z)z[f]+=o.s[c][f]|0;return z;}const x=o[k]||z;return{gp:x.gp|0,w:x.w|0,l:x.l|0,t:x.t|0};},
   stats:cid=>load().s[cid]||null,history:cid=>load().h.filter(r=>!cid||r.cid===cid),
   orphans:()=>{const live=new Set(EXH.players().map(x=>x.cid));return Object.keys(load().s).filter(c=>!live.has(c));}};})();
 // in the match: ratings onto the player's doll, skin / gloves / cleats onto its parts, number and name onto the jersey
@@ -4520,7 +4582,7 @@ const NET=(()=>{const N={host:false,guest:false,on:false,rd:null,rk:{},ry:0,rp:0
   c=String(c||'').trim().toUpperCase();if(!/^[A-Z2-9]{6}$/.test(c))throw{code:'net-code'};
   const s=await F.getDoc(F.doc(f.db,'rooms',c));if(!s.exists())throw{code:'net-noroom'};const d=s.data();if(d.v!==GAME_VER)throw{code:'net-ver'};if(d.answer)throw{code:'net-full'};
   N.guest=true;N.code=c;pc=new RTCPeerConnection({iceServers:ice()});wire(pc);
-  pc.ondatachannel=e=>{const ch=e.channel;chans(ch);if(ch.label==='ctl'){ctl=ch;const hi=()=>{const me=mine();send(ctl,{t:'hello',name:uname(),b:me.build,...pack(me.build),v:GAME_VER,re:!!re});if(!re){N.phase='lobby';say('Connected. Waiting for the host to start…');}};ch.readyState==='open'?hi():ch.onopen=hi;}else fast=ch;};
+  pc.ondatachannel=e=>{const ch=e.channel;chans(ch);if(ch.label==='ctl'){ctl=ch;const hi=()=>{const me=mine();send(ctl,{t:'hello',name:uname(),look:FRIENDS.look(),b:me.build,...pack(me.build),v:GAME_VER,re:!!re});if(!re){N.phase='lobby';say('Connected. Waiting for the host to start…');}};ch.readyState==='open'?hi():ch.onopen=hi;}else fast=ch;};
   await pc.setRemoteDescription({type:'offer',sdp:d.offer});await pc.setLocalDescription(await pc.createAnswer());await gather(pc);
   await F.updateDoc(F.doc(f.db,'rooms',c),{guest:f.auth.currentUser.uid,answer:pc.localDescription.sdp});if(!re)say('Joining…');}
  function onMsg(m){
@@ -4533,7 +4595,7 @@ const NET=(()=>{const N={host:false,guest:false,on:false,rd:null,rk:{},ry:0,rp:0
   if(m.t==='start')return startGuest(m);if(m.t==='look')return look(m.L);
   if(m.t==='plays'){N.picking=true;$m('pcards').innerHTML=m.h;$m('pcs').hidden=false;if(document.pointerLockElement)document.exitPointerLock();return;}
   if(m.t==='picked'){N.picking=false;$m('pcs').hidden=true;return;}
-  if(m.t==='end'){N.on=false;N.phase='done';N.result=m;mode=null;$m('netwait').hidden=true;$m('pcs').hidden=true;$m('runhud').hidden=true;show('net');say('');return;}}
+  if(m.t==='end'){const gr=m.b>m.a?'w':m.b<m.a?'l':'t';if(m.mode==='runs')EXH.tally('r',gr);EXH.tally('on',gr);N.on=false;N.phase='done';N.result=m;mode=null;$m('netwait').hidden=true;$m('pcs').hidden=true;$m('runhud').hidden=true;show('net');say('');return;}}
  // ---- host
  function hostMsg(m){
   if(m.t==='hello'){
@@ -4541,8 +4603,8 @@ const NET=(()=>{const N={host:false,guest:false,on:false,rd:null,rk:{},ry:0,rp:0
    if(!okGuest(m)){send(ctl,{t:'deny',why:'Your career player could not be checked. Pick another save and try again.'});return;}
    if(N.mode==='runs'&&STYLES[m.b.style][4]==='qb'){send(ctl,{t:'deny',why:'Quarterback builds cannot play 1v1 Runs. Pick a non-QB career save.'});return;}
    if(N.hold&&MATCH){N.hold=false;lastIn=performance.now();sendStart(true);say('Opponent reconnected.');return;}   // back in the same match
-   G={...m.b};GT={club:m.club,team:m.team};N.peer={uid:N.joinUid,name:String(m.name||'player').slice(0,16),pl:`${m.b.first} ${m.b.last}`,ovr:ovr(m.b.att,m.b.style),club:m.club};
-   N.phase='lobby';const me=mine();send(ctl,{t:'lobby',mode:N.mode,peer:{name:uname(),pl:me?`${me.build.first} ${me.build.last}`:'',ovr:me?ovr(me.build.att,me.build.style):0,club:me?me.build.team??0:0}});say('Opponent connected.');return;}
+   G={...m.b};GT={club:m.club,team:m.team};N.peer={uid:N.joinUid,look:m.look&&{avatar:String(m.look.avatar||''),card:String(m.look.card||'')},name:String(m.name||'player').slice(0,16),pl:`${m.b.first} ${m.b.last}`,ovr:ovr(m.b.att,m.b.style),club:m.club};
+   N.phase='lobby';const me=mine();send(ctl,{t:'lobby',mode:N.mode,peer:{name:uname(),look:FRIENDS.look(),pl:me?`${me.build.first} ${me.build.last}`:'',ovr:me?ovr(me.build.att,me.build.style):0,club:me?me.build.team??0:0}});say('Opponent connected.');return;}
   if(m.t==='k'){N.st.keysIn++;N.rk={};KEYS.forEach((k,i)=>N.rk[k]=!!(m.k&1<<i));N.ry=+m.y||0;N.rp=cl(+m.p||0,-.6,1.2);N.aim=!!m.a;return;}
   if(m.t==='cmd'){if(N.cmds.length<8)N.cmds.push(String(m.c));return;}
   if(m.t==='pick'){const i=m.i|0;if(N.waitPick&&deal&&deal[i])pickRemote(i);return;}}   // only while the guest is actually choosing, only a dealt play
@@ -4634,10 +4696,10 @@ const NET=(()=>{const N={host:false,guest:false,on:false,rd:null,rk:{},ry:0,rp:0
 function netUI(){const b=$m('netb');if(!b)return;const N=NET,P=EXH.players();if(!P.some(x=>x.cid===XM.cid))XM.cid=P[0]?P[0].cid:null;const me=P.find(x=>x.cid===XM.cid),busy=N.phase!=='idle'&&N.phase!=='done';
  const MODES={runs:['1V1 RUNS','Receiver against cornerback with an AI quarterback. Take turns: first to 5 catches wins.'],exh:['EXHIBITION','Your career team against your friend\'s career team. A full match, each of you controls your own player.']};
  const card=({cid,slot,build:p})=>{const c=p.draft?club(p.team):null;return`<button class="slot${cid===XM.cid?' on':''}" data-nx="${cid}"${busy?' disabled':''} style="--j:${c?hx(c.jer):'#2a2a2e'};--a:${c?hx(c.acc):'#555'}"><small>SLOT ${slot+1}</small><div class="sh"><span class="ic3">${c?c.ic:'?'}</span><div><b>${esc(p.first)} ${esc(p.last)}</b><span>${tcase(STYLES[p.style][0])}</span></div><em>${ovr(p.att,p.style)}<small>OVR</small></em></div><div class="ss"><span>${c?c.ab:'UNDRAFTED'}</span></div></button>`;};
- const st=N.msg?`<p class="note${N.err?' acerr':''}" id="netst">${esc(N.msg)}</p>`:'<p class="note" id="netst"></p>',peer=N.peer?`<div class="netpeer"><b>${esc(N.peer.name)}</b><span>${esc(N.peer.pl)} · ${N.peer.ovr} OVR · ${club(N.peer.club).ab}</span></div>`:'';
+ const st=N.msg?`<p class="note${N.err?' acerr':''}" id="netst">${esc(N.msg)}</p>`:'<p class="note" id="netst"></p>',peer=N.peer?COSM.card(N.peer.look&&N.peer.look.card,`${COSM.av(N.peer.look&&N.peer.look.avatar,N.peer.name,'big')}<div><b>${esc(N.peer.name)}</b><small>${esc(N.peer.pl)} · ${N.peer.ovr} OVR · ${club(N.peer.club).ab}</small></div>`,'prof'):'';
  let h='';
  if(N.phase==='idle'||N.phase==='done'){
-  if(N.result){const R=N.result,mine=R.host?R.a:R.b,their=R.host?R.b:R.a,w=mine>their?'VICTORY':mine<their?'DEFEAT':'TIE GAME';h+=`<div class="netres"><b class="res ${mine>their?'w':mine<their?'l':'t'}">${w}</b><span>${R.mode==='runs'?'Catches':'Final'} ${mine} – ${their}</span><small>Online matches are not saved to your career.</small></div>`;}
+  if(N.result){const R=N.result,mine=R.host?R.a:R.b,their=R.host?R.b:R.a,w=mine>their?'VICTORY':mine<their?'DEFEAT':'TIE GAME';h+=`<div class="netres"><b class="res ${mine>their?'w':mine<their?'l':'t'}">${w}</b><span>${R.mode==='runs'?'Catches':'Final'} ${mine} – ${their}</span><small>Not saved to your career. Counted in your online record.</small></div>`;}
   h+=`<h4>MODE</h4><div class="netmodes">${Object.entries(MODES).map(([k,[n,d]])=>`<button class="mc${N.mode===k?' acc':''}" data-nm="${k}"><b>${n}</b><span>${d}</span></button>`).join('')}</div>
    <h4>YOUR CAREER SAVE</h4>${P.length?`<div class="exgrid">${P.map(card).join('')}</div>`:'<p class="note">You need a career player on this device. Cloud careers: download one in ACCOUNT first.</p>'}
    ${N.mode==='runs'&&me&&STYLES[me.build.style][4]==='qb'?'<p class="note acerr">Quarterback builds cannot play 1v1 Runs.</p>':''}
@@ -4657,7 +4719,7 @@ function preMatch(){if(!PROF)return;if(!PROF.draft){show('comb');combUI();return
 function kickOff(){RP.reset();$m('rvm').hidden=true;show(null);useClubs(PROF.team??0,preMatch.op,preMatch.home!==false);applyProf(PROF);startGame(pendMode);Object.assign(ORG,{free:false,four:true,you:'blue',off:'blue',pos:PROF.pos||STYLES[PROF.style][4]});lgEnsure(PROF);BADJ.blue=BADJ.red=0;MATCH={ctx:preMatch.ctx,id:Date.now()+'-'+(Math.random()*1e6|0),clock:MLEN,st:Object.fromEntries(STK.map(k=>[k,0])),obj:mkObj((PROF.pos||STYLES[PROF.style][4])==='qb')};newGame();applyOrg();
  $m('pcard').hidden=false;$m('pcard').innerHTML=`<span class="o">${ovr(PROF.att,PROF.style)}</span><span><span class="n">#${PROF.num} ${esc(PROF.last)}</span><small>${STYLES[PROF.style][0]}</small></span>`;if(PROF._exh)MATCH.exh=1;else xpHudStart();BC.start();}
 function endMatch(){const M=MATCH,S=M.st,me=ORG.you,op=me==='blue'?'red':'blue',r=SCORE[me]>SCORE[op]?'w':SCORE[me]<SCORE[op]?'l':'t';M.my=SCORE[me];M.their=SCORE[op];
- if(M.exh){const X=XM.cur,sb=SCORE.blue,sr=SCORE.red;MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;if(M.mp)NET.ended(sb,sr);const rn=M.runs;RUNS.stop();toMenu();if(!M.mp&&!rn)EXH.record(X.cid,{opp:club(X.op).ab,us:M.my,them:M.their,st:{...S}});show('exr');exrUI(X,S,r,sb,sr,rn);return;}
+ if(M.exh){const X=XM.cur,sb=SCORE.blue,sr=SCORE.red;MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;if(M.mp)NET.ended(sb,sr);const rn=M.runs;RUNS.stop();toMenu();if(rn)EXH.tally('r',r);if(M.mp)EXH.tally('on',r);if(!M.mp&&!rn)EXH.record(X.cid,{opp:club(X.op).ab,us:M.my,them:M.their,st:{...S}});show('exr');exrUI(X,S,r,sb,sr,rn);return;}
  MATCH=null;ORG.four=false;playOn=false;playEnd=0;$m('pcard').hidden=true;xpHudStop();toMenu();
  const X=xpFor(S,r,M.obj),p=PROF,dup=p.lastMatch===M.id,L0=p.lvl,X0=p.lxp;let ups=0;
  if(!dup){const C=p.career;C.gp++;C[r]++;for(const k of STK)C[k]=(C[k]||0)+S[k];p.lastMatch=M.id;ups=addXP(p,X.total);

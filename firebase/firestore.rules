@@ -17,7 +17,7 @@ service cloud.firestore {
 
     // ---- usernames: claimed once, only for yourself, only together with your own user document
     match /usernames/{name} {
-      allow get: if signedIn() && resource.data.uid == request.auth.uid;
+      allow get: if signedIn();   // look up a friend by username (a username only maps to a uid)
       allow list: if false;
       allow create: if signedIn() && validName(name)
         && request.resource.data.keys().hasOnly(['uid'])
@@ -94,6 +94,54 @@ service cloud.firestore {
         && request.resource.data.guest == request.auth.uid
         && request.resource.data.answer is string && request.resource.data.answer.size() <= 20000;
       allow delete: if signedIn() && resource.data.host == request.auth.uid;
+    }
+
+    // ---- friends. Public profile: username + join date + Exhibition totals, nothing private; written only by its owner, matching their account
+    function pair(a, b) { return a < b ? a + '_' + b : b + '_' + a; }
+    function uname(uid) { return get(userPath(uid)).data.username; }
+    function docPath(c, id) { return /databases/$(database)/documents/$(c)/$(id); }
+    match /publicProfiles/{uid} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create, update: if isUser(uid) && request.resource.data.keys().hasOnly(['username', 'joined', 'stats'])
+        && request.resource.data.username == uname(uid) && request.resource.data.joined == get(userPath(uid)).data.createdAt
+        && request.resource.data.stats is map && request.resource.data.stats.size() <= 4;
+      allow delete: if isUser(uid);
+    }
+    // friend request {from}_{to}: one per pair and direction, not to yourself, not to a friend, not if they already asked you
+    match /requests/{id} {
+      allow read: if signedIn() && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      allow create: if signedIn() && verified() && request.resource.data.keys().hasOnly(['from', 'to', 'fromName', 'toName', 'at'])
+        && request.resource.data.from == request.auth.uid && request.resource.data.to != request.auth.uid
+        && id == request.auth.uid + '_' + request.resource.data.to && exists(userPath(request.resource.data.to))
+        && request.resource.data.fromName == uname(request.auth.uid) && request.resource.data.toName == uname(request.resource.data.to)
+        && !exists(docPath('friendships', pair(request.auth.uid, request.resource.data.to)))
+        && !exists(docPath('requests', request.resource.data.to + '_' + request.auth.uid)) && request.resource.data.at == request.time;
+      allow update: if false;
+      allow delete: if signedIn() && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+    }
+    // friendship: created only by the person who received the request (the request must exist), with both real usernames
+    function otherOf(u) { return u[0] == request.auth.uid ? u[1] : u[0]; }
+    match /friendships/{id} {
+      allow read: if signedIn() && request.auth.uid in resource.data.users;
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['users', 'names', 'at'])
+        && request.resource.data.users is list && request.resource.data.users.size() == 2 && request.auth.uid in request.resource.data.users
+        && request.resource.data.users[0] < request.resource.data.users[1] && id == request.resource.data.users[0] + '_' + request.resource.data.users[1]
+        && exists(docPath('requests', otherOf(request.resource.data.users) + '_' + request.auth.uid))
+        && request.resource.data.names.size() == 2 && request.resource.data.names[request.auth.uid] == uname(request.auth.uid)
+        && request.resource.data.names[otherOf(request.resource.data.users)] == uname(otherOf(request.resource.data.users)) && request.resource.data.at == request.time;
+      allow update: if false;
+      allow delete: if signedIn() && request.auth.uid in resource.data.users;
+    }
+    // match invite {to}_{from}: only between friends, carries the room code; deleted when answered
+    match /invites/{id} {
+      allow read: if signedIn() && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      allow create, update: if signedIn() && verified() && request.resource.data.keys().hasOnly(['from', 'to', 'fromName', 'mode', 'code', 'at'])
+        && request.resource.data.from == request.auth.uid && id == request.resource.data.to + '_' + request.auth.uid
+        && exists(docPath('friendships', pair(request.auth.uid, request.resource.data.to)))
+        && request.resource.data.mode in ['runs', 'exh'] && request.resource.data.code.matches('^[A-Z2-9]{6}$')
+        && request.resource.data.fromName == uname(request.auth.uid) && request.resource.data.at == request.time;
+      allow delete: if signedIn() && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
     }
 
     // everything else: closed

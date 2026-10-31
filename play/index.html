@@ -2993,7 +2993,7 @@ function helmet(d,L,col,fin){const key=HKEYS[L.shell]||'classic',P=HSPEC[key],g=
  return g;}
 function kit(d,L,T){L=migLook(L);if(PROG.isMine(d))L=PROG.lookMod(L);for(const m of d.kitM||[]){m.parent.remove(m);m.traverse(o=>{if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>x.dispose());});}d.kitM=[];if(T&&T[2]!=null)L={...L,c_acc:T[2]};const P=d.parts,sk=SKC[L.skin]??SKC[1],pri=T?T[0]:L.c_pri,sec=T?T[1]:L.c_sec,hel=T?T[3]??T[0]:L.c_helm,acc=L.c_acc;   // team kit: club trim on stripes, wristbands and accents
  const col=(n,c)=>P[n]&&P[n].mesh.material.color.setHex(c);
- for(const n of['chest','abdomen','uarm1','uarm-1']){const m=P[n]&&P[n].mesh.material;if(m&&m.map){m.map=null;m.normalMap=null;m.needsUpdate=true;}}d.jk={pri,sec,acc,sleeve:L.sleeve,tuck:L.tuck|0};   // the premium jersey is re-applied after the kit
+ for(const n in P){const m=P[n].mesh.material;if(m&&m.map){m.map=null;m.normalMap=null;m.roughness=m.userData.r0??m.roughness;m.needsUpdate=true;}}d.jk={pri,sec,acc,sleeve:L.sleeve,tuck:L.tuck|0};d.jkL=L;for(const s of['1','-1'])if(P['hand'+s])P['hand'+s].mesh.material.userData.skin=L.c_glove<0;   // the premium jersey is re-applied after the kit
  for(const n of['chest','abdomen'])col(n,pri);col('pelvis',sec);for(const s of['1','-1']){col('thigh'+s,sec);col('uarm'+s,L.sleeve===2?sk:pri);col('farm'+s,L.sleeve===1?pri:sk);col('hand'+s,L.c_glove<0?sk:L.c_glove);col('shin'+s,L.sock?L.c_sock:sk);col('foot'+s,L.c_cleat);col('toe'+s,L.cstyle===2?acc:L.c_cleat);}
  col('neck',sk);col('head',sk);
  d.fitK=[.95,1,1.06][L.fit];
@@ -3002,11 +3002,11 @@ function kit(d,L,T){L=migLook(L);if(PROG.isMine(d))L=PROG.lookMod(L);for(const m
  {const hg=helmet(d,L,hel,fin);hg.userData.helm=1;P.head.mesh.add(hg);d.kitM.push(hg);P.head.mesh.scale.setScalar(.92);}   // the helmet; the head cube is trimmed slightly so its corners stay inside the shell
  if(L.eye)for(const x of[-.045,.045])kmesh(d,H,KB(.035,.012,.004),0x0a0a0a,x,.005,.111);
  // shoulder pads, compression, wristbands
- if(L.pads)for(const x of[-.19,.19])kmesh(d,'chest',KB(L.pads===2?.16:.12,L.pads===2?.07:.05,L.pads===2?.26:.23),pri,x,.14,0);
+ if(L.pads)for(const x of[-.19,.19])kmesh(d,'chest',KB(L.pads===2?.16:.12,L.pads===2?.07:.05,L.pads===2?.26:.23),pri,x,.14,0).userData.pad=1;
  const side=(v,s)=>v===3||(v===1&&s==='1')||(v===2&&s==='-1');
  for(const s of['1','-1']){if(side(L.comp,s)){if(L.sleeve!==1)col('farm'+s,L.c_comp);if(L.compLen&&L.sleeve===2)col('uarm'+s,L.c_comp);if(L.compLen&&L.sleeve===0)kmesh(d,'uarm'+s,KB(.062,.06,.062),L.c_comp,0,-.09,0);}
   if(L.wrist)kmesh(d,'farm'+s,KB(.062,.035,.062),[0,0xffffff,acc,0x111111][L.wrist],0,-.12,0);
-  if(L.thighpad)kmesh(d,'thigh'+s,KB(.1,.13,.025),sec,0,.02,.075);
+  if(L.thighpad)kmesh(d,'thigh'+s,KB(.1,.13,.025),sec,0,.02,.075).userData.tp=1;
   if(L.knee)kmesh(d,'shin'+s,KB(.09,.06,.035),L.knee===2?0x111111:sec,0,.2,.05);
   if(side(L.leg,s))col('shin'+s,L.c_comp);if(side(L.leg,s)&&L.legLen)kmesh(d,'thigh'+s,KB(.105,.08,.105),L.c_comp,0,-.17,0);
   if(!L.sock&&!side(L.leg,s))kmesh(d,'shin'+s,KB(.07,.05,.07),L.c_sock,0,-.19,0);   // low socks: a band at the ankle
@@ -3049,11 +3049,70 @@ function jxDraw(W,H,pri,sec,acc,design,part){const cv=document.createElement('ca
 function jxSet(pri,sec,acc){const k=pri+'/'+sec+'/'+acc;let e=JX.c.get(k);if(e){e.t=performance.now();return e;}
  const design=((pri*31+sec*7+acc)>>>3)%5;e={design,chest:jxDraw(2048,2048,pri,sec,acc,design,'chest'),abd:jxDraw(1024,1024,pri,sec,acc,design,'abd'),sl:jxDraw(512,512,pri,sec,acc,design,'sl'),t:performance.now()};
  JX.c.set(k,e);if(JX.c.size>6){const old=[...JX.c.entries()].sort((a,b)=>a[1].t-b[1].t)[0];for(const x of['chest','abd','sl'])old[1][x].dispose();JX.c.delete(old[0]);}return e;}
-function jerseyFX(d,bg){if(d.hem){d.hem.parent&&d.hem.parent.remove(d.hem);d.hem.geometry.dispose();d.hem.material.dispose();d.hem=null;}if(!JFX()||!d.jk)return;const P=d.parts,K=d.jk,pri=bg??K.pri;const e=jxSet(pri,K.sec,K.acc);
+function jerseyFX(d,bg){for(const m of d.kfx||[]){m.parent&&m.parent.remove(m);}d.kfx=[];if(d.hem){d.hem.parent&&d.hem.parent.remove(d.hem);d.hem.geometry.dispose();d.hem.material.dispose();d.hem=null;}if(!JFX()||!d.jk)return;const P=d.parts,K=d.jk,pri=bg??K.pri;const e=jxSet(pri,K.sec,K.acc);
  const put=(n,map,nk)=>{const m=P[n]&&P[n].mesh.material;if(!m)return;m.map=map;m.color.setHex(0xffffff);m.normalMap=jxNormal(nk);m.normalScale=new THREE.Vector2(.55,.55);m.roughness=.78;m.needsUpdate=true;};
- put('chest',e.chest,'chest');put('abdomen',e.abd,'abd');if(K.sleeve!==2)for(const s of['1','-1'])put('uarm'+s,e.sl,'sl');
- if(K.tuck){const a=P.abdomen.shapes[0].halfExtents,pv=P.pelvis.shapes[0].halfExtents,w=Math.max(a.x,pv.x)*2+.016,dz=Math.max(a.z,pv.z)*2+.016;   // untucked: the shirt tail hangs over the waistband, just outside the pants
+ for(const n in P){const m=P[n].mesh.material;if(m&&m.userData.r0==null)m.userData.r0=m.roughness;}
+ put('chest',e.chest,'chest');put('abdomen',e.abd,'abd');if(K.sleeve!==2)for(const s of['1','-1'])put('uarm'+s,e.sl,'sl');kitFX(d,e,K);
+ if(K.tuck){const a=kxHE(P.abdomen),pv=kxHE(P.pelvis),w=Math.max(a.x,pv.x)*2+.016,dz=Math.max(a.z,pv.z)*2+.016;   // untucked: the shirt tail hangs over the waistband, just outside the pants
   const m=new THREE.Mesh(new THREE.BoxGeometry(w,.075,dz),new THREE.MeshStandardMaterial({map:e.abd,normalMap:jxNormal('abd'),roughness:.8}));m.position.y=-a.y-.022;m.castShadow=true;P.abdomen.mesh.add(m);d.hem=m;}}
+// ===== full premium kit (keyboard only), same team design index as the jersey: pants, socks, cleats, gloves, pads, helmet extras =====
+// Textures: one per (piece, colours, design), 512-1024 (pants 1024; small pieces 512), mipmapped, LRU-capped. Extra geometry is parented to the existing body boxes, so it moves with the ragdoll and adds no physics.
+const KX=new Map(),kxHE=pt=>{if(pt.shapes&&pt.shapes[0])return pt.shapes[0].halfExtents;const q=pt.mesh.geometry.parameters||{};return{x:(q.width||.1)/2,y:(q.height||.1)/2,z:(q.depth||.1)/2};};
+function kxTex(key,W,H,draw){let e=KX.get(key);if(e){e.t=performance.now();return e.x;}const cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');draw(g,W,H);
+ const x=new THREE.CanvasTexture(cv);x.encoding=THREE.sRGBEncoding;x.anisotropy=8;x.minFilter=THREE.LinearMipmapLinearFilter;KX.set(key,{x,t:performance.now()});
+ if(KX.size>28){const o=[...KX.entries()].sort((a,b)=>a[1].t-b[1].t)[0];o[1].x.dispose();KX.delete(o[0]);}return x;}
+function kxStitch(g,W,x1,y1,x2,y2,dark){g.save();g.setLineDash([W*.012,W*.01]);g.lineWidth=Math.max(1,W*.004);g.strokeStyle=dark?'#00000055':'#ffffff44';g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.restore();}
+function kxBase(g,W,H,c,edge=.8){const gr=g.createLinearGradient(0,0,W,0);gr.addColorStop(0,jxShade(c,edge));gr.addColorStop(.2,jxHex(c));gr.addColorStop(.8,jxHex(c));gr.addColorStop(1,jxShade(c,edge));g.fillStyle=gr;g.fillRect(0,0,W,H);}
+const kxL=c=>new THREE.Color(c).getHSL({}).l>.55;
+function kxNorm(kind){if(JX.nrm[kind])return JX.nrm[kind];const N=256,cv=document.createElement('canvas');cv.width=cv.height=N;const g=cv.getContext('2d'),im=g.createImageData(N,N),H=new Float32Array(N*N);
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){let h=0;if(kind==='pant')h=.3*Math.sin(x*.07+Math.sin(y*.03)*1.5)*.5+.25*Math.exp(-((y-N*.62)**2)/300)+(((x+y)&3)?0:.04);   // vertical folds + knee pad contour
+  else if(kind==='sock')h=.35*Math.sin(x*.8);   // rib knit
+  else if(kind==='leather')h=.12*Math.sin(x*.9+y*.3)*Math.sin(y*.7-x*.2)+.06*Math.sin(x*2.1)*Math.sin(y*1.7);   // grain
+  else h=.3*((x%16<2||y%16<2)?1:0);   // glove palm grid
+  H[y*N+x]=h;}
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x,hx=H[y*N+(x+1)%N]-H[y*N+(x+N-1)%N],hy=H[((y+1)%N)*N+x]-H[((y+N-1)%N)*N+x],l=Math.hypot(hx*2,hy*2,1);im.data[i*4]=(-hx*2/l*.5+.5)*255;im.data[i*4+1]=(-hy*2/l*.5+.5)*255;im.data[i*4+2]=(1/l*.5+.5)*255;im.data[i*4+3]=255;}
+ g.putImageData(im,0,0);const tx=new THREE.CanvasTexture(cv);tx.wrapS=tx.wrapT=THREE.RepeatWrapping;return JX.nrm[kind]=tx;}
+function kitFX(d,e,K){const P=d.parts,ds=e.design,add=(part,geo,mat,x,y,z,rx=0)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.rotation.x=rx;m.castShadow=true;P[part].mesh.add(m);d.kfx.push(m);return m;};
+ const base=n=>{const m=P[n]&&P[n].mesh.material;if(!m)return 0;if(m.map&&m.userData.bc!=null)return m.userData.bc;return m.userData.bc=m.color.getHex();};
+ const skin=n=>P[n].mesh.userData.k===undefined&&false;
+ const put=(n,map,nk,r=.75,rep=1)=>{const m=P[n]&&P[n].mesh.material;if(!m)return;base(n);m.map=map;m.color.setHex(0xffffff);m.normalMap=nk?kxNorm(nk):null;if(nk){m.normalScale=new THREE.Vector2(.6,.6);}m.roughness=r;m.needsUpdate=true;};
+ const A=K.acc,S=K.sec;
+ // pants: pelvis + thighs, team side stripes, seams, knee/thigh pad contour
+ const pc=base('thigh1');if(pc!=null){const pt=kxTex(`pant${pc}_${A}_${K.pri}_${ds}`,1024,1024,(g,W,H)=>{kxBase(g,W,H,pc);const st=[[.5,.06,A],[.5,.03,K.pri],[.5,.08,K.pri],[.5,.05,A],[.5,.02,A]][ds];
+   if(ds===1){g.fillStyle=jxHex(A);g.fillRect(W*.4,0,W*.05,H);g.fillRect(W*.55,0,W*.05,H);}else if(ds===2){g.fillStyle=jxHex(K.pri);g.fillRect(W*.38,0,W*.24,H);g.fillStyle=jxHex(A);g.fillRect(W*.47,0,W*.06,H);}else{g.fillStyle=jxHex(st[2]);g.fillRect(W*(st[0]-st[1]/2),0,W*st[1],H);}
+   g.fillStyle='#00000018';g.beginPath();g.ellipse(W*.5,H*.62,W*.28,H*.16,0,0,7);g.fill();kxStitch(g,W,W*.22,H*.46,W*.78,H*.46,!kxL(pc));kxStitch(g,W,W*.22,H*.78,W*.78,H*.78,!kxL(pc));   // knee pad pocket
+   kxStitch(g,W,W*.04,0,W*.04,H,!kxL(pc));kxStitch(g,W,W*.96,0,W*.96,H,!kxL(pc));});
+  for(const s of['1','-1'])put('thigh'+s,pt,'pant',.82);for(const m of(d.kitM||[]))if(m.userData.tp){m.material.map=pt;m.material.color.setHex(0xffffff);m.material.normalMap=kxNorm('pant');m.material.needsUpdate=true;m.scale.set(1.04,1,.6);}   // thigh pads sit inside the pants: same fabric, a gentle bulge
+  const pb=kxTex(`belt${base('pelvis')}_${A}`,512,512,(g,W,H)=>{kxBase(g,W,H,base('pelvis'));g.fillStyle='#111';g.fillRect(0,0,W,H*.16);g.fillStyle='#777';for(let i=0;i<6;i++)g.fillRect(W*(.08+i*.17),H*.02,W*.03,H*.12);kxStitch(g,W,W*.5,H*.16,W*.5,H,!kxL(base('pelvis')));});   // waistband + belt loops, fly seam
+  put('pelvis',pb,'pant',.82);}
+ // socks: team hoops in the design's rhythm
+ for(const s of['1','-1']){const sc=base('shin'+s);if(sc==null)continue;const t=kxTex(`sock${sc}_${A}_${K.pri}_${ds}`,512,512,(g,W,H)=>{kxBase(g,W,H,sc,.85);const hoops=[[.25,.08],[.18,.04,.3,.04],[.2,.12],[.22,.03,.28,.03,.34,.03],[.26,.06]][ds];
+   for(let i=0;i<hoops.length;i+=2){g.fillStyle=jxHex(i?A:K.pri);g.fillRect(0,H*hoops[i],W,H*hoops[i+1]);}kxStitch(g,W,W*.5,0,W*.5,H,!kxL(sc));});
+  put('shin'+s,t,'sock',.9);}
+ // cleats: leather upper with laces and an accent flash; sole slab + studs as geometry
+ for(const s of['1','-1']){const cc=base('foot'+s);if(cc==null)continue;const t=kxTex(`cleat${cc}_${A}`,512,512,(g,W,H)=>{kxBase(g,W,H,cc,.7);g.fillStyle=jxHex(A);g.beginPath();g.moveTo(0,H*.75);g.quadraticCurveTo(W*.5,H*.45,W,H*.6);g.lineTo(W,H*.7);g.quadraticCurveTo(W*.5,H*.58,0,H*.85);g.fill();
+   g.strokeStyle=kxL(cc)?'#222':'#eee';g.lineWidth=W*.02;for(let i=0;i<5;i++){const y=H*(.15+i*.09);g.beginPath();g.moveTo(W*.35,y);g.lineTo(W*.65,y+H*.03);g.moveTo(W*.65,y);g.lineTo(W*.35,y+H*.03);g.stroke();}kxStitch(g,W,0,H*.9,W,H*.9,!kxL(cc));});
+  put('foot'+s,t,'leather',.45);put('toe'+s,t,'leather',.45);
+  const f=kxHE(P['foot'+s]),sole=new THREE.MeshStandardMaterial({color:0x151515,roughness:.95}),stud=new THREE.MeshStandardMaterial({color:0xd8d8d8,roughness:.35,metalness:.6});
+  add('foot'+s,KB(+(f.x*2+.008).toFixed(3),.012,+(f.z*2+.006).toFixed(3)),sole,0,-f.y-.004,0);
+  for(const[x,z]of[[-.6,-.6],[.6,-.6],[-.6,0],[.6,0],[-.6,.6],[.6,.6]])add('foot'+s,kg('stud',()=>new THREE.CylinderGeometry(.006,.008,.012,6)),stud,x*f.x,-f.y-.014,z*f.z);}
+ // gloves: tacky palm with grip pattern, finger seams, accent cuff; three finger ridges as geometry
+ for(const s of['1','-1']){const gc=base('hand'+s);if(gc==null||P['hand'+s].mesh.material.userData.skin)continue;const t=kxTex(`glove${gc}_${A}_${K.pri}`,512,512,(g,W,H)=>{kxBase(g,W,H,gc,.85);g.fillStyle=jxHex(A);g.fillRect(0,0,W,H*.14);g.fillStyle=jxHex(K.pri);g.beginPath();g.arc(W*.5,H*.55,W*.18,0,7);g.fill();
+   g.strokeStyle='#00000040';g.lineWidth=W*.012;for(let i=1;i<4;i++){g.beginPath();g.moveTo(W*i/4,H*.62);g.lineTo(W*i/4,H);g.stroke();}kxStitch(g,W,0,H*.15,W,H*.15,!kxL(gc));});
+  put('hand'+s,t,'glove',.6);}
+ // shoulder pads: arched caps over the existing pad blocks, in the jersey's chest graphics
+ for(const m of(d.kitM||[]))if(m.userData.pad){m.material.map=e.chest;m.material.color.setHex(0xffffff);m.material.normalMap=jxNormal('chest');m.material.needsUpdate=true;
+  const gp=m.geometry.parameters,cap=new THREE.Mesh(kg('padcap'+gp.width+gp.depth,()=>new THREE.CylinderGeometry(gp.depth/2,gp.depth/2,gp.width,14,1,false,0,Math.PI)),m.material);cap.rotation.z=Math.PI/2;cap.position.y=gp.height/2-.004;cap.scale.set(1,1,.5);m.add(cap);d.kfx.push(cap);}
+ // helmet: clear-coated shell, top vents, rear bumper, ear hole, jaw pads
+ const hg=P.head.mesh.children.find(o=>o.userData.helm);if(hg&&hg.children[0]){const sh=hg.children[0],key=HKEYS[(d.jkL||{}).shell]||'classic',HP=HSPEC[key],m0=Array.isArray(sh.material)?sh.material[0]:sh.material;
+  if(!m0.isMeshPhysicalMaterial){const pm=new THREE.MeshPhysicalMaterial({color:m0.color,roughness:m0.roughness,metalness:m0.metalness,clearcoat:m0.roughness<.5?1:.2,clearcoatRoughness:.08});if(Array.isArray(sh.material))sh.material[0]=pm;else sh.material=pm;m0.dispose();}
+  const dk=new THREE.MeshStandardMaterial({color:0x0b0b0d,roughness:.9}),v=new THREE.Vector3();
+  for(const th of[-.35,.35]){hPt(HP,th,.55,1.005,v);const m=new THREE.Mesh(KB(.012,.004,.05),dk);m.position.copy(v);m.lookAt(0,HP.cy,HP.cz);m.rotateX(Math.PI/2);hg.add(m);d.kfx.push(m);}   // crown vents
+  hPt(HP,Math.PI,Math.max(.2,hEdge(HP,Math.PI)-.12),1.01,v);{const m=new THREE.Mesh(KB(.06,.016,.012),new THREE.MeshStandardMaterial({color:0x222226,roughness:.55}));m.position.copy(v);hg.add(m);d.kfx.push(m);}   // rear bumper
+  for(const sx of[1,-1]){hPt(HP,sx*Math.PI/2,1.25,1.006,v);const m=new THREE.Mesh(kg('ear',()=>new THREE.CircleGeometry(.012,12)),dk);m.position.copy(v);m.lookAt(v.x*3,v.y,v.z);hg.add(m);d.kfx.push(m);
+   const jp=new THREE.Mesh(KB(.012,.05,.04),new THREE.MeshStandardMaterial({color:0x2a2a2e,roughness:.95}));jp.position.set(sx*.07,HP.cy-.09,HP.cz+.04);hg.add(jp);d.kfx.push(jp);}}   // ear holes + jaw pads
+ // elbow pads on bare forearms
+ if(K.sleeve===0)for(const s of['1','-1'])if(P['farm'+s])add('farm'+s,KB(.066,.04,.066),new THREE.MeshStandardMaterial({color:0x1a1a1c,roughness:.8,normalMap:kxNorm('glove')}),0,.1,0);}
 // jersey lettering: number on the front; surname over the number on the back (traditional layout), in white or black, whichever reads on the jersey colour
 function jersey(d,num,name,bg,ink2){for(const m of d.decals||[]){m.parent.remove(m);m.material.map.dispose();}d.decals=[];jerseyFX(d,bg);if(num==null||num==='')return;
  const c=new THREE.Color(bg??d.parts.chest.mesh.material.color.getHex()),lum=.2126*c.r+.7152*c.g+.0722*c.b,ink=ink2!=null?'#'+new THREE.Color(ink2).getHexString():lum>.5?'#111':'#fff',edge=ink2!=null?(lum>.5?'#00000055':'#ffffffaa'):lum>.5?'#ffffffaa':'#000000aa';   // away kits: numbers in the club colour

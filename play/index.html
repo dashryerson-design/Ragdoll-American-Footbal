@@ -1759,7 +1759,7 @@ const player={};saveTo(player);curD=player;
 // ---------- bots: extra dolls on the same ragdoll + controller, built on demand and parked out of the world until a set needs them ----------
 const TEAM={blue:[0x2a6fdb,0x23304d],red:[0xb01e28,0x3a0d10]};
 function tagCols(d){for(const b of d.list){const h=b.mesh.material.color.getHex();b.mesh.userData.k=h===0x2a6fdb?0:h===0x23304d?1:-1;}}
-function paint(d,t){for(const b of d.list){const k=b.mesh.userData.k;if(k>=0)b.mesh.material.color.setHex(TEAM[t][k]);}}
+function paint(d,t){for(const b of d.list){const k=b.mesh.userData.k;if(k>=0&&!b.mesh.material.map)b.mesh.material.color.setHex(TEAM[t][k]);}}   // a textured jersey already carries its colours
 tagCols(player);const pool=[];
 function bot(i){if(pool[i])return pool[i];const d={};saveTo(player);buildDoll(0x2a6fdb,0x23304d);
  limp=false;gdir=1;crK=0;fh={1:0,'-1':0};LH={1:0,'-1':0};gs=0;keys={};camYaw=Math.PI;camPitch=.12;js=jt=jdx=jdz=jp=jpt=bchg=0;bsd=1;cur={ai:true};
@@ -2904,7 +2904,7 @@ const fxText=fx=>Object.entries(fx).map(([ch,v])=>{const C=BCH[ch];return ch==='
 const RCH=d=>d===player&&player.cur.bm?player.cur.bm.reach:1;
 // ---------- equipment: real meshes on the ragdoll's parts (they move with it); geometry shared ----------
 const PAL=[0xffffff,0x111111,0x2a6fdb,0x23304d,0xb01e28,0xff5a1f,0xffd23f,0x1f5d3a,0x0aa3a3,0x4b2a7b,0x7a7a80,0xc0c6cc,0xd4af37,0x6b1f2a,0x3ee07a,0xff8ac2];
-const DEFLOOK={hv:2,skin:1,eye:0,shell:0,mask:0,visor:0,hfin:0,decal:1,sleeve:0,fit:1,pads:1,comp:0,compLen:0,wrist:0,pfit:1,thighpad:1,leg:0,knee:0,sock:1,cstyle:0,
+const DEFLOOK={hv:2,skin:1,eye:0,shell:0,mask:0,visor:0,hfin:0,decal:1,sleeve:0,fit:1,tuck:0,pads:1,comp:0,compLen:0,wrist:0,pfit:1,thighpad:1,leg:0,knee:0,sock:1,cstyle:0,
  c_pri:0x2a6fdb,c_sec:0x23304d,c_acc:0xffd23f,c_helm:0x2a6fdb,c_mask:0xdddddd,c_glove:-1,c_cleat:0x111111,c_comp:0x111111,c_sock:0xffffff,c_strap:0xffffff};
 function migLook(l){if(!l)return{...DEFLOOK};if('shell'in l){const o={...DEFLOOK,...l};if(l.hv!==2){o.shell=[0,1,3][l.shell]??0;o.mask=[0,3,1,2][l.mask]??0;o.hv=2;}return o;}return{...DEFLOOK,skin:l.skin??1,c_glove:GLC[l.glove]!=null?GLC[l.glove]:-1,c_cleat:CLC[l.cleat??0]};}   // older 3-option looks carry over
 const KG={},kg=(k,f)=>KG[k]||(KG[k]=f()),KB=(x,y,z)=>kg(`b${x},${y},${z}`,()=>new THREE.BoxGeometry(x,y,z));
@@ -2993,6 +2993,7 @@ function helmet(d,L,col,fin){const key=HKEYS[L.shell]||'classic',P=HSPEC[key],g=
  return g;}
 function kit(d,L,T){L=migLook(L);if(PROG.isMine(d))L=PROG.lookMod(L);for(const m of d.kitM||[]){m.parent.remove(m);m.traverse(o=>{if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>x.dispose());});}d.kitM=[];if(T&&T[2]!=null)L={...L,c_acc:T[2]};const P=d.parts,sk=SKC[L.skin]??SKC[1],pri=T?T[0]:L.c_pri,sec=T?T[1]:L.c_sec,hel=T?T[3]??T[0]:L.c_helm,acc=L.c_acc;   // team kit: club trim on stripes, wristbands and accents
  const col=(n,c)=>P[n]&&P[n].mesh.material.color.setHex(c);
+ for(const n of['chest','abdomen','uarm1','uarm-1']){const m=P[n]&&P[n].mesh.material;if(m&&m.map){m.map=null;m.normalMap=null;m.needsUpdate=true;}}d.jk={pri,sec,acc,sleeve:L.sleeve,tuck:L.tuck|0};   // the premium jersey is re-applied after the kit
  for(const n of['chest','abdomen'])col(n,pri);col('pelvis',sec);for(const s of['1','-1']){col('thigh'+s,sec);col('uarm'+s,L.sleeve===2?sk:pri);col('farm'+s,L.sleeve===1?pri:sk);col('hand'+s,L.c_glove<0?sk:L.c_glove);col('shin'+s,L.sock?L.c_sock:sk);col('foot'+s,L.c_cleat);col('toe'+s,L.cstyle===2?acc:L.c_cleat);}
  col('neck',sk);col('head',sk);
  d.fitK=[.95,1,1.06][L.fit];
@@ -3011,8 +3012,50 @@ function kit(d,L,T){L=migLook(L);if(PROG.isMine(d))L=PROG.lookMod(L);for(const m
   if(!L.sock&&!side(L.leg,s))kmesh(d,'shin'+s,KB(.07,.05,.07),L.c_sock,0,-.19,0);   // low socks: a band at the ankle
   if(L.cstyle>=1)kmesh(d,'foot'+s,KB(.085,L.cstyle===2?.08:.045,.09),L.c_cleat,0,.06,-.01);}if(PROG.isMine(d))PROG.decorate(d);}   // mid / high-top cleats
 
+// ===== premium jerseys (keyboard version only): procedural 2K team-design textures + fabric normal maps on the existing torso / sleeve boxes; tucked or untucked hem.
+// Touch keeps the plain coloured kit. Textures are cached per club colours (one set per team on the field), mipmapped, and freed when no longer used.
+const JX={c:new Map(),nrm:{}};const JFX=()=>!LOWFX&&pendMode!=='touch'&&!document.body.classList.contains('touch');
+function jxHex(c){return'#'+new THREE.Color(c).getHexString();}
+function jxShade(c,k){const o=new THREE.Color(c);o.multiplyScalar(k);return'#'+o.getHexString();}
+function jxNormal(kind){if(JX.nrm[kind])return JX.nrm[kind];const N=512,H=new Float32Array(N*N);let s=kind.length*97+13;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+ const F=[];for(let i=0;i<14;i++)F.push([rnd()*N,rnd()*N,rnd()*6.3,30+rnd()*90,.4+rnd()*.8]);   // a few soft folds
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){let h=((x+y)&3)===0?.06:0;h+=.05*Math.sin(x*.9)*Math.sin(y*.9);   // knit / mesh
+  if(kind==='chest'){for(const k of[0,N]){const d=Math.abs((x-k)*(k?-1:1)*.7+y*.7);h+=.35*Math.max(0,1-y/(N*.45))*Math.sin(d*.09);}}   // tension lines fanning from the shoulders
+  else if(kind==='abd'){h+=.28*Math.sin(y*.11+Math.sin(x*.02)*2)*Math.min(1,y/(N*.5));}   // waist gathers
+  else h+=.25*Math.sin(x*.05+y*.12);   // sleeve twist
+  for(const[fx,fy,a,r,w]of F){const dx=x-fx,dy=y-fy,dd=Math.hypot(dx,dy);if(dd<r)h+=w*.25*Math.cos(dd/r*1.57)*Math.sin((dx*Math.cos(a)+dy*Math.sin(a))*.08);}H[y*N+x]=h;}
+ const cv=document.createElement('canvas');cv.width=cv.height=N;const g=cv.getContext('2d'),im=g.createImageData(N,N);
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x,hx=H[y*N+(x+1)%N]-H[y*N+(x+N-1)%N],hy=H[((y+1)%N)*N+x]-H[((y+N-1)%N)*N+x],nx=-hx*2,ny=-hy*2,nz=1,l=Math.hypot(nx,ny,nz);
+  im.data[i*4]=(nx/l*.5+.5)*255;im.data[i*4+1]=(ny/l*.5+.5)*255;im.data[i*4+2]=(nz/l*.5+.5)*255;im.data[i*4+3]=255;}
+ g.putImageData(im,0,0);const tx=new THREE.CanvasTexture(cv);tx.anisotropy=4;return JX.nrm[kind]=tx;}
+function jxDraw(W,H,pri,sec,acc,design,part){const cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d'),P=jxHex(pri),S=jxHex(sec),A=jxHex(acc),lum=new THREE.Color(pri).getHSL({}).l;
+ const gr=g.createLinearGradient(0,0,W,0);gr.addColorStop(0,jxShade(pri,.78));gr.addColorStop(.18,P);gr.addColorStop(.82,P);gr.addColorStop(1,jxShade(pri,.78));g.fillStyle=gr;g.fillRect(0,0,W,H);   // depth: darker toward the panel edges
+ const stitch=(x1,y1,x2,y2)=>{g.save();g.setLineDash([W*.006,W*.006]);g.lineWidth=W*.0025;g.strokeStyle=lum>.55?'#00000040':'#ffffff3a';g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.restore();};
+ const pipe=(x1,y1,x2,y2,c,w)=>{g.lineWidth=w;g.strokeStyle=c;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();};
+ if(part==='chest'){const yk=H*.24;
+  if(design===0){g.fillStyle=S;g.fillRect(0,0,W,yk);pipe(0,yk,W,yk,A,H*.022);stitch(0,yk+H*.025,W,yk+H*.025);}   // classic yoke
+  else if(design===1){g.fillStyle=S;g.beginPath();g.moveTo(0,0);g.lineTo(W,0);g.lineTo(W,yk*.6);g.lineTo(W/2,yk*1.5);g.lineTo(0,yk*.6);g.fill();g.strokeStyle=A;g.lineWidth=H*.02;g.beginPath();g.moveTo(0,yk*.6+H*.03);g.lineTo(W/2,yk*1.5+H*.03);g.lineTo(W,yk*.6+H*.03);g.stroke();}   // chevron
+  else if(design===2){g.save();g.translate(W/2,H/2);g.rotate(-.5);g.fillStyle=S;g.fillRect(-W,-H*.08,W*2,H*.16);g.fillStyle=A;g.fillRect(-W,-H*.1,W*2,H*.02);g.fillRect(-W,H*.08,W*2,H*.02);g.restore();g.fillStyle=S;g.fillRect(0,0,W,yk*.45);}   // sash
+  else if(design===3){g.fillStyle=S;g.fillRect(0,0,W*.16,H);g.fillRect(W*.84,0,W*.16,H);pipe(W*.16,0,W*.16,H,A,W*.012);pipe(W*.84,0,W*.84,H,A,W*.012);stitch(W*.18,0,W*.18,H);stitch(W*.82,0,W*.82,H);g.fillStyle=S;g.fillRect(0,0,W,yk*.4);}   // side panels
+  else{g.fillStyle=S;for(let i=0;i<8;i++){const x=i*W/8;g.beginPath();g.moveTo(x,0);g.lineTo(x+W/16,yk);g.lineTo(x+W/8,0);g.fill();}pipe(0,yk*1.05,W,yk*1.05,A,H*.012);}   // geometric teeth
+  g.fillStyle=A;g.fillRect(W*.4,0,W*.2,H*.025);   // collar trim
+  stitch(W*.06,0,W*.06,H);stitch(W*.94,0,W*.94,H);}
+ else if(part==='abd'){if(design===3){g.fillStyle=S;g.fillRect(0,0,W*.16,H);g.fillRect(W*.84,0,W*.16,H);pipe(W*.16,0,W*.16,H,A,W*.012);pipe(W*.84,0,W*.84,H,A,W*.012);}
+  else{pipe(W*.08,0,W*.08,H,A,W*.008);pipe(W*.92,0,W*.92,H,A,W*.008);}stitch(W*.05,0,W*.05,H);stitch(W*.95,0,W*.95,H);
+  if(design===1||design===4){g.fillStyle=S;g.fillRect(0,H*.88,W,H*.12);pipe(0,H*.88,W,H*.88,A,H*.02);}stitch(0,H*.95,W,H*.95);}   // hem band
+ else{const b=H*.72;g.fillStyle=S;g.fillRect(0,b,W,H*.12);g.fillStyle=A;g.fillRect(0,b+H*.12,W,H*.04);if(design===2||design===4){g.fillRect(0,b-H*.06,W,H*.03);}stitch(0,H*.97,W,H*.97);stitch(0,H*.08,W,H*.08);}   // sleeve stripes + cuff
+ g.globalAlpha=.05;g.fillStyle=lum>.5?'#000':'#fff';for(let y=0;y<H;y+=6)for(let x=(y/6&1)*3;x<W;x+=6)g.fillRect(x,y,1.5,1.5);g.globalAlpha=1;   // performance-fabric speckle, very faint
+ const tx=new THREE.CanvasTexture(cv);tx.encoding=THREE.sRGBEncoding;tx.anisotropy=8;tx.generateMipmaps=true;tx.minFilter=THREE.LinearMipmapLinearFilter;return tx;}
+function jxSet(pri,sec,acc){const k=pri+'/'+sec+'/'+acc;let e=JX.c.get(k);if(e){e.t=performance.now();return e;}
+ const design=((pri*31+sec*7+acc)>>>3)%5;e={design,chest:jxDraw(2048,2048,pri,sec,acc,design,'chest'),abd:jxDraw(1024,1024,pri,sec,acc,design,'abd'),sl:jxDraw(512,512,pri,sec,acc,design,'sl'),t:performance.now()};
+ JX.c.set(k,e);if(JX.c.size>6){const old=[...JX.c.entries()].sort((a,b)=>a[1].t-b[1].t)[0];for(const x of['chest','abd','sl'])old[1][x].dispose();JX.c.delete(old[0]);}return e;}
+function jerseyFX(d,bg){if(d.hem){d.hem.parent&&d.hem.parent.remove(d.hem);d.hem.geometry.dispose();d.hem.material.dispose();d.hem=null;}if(!JFX()||!d.jk)return;const P=d.parts,K=d.jk,pri=bg??K.pri;const e=jxSet(pri,K.sec,K.acc);
+ const put=(n,map,nk)=>{const m=P[n]&&P[n].mesh.material;if(!m)return;m.map=map;m.color.setHex(0xffffff);m.normalMap=jxNormal(nk);m.normalScale=new THREE.Vector2(.55,.55);m.roughness=.78;m.needsUpdate=true;};
+ put('chest',e.chest,'chest');put('abdomen',e.abd,'abd');if(K.sleeve!==2)for(const s of['1','-1'])put('uarm'+s,e.sl,'sl');
+ if(K.tuck){const a=P.abdomen.shapes[0].halfExtents,pv=P.pelvis.shapes[0].halfExtents,w=Math.max(a.x,pv.x)*2+.016,dz=Math.max(a.z,pv.z)*2+.016;   // untucked: the shirt tail hangs over the waistband, just outside the pants
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,.075,dz),new THREE.MeshStandardMaterial({map:e.abd,normalMap:jxNormal('abd'),roughness:.8}));m.position.y=-a.y-.022;m.castShadow=true;P.abdomen.mesh.add(m);d.hem=m;}}
 // jersey lettering: number on the front; surname over the number on the back (traditional layout), in white or black, whichever reads on the jersey colour
-function jersey(d,num,name,bg,ink2){for(const m of d.decals||[]){m.parent.remove(m);m.material.map.dispose();}d.decals=[];if(num==null||num==='')return;
+function jersey(d,num,name,bg,ink2){for(const m of d.decals||[]){m.parent.remove(m);m.material.map.dispose();}d.decals=[];jerseyFX(d,bg);if(num==null||num==='')return;
  const c=new THREE.Color(bg??d.parts.chest.mesh.material.color.getHex()),lum=.2126*c.r+.7152*c.g+.0722*c.b,ink=ink2!=null?'#'+new THREE.Color(ink2).getHexString():lum>.5?'#111':'#fff',edge=ink2!=null?(lum>.5?'#00000055':'#ffffffaa'):lum>.5?'#ffffffaa':'#000000aa';   // away kits: numbers in the club colour
  for(const[z,ry,nm]of[[.1115,0,''],[-.1115,Math.PI,(name||'').toUpperCase().replace(/[^A-Z' .-]/g,'').slice(0,18)]]){const cv=document.createElement('canvas');cv.width=cv.height=256;const g=cv.getContext('2d');g.textAlign='center';g.fillStyle=ink;g.strokeStyle=edge;g.lineJoin='round';
   g.lineWidth=8;g.font='900 168px Impact,"Arial Black",sans-serif';g.strokeText(String(num),128,nm?238:206);g.fillText(String(num),128,nm?238:206);
@@ -3217,7 +3260,7 @@ function projection(e){const a=e.att,f=(x,y)=>(a[x]+a[y])/2;const tags=[[f('spd'
  return`Expected on the field: a player who ${tags[0][1]} and ${tags[1][1]}; weakest when asked to ${tags[6][1].replace('gets','get').replace('drives','drive').replace('separates','separate').replace('runs','run').replace('makes','make').replace('blankets','blanket').replace('closes','close')}.`;}
 // ---------- stage 3: equipment & appearance ----------
 const OPTS={helmet:[['shell','Shell',['Classic','Speed','Angular','Defender']],['mask','Facemask',FMASK],['visor','Visor',['None','Clear','Dark Tint','Gold Iridium','Amber']],['hfin','Finish',['Gloss','Matte','Chrome']],['decal','Stripes',['None','Centre','Double']]],
- upper:[['sleeve','Sleeves',['Short','Long','Sleeveless']],['fit','Jersey Fit',['Tight','Standard','Loose']],['pads','Shoulder Pads',['Slim','Standard','Big']],['comp','Arm Compression',['None','Left','Right','Both']],['compLen','Compression Length',['Forearm','Full Arm']],['wrist','Wristbands',['None','White','Accent','Black']]],
+ upper:[['sleeve','Sleeves',['Short','Long','Sleeveless']],['fit','Jersey Fit',['Tight','Standard','Loose']],['tuck','Jersey Style',['Tucked','Untucked']],['pads','Shoulder Pads',['Slim','Standard','Big']],['comp','Arm Compression',['None','Left','Right','Both']],['compLen','Compression Length',['Forearm','Full Arm']],['wrist','Wristbands',['None','White','Accent','Black']]],
  lower:[['pfit','Pants Fit',['Tight','Standard','Loose']],['thighpad','Thigh Pads',['Hidden','Visible']],['leg','Leg Compression',['None','Left','Right','Both']],['legLen','Leg Sleeve',['Calf','Over the Knee']],['knee','Knee Pads',['None','Under Pants','External']],['sock','Socks',['Low','High']],['cstyle','Cleats',['Low','Mid','High-Top']]],
  colours:[['c_pri','Jersey (primary)'],['c_sec','Pants (secondary)'],['c_acc','Accent'],['c_helm','Helmet'],['c_mask','Facemask'],['c_strap','Chinstrap'],['c_glove','Gloves'],['c_cleat','Cleats'],['c_comp','Compression'],['c_sock','Socks']],
  look:[['eye','Eye Black',['None','Stripes']]]};

@@ -1046,7 +1046,15 @@ function updatePins(dt){
 let keys={};let camYaw=Math.PI,camPitch=.12,camDist=3.6;let js=0,jt=0,jdx=0,jdz=0,jp=0,jpt=0,bsd=1,bchg=0;const JF=18;
 let cur={};   // movement memory (normal ground speed, queued bounds)
 function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>1){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=jdz=0;}}
-function startBound(){bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
+// ===== hurdle: sprinting with the ball + the running-jump input. Same jump state machine (js 6 = plant, 7 = airborne), real impulses and joint targets only.
+// Quality from Agility (coordination / leg lift), Speed (carry), timing against the nearest defender ahead, and a little luck; Strength helps ride out a bad landing.
+function hurdleOK(){let vx=0,vz=0,m=0;for(const b of list){vx+=b.velocity.x*b.mass;vz+=b.velocity.z*b.mass;m+=b.mass;}const sp=Math.hypot(vx,vz)/m;   // whole-body speed: steady through the stride
+ return held&&keys.shift&&mv>.3&&sp>3.8&&contact()&&!limp&&cs===0&&dv===0;}
+function startHurdle(){const sp=Math.hypot(pel.velocity.x,pel.velocity.z);jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;let dd=9;
+ for(const d of roster){if(d===curD||d.cur.side===cur.side)continue;const q=d.pel.position,ax=q.x-pel.position.x,az=q.z-pel.position.z,al=ax*jdx+az*jdz,lat=Math.abs(ax*jdz-az*jdx);if(al>0&&lat<1.4&&al<dd)dd=al;}   // nearest opponent in the running lane
+ const tim=dd>8?.5:Math.abs(dd-2.3)/1.6;   // take off about 2.3 m out: too early lands on him, too late runs into him
+ cur.hq=cl(.3+.4*AT('agi')+.15*AT('spd')-.35*cl(tim,0,1.2)+(Math.random()-.5)*.3,.05,1);js=6;jt=0;cur.hT=performance.now();}
+function startBound(){if(hurdleOK()){startHurdle();return;}bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{if(NET.guest&&NET.on)return NET.key(e,true);const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat&&!CINE.on){togglePause();return;}if(!mode||paused||CINE.on)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
  if(k===' '&&cur.runT>1){cur.boost=Math.min(.3,(cur.boost||0)+.06);return;}   // ball carrier in a long sprint: Space taps are a burst of speed, not a jump
@@ -1391,7 +1399,7 @@ cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT(
  jt+=dt;
  if(js>0){
   const uj=Math.min(1,jt/.13),su=uj*uj*(3-2*uj);
-  const P={1:[-.55*su,1.05*su,.8*su,-.3*su,0],2:[-.1,.05,-2.3,-.2,jt>.1?.7:0],3:[-.5,.9,-.7,-.8,0],4:[-.7,1.2,.4,-.4,0],5:[-.1,.05,0,-.2,.7]}[js];
+  const P={1:[-.55*su,1.05*su,.8*su,-.3*su,0],2:[-.1,.05,-2.3,-.2,jt>.1?.7:0],3:[-.5,.9,-.7,-.8,0],4:[-.7,1.2,.4,-.4,0],5:[-.1,.05,0,-.2,.7],6:[-.4,.6,-.6,-.4,0],7:[-.4,.6,-.3,-.5,0]}[js];
   const armsFree=!(catchOn&&cur.look);   // tracking a ball to catch: the jump's arm swing is skipped so it never fights the reach
   for(const sd of[-1,1]){const k=sd+'';joints['hip'+k].x=P[0];joints['knee'+k].x=P[1];joints['ankle'+k].x=-(P[0]+P[1])+P[4];if(armsFree){joints['shoulder'+k].x=P[2];joints['elbow'+k].x=P[3];}joints['toe'+k].x=-P[4];}
   if(js===5){const lk=(-bsd)+'',pk=bsd+'';
@@ -1400,6 +1408,14 @@ cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT(
    if(jt<.18&&contact()){const F=totalMass*9.82*JF*.6*(1+1.2*bchg);pel.force.y+=F;parts['foot'+pk].force.y-=F;pel.force.x+=jdx*totalMass*9.82*.75*(1+.4*bchg);pel.force.z+=jdz*totalMass*9.82*.75*(1+.4*bchg);}
    if(cur.bndB&&jt>.04&&contact()){cur.bndB=0;const fx=Math.sin(yaw),fz=Math.cos(yaw),fs=pel.velocity.x*fx+pel.velocity.z*fz,add=Math.max(0,Math.min(1,(cur.runV||fs)*1.3-fs));for(const b of list){b.velocity.x+=fx*add;b.velocity.z+=fz*add;b.velocity.y+=.4;}}   // bounding: a shove the way he's facing, none once already near top bounding speed, so chains can't snowball
    if(jt>.2||(jt>.07&&!contact())){js=3;jt=0;if(keys.shift)for(const b of list)b.velocity.y+=2.2;}}   // sprinting bound: extra lift at take-off
+  if(js===6||js===7){const q=cur.hq||.5,J=joints,u=js===6?Math.min(1,jt/.08):1;
+   const lead=bsd+'',trail=(-bsd)+'';   // lead leg kicks out straight and high, trail leg folds up under
+   J['hip'+lead].x=-(.9+.8*q)*u;J['knee'+lead].x=(.25+.25*(1-q))*u;J['ankle'+lead].x=-.2;
+   J['hip'+trail].x=-(.5+.5*q)*u;J['knee'+trail].x=(1.4+.6*q)*u;J['ankle'+trail].x=-.3;J['toe1'].x=J['toe-1'].x=0;
+   if(js===6&&jt<.09&&contact()){if(!cur.hImp){cur.hImp=1;const up=3.1+1.7*q+.15*Math.min(8,Math.hypot(pel.velocity.x,pel.velocity.z)-4),fw=.25+.35*AT('spd');for(const b of list){b.velocity.y+=up;b.velocity.x+=jdx*fw;b.velocity.z+=jdz*fw;}}}   // one drive off the plant foot; forward momentum is kept
+   if(js===6&&(jt>.12||jt>.05&&!contact())){js=7;jt=0;cur.hImp=0;}
+   else if(js===7&&jt>.18&&contact()){js=4;jt=0;cur.hImp=0;const tilt=upTilt(curD);   // touchdown: a clean landing runs on, a crooked one may go down
+    if(tilt<.82&&Math.random()>.35+.45*AT('str')+.2*q){limp=true;curD.limpT=performance.now()+650+500*(1-q);}}}
   if(js===2&&jt<.2&&contact()){const F=totalMass*9.82*JF;pel.force.y+=F;pel.force.x+=jdx*totalMass*9.82*.55;pel.force.z+=jdz*totalMass*9.82*.55;parts.foot1.force.y-=F/2;parts['foot-1'].force.y-=F/2;}
   if(js===2&&jt<.24){const ax=Math.cos(yaw),az=-Math.sin(yaw);
    for(const sd of[-1,1]){const th=parts['thigh'+sd],sh=parts['shin'+sd];
@@ -1412,12 +1428,12 @@ cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT(
   else if(js===3&&jt>.08&&contact()){js=4;jt=0;}
   else if(js===4&&jt>.15){js=0;}
   if(js===3&&catchOn&&cur.cp){const C=jumpAim();if(C)for(const b of list){b.force.x+=b.mass*cl(12*(C.x-pel.position.x)-3.5*pel.velocity.x,-14,14);b.force.z+=b.mass*cl(12*(C.z-pel.position.z)-3.5*pel.velocity.z,-14,14);}}   // in the air: steer toward the catch point
-  if(js===5||js===3||js===4){const hs=Math.hypot(pel.velocity.x,pel.velocity.z),cap=Math.min(7,(cur.runV||4)*1.3+.2);if(hs>cap){const k=cap/hs;for(const b of list){b.velocity.x*=k;b.velocity.z*=k;}}}   // hard speed cap through the whole jump
+  if(js===5||js===3||js===4||js===6||js===7){const hs=Math.hypot(pel.velocity.x,pel.velocity.z),cap=Math.min(7,(cur.runV||4)*1.3+.2);if(hs>cap){const k=cap/hs;for(const b of list){b.velocity.x*=k;b.velocity.z*=k;}}}   // hard speed cap through the whole jump
   if(js===0&&mv>.3&&contact()){const f=pel.velocity.x*Math.sin(yaw)+pel.velocity.z*Math.cos(yaw);cur.runV=(cur.runV==null?f:cur.runV*.995+f*.005);}   // remember normal ground speed: a bound only beats it by ~20%
   if(cur.bufB&&(js===4||js===0)&&contact()&&!limp){if(performance.now()-cur.bufB<400){jpt=.2;startBound();}cur.bufB=0;}   // space pressed just before landing: chain straight into the next bound
  }
  ballArm();if(!cur.ai)stanceArms(dt);else blockArms(dt);
- const lean=thLean-.08*qbK+.95*reachK+.85*(cur.low||0)+.18*crK+mv*(run?.14+.16*cl((speed-vf)/3,0,1):.1)*(1-qbK)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0);
+ const lean=thLean-.08*qbK+.95*reachK+.85*(cur.low||0)+.18*crK+mv*(run?.14+.16*cl((speed-vf)/3,0,1):.1)*(1-qbK)*(gdir<0?-.6:1)+(js===1?(.2+(jdx||jdz?.12:0))*Math.min(1,jt/.13):0)+((js===2||js===5)&&(jdx||jdz)?.28:0)+(js===7?.35*(cur.hq||.5):js===6?.2:0);
  if(!limp){
   // balance: keep pelvis and chest facing the heading, upright
   const tw=.12*Math.sin(phase)*mv;

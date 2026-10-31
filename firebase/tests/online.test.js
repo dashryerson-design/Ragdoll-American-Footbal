@@ -38,6 +38,7 @@ await until(async()=>(await adm('/rooms/'+code)).status===200,10000);await G.p.f
 await H.nb('#netstart');ok('runsStarted',await until(()=>H.p.evaluate(()=>!!MATCH&&MATCH.mp===1&&MATCH.runs===1&&RUNS.on)&&G.p.evaluate(()=>NET.on&&NET.st.snaps>5),40000));
 ok('runsGuestIsRedReceiverCorner',await until(()=>H.p.evaluate(()=>{const d=NET.rd;return !!d&&d.cur.team==='red'&&d.cur.role!=='qb'&&d.cur.ai===false&&d.cur.pid==='NET'&&d.cur.nm==='NetA';}),10000));
 ok('runsGuestHud',await until(async()=>/1V1 RUNS · YOU 0 – 0/.test(await G.p.textContent('#nethud')),8000),await G.p.textContent('#nethud'));
+ok('sameWeatherBothSides',await until(async()=>{const a=await H.p.evaluate(()=>WX.cur()),b=await G.p.evaluate(()=>WX.cur());return !!a&&a===b;},8000));
 // forged messages from the guest change nothing on the host
 await G.p.evaluate(()=>{NET._raw({t:'end',a:0,b:5});NET._raw({t:'pick',i:0});NET._raw({t:'start'});NET._raw({t:'k',k:1,y:'x',p:999});});await sleep(800);
 ok('forgedMessagesIgnored',await H.p.evaluate(()=>RUNS.on&&RUNS.c.me===0&&RUNS.c.op===0&&!!MATCH&&NET.rp<=1.2));

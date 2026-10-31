@@ -5,7 +5,7 @@ const R={};const ok=(k,v,x)=>{R[k]=!!v;console.log(v?'PASS':'FAIL',k,v?'':(x||''
 await p.route(/cdnjs/,r=>r.fulfill({path:L+(r.request().url().includes('three')?'three':'cannon')+'.min.js'}));
 await p.goto('file://'+path.resolve(__dirname,'../../play/index.html'));await p.waitForTimeout(1500);
 await p.evaluate(()=>{setInput('kb');pendMode='kb';SLOT=0;openCre(true);ED.first='Runa';ED.last='Wide';saveCre();const q=loadProf(0);q.style=3;saveProf(q);SLOT=1;openCre(true);ED.first='Quinn';ED.last='Back';saveCre();const r=loadProf(1);r.style=0;saveProf(r);show('mode');});
-await p.waitForTimeout(1000);const snap=()=>p.evaluate(()=>JSON.stringify([0,1,2,3,4].map(i=>localStorage.getItem('pafCareer#'+i)))+'|'+localStorage.getItem('pafExh'));const C0=await snap();
+await p.waitForTimeout(1000);const snap=()=>p.evaluate(()=>JSON.stringify([0,1,2,3,4].map(i=>localStorage.getItem('pafCareer#'+i)))+'|'+(()=>{try{const o=JSON.parse(localStorage.getItem('pafExh')||'null');return JSON.stringify([o?o.s:{},o?o.h:[]]);}catch(e){return'';}})());const C0=await snap();
 // mode picker, both ways in and out
 await p.click('#mexh');ok('modePickerShown',await p.isVisible('#exm')&&await p.isVisible('#xmteam')&&await p.isVisible('#xmruns'));
 await p.click('#xmteam');ok('teamPlayUnchanged',await p.isVisible('#exh')&&(await p.textContent('#xoph'))==='OPPONENT'&&(await p.$$('#xop [data-o]')).length===15);

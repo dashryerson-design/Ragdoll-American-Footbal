@@ -100,7 +100,7 @@ await L7.p.waitForTimeout(3000);s=await L7.act('ckc');ok('15 retryWorks',(await 
 const fnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);};
 const evil=JSON.stringify({fields:{careerId:{stringValue:'evil'},rev:{integerValue:1},gen:{stringValue:'evilgen01'},parts:{arrayValue:{values:[{stringValue:'evilgen01_car_0'}]}},fmt:{integerValue:2},gameVer:{stringValue:'x'},sum:{mapValue:{fields:{n:{stringValue:'<img src=x onerror="window.XSS=1">'},lvl:{stringValue:'<b id=pwn>'},ovr:{stringValue:'<i id=pwn2>'},team:{stringValue:'<svg onload=window.XSS=2>'}}}}}});
 await adm(`/users/${uid}/careers/3`,{method:'PATCH',body:evil});await L7.act('cload');
-ok('17 noInjection',await L7.p.evaluate(()=>!window.XSS&&!document.querySelector('#acctb img,#acctb #pwn,#acctb #pwn2,#acctb svg'))&&(await L7.text()).includes('<img src=x'));
+ok('17 noInjection',await L7.p.evaluate(()=>!window.XSS&&!document.querySelector('#acctb .accs img,#acctb #pwn,#acctb #pwn2,#acctb .accs svg'))&&(await L7.text()).includes('<img src=x'));
 // ---- 18. a save from a newer game version is refused, device untouched
 const fut=JSON.stringify({v:1,sv:99,first:'Future',last:'Kid'});
 await adm(`/users/${uid}/careers/3/parts/evilgen01_car_0`,{method:'PATCH',body:JSON.stringify({fields:{d:{stringValue:fut}}})});

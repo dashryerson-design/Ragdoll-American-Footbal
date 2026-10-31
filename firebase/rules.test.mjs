@@ -28,7 +28,8 @@ await t('bob cannot delete alice\'s name',deleteDoc(doc(B,'usernames','alice')),
 await t('alice cannot release her name while her profile uses it',deleteDoc(doc(A,'usernames','alice')),false);
 await t('alice renames to "alice_2" (atomic swap)',(()=>{const b=writeBatch(A);b.set(doc(A,'usernames','alice_2'),{uid:'alice'});b.update(doc(A,'users','alice'),{username:'alice_2'});b.delete(doc(A,'usernames','alice'));return b.commit();})(),true);
 await t('the old name is free again for bob? (bob already named; ursula claims it)',claim(U,'ursula','alice'),true);
-await t('nobody can read a name they don\'t own',getDoc(doc(B,'usernames','alice_2')),false);
+await t('signed-in players can look up a username (friend search)',getDoc(doc(B,'usernames','alice_2')),true);
+await t('signed-out visitors cannot look up usernames',getDoc(doc(anon,'usernames','alice_2')),false);
 await t('users cannot be listed',getDocs(collection(B,'users')),false);
 // --- profiles
 await t('bob cannot read alice\'s profile',getDoc(doc(B,'users','alice')),false);
@@ -87,5 +88,16 @@ await t('bob answers the room',updateDoc(room(B,'ABC234'),{guest:'bob',answer:'v
 await t('a second guest cannot take the room',updateDoc(room(C,'ABC234'),{guest:'carl',answer:'x'}),false);
 await t('guest cannot delete the room',deleteDoc(room(B,'ABC234')),false);
 await t('host deletes the room',deleteDoc(room(A,'ABC234')),true);
+// --- account level (progress)
+const pg=(db,u)=>doc(db,'progress',u);
+await t('create progress at 0 XP',setDoc(pg(A,'alice'),{xp:0,eq:{},t:serverTimestamp()}),true);
+await t('cannot create someone else\'s progress',setDoc(pg(A,'bob'),{xp:0,eq:{},t:serverTimestamp()}),false);
+await t('cannot create with XP already in it',setDoc(pg(B,'bob'),{xp:9999,eq:{},t:serverTimestamp()}),false);
+await t('equip change without touching XP',updateDoc(pg(A,'alice'),{eq:{bt:'b-clean'}}),true);
+await t('XP cannot jump by more than 5000',env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'progress','alice'),{xp:0,eq:{},t:new Date(Date.now()-60000)})).then(()=>updateDoc(pg(A,'alice'),{xp:6000,t:serverTimestamp()})),false);
+await t('XP grows by up to 5000 after 20 s',updateDoc(pg(A,'alice'),{xp:4000,t:serverTimestamp()}),true);
+await t('a second XP write within 20 s refused',updateDoc(pg(A,'alice'),{xp:4100,t:serverTimestamp()}),false);
+await t('XP can never go down',env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'progress','alice'),{xp:4000,eq:{},t:new Date(Date.now()-60000)})).then(()=>updateDoc(pg(A,'alice'),{xp:100,t:serverTimestamp()})),false);
+await t('bob cannot read alice\'s progress',getDoc(pg(B,'alice')),false);
 await env.cleanup();
 for(const r of res)console.log(r.join(' | '));const f=res.filter(r=>r[0]==='FAIL').length;console.log(`\n${res.length-f}/${res.length} passed`);process.exit(f?1:0);

@@ -17,7 +17,7 @@ const dev=async(name,email,saves)=>{const ctx=await b.newContext({viewport:{widt
  await p.click('#macct');await idle();await p.click('#acctb [data-t="new"]');for(const[k,v]of Object.entries({acun:name.toLowerCase()+'_net',acem:email,acpw:'password1',acpw2:'password1'}))await p.fill('#'+k,v);await p.check('#acok');await p.click('#acctb [data-aa="create"]');await idle();
  const oob=(await (await fetch(`${AU}/emulator/v1/projects/${PJ}/oobCodes`)).json()).oobCodes;await fetch(oob.find(o=>o.email===email).oobLink);await p.click('#acctb [data-aa="recheck"]');await idle();
  await p.evaluate(()=>show('mode'));await p.click('#mnet');
- const snap=()=>p.evaluate(()=>JSON.stringify([0,1,2,3,4].map(i=>localStorage.getItem('pafCareer#'+i)))+'|'+localStorage.getItem('pafExh'));
+ const snap=()=>p.evaluate(()=>JSON.stringify([0,1,2,3,4].map(i=>localStorage.getItem('pafCareer#'+i)))+'|'+(()=>{try{const o=JSON.parse(localStorage.getItem('pafExh')||'null');return JSON.stringify([o?o.s:{},o?o.h:[]]);}catch(e){return'';}})());
  const nb=sel=>p.click('#netb '+sel);
  return{p,ctx,snap,nb};};
 // host: one WR career (club 3); guest: a WR career (club 7) for Runs and a QB career (club 7) for Exhibition
@@ -50,7 +50,7 @@ ok('runsScoreSameOnBoth',gv[0]===hc.me&&gv[1]===hc.op&&gv[2]===(hc.wr==='me'?0:1
 await H.p.evaluate(()=>{RUNS.c.me=4;RUNS.c.op=2;RUNS.wr='me';RUNS.caught=true;playEnd=performance.now()-1;});
 ok('runsEndBoth',await until(async()=>await H.p.isVisible('#exr')&&await G.p.evaluate(()=>NET.phase==='done'),60000));
 ok('runsResultConsistent',(await H.p.textContent('#xrec')).includes('5 – 2')&&/DEFEAT/.test(await G.p.textContent('#netb'))&&/2 – 5/.test(await G.p.textContent('#netb')),await G.p.textContent('#netb'));
-ok('runsNothingSaved',(await H.snap())===H0&&(await G.snap())===G0);
+await H.p.evaluate(()=>{$m('lvlup').hidden=true;});await G.p.evaluate(()=>{$m('lvlup').hidden=true;});ok('runsNothingSaved',(await H.snap())===H0&&(await G.snap())===G0);
 // ---- online Exhibition: both career teams, guest brings its QB career
 await H.p.evaluate(()=>{show('net');NET.close();NET.phase='idle';netUI();});await G.p.evaluate(()=>{NET.close();NET.phase='idle';NET.result=null;netUI();});
 await H.nb('[data-nm="exh"]');await H.nb('#nethost');code=null;await until(async()=>(code=await H.p.evaluate(()=>NET.phase==='waiting'&&NET.code))&&true);

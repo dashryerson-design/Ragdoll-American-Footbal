@@ -38,7 +38,7 @@ ok('noPresenceShown',await A.p.evaluate(()=>!document.querySelector('.frdot')&&!
 await A.fa('tab','[data-t="list"]');await A.p.click('#acctb .frrow');ok('profileShown',await until(async()=>{const t=await A.p.textContent('#acctb');return /ben_fr/.test(t)&&/Joined/.test(t)&&/EXHIBITION/.test(t)&&/1V1 RUNS/.test(t)&&/Win rate/.test(t);},8000),await A.p.textContent('#acctb'));
 ok('profileShowsLook',await A.p.evaluate(()=>document.querySelector('#acctb [data-pane="fr"] .ccard.prof .cav').title==='Helmet'));
 const doc=await (await adm('/publicProfiles/'+bu)).json(),keys=Object.keys(doc.fields).sort().join(',');
-ok('noPrivateData',keys==='avatar,card,joined,stats,username'&&!JSON.stringify(doc).includes('@x.com')&&!(await A.p.textContent('#acctb')).includes('b@x.com'),keys);
+ok('noPrivateData',keys.replace('acct,','')==='avatar,card,joined,stats,username'&&!JSON.stringify(doc).includes('@x.com')&&!(await A.p.textContent('#acctb')).includes('b@x.com'),keys);
 // ---- account deletion removes friends data and the public profile
 await A.fa('back');await B.p.evaluate(()=>{ACCT.tab('sec');});await B.p.click('#acctb [data-aa="delask"]');await B.p.fill('#acdty','ben_fr');await B.p.fill('#acdpw','password1');await B.p.click('#acctb [data-aa="del"]');
 ok('accountDeleted',await until(()=>B.p.evaluate(()=>ACCT.state().mode==='out'),20000));

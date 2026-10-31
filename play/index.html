@@ -1274,13 +1274,14 @@ const onD=()=>(playOn&&POSS()!==player.cur.team&&roster.some(d=>H(d)))||(DRILL&&
 const aiTrig=()=>1.75*(1+.12*AT('tak'))+(Math.random()-.5)*.9*(1-(AT('tak')+1)/2);
 function aiType(car){const C=car.pel.position,P=pel.position,V=car.pel.velocity,my=Math.hypot(pel.velocity.x,pel.velocity.z),d=Math.hypot(C.x-P.x,C.z-P.z);
  if(my>4&&AT('tak')+AT('str')>.4&&Math.random()<.3*(.5+.5*AT('awr')))return'power';return tkType(car,false);}
-function startDive(){if(dv>0||limp||cs>0)return;cur.stam=Math.max(0,(cur.stam??1)-.06*(1-.45*AT('sta'))*(1-BE(curD,'sta')));const sp=Math.hypot(pel.velocity.x,pel.velocity.z);dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);
+function startDive(ax,az){if(dv>0||limp||cs>0)return;cur.stam=Math.max(0,(cur.stam??1)-.06*(1-.45*AT('sta'))*(1-BE(curD,'sta')));const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(ax!=null){dvx=ax;dvz=az;}else{dvx=-Math.sin(camYaw);dvz=-Math.cos(camYaw);}
  for(const k in pins)unpin(k);js=0;jp=0;dv=1e-4;yaw=Math.atan2(dvx,dvz);const push=Math.max(0,Math.min(4.5,8-sp));   // the dive adds speed the way you aim, capped
  for(const b of list){b.velocity.x+=dvx*push;b.velocity.z+=dvz*push;b.velocity.y+=2.3;}}
 function dive(dt){dv+=dt;const T=dv,J=joints;yaw=Math.atan2(dvx,dvz);mv=0;
  if(T<DIVE_UP){torso(1.35,0,-.25);   // laid out flat toward the dive, chest lifted a touch so the eyes stay forward
   for(const sd of[1,-1]){J['hip'+sd].x=.25;J['knee'+sd].x=.15;J['ankle'+sd].x=.35;J['toe'+sd].x=0;J['shoulder'+sd].x=-2.9;J['shoulder'+sd].z=sd*.15;J['elbow'+sd].x=-.1;J['wrist'+sd].x=0;}
   ballArm();
+  if(!held&&catchOn)catchArms();   // laid out: the arms keep reaching for the ball (and the hands can still catch it)
   if(held)for(const sd of[1,-1]){J['shoulder'+sd].x=-2.95;J['shoulder'+sd].z=-sd*.22;J['shoulder'+sd].y=0;J['elbow'+sd].x=-.05;J['wrist'+sd].x=0;}   // ball carrier: both hands out front holding the ball, for extra yards
   return;}
  // get up: pelvis lifted along an eased path to standing height ("physics magic" as in climbing), legs from kneeling to standing
@@ -1561,7 +1562,15 @@ function jumpAim(){const b=ball.position,v=ball.velocity,H=2.85,a=-4.91,c=b.y-H,
 const cfxS=new THREE.Sprite(new THREE.SpriteMaterial({map:ballGlow.children[1].material.map,color:0xffd23f,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,transparent:true}));cfxS.visible=false;scene.add(cfxS);
 function catchFx(){const b=ball.position;cfxS.position.set(b.x,b.y,b.z);const t0=performance.now();cfxS.visible=true;
  const tick=()=>{const u=(performance.now()-t0)/450;if(u>=1){cfxS.visible=false;return;}const r=.4+2.4*u;cfxS.scale.set(r,r,1);cfxS.material.opacity=1-u;requestAnimationFrame(tick);};tick();
- document.getElementById('cfx').animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.15)',offset:.2},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.7},{opacity:0,transform:'translate(-50%,-60%) scale(1)'}],{duration:900,easing:'ease-out'});}
+ {const e=document.getElementById('cfx');if(e)e.textContent=CSN[cur.cst]||'CATCH!';}document.getElementById('cfx').animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.15)',offset:.2},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.7},{opacity:0,transform:'translate(-50%,-60%) scale(1)'}],{duration:900,easing:'ease-out'});}
+// ===== catch styles: picked from the ball's path, the receiver's body and nearby defenders; each only changes joint targets / starts the existing jump or dive, so physics still decides the catch =====
+const _cv2=new V();function lowPt(){const b=ball.position,v=ball.velocity,H=.5,disc=v.y*v.y+19.64*(b.y-H);if(b.y<H||disc<0)return null;const t=(v.y+Math.sqrt(disc))/9.81;return t>0&&t<1.2?{x:b.x+v.x*t,y:H,z:b.z+v.z*t,t}:null;}   // where the ball drops through knee height: a ball that low is a diving catch
+function catchStyle(tp,bp){if(!tp)return'std';const c=chest.position,rs=Math.hypot(pel.velocity.x,pel.velocity.z);chest.vectorToLocalFrame(new V(tp.x-c.x,tp.y-c.y,tp.z-c.z),_cv);if(_cv.z<-.12&&rs>2.5)return'ots';   // behind a receiver running away from it
+ if(cur.side!=='d'){for(const d of roster){if(d.cur.side!=='d'||d===curD)continue;const q=d.pel.position;if(Math.hypot(q.x-tp.x,q.z-tp.z)<1.5)return'con';}}   // a defender at the catch point
+ if(tp.y-c.y>.55||!contact()&&tp.y>c.y)return'jump';
+ const lp=lowPt();if(lp){const hd=Math.hypot(lp.x-pel.position.x,lp.z-pel.position.z);chest.vectorToLocalFrame(new V(lp.x-c.x,lp.y-c.y,lp.z-c.z),_cv2);if(hd>.7&&hd<3.4&&_cv2.z>0)return'dive';}chest.vectorToLocalFrame(new V(tp.x-c.x,tp.y-c.y,tp.z-c.z),_cv);   // low, or out in front beyond a step
+ if(catchSide||Math.abs(_cv.x)>.55)return'one';return'std';}
+const CSN={std:'CATCH!',one:'ONE-HANDED!',dive:'DIVING CATCH!',jump:'HIGH-POINTED!',ots:'OVER THE SHOULDER!',con:'CONTESTED CATCH!'};
 const CATCH_ASSIST=.1;
 function catchGrab(){if(cur.ai&&cur.role==='df'&&!cur.canInt)return false;
  if(PASS&&cur.side!=='d'&&!PASS.contest){PASS.contest=1;const b=ball.position;let D=null,dd=1.4;for(const d of roster){if(d.cur.side!=='d')continue;const q=d.pel.position,x=Math.hypot(q.x-b.x,q.z-b.z)/RCH(d);if(x<dd){dd=x;D=d;}}   // a defender in reach at the catch point
@@ -1569,7 +1578,7 @@ function catchGrab(){if(cur.ai&&cur.role==='df'&&!cur.canInt)return false;
  if(PASS&&cur.side!=='d'&&!PASS.drop){PASS.drop=1;const v=ball.velocity,rel=Math.hypot(v.x-pel.velocity.x,v.y-pel.velocity.y,v.z-pel.velocity.z),diff=Math.max(0,(rel-12)/10)+Math.max(0,(catchGrab.d||0)-.65)*1.6+(dv>0?.35:0);
   if(Math.random()<A.drop(AT('cth'),diff)){knock();ball.velocity.scale(.5,ball.velocity);toast('DROPPED','#ff8a7a');return false;}}   // a hard catch can still go through your hands
  if(PASS&&!cur.ai&&cur.side==='d'){if(PASS.int)return false;PASS.int=1;if(Math.random()>cl(.55+.4*AT('int')+BE(player,'hawk'),.2,.93)){knock();if(MATCH)MATCH.st.pd++;return false;}}   // your pick: Interceptions decides if you hang on or just bat it away
- catchFx();grabBall();return true;}
+ catchFx();if(MATCH&&cur.cst){const C=MATCH.cst||(MATCH.cst={});C[cur.cst]=(C[cur.cst]||0)+1;}grabBall();return true;}
 function knock(){const v=ball.velocity;ball.velocity.set(-v.x*.25+(Math.random()-.5)*3,2+Math.random()*2,-v.z*.25+(Math.random()-.5)*3);ballCool=.4;catchK=0;}   // a defender who isn't going to hang on still gets his hands on it (a deflection)
 // held catch for 1.2 s+ (an early, set receiver): +20% reach, range and reaction
 const catchBoost=()=>catchOn&&cur.catchT0&&performance.now()-cur.catchT0>1200?1.2:1;
@@ -1585,7 +1594,7 @@ function interceptPoint(){const b=ball.position,v=ball.velocity,c=chest.position
  return null;}
 function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(ball);let want=0,cp=null,ip=null;
  if(live){cp=catchPoint();const near=Math.hypot(ball.position.x-chest.position.x,ball.position.y-chest.position.y,ball.position.z-chest.position.z);
-  chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);const cb=catchBoost();want=near<15*cb&&cp.d<4*cb&&(_cv.z>-.12||dv>0&&_cv.y>0)?1:0;}   // receivers pick the ball up from far away   // only balls passing in front of or beside the body: arms can't reach behind the back
+  chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);const cb=catchBoost();const rs=Math.hypot(pel.velocity.x,pel.velocity.z),ots=rs>3&&(ball.velocity.x*pel.velocity.x+ball.velocity.z*pel.velocity.z)>0&&_cv.y>-.35&&_cv.z>-.9;want=near<15*cb&&cp.d<4*cb&&(_cv.z>-.12||dv>0&&_cv.y>0||ots)?1:0;}   // over the shoulder: running away from a ball coming the same way, the arms may reach back for it   // receivers pick the ball up from far away   // only balls passing in front of or beside the body: arms can't reach behind the back
  if(want)ip=interceptPoint();const tp=ip?ip.p:cp&&cp.p;   // arms go to the intercept point; closest approach is only the fallback
  if(want&&(catchK<.05||ip&&catchK<.5)){if(ip)catchSide=ip.side;else{chest.vectorToLocalFrame(new V(cp.p.x-chest.position.x,cp.p.y-chest.position.y,cp.p.z-chest.position.z),_cv);catchSide=_cv.x>.3?1:_cv.x<-.3?-1:0;}}   // 1 or 2 hands, settled as the reach builds
  cur.look=live?ball.position:null;cur.cp=live&&want?cp:null;   // eyes on the ball while catch is held; cp also guides a jump catch
@@ -1593,15 +1602,20 @@ function catchArms(){const live=catchOn&&!held&&!limp&&world.bodies.includes(bal
  cur.low=tp?Math.max(catchK,want*.6)*cl((pel.position.y-.15-tp.y)/.55,0,1):0;   // ball coming in below the hips: bend and drop to scoop it   // ball passing above the shoulders: reach up tall
  catchK+=(want-catchK)*Math.min(1,DT*(want?20*catchBoost():6));if(catchK<.05||!cp)return;
  if(cur.high>.01)for(const sd of[1,-1])joints['ankle'+sd].x+=.35*cur.high;   // up on the toes
+ if(catchK<.5||!cur.cst)cur.cst=catchStyle(tp,cp&&cp.p);const st=cur.cst,J0=joints,k0=catchK;chest.vectorToLocalFrame(new V(tp.x-chest.position.x,tp.y-chest.position.y,tp.z-chest.position.z),_cv);
+ {const tw=cl(Math.atan2(_cv.x,Math.max(.05,Math.abs(_cv.z)))*(_cv.z<0?1.1:.5),-.9,.9);J0.chest.y+=(tw*.6-J0.chest.y)*k0;J0.abd.y+=(tw*.35-J0.abd.y)*k0;}   // upper body turns toward the ball (spine joints, so the hips keep running)
+ if(st==='dive'&&dv===0&&!limp&&cs===0&&contact()){const q=lowPt();if(q&&q.t<.45){const dx=q.x-pel.position.x,dz=q.z-pel.position.z,d=Math.hypot(dx,dz);if(d>.7&&d<3.4)startDive(dx/d,dz/d);}}   // low and out of reach: lay out for it
+ if(st==='jump'&&cur.ai&&js===0&&contact()&&cur.cp&&cur.cp.t<.45&&tp.y>head.position.y)startJump();
  // high ball: elbows lock straight so the arms reach as high as they go
  for(const sd of catchSide?[catchSide]:[1,-1]){const S=bpt(chest,sd*.27,.12,0),o=catchSide?0:sd*.07;   // two hands: each aims a little to its own side of the ball
   chest.vectorToLocalFrame(new V(tp.x-S.x,tp.y-S.y,tp.z-S.z),_cv);_cv.x+=o;const L=Math.hypot(_cv.x,_cv.y,_cv.z)||1,J=joints,k=catchK;
   const ax=cl(-Math.atan2(_cv.z,-_cv.y),-3,.3),az=cl(Math.asin(cl(_cv.x/L,-1,1)),sd>0?-.5:-1.4,sd>0?1.4:.5),M=(a,b)=>a+(b-a)*k;   // shoulder range: no reaching back past the body, limited reach across it
-  J['shoulder'+sd].x=M(J['shoulder'+sd].x,ax);J['shoulder'+sd].z=M(J['shoulder'+sd].z,az);J['shoulder'+sd].y=0;J['elbow'+sd].x=M(J['elbow'+sd].x,cur.high>.2?-.03:-.2);J['wrist'+sd].x=M(J['wrist'+sd].x,0);}
+  J['shoulder'+sd].x=M(J['shoulder'+sd].x,ax);J['shoulder'+sd].z=M(J['shoulder'+sd].z,az);J['shoulder'+sd].y=0;J['elbow'+sd].x=M(J['elbow'+sd].x,cur.high>.2||st==='one'||st==='con'||st==='ots'?-.05:-.42);J['wrist'+sd].x=M(J['wrist'+sd].x,st==='std'?-.25:0);}   // soft elbows to absorb a ball into the body; long arms when stretching for it
+ if(catchSide&&(st==='one'||st==='ots')){const o=-catchSide;J0['shoulder'+o].x+=(-.5-J0['shoulder'+o].x)*k0;J0['shoulder'+o].z+=(o*.9-J0['shoulder'+o].z)*k0;J0['elbow'+o].x+=(-.35-J0['elbow'+o].x)*k0;}   // free arm swings out to balance the long reach
  // the catch itself: a reaching hand gets to the ball (checked every physics step, so fast passes can't skip past)
  for(const sd of catchSide?[catchSide]:[1,-1]){const h=parts['hand'+sd].position,b=ball.position;if(catchK>.5&&(catchGrab.d=Math.hypot(h.x-b.x,h.y-b.y,h.z-b.z)/((.36+CATCH_ASSIST)*catchBoost()*handsK()))<1&&catchGrab()){catchK=0;return;}}
  if(!catchSide&&catchK>.6){const c=chest.position,b=ball.position;chest.vectorToLocalFrame(new V(b.x-c.x,b.y-c.y,b.z-c.z),_cv);if(_cv.z>.05&&(catchGrab.d=Math.hypot(b.x-c.x,b.y-c.y,b.z-c.z)/((.42+CATCH_ASSIST)*catchBoost()*handsK())*.6)<1&&catchGrab()){catchK=0;}}}   // trap only in front of the chest, never against the back   // two-hand reach: a ball into the chest is trapped against it
-function grabBall(){held=true;world.removeBody(ball);cur.low=cur.high=0;cur.look=cur.cp=null;   // catch made: stop bending / reaching, stand back up into running form
+function grabBall(){held=true;world.removeBody(ball);cur.low=cur.high=0;cur.look=cur.cp=null;cur.cst=null;   // catch made: stop bending / reaching, stand back up into running form
  reachK=Math.max(reachK,.5);catchOn=false;}
 function dropBall(){if(!held)return;held=false;ballCool=.6;ball.collisionFilterMask=1;maskT=performance.now()+250;const h=handR(),p=bpt(h,0,-.02,.06);
  ball.position.set(p.x,Math.max(.25,p.y),p.z);ball.quaternion.copy(parts['farm-1'].quaternion);

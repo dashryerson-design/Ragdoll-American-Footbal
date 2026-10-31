@@ -50,7 +50,7 @@ await p.click('#hmain .lki[data-id="g-crimson"]');await wait(300);
 ok('equipGlovesFromLocker',await ev(()=>PROG.eqd().gl==='g-crimson'&&!!document.querySelector('#hmain .lki.on[data-id="g-crimson"]')));
 // ---- cosmetics on your player only
 await ev(()=>{show('mode');});await p.click('#mexh');await p.click('#xmteam');await p.click('#xgo');await wait(1800);
-const gl=await ev(()=>{const hc=m=>m.map&&m.userData.bc!=null?m.userData.bc:m.color.getHex(),mine=hc(player.parts.hand1.mesh.material),ai=roster.filter(d=>d!==player).map(d=>d.parts&&d.parts.hand1?hc(d.parts.hand1.mesh.material):null);   // a textured glove keeps its colour in userData.bcreturn{mine,ai,want:0xc8102e,isMine:player.cur.mine};});
+const gl=await ev(()=>{const hc=m=>m.map&&m.userData.bc!=null?m.userData.bc:m.color.getHex(),mine=hc(player.parts.hand1.mesh.material),ai=roster.filter(d=>d!==player).map(d=>d.parts&&d.parts.hand1?hc(d.parts.hand1.mesh.material):null);return{mine,ai,want:0xc8102e,isMine:player.cur.mine};});
 ok('glovesOnYourPlayer',gl.mine===gl.want&&gl.isMine,JSON.stringify(gl));ok('notOnOtherPlayers',gl.ai.every(c=>c!==gl.want),JSON.stringify(gl));
 // your throw: trail particles; an AI QB's throw: none
 const lit=()=>ev(()=>{let n=0;const C=PROG._fx&&PROG._fx();return C;});

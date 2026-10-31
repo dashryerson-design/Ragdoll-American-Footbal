@@ -553,61 +553,51 @@ body{font-family:var(--fu)}
 .slot{clip-path:var(--cut);border-radius:0!important}.slot:hover{filter:brightness(1.15)}
 input,select{accent-color:var(--ac)}.fld2 input:focus{border-color:var(--ac)!important;box-shadow:0 0 0 3px #e0243a33}
 .acchip.ok{background:#3ee07a22}.netstat.ok,.acok{color:var(--ok)}
-/* ---- MAIN MENU */
+/* ---- MAIN MENU: the live 3D shot fills the screen; a dark wedge on the left carries the navigation */
+#mm.ov,#mm.ov:not([hidden]){background:transparent!important}
 #mm.ov[hidden]{display:none!important}
-#mm.ov:not([hidden]){display:grid!important;grid-template-columns:minmax(300px,40%) 1fr;grid-template-rows:auto 1fr auto;padding:clamp(14px,3vh,34px) clamp(16px,4vw,64px)!important;gap:0 2vw!important;justify-content:stretch!important;align-items:stretch;overflow:hidden;--px:0;--py:0}
-#mm .mmfx{z-index:0}#mm .mmfx>i{position:absolute;inset:0}
-#mm .mmbeams{background:conic-gradient(from 200deg at 82% -10%,transparent 0deg,#ffffff10 6deg,transparent 12deg,transparent 20deg,#ffffff0c 26deg,transparent 32deg),conic-gradient(from 150deg at 18% -10%,transparent 0deg,#ffffff0a 5deg,transparent 10deg);transform:translate(calc(var(--px)*-8px),0);animation:beam 9s ease-in-out infinite alternate}
-@keyframes beam{to{opacity:.55}}
-#mm .mmcrowd{background:radial-gradient(1.5px 1.5px at 10% 70%,#fff6,transparent),radial-gradient(1.5px 1.5px at 30% 76%,#ffd9,transparent),radial-gradient(1.5px 1.5px at 55% 72%,#fff5,transparent),radial-gradient(1.5px 1.5px at 75% 78%,#ff8,transparent),radial-gradient(1.5px 1.5px at 92% 74%,#fff7,transparent);background-size:220px 120px;opacity:.5;animation:flash 3.2s steps(4) infinite}
-@keyframes flash{50%{opacity:.25}}
-#mm .vig{background:radial-gradient(110% 90% at 60% 45%,transparent 45%,#000d 100%)!important}
+#mm.ov:not([hidden]){display:grid!important;grid-template-columns:minmax(320px,34vw) 1fr;grid-template-rows:auto 1fr auto;padding:clamp(18px,3.4vh,40px) clamp(18px,3.6vw,60px)!important;gap:0!important;justify-content:stretch!important;align-items:stretch;overflow:hidden}
+#mm .mmfx{z-index:0}#mm .mmfx>i{position:absolute;inset:0}#mm .mmstad,#mm .mmbeams,#mm .mmcrowd{display:none}
+#mm .vig{background:linear-gradient(90deg,#030407f2 0%,#030407d9 22%,#03040799 34%,transparent 52%),radial-gradient(120% 100% at 70% 50%,transparent 55%,#000c 100%),linear-gradient(0deg,#000a,transparent 18%)!important}
 #mm::before{z-index:30}
-.mmtop{grid-column:1/3;grid-row:1;display:flex;align-items:center;gap:clamp(14px,3vw,40px);z-index:3}
+.mmtop{grid-column:1;grid-row:1;z-index:3}
 #mm #logo{position:static!important;width:auto!important;height:auto!important;margin:0!important;transform:none!important}
-#mm #logo .pafmark{width:clamp(150px,18vw,230px);display:block;filter:drop-shadow(0 6px 12px #000c)}
+#mm #logo .pafmark{width:clamp(130px,13vw,190px);display:block;filter:drop-shadow(0 6px 14px #000)}
 #mm #logo>svg.lg{display:none}
-.mmtabs{display:flex;gap:4px;flex-wrap:wrap}
-.mmtabs button{background:none;border:0;padding:6px 12px;font:italic 800 16px var(--fd);letter-spacing:.14em;color:var(--tx2);cursor:pointer;text-transform:uppercase;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
-.mmtabs button:hover,.mmtabs button.on{background:#fff;color:#0a0c10}
-.mmnav{grid-column:1;grid-row:2;align-self:center;display:flex;flex-direction:column;gap:6px;z-index:3;min-width:0}
-.mmtag{font:italic 800 13px var(--fd);letter-spacing:.3em;color:var(--ac2);text-transform:uppercase}
-#mnow{all:unset;cursor:pointer;display:block;padding:clamp(12px,2.2vh,22px) 22px;background:linear-gradient(100deg,#fff 0,#e9edf2 70%,#cfd6de);color:#07080b;clip-path:polygon(0 0,100% 0,calc(100% - 22px) 100%,0 100%);box-shadow:0 18px 40px #000a;transition:transform var(--tf) var(--ease);position:relative;overflow:hidden}
-#mnow b{display:block;font:italic 900 clamp(40px,6.4vw,82px)/.9 var(--fd);letter-spacing:.01em}
-#mnow small{font:700 13px var(--fu);letter-spacing:.06em;color:#3b434e}
-#mnow::after{content:"";position:absolute;top:0;bottom:0;width:30%;background:linear-gradient(100deg,transparent,#fff9,transparent);transform:translateX(-150%) skewX(-20deg);animation:sheen 4.5s ease-in-out infinite 1.6s}
-@keyframes sheen{40%,100%{transform:translateX(420%) skewX(-20deg)}}
-#mnow:hover{transform:translateX(6px)}#mnow:focus-visible{outline:3px solid var(--gd);outline-offset:3px}
-.mmbig{display:flex;flex-direction:column;margin:6px 0 4px}
-.mmbig button{all:unset;cursor:pointer;font:italic 900 clamp(30px,4.4vw,56px)/1.02 var(--fd);letter-spacing:.01em;text-transform:uppercase;color:#e9edf2;text-shadow:0 4px 18px #000;transition:transform var(--tf) var(--ease),color var(--tf);width:max-content;max-width:100%}
-.mmbig button small{font:700 13px var(--fu);letter-spacing:.05em;color:var(--tx2);margin-left:12px;vertical-align:middle;opacity:0;transition:opacity var(--tf)}
-.mmbig button:hover,.mmbig button:focus-visible{color:#fff;transform:translateX(10px);background:var(--chrome);-webkit-background-clip:text;background-clip:text;color:transparent;outline:none}
-.mmbig button:hover small,.mmbig button:focus-visible small{opacity:1;-webkit-text-fill-color:var(--tx2)}
-.mmbig button::before{content:"";display:inline-block;width:0;height:.6em;margin-right:0;background:var(--ac);transform:skewX(-20deg);transition:width var(--tf),margin var(--tf)}
-.mmbig button:hover::before,.mmbig button:focus-visible::before{width:10px;margin-right:12px}
-#mm #pick.cats{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px!important;margin-top:10px;width:100%!important;max-width:620px}
-#mm #pick .ch{min-height:0!important;min-width:0!important;padding:9px 12px!important;background:linear-gradient(180deg,#191e27e6,#0b0d12ee)!important;border:1px solid #ffffff14!important;gap:10px}
-#mm #pick .ch svg{width:24px!important;height:24px!important}
-#mm #pick .ch b{font:italic 800 17px/1 var(--fd)!important;letter-spacing:.1em!important}
-#mm #pick .ch small{font:600 10px var(--fu)!important;letter-spacing:.04em!important;text-transform:none!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#mm #pick .ch::before{background:var(--ac)!important;box-shadow:0 0 12px var(--ac)!important}
-.mmhero{grid-column:2;grid-row:1/4;position:relative;z-index:2;pointer-events:none;min-height:0}
-.mmglow{position:absolute;left:12%;right:0;top:4%;bottom:6%;background:radial-gradient(42% 46% at 55% 42%,#e0243a66,transparent 70%),radial-gradient(30% 30% at 62% 30%,#ffffff22,transparent 70%);filter:blur(10px);transform:translate(calc(var(--px)*12px),calc(var(--py)*8px))}
-.mmemb{position:absolute;right:4%;top:6%;width:min(62%,560px);opacity:.92;transform:perspective(900px) rotateY(calc(-18deg + var(--px)*6deg)) rotateX(calc(var(--py)*-4deg)) translateZ(0);filter:drop-shadow(0 30px 40px #000) drop-shadow(0 0 30px #e0243a44);animation:embF 7s ease-in-out infinite}
-@keyframes embF{50%{translate:0 -10px}}
-#mmhero{position:absolute;left:8%;right:8%;top:6%;bottom:2%;transform:translate(calc(var(--px)*-16px),calc(var(--py)*-6px));filter:drop-shadow(-18px 0 22px #e0243a55) drop-shadow(14px 0 18px #8fc6ff33) drop-shadow(0 30px 30px #000)}
-#mmhero canvas{background:transparent!important}
-.mmfloor{position:absolute;left:10%;right:6%;bottom:2%;height:16%;background:radial-gradient(50% 50% at 50% 50%,#000c,transparent 70%)}
-.mmcard{position:absolute;right:0;bottom:7%;width:min(320px,46%);pointer-events:auto;transform:rotate(-3deg) translate(calc(var(--px)*-10px),0);filter:drop-shadow(0 18px 24px #000c)}
-.mmticket{display:grid;grid-template-columns:70px 1fr;background:#f3efe6;color:#111;clip-path:polygon(0 0,100% 0,100% 40%,calc(100% - 10px) 50%,100% 60%,100% 100%,0 100%);font-family:var(--fd)}
-.mmticket .tl{display:block;background:#e8e2d4;border-right:2px dashed #b9b09c;padding:10px 8px;text-align:center;font:800 11px var(--fd);letter-spacing:.1em;color:#555}.mmticket .tl b{display:block;font:900 30px/1 var(--fd);color:#111}
-.mmticket .tr{display:block;padding:10px 14px;background:linear-gradient(135deg,var(--ac),var(--acd));color:#fff}.mmticket .tr small{display:block;font:800 11px var(--fd);letter-spacing:.2em;opacity:.85}.mmticket .tr b{display:block;font:italic 900 24px/1.05 var(--fd)}.mmticket .tr span{font:600 12px var(--fu);opacity:.9}
-.mmuser{margin-top:8px}.mmuser .ccard{min-height:52px}.mmuser .cct{padding:6px 10px!important}.mmuser .cav{width:38px;height:38px}
-.mmbar{grid-column:1/3;grid-row:3;display:flex;gap:22px;align-items:center;z-index:3;padding-top:10px;border-top:1px solid #ffffff14;font:italic 700 14px var(--fd);letter-spacing:.12em;color:var(--tx2);text-transform:uppercase}
+.mmnav{grid-column:1;grid-row:2;align-self:center;display:flex;flex-direction:column;z-index:3;min-width:0;max-width:520px}
+.mmtag{font:italic 800 12px var(--fd);letter-spacing:.34em;color:var(--ac2);text-transform:uppercase;margin:0 0 8px 2px}.mmtag.sub{margin-top:18px;color:var(--mu)}
+.mmlist{display:flex;flex-direction:column;gap:2px;counter-reset:mm}
+.mmi{all:unset;cursor:pointer;position:relative;display:grid;grid-template-columns:34px 1fr;align-items:baseline;padding:8px 18px 8px 12px;transition:padding var(--tm) var(--ease),background var(--tm)}
+.mmi i{font:italic 800 13px var(--fd);color:var(--mu);letter-spacing:.1em;font-style:italic;transition:color var(--tf)}
+.mmi b{font:italic 900 clamp(30px,3.5vw,50px)/1 var(--fd);letter-spacing:.01em;text-transform:uppercase;color:#d9dde3;transition:color var(--tf),letter-spacing var(--tm) var(--ease);text-shadow:0 4px 18px #000}
+.mmi small{grid-column:2;max-height:0;overflow:hidden;opacity:0;font:600 13px var(--fu);letter-spacing:.04em;color:var(--tx2);transition:max-height var(--tm) var(--ease),opacity var(--tm),margin var(--tm)}
+.mmi::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#e0243ae6,#a0101fcc 55%,transparent);clip-path:polygon(0 0,100% 0,calc(100% - 18px) 100%,0 100%);transform:scaleX(0);transform-origin:left;transition:transform var(--tm) var(--ease)}
+.mmi::after{content:"";position:absolute;left:0;top:10%;bottom:10%;width:4px;background:var(--gd);transform:scaleY(0);transition:transform var(--tm) var(--ease);box-shadow:0 0 12px var(--gd)}
+.mmi:hover,.mmi:focus-visible,.mmi.sel{padding:12px 30px 12px 18px;outline:none}
+.mmi:hover::before,.mmi:focus-visible::before,.mmi.sel::before{transform:scaleX(1)}.mmi:hover::after,.mmi:focus-visible::after,.mmi.sel::after{transform:scaleY(1)}
+.mmi:hover b,.mmi:focus-visible b,.mmi.sel b{color:#fff;letter-spacing:.03em}.mmi:hover i,.mmi:focus-visible i,.mmi.sel i{color:#fff}
+.mmi:hover small,.mmi:focus-visible small,.mmi.sel small{max-height:30px;opacity:1;margin-top:4px;color:#ffe3e6}
+.mmi:active{transform:translateX(4px) scale(.99)}
+.mmlist .mmi{animation:mmIn .7s var(--ease) both}.mmlist .mmi:nth-child(2){animation-delay:.08s}.mmlist .mmi:nth-child(3){animation-delay:.16s}.mmlist .mmi:nth-child(4){animation-delay:.24s}
+@keyframes mmIn{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+#mm #pick.cats{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px!important;width:100%!important;max-width:520px;animation:mmIn .7s var(--ease) .32s both}
+#mm #pick .ch{min-height:0!important;min-width:0!important;padding:8px 10px!important;background:#0b0d12b3!important;border:1px solid #ffffff12!important;border-left:2px solid #ffffff22!important;gap:8px;backdrop-filter:blur(4px)}
+#mm #pick .ch:hover,#mm #pick .ch:focus-visible{border-left-color:var(--ac)!important;background:#1a0c10d9!important}
+#mm #pick .ch svg{width:20px!important;height:20px!important}
+#mm #pick .ch b{font:italic 800 14px/1 var(--fd)!important;letter-spacing:.1em!important}
+#mm #pick .ch small{display:none!important}
+#mm #pick .ch::before,#mm #pick .ch::after{display:none!important}
+#macbadge{top:4px!important;right:4px!important}
+.mmuser{grid-column:2;grid-row:1;justify-self:end;align-self:start;z-index:3;min-width:220px;animation:mmIn .7s var(--ease) .4s both}.mmuser:empty{display:none}.mmuser .ccard{min-height:50px}.mmuser .cct{padding:6px 12px!important}.mmuser .cav{width:36px;height:36px}
+.mmcard{grid-column:2;grid-row:3;justify-self:end;align-self:end;z-index:3;width:min(330px,40vw);animation:mmIn .7s var(--ease) .5s both;filter:drop-shadow(0 14px 22px #000c)}
+.mmticket{display:grid;grid-template-columns:64px 1fr;background:#0b0d12d9;backdrop-filter:blur(6px);border:1px solid #ffffff1a;border-left:3px solid var(--ac);font-family:var(--fd)}
+.mmticket .tl{display:block;padding:10px 6px;text-align:center;font:800 10px var(--fd);letter-spacing:.14em;color:var(--mu);border-right:1px solid #ffffff14}.mmticket .tl b{display:block;font:italic 900 28px/1 var(--fd);color:#fff}
+.mmticket .tr{display:block;padding:9px 14px}.mmticket .tr small{display:block;font:800 10px var(--fd);letter-spacing:.24em;color:var(--ac2)}.mmticket .tr b{display:block;font:italic 900 20px/1.05 var(--fd);color:#fff}.mmticket .tr b br{display:none}.mmticket .tr span{font:600 12px var(--fu);color:var(--tx2)}
+.mmbar{grid-column:1/3;grid-row:3;align-self:end;display:flex;gap:22px;align-items:center;z-index:3;font:italic 700 13px var(--fd);letter-spacing:.14em;color:var(--tx2);text-transform:uppercase;margin-right:min(360px,42vw)}
 .mmbar .kp{font-style:normal;display:inline-block;min-width:22px;padding:1px 6px;margin-right:6px;background:#fff;color:#000;border-radius:3px;text-align:center}
-.mmbar .sp{margin-left:auto}
-#mm #pnw{position:absolute;right:clamp(16px,4vw,64px);top:auto;bottom:clamp(10px,2vh,24px);left:auto;z-index:4}#mm .mmbar .sp{margin-right:160px}
-@media (max-width:860px){#mm.ov{grid-template-columns:1fr;grid-template-rows:auto 34vh 1fr auto}.mmhero{grid-column:1;grid-row:2}.mmnav{grid-row:3;align-self:start}.mmbar{grid-row:4}.mmtabs{display:none}#mm #pick.cats{grid-template-columns:repeat(2,minmax(0,1fr))}.mmcard{display:none}.mmemb{width:70%;right:15%}}
+.mmbar .sp{margin-left:auto;color:var(--mu)}
+#mm #pnw{display:none}
+@media (max-width:860px){#mm #logo .pafmark{width:96px}.mmtop{justify-self:start}#mm.ov:not([hidden]){grid-template-columns:1fr;grid-template-rows:auto 1fr auto}.mmuser,.mmcard{display:none}#mm .vig{background:linear-gradient(0deg,#030407f5 0%,#030407c0 45%,transparent 70%)!important}.mmnav{align-self:end;margin-bottom:10px}.mmi b{font-size:30px}#mm #pick.cats{grid-template-columns:repeat(2,minmax(0,1fr))}.mmbar{margin-right:0}}
 /* ---- MATCH: broadcast scoreboard */
 #score{background:linear-gradient(180deg,#1b2029,#07090c)!important;border:1px solid #ffffff22!important;border-bottom:3px solid var(--ac)!important;border-radius:0!important;clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 100%,0 100%);padding:0 10px;font:italic 800 18px var(--fd)!important;box-shadow:0 12px 30px #000c!important}
 #score>span{padding:6px 14px!important}
@@ -664,24 +654,9 @@ input,select{accent-color:var(--ac)}.fld2 input:focus{border-color:var(--ac)!imp
 <text x="320" y="196" text-anchor="middle" class="lw" fill="url(#lgM)" stroke="#0a0d11" stroke-width="2.5">PHYSICS</text>
 <g clip-path="url(#lgT)"><rect class="sweep" x="-200" y="90" width="140" height="130" fill="url(#lgS)" transform="skewX(-20)"/></g>
 <rect x="70" y="222" width="500" height="2" fill="url(#lgC)"/><text x="320" y="262" text-anchor="middle" class="la">AMERICAN FOOTBALL</text><rect x="200" y="276" width="240" height="1.5" fill="#ffffff44"/></svg></div>
-<nav class="mmtabs" aria-label="Sections"><button class="on" data-mt="home">Home</button><button data-mt="play">Game Modes</button><button data-mt="career">Career</button><button data-mt="online">Online</button><button data-mt="league">League</button><button data-mt="settings">Settings</button><button data-mt="account">Account</button></nav></header>
-<div class="mmhero" aria-hidden="true"><div class="mmglow"></div><div class="mmemb"><svg class="pafbig" viewBox="0 0 400 232" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
-<linearGradient id="phc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".42" stop-color="#d9dfe6"/><stop offset=".52" stop-color="#7d8794"/><stop offset=".7" stop-color="#c9d0d8"/><stop offset="1" stop-color="#fff"/></linearGradient>
-<linearGradient id="phd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d222b"/><stop offset="1" stop-color="#05060a"/></linearGradient>
-<linearGradient id="phr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5a6a"/><stop offset=".5" stop-color="#e0243a"/><stop offset="1" stop-color="#6e0d18"/></linearGradient>
-<linearGradient id="phg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2c6"/><stop offset=".45" stop-color="#e6c47a"/><stop offset=".55" stop-color="#9a7330"/><stop offset="1" stop-color="#fbe9b4"/></linearGradient>
-<clipPath id="phk"><path d="M44 18h312l26 44-40 170H58L18 62z"/></clipPath></defs>
-<path d="M44 18h312l26 44-40 170H58L18 62z" fill="url(#phd)" stroke="url(#phc)" stroke-width="6"/>
-<g clip-path="url(#phk)"><path d="M-20 200L260 -20h70L30 230z" fill="url(#phr)" opacity=".92"/><path d="M290 240L420 120v40L330 250z" fill="url(#phr)" opacity=".5"/>
-<g transform="rotate(-28 200 125)" opacity=".16"><ellipse cx="200" cy="125" rx="150" ry="70" fill="none" stroke="#fff" stroke-width="5"/><path d="M150 125h100" stroke="#fff" stroke-width="5"/><path d="M162 113v24" stroke="#fff" stroke-width="5"/><path d="M178 113v24" stroke="#fff" stroke-width="5"/><path d="M194 113v24" stroke="#fff" stroke-width="5"/><path d="M210 113v24" stroke="#fff" stroke-width="5"/><path d="M226 113v24" stroke="#fff" stroke-width="5"/><path d="M242 113v24" stroke="#fff" stroke-width="5"/></g></g>
-<path d="M44 18h312l26 44-40 170H58L18 62z" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="2" transform="translate(0 3)"/>
-<text x="200" y="168" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif" font-style="italic" font-weight="900" font-size="150" letter-spacing="2" fill="#000" fill-opacity=".55" transform="translate(4 7)">PAF</text>
-<text x="200" y="168" text-anchor="middle" font-family="Barlow Condensed,Impact,sans-serif" font-style="italic" font-weight="900" font-size="150" letter-spacing="2" fill="url(#phc)" stroke="#0b0d12" stroke-width="3" paint-order="stroke">PAF</text>
-<path d="M110 186h180l-8 10H102z" fill="url(#phg)"/>
-</svg></div><div id="mmhero"></div><div class="mmfloor"></div></div>
-<section class="mmnav"><small class="mmtag">Recommended</small><button id="mnow"><b>PLAY NOW</b><small>Quick match · straight onto the field</small></button>
-<div class="mmbig"><button id="mmcar">Career<small>Your player, your season</small></button><button id="mmexh">Exhibition<small>Team Play · 1v1 Runs</small></button><button id="mmnet">Online<small>Play a friend</small></button></div>
-<div id="pick" class="cats"><button class="ch cat pri" id="mplay"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 11l22 13-22 13z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>ALL MODES</b><small>Quick Play · Exhibition · Online · Career</small></span></button><button class="ch cat" id="mhub"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 22a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM9 42c1-9 7-14 15-14s14 5 15 14" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>PLAYER HUB</b><small>Create · ratings · position · upgrades</small></span></button><button class="ch cat" id="mteams"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 14h32v24H8zM16 14V8h16v6M8 24h32" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>TEAMS &amp; ROSTERS</b><small>16 clubs and their players</small></span></button><button class="ch cat" id="mset"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 30a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM24 4v6M24 38v6M4 24h6M38 24h6M10 10l4 4M34 34l4 4M10 38l4-4M34 14l4-4" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>SETTINGS</b><small>Controls: touch or keyboard</small></span></button><button class="ch cat" id="macct"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 24a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM9 42c1-8 7-12 15-12s14 4 15 12" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><i id="macbadge" hidden></i><span><b>ACCOUNT</b><small id="macsub">Guest · optional online account</small></span></button><button class="ch cat" id="mupd"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 6h22l6 6v30H10zM16 18h16M16 26h16M16 34h10" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>UPDATES</b><small>Patch notes · <span class="vlab"></span></small></span></button></div><div class="mmuser" id="mmuser"></div></section><div class="mmcard" id="mmcard"></div>
+</header>
+<section class="mmnav" aria-label="Main menu"><small class="mmtag">Recommended</small><div class="mmlist"><button class="mmi" id="mnow"><i>01</i><b>Play Now</b><small>Quick match · straight onto the field</small></button><button class="mmi" id="mmcar"><i>02</i><b>Career</b><small>Your player · your season</small></button><button class="mmi" id="mmexh"><i>03</i><b>Exhibition</b><small>Team Play · 1v1 Runs</small></button><button class="mmi" id="mmnet"><i>04</i><b>Online</b><small>Private room · play a friend</small></button></div><small class="mmtag sub">More</small>
+<div id="pick" class="cats"><button class="ch cat pri" id="mplay"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 11l22 13-22 13z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>ALL MODES</b><small>Quick Play · Exhibition · Online · Career</small></span></button><button class="ch cat" id="mhub"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 22a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM9 42c1-9 7-14 15-14s14 5 15 14" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>PLAYER HUB</b><small>Create · ratings · position · upgrades</small></span></button><button class="ch cat" id="mteams"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 14h32v24H8zM16 14V8h16v6M8 24h32" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>TEAMS &amp; ROSTERS</b><small>16 clubs and their players</small></span></button><button class="ch cat" id="mset"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 30a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM24 4v6M24 38v6M4 24h6M38 24h6M10 10l4 4M34 34l4 4M10 38l4-4M34 14l4-4" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>SETTINGS</b><small>Controls: touch or keyboard</small></span></button><button class="ch cat" id="macct"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 24a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM9 42c1-8 7-12 15-12s14 4 15 12" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><i id="macbadge" hidden></i><span><b>ACCOUNT</b><small id="macsub">Guest · optional online account</small></span></button><button class="ch cat" id="mupd"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 6h22l6 6v30H10zM16 18h16M16 26h16M16 34h10" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>UPDATES</b><small>Patch notes · <span class="vlab"></span></small></span></button></div></section><div class="mmuser" id="mmuser"></div><div class="mmcard" id="mmcard"></div>
 <footer class="mmbar"><span><i class="kp">↵</i>Select</span><span><i class="kp">ESC</i>Back</span><span class="sp" id="mmver"></span></footer></div>
 <div class="tb" id="brst" title="Reset the QB with the ball (R)">&#x21bb;</div>
 <div id="cboost" hidden style="position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3;font:800 13px system-ui,sans-serif;letter-spacing:.12em;color:#111;background:#ffd23f;border-radius:999px;padding:6px 14px;pointer-events:none">CATCH BOOST +20%</div>
@@ -2977,8 +2952,9 @@ var NAVFROM='mm';   // where Back on a shared screen (career slots, clubs) retur
 $m('mplay').onclick=e=>mmNav(e.currentTarget,()=>show('mode'));
  // new main menu: direct routes to the modes (the PLAY screen still lists them all)
  $m('mnow').onclick=e=>mmNav(e.currentTarget,()=>$m('mquick').onclick());$m('mmcar').onclick=e=>mmNav(e.currentTarget,()=>{NAVFROM='mode';slotsUI();});$m('mmexh').onclick=e=>mmNav(e.currentTarget,()=>exmUI());$m('mmnet').onclick=e=>mmNav(e.currentTarget,()=>{show('net');netUI();});
- document.querySelector('.mmtabs').onclick=e=>{const b=e.target.closest('[data-mt]');if(!b)return;({home:()=>{},play:()=>show('mode'),career:()=>$m('mmcar').click(),online:()=>$m('mmnet').click(),league:()=>$m('mteams').click(),settings:()=>$m('mset').click(),account:()=>$m('macct').click()})[b.dataset.mt]();};
- $m('mm').addEventListener('pointermove',e=>{const r=$m('mm');r.style.setProperty('--px',(e.clientX/innerWidth-.5).toFixed(3));r.style.setProperty('--py',(e.clientY/innerHeight-.5).toFixed(3));});$m('mhub').onclick=e=>mmNav(e.currentTarget,()=>{NAVFROM='mm';if(PROF){show('car');carUI();}else slotsUI();});
+ // keyboard: up / down moves the selection through the menu, Enter opens it (the selected item is the focused one)
+ $m('mm').addEventListener('keydown',e=>{if(!/^Arrow(Up|Down)$/.test(e.key))return;const B=[...$m('mm').querySelectorAll('.mmi,#pick .ch')].filter(b=>b.offsetParent),i=B.indexOf(document.activeElement);e.preventDefault();B[(i+(e.key==='ArrowDown'?1:B.length-1))%B.length].focus();});
+ $m('mm').addEventListener('pointermove',e=>{window.MMPX=e.clientX/innerWidth-.5;window.MMPY=e.clientY/innerHeight-.5;});$m('mhub').onclick=e=>mmNav(e.currentTarget,()=>{NAVFROM='mm';if(PROF){show('car');carUI();}else slotsUI();});
 $m('mteams').onclick=e=>mmNav(e.currentTarget,()=>{NAVFROM='mm';show('teams');teamsUI();});$m('mset').onclick=e=>mmNav(e.currentTarget,()=>{setSync();show('set');$m(pendMode==='touch'?'ctouch':'ckb').focus();});$m('mupd').onclick=()=>$m('pnb').click();$m('setback').onclick=()=>show('mm');$m('macct').onclick=e=>mmNav(e.currentTarget,()=>ACCT.open());$m('acback').onclick=()=>show('mm');
 for(const[id,m]of[['btouch','touch'],['bkb','kb']])$m(id).onclick=()=>{pendMode=m;setInput(m);perfMode(m);setSync();show('mm');$m('mplay').focus();};   // chosen: save it and switch the controls + graphics profile right now
 show('boot');   // every launch starts here: the saved choice is only a preference, never a skip
@@ -4873,7 +4849,7 @@ function netUI(){const b=$m('netb');if(!b)return;const N=NET,P=EXH.players();if(
 const NETERR={'net-signin':'Sign in with a verified account first (ACCOUNT on the main menu).','net-code':'Room codes are 6 letters and numbers.','net-noroom':'No room with that code. Check it with the host.','net-ver':'The host is on a different game version. Both players need to reload.','net-full':'That room already has a guest.','net-nosave':'Pick one of your career saves first.','net-qb':'Quarterback builds cannot play 1v1 Runs.'};
 const netErr=e=>NETERR[e&&e.code]||`Could not connect${e&&e.code?' ('+e.code+')':''}.`;
 // main menu hero: your career player under the lights (or a rookie if there is none yet), plus your next game and your account card
-function mmHero(){if($m('mm').hidden)return;const P=EXH.players(),me=PROF||(P[0]&&P[0].build)||null;try{pvShow('mmhero',me||newED());}catch(e){}
+function mmHero(){if($m('mm').hidden)return;const P=EXH.players(),me=PROF||(P[0]&&P[0].build)||null;
  const c=$m('mmcard');let h='';if(me&&me.draft&&me.season){const n=nextGame(me);if(n){const A=club(me.team??0),B=club(n.op);h=`<div class="mmticket"><div class="tl">WEEK<b>${(me.season.week|0)+1}</b>S${me.season.year}</div><div class="tr"><small>NEXT UP · CAREER</small><b>${esc(A.name)}<br>vs ${esc(B.name)}</b><span>${esc(me.first)} ${esc(me.last)} · ${ovr(me.att,me.style)} OVR</span></div></div>`;}}
  if(!h)h=`<div class="mmticket"><div class="tl">PAF<b>${me?ovr(me.att,me.style):'--'}</b>OVR</div><div class="tr"><small>${me?'YOUR PLAYER':'GET STARTED'}</small><b>${me?esc(me.first)+'<br>'+esc(me.last):'Create your<br>player'}</b><span>${me?'Ready for kickoff':'Career Mode · 5 slots'}</span></div></div>`;c.innerHTML=h;
  const S=ACCT.state(),u=$m('mmuser');u.innerHTML=S.prof?COSM.card(FRIENDS.look().card,`${COSM.av(FRIENDS.look().avatar,S.prof.username)}<div><b style="font-size:18px">${esc(S.prof.username)}</b><small>Signed in</small></div>`):'';
@@ -4957,10 +4933,89 @@ legacyWipe();ensureCids();PROF=null;ACCT.init();
 const DT=1/400;let acc=0,last=performance.now();
 const tgt=new THREE.Vector3(0,1,0);let camCD=3.6;
 const PRESV=[routeMesh,readRing,youRing,carMark,...oRings].map(o=>({o,s:false}));   // route arrows, read/open rings, your ring, ball marker: hidden for the cinematic render only
+// ===================== MAIN MENU 3D: one freeze-frame hero shot, rendered live with the game's own renderer =====================
+// A night stadium: wet turf, light towers with haze cones, a crowd of flashbulbs, the PAF emblem on the video board, and one player caught
+// mid-breakaway (stiff-arm out, ball tucked) in your career team's colours. The camera drifts slowly; the mouse adds a little parallax.
+// Built once on first use, drawn only while the main menu is on screen.
+const MENU3D=(()=>{let S=null,C=null,H=null,dust=null,lights=[],built=false,t0=0,last='',px=0,py=0;
+ const V=(x,y,z)=>new THREE.Vector3(x,y,z),M=(c,r,m,o={})=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m,...o});
+ const ct=(w,h,f)=>{const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t;};
+ function env(){const s=new THREE.Scene(),add=(w,h,x,y,z,ry,c,i)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(i),side:THREE.DoubleSide}));m.position.set(x,y,z);m.rotation.y=ry;s.add(m);};
+  s.background=new THREE.Color(0x05060a);add(30,3,0,12,-12,0,0xffffff,4);add(2,14,-14,6,0,Math.PI/2,0xff3a4a,3);add(2,14,14,6,0,-Math.PI/2,0x9fc4ff,2.5);add(20,1,0,1,12,Math.PI,0xffffff,1.5);
+  const g=new THREE.PMREMGenerator(renderer),t=g.fromScene(s,.04).texture;g.dispose();return t;}
+ function build(){S=new THREE.Scene();S.background=new THREE.Color(0x020306);S.fog=new THREE.FogExp2(0x0a0408,.0095);S.environment=env();
+  C=new THREE.PerspectiveCamera(30,1,.1,400);
+  // turf: mowed stripes, yard lines, a wet sheen that picks up the lights
+  const turf=ct(1024,1024,(g,w,h)=>{for(let i=0;i<16;i++){g.fillStyle=i%2?'#0f3d22':'#124a29';g.fillRect(0,i*h/16,w,h/16);}g.strokeStyle='#e8efe9';g.lineWidth=6;for(let i=0;i<=8;i++){g.beginPath();g.moveTo(0,i*h/8);g.lineTo(w,i*h/8);g.stroke();}
+   g.lineWidth=3;for(let i=0;i<40;i++){const y=i*h/40;g.beginPath();g.moveTo(w*.38,y);g.lineTo(w*.38+16,y);g.moveTo(w*.62-16,y);g.lineTo(w*.62,y);g.stroke();}
+   g.fillStyle='#e8efe9';g.font='900 64px "Barlow Condensed",Impact,sans-serif';g.textAlign='center';[['4 0',2],['5 0',4],['4 0',6]].forEach(([s,i])=>{g.save();g.translate(w*.16,i*h/8);g.rotate(Math.PI/2);g.fillText(s,0,22);g.restore();});});
+  turf.wrapS=turf.wrapT=THREE.RepeatWrapping;turf.repeat.set(1,1);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(90,90),M(0xffffff,.42,.05,{map:turf,envMapIntensity:.9}));ground.rotation.x=-Math.PI/2;ground.rotation.z=Math.PI/2;ground.receiveShadow=true;S.add(ground);
+  // the bowl: tiers of seats lit by thousands of flashbulbs, a rim of light towers
+  const crowd=ct(2048,256,(g,w,h)=>{g.fillStyle='#07080c';g.fillRect(0,0,w,h);for(let i=0;i<9000;i++){const x=Math.random()*w,y=Math.random()*h,c=['#3a1418','#1b2235','#2b2b33','#e0243a','#f3f5f8'][Math.random()*5|0];g.fillStyle=c;g.globalAlpha=.25+Math.random()*.5;g.fillRect(x,y,2,2);}
+   g.globalAlpha=1;for(let i=0;i<260;i++){g.fillStyle='#fff';g.fillRect(Math.random()*w,Math.random()*h,1.5,1.5);}g.fillStyle='#000';g.globalAlpha=.55;for(let r=0;r<6;r++)g.fillRect(0,r*h/6,w,3);});
+  crowd.wrapS=THREE.RepeatWrapping;crowd.repeat.set(-4,1);
+  const bowl=new THREE.Mesh(new THREE.CylinderGeometry(70,58,30,64,1,true,0,Math.PI*2),new THREE.MeshBasicMaterial({map:crowd,side:THREE.BackSide,color:0xc8ccd4}));bowl.position.y=15;S.add(bowl);
+  const ribbon=ct(2048,64,(g,w,h)=>{g.fillStyle='#0b0d12';g.fillRect(0,0,w,h);g.font='italic 900 44px "Barlow Condensed",Impact,sans-serif';g.textBaseline='middle';for(let x=0,i=0;x<w;x+=1024,i++){g.fillStyle='#f3f5f8';g.fillText('PAF  ★  HOME OF THE HITS',x+30,h/2+2);g.fillStyle='#e0243a';g.fillText('PHYSICS AMERICAN FOOTBALL',x+520,h/2+2);}});
+  ribbon.wrapS=THREE.RepeatWrapping;ribbon.repeat.set(-3,1);const rib=new THREE.Mesh(new THREE.CylinderGeometry(57.6,57.6,1.4,64,1,true),new THREE.MeshBasicMaterial({map:ribbon,side:THREE.BackSide,toneMapped:false}));rib.position.y=1.6;S.add(rib);H&&0;
+  // video board with the PAF mark (drawn from the menu's own SVG emblem)
+  const board=ct(1024,512,(g,w,h)=>{const gr=g.createLinearGradient(0,0,w,h);gr.addColorStop(0,'#14060a');gr.addColorStop(1,'#030406');g.fillStyle=gr;g.fillRect(0,0,w,h);});
+  const bm=new THREE.Mesh(new THREE.PlaneGeometry(36,18),new THREE.MeshBasicMaterial({map:board,toneMapped:false,fog:true,color:0x9a9a9a}));bm.position.set(30,25,-62);bm.lookAt(0,4,0);S.add(bm);
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(37.5,19.5,.6),M(0x15181e,.4,.8));frame.position.copy(bm.position);frame.quaternion.copy(bm.quaternion);frame.translateZ(-.4);S.add(frame);
+  const svg=document.querySelector('#mm .pafmark');if(svg){const img=new Image();img.onload=()=>{const c=board.image,g=c.getContext('2d'),s=Math.min(c.width*.78/img.width,c.height*.86/img.height),w=img.width*s,h=img.height*s;g.drawImage(img,(c.width-w)/2,(c.height-h)/2,w,h);board.needsUpdate=true;};
+   const sv=svg.cloneNode(true);sv.setAttribute('width','800');sv.setAttribute('height','520');img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(sv));}
+  // light towers: a lamp bank, a haze cone and a real spot each
+  const cone=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.055,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false});
+  [[-34,30,-30,0xffffff],[30,28,-36,0xffe6d0],[-46,26,6,0xff4a5a],[44,26,-4,0x9fc4ff]].forEach(([x,y,z,c],i)=>{const lamp=new THREE.Mesh(new THREE.BoxGeometry(6,3,.6),new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(3),toneMapped:false}));lamp.position.set(x,y,z);lamp.lookAt(0,0,0);S.add(lamp);
+   const L=V(0,0,0).sub(lamp.position),len=L.length(),cg=new THREE.ConeGeometry(len*.2,len,32,1,true);cg.translate(0,-len/2,0);const cm=new THREE.Mesh(cg,cone.clone());cm.material.color.set(c);cm.position.copy(lamp.position);cm.quaternion.setFromUnitVectors(V(0,-1,0),L.normalize());S.add(cm);lights.push(cm);});
+  const key=new THREE.SpotLight(0xfff4ea,4.2,120,.26,.6,1.2);key.position.set(-18,24,6);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.bias=-.0004;S.add(key);S.add(key.target);
+  const rimR=new THREE.SpotLight(0xff2a3c,9,60,.5,.6,1.4);rimR.position.set(8,7,-10);S.add(rimR);S.add(rimR.target);
+  const rimB=new THREE.SpotLight(0x7fb2ff,4.5,60,.5,.6,1.4);rimB.position.set(-10,4,-9);S.add(rimB);S.add(rimB.target);
+  S.add(new THREE.HemisphereLight(0x1c2438,0x050302,.35));
+  // haze particles drifting through the light
+  const n=LOWFX?300:900,pg=new THREE.BufferGeometry(),pa=new Float32Array(n*3);for(let i=0;i<n;i++){pa[i*3]=(Math.random()-.5)*40;pa[i*3+1]=Math.random()*16;pa[i*3+2]=(Math.random()-.5)*40;}
+  pg.setAttribute('position',new THREE.BufferAttribute(pa,3));dust=new THREE.Points(pg,new THREE.PointsMaterial({color:0xffe9e0,size:.04,transparent:true,opacity:.4,depthWrite:false,blending:THREE.AdditiveBlending}));S.add(dust);
+  built=true;}
+ // the hero: a blocky PAF player (same build language as the game) frozen mid-stride, stiff-arm forward, ball tucked
+ function hero(look){if(H){S.remove(H);H.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
+  const {jer,pant,acc,num,skin}=look,E={envMapIntensity:.35},J=M(jer,.6,.05,E),P=M(pant,.62,.05,E),A=M(acc,.35,.3,E),K=M(skin,.65,0,E),HM=M(jer,.16,.6,{envMapIntensity:1.1}),BL=M(0x0d0f12,.5,.2,E),WH=M(0xe9edf1,.55,0,E);
+  const g=new THREE.Group(),bx=(w,h,d,m,x,y,z,par)=>{const k=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);k.position.set(x,y,z);k.castShadow=true;k.receiveShadow=true;(par||g).add(k);return k;},grp=(x,y,z,par,rx=0,ry=0,rz=0)=>{const q=new THREE.Group();q.position.set(x,y,z);q.rotation.set(rx,ry,rz);(par||g).add(q);return q;};
+  const nt=ct(256,256,(c,w,h)=>{c.fillStyle='#'+jer.toString(16).padStart(6,'0');c.fillRect(0,0,w,h);c.fillStyle='#'+acc.toString(16).padStart(6,'0');c.font='900 170px "Barlow Condensed",Impact,sans-serif';c.textAlign='center';c.textBaseline='middle';c.lineWidth=10;c.strokeStyle='#fff';c.strokeText(num,w/2,h/2+8);c.fillText(num,w/2,h/2+8);});
+  const hips=grp(0,1.02,0,g,.08);
+  const torso=grp(0,.08,0,hips,.42,.1);   // leaning hard into the run
+  bx(.62,.66,.36,J,0,.36,0,torso);const front=new THREE.Mesh(new THREE.PlaneGeometry(.42,.42),new THREE.MeshStandardMaterial({map:nt,roughness:.55}));front.position.set(0,.4,.181);torso.add(front);
+  bx(.78,.16,.42,J,0,.66,0,torso);   // shoulder pads
+  const head=grp(0,.82,.02,torso,-.45);bx(.32,.32,.32,K,0,.08,0,head);
+  const hel=bx(.42,.4,.44,HM,0,.12,-.02,head);bx(.06,.42,.46,A,0,.15,-.02,head);for(const y of[.0,.08])bx(.36,.03,.03,BL,0,y,.24,head);bx(.03,.14,.03,BL,0,.04,.25,head);
+  // stiff-arm (left) straight out, ball arm (right) folded with the ball
+  const ls=grp(-.42,.58,0,torso,-1.25,0,.25);bx(.17,.36,.18,J,0,-.16,0,ls);const le=grp(0,-.34,0,ls,-.1);bx(.15,.32,.16,K,0,-.15,0,le);bx(.17,.12,.18,BL,0,-.34,0,le);
+  const rs=grp(.42,.58,0,torso,-.15,0,-.1);bx(.17,.36,.18,J,0,-.16,0,rs);const re=grp(0,-.34,0,rs,-1.9);bx(.15,.32,.16,K,0,-.15,0,re);
+  const ball=new THREE.Mesh(new THREE.SphereGeometry(.1,20,14),M(0x7a3f1c,.55,.05));ball.scale.set(1,1,1.65);ball.position.set(-.08,-.2,.12);ball.rotation.x=.4;ball.castShadow=true;re.add(ball);bx(.02,.02,.16,WH,-.08,-.07,.13,re);
+  // legs: right knee driving up, left leg extended behind
+  const rt=grp(.17,0,0,hips,-1.35);bx(.24,.46,.26,P,0,-.22,0,rt);const rk=grp(0,-.44,0,rt,1.55);bx(.2,.42,.22,WH,0,-.2,0,rk);bx(.22,.12,.36,BL,0,-.44,.07,rk);
+  const lt=grp(-.17,0,0,hips,.62);bx(.24,.46,.26,P,0,-.22,0,lt);const lk=grp(0,-.44,0,lt,.95);bx(.2,.42,.22,WH,0,-.2,0,lk);bx(.22,.12,.36,BL,0,-.44,.07,lk);
+  g.scale.setScalar(2.1);g.position.set(0,.9,0);g.rotation.y=-1.05;H=g;S.add(g);
+  // a contact shadow pool under him
+  const sh=new THREE.Mesh(new THREE.CircleGeometry(2.6,32),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.45,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.01;S.add(sh);}
+ function lookOf(){const P=EXH.players(),me=PROF||(P[0]&&P[0].build)||null,c=me&&me.draft?club(me.team??0):null;
+  return{jer:c?c.jer:0xc8102e,pant:c?c.pant:0x111317,acc:c?c.acc:0xf3f5f8,num:String(me&&me.num!=null?me.num:88),skin:new THREE.Color(SKIN[(me&&me.look&&me.look.skin)|0]||SKIN[2]).getHex()};}
+ function on(){const m=$m('mm');return !!m&&!m.hidden&&!mode&&!(typeof CER!=='undefined'&&CER.on());}
+ function render(now){if(!built){build();t0=now;}const L=lookOf(),k=JSON.stringify(L);if(k!==last){last=k;hero(L);}
+  const cv=renderer.domElement,w=cv.clientWidth||innerWidth,h=cv.clientHeight||innerHeight;if(C.aspect!==w/h){C.aspect=w/h;C.updateProjectionMatrix();}
+  const t=(now-t0)/1000,wide=w/h>1.2,ox=wide?-2.2:0;   // on a wide screen he sits right of centre, clear of the menu
+  px+=((window.MMPX||0)-px)*.05;py+=((window.MMPY||0)-py)*.05;
+  const a=-.35+Math.sin(t*.08)*.1+px*.16,r=wide?14:24,cy=.9+Math.sin(t*.11)*.12-py*.35;   // low angle, looking up at him
+  C.position.set(ox+Math.sin(a)*r,cy,Math.cos(a)*r);C.lookAt(ox,wide?3.4:.4,0);   // phone: he stands in the open top half, the menu below
+  for(const [i,c] of lights.entries())c.material.opacity=.045+.02*Math.sin(t*(.7+i*.23)+i);
+  if(dust){dust.rotation.y=t*.01;dust.position.y=Math.sin(t*.2)*.3;}
+  if(H)H.position.y=.9+Math.sin(t*1.1)*.012;   // the faintest breath, so it never looks like a still image
+  renderer.render(S,C);}
+ return{on,render};})();
+
 function frame(now){
  requestAnimationFrame(frame);
  lockSync();   // any menu showing (match over, back to menu, results...): the cursor is released right away, no ESC needed
- const cv=renderer.domElement,on=!!mode||CER.on();if(cv.hidden===on)cv.hidden=!on;   // no match: the 3D canvas is not shown at all (its last frame can't leak through a menu)
+ const cv=renderer.domElement,mm3=!mode&&MENU3D.on(),on=!!mode||CER.on()||mm3;if(cv.hidden===on)cv.hidden=!on;if(mm3){last=now;MENU3D.render(now);return;}   // no match: the 3D canvas is not shown at all (its last frame can't leak through a menu)
  if(!mode){last=now;return;}   // menus: no physics, no AI, no rendering
  if(paused){last=now;if(!frame.pz){frame.pz=1;renderer.render(scene,cam);}return;}frame.pz=0;   // paused: one frozen frame, then nothing
  if(NET.guest&&NET.on){last=now;NET.view(now);return;}   // online guest: draws the host's snapshots, simulates nothing

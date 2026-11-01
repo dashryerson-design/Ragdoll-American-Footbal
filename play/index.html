@@ -714,6 +714,20 @@ body.touch #bcast{bottom:auto;top:calc(64px + env(safe-area-inset-top,0px));tran
 .bcplay{padding:8px 14px 9px;min-width:220px;background:linear-gradient(100deg,#0c1016ee,#141a24d9);border-left:3px solid #e0243a;box-shadow:0 8px 22px #0008}.bcplay small{display:block;font:700 11px/1 inherit;letter-spacing:.24em;color:#c9b98a}.bcplay b{display:block;font:900 italic 28px/1.05 inherit;letter-spacing:.02em;margin-top:3px;text-transform:uppercase}.bcplay em{display:block;font:600 13px/1 inherit;font-style:normal;letter-spacing:.12em;color:#c9ced8;margin-top:5px;text-transform:uppercase}
 #bcast.v1 .bcplay{border-left:0;border-right:3px solid #e0243a;text-align:right}
 .bctags{display:flex;gap:6px}.bctags span{padding:4px 10px;font:800 12px/1 inherit;letter-spacing:.18em;background:#e0243a;color:#fff;box-shadow:0 4px 12px #0007}.bctags span+span{background:#0c1016e6;border:1px solid #c9a54a88;color:#f3e3b0}
+
+#gfx{z-index:70;background:radial-gradient(120% 90% at 50% 0,#151a22,#07090c)!important}#gfx .sset{max-width:880px}
+.gfh{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}.gfh small{display:block;font:700 11px "Barlow Condensed";letter-spacing:.24em;color:#c9b98a}.gfh b{font:900 italic 30px "Barlow Condensed";color:#fff}
+.gfp{display:flex;flex-wrap:wrap;gap:6px}.gfp button{padding:8px 14px;background:#ffffff0a;border:1px solid #ffffff22;color:#cfd8e3;font:800 13px "Barlow Condensed";letter-spacing:.14em;cursor:pointer}.gfp button.on{background:linear-gradient(180deg,#f3e3b0,#c9a54a);color:#111;border-color:#c9a54a}
+#gfxb h4{margin:18px 0 6px!important;font:800 14px "Barlow Condensed"!important;letter-spacing:.2em;color:#e6ebf1!important;border-bottom:1px solid #ffffff14;padding-bottom:4px}
+.gfr{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(120px,1.4fr) 140px;gap:2px 14px;align-items:center;padding:7px 2px;border-bottom:1px solid #ffffff0a;font-family:"Barlow Condensed"}
+.gfr span{font:600 15px inherit;color:#e6ebf1}.gfr input{width:100%;accent-color:#e0243a}.gfr em{font:700 14px inherit;font-style:normal;color:#f3e3b0;text-align:right}.gfr i{grid-column:2/4;font:500 11px inherit;font-style:normal;color:#7d8896}
+.gfr.na span{color:#7d8896}.gfr.na em{color:#7d8896}
+.gfa{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}.gfa button{padding:10px 18px;background:#ffffff0d;border:1px solid #ffffff26;color:#fff;font:800 14px "Barlow Condensed";letter-spacing:.14em;cursor:pointer}.gfa button.pri{background:#e0243a;border-color:#e0243a}
+@media (max-width:640px){.gfr{grid-template-columns:1fr 90px}.gfr input{grid-column:1/3;grid-row:2}.gfr i{grid-column:1/3}}
+#gfxfx{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,var(--vig,0)) 100%)}#gfxfx[hidden]{display:none}
+#gfxfx::after{content:'';position:absolute;inset:-50%;opacity:var(--grain,0);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:gfg .5s steps(4) infinite}
+@keyframes gfg{0%{transform:translate(0,0)}25%{transform:translate(-5%,3%)}50%{transform:translate(4%,-4%)}75%{transform:translate(-3%,-2%)}}
+#gfxfps{position:fixed;right:12px;bottom:12px;z-index:90;pointer-events:none;font:700 13px "Barlow Condensed",monospace;letter-spacing:.1em;color:#3ee07a;background:#000a;padding:3px 8px}#gfxfps[hidden]{display:none}
 </style></head><body>
 <div id="boot" class="ov" hidden><div class="crumb">// BEFORE YOU START</div><h2 class="ttl">HOW ARE YOU PLAYING?</h2><p class="note">This sets the controls and the graphics profile for this session.</p><div class="ssc bootc"><button class="ch" id="btouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="currentColor" stroke-width="5"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#5fd4ff"/></svg><span><b>TOUCH</b><small>Phone &amp; tablet</small></span></button>
 <button class="ch" id="bkb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="currentColor" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#5fd4ff" stroke-width="5"/><path d="M103 18v14" stroke="#5fd4ff" stroke-width="5"/></svg><span><b>KEYBOARD</b><small>Keyboard &amp; mouse</small></span></button></div></div>
@@ -753,9 +767,9 @@ body.touch #bcast{bottom:auto;top:calc(64px + env(safe-area-inset-top,0px));tran
 <div id="cfx" style="position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);z-index:3;font:900 min(12vw,72px) Impact,'Arial Black',sans-serif;letter-spacing:.06em;color:#ffd23f;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffb000;pointer-events:none;opacity:0">CATCH!</div>
 <div id="pnm" class="ov" hidden role="dialog" aria-modal="true" aria-labelledby="pnhd"><div class="pnbox"><div class="pnh"><h2 id="pnhd">PATCH NOTES<small id="pnsub"></small></h2><button id="pnx">CLOSE</button></div><div id="pnl"></div></div></div>
 <div id="pcs" class="ov" hidden role="dialog" aria-label="Choose your play"><div class="pch"><small>// NEW POSSESSION</small><h2>CHOOSE YOUR PLAY</h2></div><div id="pcards"></div></div>
-<div id="ppc" hidden aria-hidden="true"></div><div id="rvm" hidden aria-live="polite"></div><div id="achq" aria-live="polite"></div><div id="wxb" hidden></div><canvas id="wxs" hidden></canvas><div id="bcast" hidden></div><div id="ix" hidden><div id="ixg" class="ix-g"></div></div><button id="ixs" type="button" hidden>SKIP INTRO · ⌫</button><div id="rph" hidden><i>⟲ REPLAY</i><b id="rpt"></b></div><button id="rps" type="button" hidden>SKIP REPLAY · ⌫</button><div id="rpf"></div><div id="cer" hidden><div id="cerf"></div><div id="cerbar"><button id="cersk" type="button">NEXT AWARD · ⏎</button><button id="cerx" type="button">SKIP CEREMONY · ESC</button></div></div><div id="ppn" hidden aria-hidden="true"></div>
+<div id="ppc" hidden aria-hidden="true"></div><div id="rvm" hidden aria-live="polite"></div><div id="achq" aria-live="polite"></div><div id="wxb" hidden></div><canvas id="wxs" hidden></canvas><div id="bcast" hidden></div><div id="gfxfx" hidden></div><div id="gfxfps" hidden></div><div id="gfx" class="ov scr" hidden><div class="crumb">// SETTINGS · GRAPHICS</div><h2 class="ttl">GRAPHICS</h2><section class="sset" id="gfxb"></section></div><div id="ix" hidden><div id="ixg" class="ix-g"></div></div><button id="ixs" type="button" hidden>SKIP INTRO · ⌫</button><div id="rph" hidden><i>⟲ REPLAY</i><b id="rpt"></b></div><button id="rps" type="button" hidden>SKIP REPLAY · ⌫</button><div id="rpf"></div><div id="cer" hidden><div id="cerf"></div><div id="cerbar"><button id="cersk" type="button">NEXT AWARD · ⏎</button><button id="cerx" type="button">SKIP CEREMONY · ESC</button></div></div><div id="ppn" hidden aria-hidden="true"></div>
 <div id="acct" class="ov scr" hidden><div class="crumb">// ACCOUNT</div><h2 class="ttl">ACCOUNT</h2><section class="sset" id="acctb"></section><button class="ghost" id="acback">BACK</button></div><div id="set" class="ov scr" hidden><div class="crumb">// SETTINGS</div><h2 class="ttl">SETTINGS</h2><section class="sset"><h4>CONTROLS</h4><p class="note">How you play: changes the on-screen controls and the button prompts. Saved on this device.</p><div class="ssc"><button class="ch" id="ctouch"><svg viewBox="0 0 80 100" aria-hidden="true"><rect x="16" y="4" width="48" height="92" rx="9" fill="none" stroke="currentColor" stroke-width="5"/><path d="M34 58V34a5 5 0 0 1 10 0v16l12 3a6 6 0 0 1 4 7l-3 16H38l-9-12a5 5 0 0 1 7-6z" fill="#5fd4ff"/></svg><span><b>TOUCH</b><small>Phone &amp; tablet</small></span></button>
-<button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="currentColor" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#5fd4ff" stroke-width="5"/><path d="M103 18v14" stroke="#5fd4ff" stroke-width="5"/></svg><span><b>KEYBOARD</b><small>Keyboard &amp; mouse</small></span></button></div><p class="note">Touch button positions and sizes: pause during a game → Edit Button Layout.</p></section><section class="sset"><h4>HOME STADIUM</h4><p class="note">The stadium used for Career and quick matches. Auto: the home club's ground. Exhibition lets you pick per match.</p><div class="ssc" id="venq"></div></section><section class="sset"><h4>WEATHER GRAPHICS</h4><p class="note">Rain and snow effects. Weather never changes gameplay. Lowered automatically on touch devices and if the frame rate drops. Saved on this device.</p><div class="ssc" id="wxq"></div></section><button class="ghost" id="setback">BACK</button></div>
+<button class="ch" id="ckb"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="2" y="22" width="78" height="40" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><path d="M12 34h8M26 34h8M40 34h8M54 34h8M12 46h8M26 46h30M62 46h8" stroke="currentColor" stroke-width="5"/><rect x="90" y="18" width="26" height="44" rx="13" fill="none" stroke="#5fd4ff" stroke-width="5"/><path d="M103 18v14" stroke="#5fd4ff" stroke-width="5"/></svg><span><b>KEYBOARD</b><small>Keyboard &amp; mouse</small></span></button></div><p class="note">Touch button positions and sizes: pause during a game → Edit Button Layout.</p></section><section class="sset"><h4>GRAPHICS</h4><p class="note">Presets, shadows, lighting, textures, environment and image settings.</p><button class="mrow pri2" id="sgfx">OPEN GRAPHICS SETTINGS</button></section><section class="sset"><h4>HOME STADIUM</h4><p class="note">The stadium used for Career and quick matches. Auto: the home club's ground. Exhibition lets you pick per match.</p><div class="ssc" id="venq"></div></section><button class="ghost" id="setback">BACK</button></div>
 <div id="cskip" class="ov scr" hidden role="dialog" aria-labelledby="cskt"><div class="sset"><h4>PRE-DRAFT COMBINE</h4><h2 class="ttl" id="cskt">Skip the Combine?</h2><p class="note">You go straight to your scouting report with a standard, mid-level evaluation: solid but unspectacular results, clearly marked as estimated. Your ratings, OVR and player don't change. You can still run any drill afterwards; a real result replaces that drill's estimate.</p><div class="row"><button class="pri" id="cskyes">Skip Combine</button><button class="ghost" id="cskno">Return to the tutorial</button></div></div></div>
 <div id="mode" class="ov scr" hidden><div class="crumb">// PLAY</div><div class="mpick"><button class="mc" id="mquick"><b>QUICK PLAY</b><span>Jump straight onto the field. Set up teams and plays from the pause menu.</span></button><button class="mc" id="mnet"><b>ONLINE</b><span>Play a friend: 1v1 Runs or an Exhibition with both of your career teams. Private room code.</span></button><button class="mc" id="mexh"><b>EXHIBITION</b><span>One match with one of your career players. Their real ratings, no XP, separate stats.</span></button><button class="mc acc" id="mcar"><b>CAREER MODE</b><span>Create your player, choose a playstyle and take them into real drives.</span></button></div><button class="ghost" id="mback">BACK</button></div>
 <div id="car" class="ov scr mad hub" hidden><div class="vt">//CAREER</div>
@@ -816,7 +830,7 @@ body.touch #bcast{bottom:auto;top:calc(64px + env(safe-area-inset-top,0px));tran
 <div class="hints"><button id="sback"><i class="kp" data-p="back"></i> Back</button></div></div>
 <canvas id="pv3"></canvas>
 <div id="stam"><i></i></div>
-<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="borg">GAME ORGANISER</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
+<div id="pm" class="ov" hidden><h2>PAUSED</h2><button id="bres">RESUME</button><button id="borg">GAME ORGANISER</button><button id="bgfx">SETTINGS · GRAPHICS</button><button id="bedit">EDIT BUTTON LAYOUT</button><button id="bmenu">RETURN TO MAIN MENU</button></div>
 <div id="org" class="ov" hidden><div id="obox"><h3>GAME ORGANISER</h3><button id="omode"></button><button id="oyou"></button><button id="ooff"></button><button id="opos"></button><div class="cnt"><b>BLUE PLAYERS</b><button id="mblue">−</button><span id="nblue"></span><button id="pblue">+</button></div><div class="cnt"><b>RED PLAYERS</b><button id="mred">−</button><span id="nred"></span><button id="pred">+</button></div><button id="oos"></button><button id="ods"></button></div><div id="oline"></div><div class="obtn"><button id="oback">BACK</button><button id="ogo">START</button></div></div>
 <div id="ed" hidden><span id="edtxt">Drag to move · tap to select</span><button id="edm">−</button><button id="edp">+</button><button id="edr">RESET</button><button id="edone">DONE</button></div>
 <div id="tc"><div id="joy"><div id="knob"></div></div>
@@ -1718,7 +1732,7 @@ function flatMat(root){root.traverse(o=>swapMat(o,toFlat));}
 function highMat(root){root.traverse(o=>{if(o.userData.std){(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>x.dispose());o.material=o.userData.std;delete o.userData.std;o.castShadow=true;}});}
 // touch tiers: 24 solver passes (the lowest that measured identical tackles / grabs / runs vs 30), then only draw distance steps down; resolution is never touched
 const TOUCH_TIERS=[{it:24,far:240,rs:.95},{it:24,far:220,rs:.9},{it:24,far:180,rs:.9}];let TTIER=0;   // rs: internal render scale (UI is HTML, always native); never below 90%
-function touchTier(t){t=cl(t,0,TOUCH_TIERS.length-1);if(t===TTIER)return;TTIER=t;if(!LOWFX)return;const T=TOUCH_TIERS[t];world.solver.iterations=T.it;renderer.setPixelRatio(Math.min(devicePixelRatio,2)*T.rs);renderer.setSize(innerWidth,innerHeight);cam.far=T.far;cam.updateProjectionMatrix();scene.fog.far=T.far-10;scene.fog.near=Math.min(80,T.far-90);}
+function touchTier(t){t=cl(t,0,TOUCH_TIERS.length-1);if(t===TTIER)return;if(t>TTIER&&mode)toast('Graphics lowered to keep the game smooth','#ffd23f');TTIER=t;if(!LOWFX)return;const T=TOUCH_TIERS[t];world.solver.iterations=T.it;renderer.setPixelRatio(Math.min(devicePixelRatio,2)*T.rs);renderer.setSize(innerWidth,innerHeight);cam.far=T.far;cam.updateProjectionMatrix();scene.fog.far=T.far-10;scene.fog.near=Math.min(80,T.far-90);}
 // contact shadows for touch (the shadow map is off there): one soft disc per player and the ball, one draw call
 const blobG=(()=>{const G=new THREE.Group();G.visible=false;for(const[r,o]of[[.55,.16],[.33,.2]]){const m=new THREE.InstancedMesh(new THREE.CircleGeometry(r,24).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:o,depthWrite:false}),12);m.frustumCulled=false;m.renderOrder=1;G.add(m);}scene.add(G);return G;})();   // two stacked discs: a soft-edged shadow with no texture
 const _bo=new THREE.Object3D();
@@ -2310,7 +2324,7 @@ function tPool(geo,n,mat){const m=new THREE.InstancedMesh(geo,mat,n);m.frustumCu
  return{m,n,i:0,p:new Float32Array(n*3),v:new Float32Array(n*3),r:new Float32Array(n*3),w:new Float32Array(n*3),s:new Float32Array(n),age:new Float32Array(n).fill(9)};}
 const GR=tPool(blade,560,new THREE.MeshLambertMaterial({side:THREE.DoubleSide})),DR=tPool(crumb,240,new THREE.MeshLambertMaterial({flatShading:true}));
 const GC=[0x4f8a2b,0x3d6e22,0x6aa33a,0x5c9632,0x2f5a1a],DC=[0x6b4a2b,0x5a3c22,0x7a5835,0x4a3019],_c=new THREE.Color(),_o=new THREE.Object3D();
-function kick(x,z,n,bx,bz,pw,dirt){if(LOWFX)return;for(let k=0;k<n;k++){const d=Math.random()<dirt,P=d?DR:GR,i=P.i,j=i*3;P.i=(i+1)%P.n;P.age[i]=0;   // bx,bz: the way the foot pushes; turf flies back off it
+function kick(x,z,n,bx,bz,pw,dirt){if(LOWFX||!GFX.eff('particles'))return;for(let k=0;k<n;k++){const d=Math.random()<dirt,P=d?DR:GR,i=P.i,j=i*3;P.i=(i+1)%P.n;P.age[i]=0;   // bx,bz: the way the foot pushes; turf flies back off it
  P.p[j]=x+(Math.random()-.5)*.15;P.p[j+1]=.03;P.p[j+2]=z+(Math.random()-.5)*.15;
  P.v[j]=-bx*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;P.v[j+1]=pw*(.5+Math.random()*.8)*(d?.8:1);P.v[j+2]=-bz*pw*(.4+Math.random()*.8)+(Math.random()-.5)*1.4;
  for(let a=0;a<3;a++){P.r[j+a]=Math.random()*6.3;P.w[j+a]=(Math.random()-.5)*(d?14:26);}P.s[i]=d?.5+Math.random()*.9:.7+Math.random()*.6;   // spin; blades flutter faster
@@ -3058,10 +3072,10 @@ function jxDraw(W,H,pri,sec,acc,design,part){const cv=document.createElement('ca
  else{const b=H*.72;g.fillStyle=S;g.fillRect(0,b,W,H*.12);g.fillStyle=A;g.fillRect(0,b+H*.12,W,H*.04);if(design===2||design===4){g.fillRect(0,b-H*.06,W,H*.03);}stitch(0,H*.97,W,H*.97);stitch(0,H*.08,W,H*.08);}   // sleeve stripes + cuff
  g.globalAlpha=.05;g.fillStyle=lum>.5?'#000':'#fff';for(let y=0;y<H;y+=6)for(let x=(y/6&1)*3;x<W;x+=6)g.fillRect(x,y,1.5,1.5);g.globalAlpha=1;   // performance-fabric speckle, very faint
  const tx=new THREE.CanvasTexture(cv);tx.encoding=THREE.sRGBEncoding;tx.anisotropy=8;tx.generateMipmaps=true;tx.minFilter=THREE.LinearMipmapLinearFilter;return tx;}
-function jxSet(pri,sec,acc){const k=pri+'/'+sec+'/'+acc;let e=JX.c.get(k);if(e){e.t=performance.now();return e;}
- const design=((pri*31+sec*7+acc)>>>3)%5;e={design,chest:jxDraw(2048,2048,pri,sec,acc,design,'chest'),abd:jxDraw(1024,1024,pri,sec,acc,design,'abd'),sl:jxDraw(512,512,pri,sec,acc,design,'sl'),t:performance.now()};
+function jxSet(pri,sec,acc){const k=pri+'/'+sec+'/'+acc+'/'+GFX.eff('texQ');let e=JX.c.get(k);if(e){e.t=performance.now();return e;}
+ const design=((pri*31+sec*7+acc)>>>3)%5,q=[.25,.5,1][GFX.eff('texQ')];e={design,chest:jxDraw(2048*q,2048*q,pri,sec,acc,design,'chest'),abd:jxDraw(1024*q,1024*q,pri,sec,acc,design,'abd'),sl:jxDraw(Math.max(256,512*q),Math.max(256,512*q),pri,sec,acc,design,'sl'),t:performance.now()};
  JX.c.set(k,e);if(JX.c.size>6){const old=[...JX.c.entries()].sort((a,b)=>a[1].t-b[1].t)[0];for(const x of['chest','abd','sl'])old[1][x].dispose();JX.c.delete(old[0]);}return e;}
-function jerseyFX(d,bg){for(const m of d.kfx||[]){m.parent&&m.parent.remove(m);}d.kfx=[];if(d.hem){d.hem.parent&&d.hem.parent.remove(d.hem);d.hem.geometry.dispose();d.hem.material.dispose();d.hem=null;}if(!JFX()||!d.jk)return;const P=d.parts,K=d.jk,pri=bg??K.pri;const e=jxSet(pri,K.sec,K.acc);
+function jerseyFX(d,bg){for(const m of d.kfx||[]){m.parent&&m.parent.remove(m);}d.kfx=[];if(d.hem){d.hem.parent&&d.hem.parent.remove(d.hem);d.hem.geometry.dispose();d.hem.material.dispose();d.hem=null;}if(!JFX()||!d.jk||GFX.eff('player')<1)return;const P=d.parts,K=d.jk,pri=bg??K.pri;const e=jxSet(pri,K.sec,K.acc);
  const put=(n,map,nk)=>{const m=P[n]&&P[n].mesh.material;if(!m)return;m.map=map;m.color.setHex(0xffffff);m.normalMap=jxNormal(nk);m.normalScale=new THREE.Vector2(.55,.55);m.roughness=.78;m.needsUpdate=true;};
  for(const n in P){const m=P[n].mesh.material;if(m&&m.userData.r0==null)m.userData.r0=m.roughness;}
  put('chest',e.chest,'chest');put('abdomen',e.abd,'abd');if(K.sleeve!==2)for(const s of['1','-1'])put('uarm'+s,e.sl,'sl');kitFX(d,e,K);
@@ -3248,7 +3262,7 @@ $m('mplay').onclick=e=>mmNav(e.currentTarget,()=>show('mode'));$m('mprog').oncli
  // keyboard: up / down moves the selection through the menu, Enter opens it (the selected item is the focused one)
  $m('mm').addEventListener('keydown',e=>{if(!/^Arrow(Up|Down)$/.test(e.key))return;const B=[...$m('mm').querySelectorAll('.mmi,#pick .ch')].filter(b=>b.offsetParent),i=B.indexOf(document.activeElement);e.preventDefault();B[(i+(e.key==='ArrowDown'?1:B.length-1))%B.length].focus();});
  $m('mm').addEventListener('pointermove',e=>{window.MMPX=e.clientX/innerWidth-.5;window.MMPY=e.clientY/innerHeight-.5;});$m('mhub').onclick=e=>mmNav(e.currentTarget,()=>{NAVFROM='mm';if(PROF){show('car');carUI();}else slotsUI();});
-$m('mteams').onclick=e=>mmNav(e.currentTarget,()=>{NAVFROM='mm';show('teams');teamsUI();});$m('mset').onclick=e=>mmNav(e.currentTarget,()=>{setSync();WX.ui();show('set');$m(pendMode==='touch'?'ctouch':'ckb').focus();});$m('mupd').onclick=()=>$m('pnb').click();$m('setback').onclick=()=>show('mm');$m('macct').onclick=e=>mmNav(e.currentTarget,()=>ACCT.open());$m('acback').onclick=()=>show('mm');
+$m('mteams').onclick=e=>mmNav(e.currentTarget,()=>{NAVFROM='mm';show('teams');teamsUI();});$m('sgfx').onclick=()=>GFX.open('set');$m('bgfx').onclick=()=>GFX.open('pause');$m('mset').onclick=e=>mmNav(e.currentTarget,()=>{setSync();WX.ui();show('set');$m(pendMode==='touch'?'ctouch':'ckb').focus();});$m('mupd').onclick=()=>$m('pnb').click();$m('setback').onclick=()=>show('mm');$m('macct').onclick=e=>mmNav(e.currentTarget,()=>ACCT.open());$m('acback').onclick=()=>show('mm');
 for(const[id,m]of[['btouch','touch'],['bkb','kb']])$m(id).onclick=()=>{pendMode=m;setInput(m);perfMode(m);setSync();show('mm');$m('mplay').focus();};   // chosen: save it and switch the controls + graphics profile right now
 show('boot');   // every launch starts here: the saved choice is only a preference, never a skip
  addEventListener('keydown',e=>{if($m('mm').hidden||mode)return;const B=[$m('ctouch'),$m('ckb')],i=B.indexOf(document.activeElement);if(/Arrow(Left|Right|Up|Down)/.test(e.key)){e.preventDefault();B[(i+1)%2].focus();}});
@@ -4229,6 +4243,66 @@ function rivHub(p){const RV=rivEnsure(p),T=Object.keys(RV.tm).map(c=>rivTeam(p,+
 // on the live scene: the real players standing in their real formation, the existing camera (through the CINE override the coach briefings
 // use), HTML overlays animated with CSS transforms. Nothing is spawned, physics keeps running untouched, the match clock is frozen (the same
 // way the play cards freeze it) and the hand-off eases into the live gameplay camera. Skip: Backspace / Enter / the SKIP button.
+// ===== Graphics settings: one store (localStorage 'pafGfx'), one panel opened from Settings and from the pause menu. Every row drives a real renderer / scene control.
+// Engine: three.js r128 on WebGL. No ray tracing (needs WebGPU / hardware RT), no post-processing pipeline (bloom, DoF, motion blur, SSAO, chromatic aberration):
+// those are listed as unavailable with the reason, never faked. Touch only sees rows that are safe on a phone.
+const GFX=(()=>{const TOUCH=()=>{try{return pendMode==='touch'||LOWFX;}catch(e){return false;}};
+ const ROWS=[
+  ['Display',[['scale','Resolution Scale',50,100,5,v=>v+'%',0],['fps','FPS Counter',0,1,1,v=>v?'On':'Off',0]]],
+  ['Lighting & Shadows',[['shadowQ','Shadow Quality',0,3,1,v=>['Off','Basic','Filtered','Soft'][v],1],['shadowRes','Shadow Resolution',0,3,1,v=>[512,1024,2048,4096][v]+' px',1],['shadowDist','Shadow Distance',4,20,1,v=>v+' m',1],['shadowDetail','Shadow Detail',0,1,1,v=>['Players','Players + ball'][v],1],
+   ['gi','Ambient Light (GI approximation)',30,130,5,v=>v+'%',0],['ao','Contact Shadows (AO approximation)',0,100,5,v=>v+'%',1],['lightQ','Lighting Quality',0,2,1,v=>['Key light','Key + fill','Key + fill + rim'][v],1],['lightFx','Floodlight Glare',0,100,5,v=>v+'%',1]]],
+  ['Textures & Materials',[['texQ','Texture Quality',0,2,1,v=>['Low','Medium','High'][v],1],['grass','Grass Detail',0,2,1,v=>['Basic','Detailed turf','Turf + blade relief'][v],1],['stadium','Stadium Detail',0,1,1,v=>['Reduced','Full'][v],1],['player','Player Detail',0,1,1,v=>['Plain kits','Premium kits'][v],1],
+   ['material','Material Quality',0,1,1,v=>['Basic','Physically based + time of day'][v],1],['aniso','Anisotropic Filtering',0,4,1,v=>['Off','2x','4x','8x','16x'][v],1],['filter','Texture Filtering',0,1,1,v=>['Bilinear','Trilinear'][v],0]]],
+  ['Environment',[['weather','Weather Quality',0,2,1,v=>['Off','Low','High'][v],0],['rain','Rain Detail',25,150,25,v=>v+'%',1],['particles','Particle Effects',0,1,1,v=>v?'On':'Off',0],['crowd','Crowd Animation',0,1,1,v=>v?'Animated':'Static',1],['envFx','Environmental Effects',0,1,1,v=>v?'Banners + LED motion':'Static',1]]],
+  ['Camera & Image',[['exposure','Camera Exposure',60,130,5,v=>v+'%',0],['grade','Colour Grading',0,3,1,v=>['Neutral','Broadcast','Warm','Cool'][v],0],['lens','Lens Effects (vignette)',0,100,5,v=>v+'%',0],['grain','Film Grain',0,100,5,v=>v+'%',0]]]];
+ const NA=[['Ray-Traced Shadows','Needs hardware ray tracing (WebGPU / DXR). This browser engine is WebGL: shadows use shadow maps (see Shadow Quality).'],['Ray-Traced Reflections','Not available in WebGL. Screen-space reflections also need a post-processing pipeline PAF does not include.'],['Ray-Traced Global Illumination','Not available in WebGL. Ambient Light above is a hemisphere-light approximation, not GI.'],
+  ['Motion Blur','Needs a post-processing pipeline (not included).'],['Depth of Field','Needs a post-processing pipeline (not included).'],['Bloom','Needs a post-processing pipeline (not included).'],['Chromatic Aberration','Needs a post-processing pipeline (not included).'],['Screen-Space Ambient Occlusion','Needs a post-processing pipeline; Contact Shadows is the available approximation.']];
+ const P={performance:{scale:75,fps:0,shadowQ:0,shadowRes:0,shadowDist:4,shadowDetail:0,gi:80,ao:60,lightQ:0,lightFx:40,texQ:0,grass:0,stadium:0,player:0,material:0,aniso:0,filter:0,weather:1,rain:50,particles:0,crowd:0,envFx:0,exposure:100,grade:0,lens:0,grain:0},
+  balanced:{scale:90,fps:0,shadowQ:1,shadowRes:1,shadowDist:6,shadowDetail:0,gi:100,ao:40,lightQ:1,lightFx:70,texQ:1,grass:1,stadium:1,player:1,material:0,aniso:2,filter:1,weather:1,rain:75,particles:1,crowd:0,envFx:1,exposure:100,grade:1,lens:0,grain:0},
+  high:{scale:100,fps:0,shadowQ:2,shadowRes:1,shadowDist:8,shadowDetail:1,gi:100,ao:30,lightQ:2,lightFx:90,texQ:2,grass:2,stadium:1,player:1,material:1,aniso:3,filter:1,weather:2,rain:100,particles:1,crowd:1,envFx:1,exposure:100,grade:1,lens:15,grain:0},
+  ultra:{scale:100,fps:0,shadowQ:3,shadowRes:2,shadowDist:12,shadowDetail:1,gi:100,ao:25,lightQ:2,lightFx:100,texQ:2,grass:2,stadium:1,player:1,material:1,aniso:4,filter:1,weather:2,rain:125,particles:1,crowd:1,envFx:1,exposure:100,grade:1,lens:20,grain:10},
+  extreme:{scale:100,fps:0,shadowQ:3,shadowRes:3,shadowDist:20,shadowDetail:1,gi:105,ao:20,lightQ:2,lightFx:100,texQ:2,grass:2,stadium:1,player:1,material:1,aniso:4,filter:1,weather:2,rain:150,particles:1,crowd:1,envFx:1,exposure:100,grade:1,lens:25,grain:15}};
+ const TOUCHSAFE={scale:[50,100],weather:[0,1],particles:[0,0]};   // phone limits; every kb-only row is held at its Performance value
+ const PN=['performance','balanced','high','ultra','extreme'];
+ let v,preset;function defaults(){return TOUCH()?{...P.performance,scale:100}:{...P.high};}
+ function load(){try{const o=JSON.parse(localStorage.getItem('pafGfx')||'null');if(o&&o.v){v={...defaults(),...o.v};preset=o.p||'custom';return;}}catch(e){}v=defaults();preset=TOUCH()?'performance':'high';}
+ function save(){try{localStorage.setItem('pafGfx',JSON.stringify({v,p:preset}));}catch(e){}}
+ function eff(k){const row=ROWS.flatMap(r=>r[1]).find(r=>r[0]===k);if(TOUCH()){if(row&&row[6])return P.performance[k];const L=TOUCHSAFE[k];if(L)return cl(v[k],L[0],L[1]);}return v[k];}   // what actually runs on this device
+ load();
+ const base={hemi:null,exp:null};
+ function capture(){base.hemi=HEMI.intensity;base.exp=renderer.toneMappingExposure;}   // after a match's lighting (time of day, weather) is set
+ function apply(){const E=k=>eff(k);
+  if(!TOUCH()){renderer.setPixelRatio(Math.min(devicePixelRatio,2)*E('scale')/100);renderer.setSize(innerWidth,innerHeight);
+   const q=E('shadowQ');renderer.shadowMap.enabled=q>0;sun.castShadow=q>0;renderer.shadowMap.type=[THREE.BasicShadowMap,THREE.BasicShadowMap,THREE.PCFShadowMap,THREE.PCFSoftShadowMap][q];
+   const r=[512,1024,2048,4096][E('shadowRes')];if(sun.shadow.mapSize.x!==r){sun.shadow.mapSize.set(r,r);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}}
+   const d=E('shadowDist');Object.assign(sun.shadow.camera,{left:-d,right:d,top:d,bottom:-d,far:Math.max(40,d*4)});sun.shadow.camera.updateProjectionMatrix();ballMesh.castShadow=q>0&&E('shadowDetail')>0;
+   fillL.visible=E('lightQ')>=1;rimL.visible=E('lightQ')>=2;blobG.visible=E('ao')>0;blobG.children.forEach((m,i)=>m.material.opacity=[.16,.2][i]*E('ao')/50);
+   for(const m of scene.children)m.traverse&&m.traverse(o=>{const mt=o.material;if(!mt||Array.isArray(mt))return;for(const t of[mt.map,mt.normalMap])if(t){t.anisotropy=Math.min(ANI,[1,2,4,8,16][E('aniso')]);t.minFilter=E('filter')?THREE.LinearMipmapLinearFilter:THREE.LinearMipmapNearestFilter;t.needsUpdate=true;}});
+   const gk=E('lightFx')/100;if(FLOODSM)FLOODSM.opacity=(FLOODSM.userData.t0??1)*gk;if(VEN.g&&VEN.g.userData.flood)VEN.g.userData.flood.opacity=gk;}
+  if(base.hemi!=null){HEMI.intensity=base.hemi*E('gi')/100;renderer.toneMappingExposure=base.exp*E('exposure')/100;}else renderer.toneMappingExposure=.85*E('exposure')/100;
+  WX.setQ(['off','low','high'][E('weather')],true);
+  renderer.domElement.style.filter=['','contrast(1.06) saturate(1.08)','contrast(1.04) saturate(1.05) sepia(.12)','contrast(1.05) saturate(.95) hue-rotate(-6deg)'][E('grade')];
+  const fx=$m('gfxfx');if(fx){const L=E('lens'),G=E('grain');fx.style.setProperty('--vig',(L/100*.55).toFixed(3));fx.style.setProperty('--grain',(G/100*.12).toFixed(3));fx.hidden=!(mode&&(L||G));}
+  fpsOn(E('fps'));}
+ let fpsRaf=0;function fpsOn(on){const e=$m('gfxfps');if(!e)return;e.hidden=!on;if(!on){cancelAnimationFrame(fpsRaf);fpsRaf=0;return;}if(fpsRaf)return;let n=0,t0=performance.now();const f=()=>{n++;const t=performance.now();if(t-t0>=500){e.textContent=Math.round(n*1000/(t-t0))+' FPS';n=0;t0=t;}fpsRaf=requestAnimationFrame(f);};fpsRaf=requestAnimationFrame(f);}
+ function setPreset(p){if(!P[p])return;v={...P[p],fps:v.fps};preset=p;save();apply();ui();}
+ function set(k,val){v[k]=val;preset='custom';save();apply();ui();}
+ function restore(){v=defaults();preset=TOUCH()?'performance':'high';save();apply();ui();}
+ let from=null;
+ function open(src){from=src;const e=$m('gfx');e.hidden=false;ui();}
+ function close(){$m('gfx').hidden=true;}
+ function ui(){const e=$m('gfxb');if(!e||$m('gfx').hidden)return;const T=TOUCH(),nextMatch=['texQ','grass','stadium','player','material'];
+  const ps=PN.filter(p=>!T||p==='performance'||p==='balanced');
+  e.innerHTML=`<div class="gfh"><div><small>GRAPHICS PRESET</small><b>${preset==='custom'?'CUSTOM':T&&!ps.includes(preset)?'TOUCH · SAFE LIMITS':preset.toUpperCase()}</b></div><div class="gfp">${ps.map(p=>`<button data-gp="${p}" class="${p===preset?'on':''}">${p.toUpperCase()}</button>`).join('')}</div></div>
+  <p class="note">${T?'Touch profile: only phone-safe settings are shown. Keyboard-only quality settings stay at their lightweight values.':'Changes apply instantly. Rows marked ◆ take effect from the next kickoff.'} Renderer: WebGL${renderer.capabilities.isWebGL2?' 2':' 1'} · max anisotropy ${ANI}x · ${preset==='custom'?'custom settings':'preset '+preset}.</p>
+  ${ROWS.map(([cat,rows])=>{const R=rows.filter(r=>!T||!r[6]&&!(TOUCHSAFE[r[0]]&&TOUCHSAFE[r[0]][0]===TOUCHSAFE[r[0]][1]));if(!R.length)return'';return`<h4>${cat.toUpperCase()}</h4>`+R.map(([k,l,mn,mx,st,f])=>{const lim=T&&TOUCHSAFE[k],hi=lim?lim[1]:mx,lo=lim?lim[0]:mn,val=eff(k);
+   return`<label class="gfr"><span>${l}${nextMatch.includes(k)?' ◆':''}</span><input type="range" min="${lo}" max="${hi}" step="${st}" value="${val}" data-gk="${k}" ${lo===hi?'disabled':''}><em>${f(val)}</em><i>${f(lo)} – ${f(hi)}</i></label>`;}).join('');}).join('')}
+  ${T?'':`<h4>RAY TRACING &amp; POST-PROCESSING</h4>${NA.map(([n,w])=>`<div class="gfr na"><span>${n}</span><em>Unavailable</em><i>${w}</i></div>`).join('')}`}
+  <div class="gfa"><button data-ga="restore">RESTORE DEFAULTS</button><button data-ga="close" class="pri">DONE</button></div>`;}
+ document.addEventListener('input',ev=>{const k=ev.target&&ev.target.dataset&&ev.target.dataset.gk;if(!k)return;set(k,+ev.target.value);});
+ document.addEventListener('click',ev=>{const p=ev.target.closest&&ev.target.closest('[data-gp]');if(p&&$m('gfx')&&!$m('gfx').hidden){setPreset(p.dataset.gp);return;}const a=ev.target.closest&&ev.target.closest('[data-ga]');if(!a)return;if(a.dataset.ga==='restore')restore();else close();});
+ return{v:()=>v,eff,apply,capture,open,close,setPreset,restore,preset:()=>preset,ROWS,P};})();
+
 // ===== Weather: picked per match (Exhibition can choose), cosmetic only. One pooled rain mesh that follows the camera, a small low-res snow canvas, light/fog/turf tweaks. =====
 const WX=(()=>{const K=['clear','over','rain','heavy','snow'],NM={clear:'CLEAR',over:'OVERCAST',rain:'RAIN',heavy:'HEAVY RAIN',snow:'SNOW'},IC={clear:'☀',over:'☁',rain:'🌧',heavy:'⛈',snow:'❄'};
  const Q=['off','low','high'];let q=(()=>{try{return Q.includes(localStorage.getItem('pafWxFx'))?localStorage.getItem('pafWxFx'):'high';}catch(e){return'high';}})();
@@ -4237,27 +4311,27 @@ const WX=(()=>{const K=['clear','over','rain','heavy','snow'],NM={clear:'CLEAR',
  function level(){const l=Q.indexOf(q);return LOWFX?Math.min(l,1):l;}   // touch: Low at most
  function mkRain(){const N=1800,P=new Float32Array(N*6);for(let i=0;i<N;i++){const x=(Math.random()-.5)*50,y=Math.random()*24,z=(Math.random()-.5)*50;P.set([x,y,z,x+.04,y+.55,z],i*6);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));const m=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0xaab8cc,transparent:true,opacity:.28,depthWrite:false,fog:true}));m.frustumCulled=false;m.renderOrder=5;return m;}
- function density(){return!cur||!lvl?0:cur==='heavy'?(lvl>1?1800:700):cur==='rain'?(lvl>1?800:320):0;}
+ function density(){const n=!cur||!lvl?0:cur==='heavy'?(lvl>1?1800:700):cur==='rain'?(lvl>1?800:320):0;return Math.min(1800,Math.round(n*GFX.eff('rain')/100));}
  function apply(){if(rain){const n=density();rain.visible=n>0;rain.geometry.setDrawRange(0,n*2);}
   const sn=cur==='snow'&&lvl>0;$m('wxs').hidden=!sn;if(sn){fl=Array.from({length:lvl>1?90:40},()=>[Math.random(),Math.random(),.6+Math.random()*1.4,Math.random()*6.3]);}}
- function begin(c,td,vn){end();VEN.set(vn||VEN.pick());GRASS.set(JFX());STAD.begin(td);cur=K.includes(c)?c:pick();lvl=level();fa={n:0,s:0};
+ function begin(c,td,vn){end();VEN.set(vn||VEN.pick());GRASS.set(JFX()&&GFX.eff('grass')>0);STAD.begin(td);cur=K.includes(c)?c:pick();lvl=level();fa={n:0,s:0};
   base={fc:scene.fog.color.getHex(),fn:scene.fog.near,ff:scene.fog.far,si:sun.intensity,hi:HEMI.intensity,fm:FIELDM&&[FIELDM.color.getHex(),FIELDM.roughness,FIELDM.emissive.getHex()]};
   const dk=cur==='over'?[.72,.85,.7]:cur==='rain'?[.62,.8,.6]:cur==='heavy'?[.5,.72,.45]:cur==='snow'?[.8,.95,.7]:null;
   if(dk){sun.intensity*=dk[0];HEMI.intensity*=dk[1];scene.fog.color.setHex(cur==='snow'?0x5a6270:0x2a313c);scene.fog.near*=dk[2];scene.fog.far*=cur==='heavy'?.6:.8;}
   if(FIELDM){if(cur==='rain'||cur==='heavy'){FIELDM.color.setHex(cur==='heavy'?0xb4bcb6:0xc6ccc8);FIELDM.roughness=cur==='heavy'?.8:.86;}   // wet turf: darker, a little sheen
    if(cur==='snow'){FIELDM.emissive.setHex(0x1c2024);FIELDM.color.setHex(0xe8eef4);}}
   STAD.wet(cur);if((cur==='rain'||cur==='heavy')&&!rain){rain=mkRain();scene.add(rain);}apply();
-  const b=$m('wxb');b.innerHTML=`<i>${IC[cur]}</i><span><small>CONDITIONS</small>${NM[cur]}</span>`;b.className='';b.hidden=false;boxT=performance.now()+6500;}
+  const b=$m('wxb');b.innerHTML=`<i>${IC[cur]}</i><span><small>CONDITIONS</small>${NM[cur]}</span>`;b.className='';b.hidden=false;boxT=performance.now()+6500;GFX.capture();GFX.apply();}
  function end(){if(base){scene.fog.color.setHex(base.fc);scene.fog.near=base.fn;scene.fog.far=base.ff;sun.intensity=base.si;HEMI.intensity=base.hi;if(FIELDM&&base.fm){FIELDM.color.setHex(base.fm[0]);FIELDM.roughness=base.fm[1];FIELDM.emissive.setHex(base.fm[2]);}}
-  base=null;cur=null;if(rain)rain.visible=false;STAD.dry();STAD.end();$m('wxs').hidden=true;$m('wxb').hidden=true;}
+  base=null;cur=null;if(rain)rain.visible=false;STAD.dry();STAD.end();GFX.capture();GFX.apply();$m('wxs').hidden=true;$m('wxb').hidden=true;}
  function tick(now){STAD.tick(now);VEN.tick(now);if(!cur)return;const dt=Math.min(.1,(now-(last||now))/1000);last=now;
   const b=$m('wxb');if(!b.hidden&&(document.body.classList.contains('intro')||!$m('pcs').hidden))boxT=now+5000;if(!b.hidden&&now>boxT){if(b.className!=='out')b.className='out';if(now>boxT+600)b.hidden=true;}
-  if(lvl){fa.n++;fa.s+=dt;if(fa.s>3){if(fa.s/fa.n>1/38){lvl--;apply();}fa.n=fa.s=0;}}   // frame rate dropping: step the effect down for this match
+  if(lvl){fa.n++;fa.s+=dt;if(fa.s>3){if(fa.s/fa.n>1/38){lvl--;apply();toast('Weather effects lowered to keep the game smooth · Settings › Graphics','#ffd23f');}fa.n=fa.s=0;}}   // frame rate dropping: step the effect down for this match
   if(rain&&rain.visible){rain.position.set(cam.position.x,0,cam.position.z);const P=rain.geometry.attributes.position.array,n=density(),v=(cur==='heavy'?26:19)*dt;
    for(let i=0;i<n;i++){const k=i*6;let y=P[k+1]-v;if(y<0)y+=24;P[k+1]=y;P[k+4]=y+.55;}rain.geometry.attributes.position.needsUpdate=true;}
   if(cur==='snow'&&lvl&&fl){const c=$m('wxs');if(c.width!==innerWidth>>1){c.width=innerWidth>>1;c.height=innerHeight>>1;}const g=c.getContext('2d'),w=c.width,h=c.height;g.clearRect(0,0,w,h);g.fillStyle='#fff';
    for(const f of fl){f[1]+=dt*.05*f[2];f[3]+=dt;if(f[1]>1){f[1]=0;f[0]=Math.random();}const x=(f[0]+Math.sin(f[3])*.01)*w;g.fillRect(x,f[1]*h,f[2]*1.4,f[2]*1.4);}}}
- function setQ(v){q=v;try{localStorage.setItem('pafWxFx',v);}catch(e){}ui();if(cur){lvl=level();apply();}}
+ function setQ(v,quiet){if(q===v&&quiet)return;q=v;try{localStorage.setItem('pafWxFx',v);}catch(e){}if(!quiet)ui();if(cur){lvl=level();apply();}}
  function ui(){venUI();const s=$m('wxq');if(s){s.innerHTML=Q.map(v=>`<button class="ch${v===q?' on':''}" data-wq="${v}"><span><b>${v.toUpperCase()}</b><small>${v==='off'?'No rain or snow':v==='low'?'Light effects':'Full effects'}</small></span></button>`).join('');s.onclick=e=>{const x=e.target.closest('[data-wq]');if(x)setQ(x.dataset.wq);};}
   const x=$m('xwx');if(x){XM.wx=XM.wx||'random';x.innerHTML=['random',...K].map(v=>`<button class="${v===XM.wx?'on':''}" data-wx="${v}">${v==='random'?'🎲 RANDOM':IC[v]+' '+NM[v]}</button>`).join('');x.onclick=e=>{const b=e.target.closest('[data-wx]');if(b){XM.wx=b.dataset.wx;ui();}};}}
  return{begin,end,tick,ui,cur:()=>cur,q:()=>q,lvl:()=>lvl,setQ,K};})();
@@ -4280,9 +4354,9 @@ const GRASS=(()=>{let hiTex=null,nrm=null,lo=null,on=false;
   FIELDDRAW.hi=1;FIELDDRAW(g,W,H);FIELDDRAW.hi=0;g.setTransform(1,0,0,1,0,0);
   for(let i=0;i<60000;i++){const x=Math.random()*W,y=Math.random()*H;g.strokeStyle=`rgba(30,70,25,${.10+Math.random()*.12})`;g.lineWidth=.8;g.beginPath();g.moveTo(x,y);g.lineTo(x+(Math.random()-.5)*2,y-2-Math.random()*3);g.stroke();}   // blades poke through the paint, so lines sit in the turf
   const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=ANI;t.minFilter=THREE.LinearMipmapLinearFilter;return t;}
- function set(want){if(want===on)return;on=want;const m=FIELDM;if(!lo)lo=m.map;
+ function set(want){on=want;const m=FIELDM;if(!lo)lo=m.map;
   if(on){if(!hiTex){hiTex=turf();nrm=blades();m.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace('texture2D( normalMap, vUv )','texture2D( normalMap, vUv*vec2(70.,150.) )');};m.customProgramCacheKey=()=>'turfDetail';}
-   m.map=hiTex;m.normalMap=nrm;m.normalScale=new THREE.Vector2(.45,.45);m.roughness=.97;}
+   m.map=hiTex;m.normalMap=GFX.eff('grass')>1?nrm:null;m.normalScale=new THREE.Vector2(.45,.45);m.roughness=.97;}
   else{m.map=lo;m.normalMap=null;}m.needsUpdate=true;}
  return{set,on:()=>on};})();
 
@@ -4356,15 +4430,15 @@ const VEN=(()=>{const LIST=[['mega','Mega Bowl','Two-deck bowl, roof ring, giant
    tunnel(G,wh);sideline(G);G.userData.tods=['night','night','sunset'];}};
  function build(id,T){const G=new THREE.Group();G.visible=false;BUILD[id](G,T);G.traverse(o=>{if(o.isMesh){o.matrixAutoUpdate=false;o.updateMatrix();}});scene.add(G);return G;}
  function teamCols(){const h=c=>jxHex(c),a=TEAM&&TEAM.blue?h(TEAM.blue[0]):'#13306e',b=TEAM&&TEAM.red?h(TEAM.red[0]):'#7a1420';return{a,b};}
- function set(id){id=LIST.some(v=>v[0]===id)?id:'mega';const h=JFX();if(h!==hi){for(const k in B){scene.remove(B[k]);}for(const k in B)delete B[k];hi=h;}   // profile changed (touch <-> keyboard): rebuild at the right detail
+ function set(id){id=LIST.some(v=>v[0]===id)?id:'mega';const h=JFX()&&GFX.eff('stadium')>0;if(h!==hi){for(const k in B){scene.remove(B[k]);}for(const k in B)delete B[k];hi=h;}   // profile changed (touch <-> keyboard): rebuild at the right detail
   cur=id;for(const r of STATREC)r.visible=id==='mega';const T=teamCols();anim.length=0;
   for(const k in B)B[k].visible=false;if(id!=='mega'){const key=id+(hi?'H':'L')+T.a+T.b;if(!B[key])B[key]=build(id,T);B[key].visible=true;cur=id;VEN.g=B[key];}else VEN.g=null;
   if(SKYDOME)SKYDOME.visible=!(VEN.g&&VEN.g.userData.noSky);}
  function pick(){if(PROF&&PROF._exh&&XM.venue)return XM.venue==='random'?LIST[Math.random()*LIST.length|0][0]:XM.venue;const pref=(()=>{try{return localStorage.getItem('pafVenue')||'auto';}catch(e){return'auto';}})();if(pref!=='auto')return pref;
   const h=(PROF&&PROF.team!=null?PROF.team:0)+(preMatch&&preMatch.op||0)*7;return LIST[(preMatch&&preMatch.home===false?(preMatch.op|0):(PROF&&PROF.team|0))%LIST.length][0];}   // auto: the home club's stadium
  let bump=0;function cheer(){bump=1;}
- function tick(now){if(!VEN.g)return;for(const t of anim)t.offset.x=(now/40000)%1;if(VEN.g.userData.spin)VEN.g.userData.spin.rotation.y=now/9000;
-  if(hi&&VEN.g.userData.crowd){bump*=.985;const k=Math.sin(now/90)*.004*bump+Math.sin(now/700)*.0006;for(const m of VEN.g.userData.crowd)if(m.map)m.map.offset.y=k;}}   // the crowd bobs; jumps on big moments
+ function tick(now){if(!VEN.g)return;if(GFX.eff('envFx')){for(const t of anim)t.offset.x=(now/40000)%1;if(VEN.g.userData.spin)VEN.g.userData.spin.rotation.y=now/9000;}
+  if(hi&&VEN.g.userData.crowd&&GFX.eff('crowd')){bump*=.985;const k=Math.sin(now/90)*.004*bump+Math.sin(now/700)*.0006;for(const m of VEN.g.userData.crowd)if(m.map)m.map.offset.y=k;}}   // the crowd bobs; jumps on big moments
  return{LIST,set,pick,tick,cheer,cur:()=>cur,tods:()=>VEN.g&&VEN.g.userData.tods,g:null};})();
 
 function venUI(){const x=$m('xven');if(x){XM.venue=XM.venue||'random';x.innerHTML=[['random','🎲 RANDOM'],...VEN.LIST.map(v=>[v[0],v[1].toUpperCase()])].map(([k,n])=>`<button class="${k===XM.venue?'on':''}" data-vn="${k}" title="${esc((VEN.LIST.find(v=>v[0]===k)||[,,'Any stadium'])[2])}">${n}</button>`).join('');x.onclick=e=>{const b=e.target.closest('[data-vn]');if(b){XM.venue=b.dataset.vn;venUI();}};}
@@ -4387,7 +4461,7 @@ const STAD=(()=>{let on=false,tod='night',env=null,base=null,ban=[],ezBase=null;
  function swap(m,k){if(!m)return;m.userData.m0=m.userData.m0||m.material;m.material=M[k];}
  function unswap(m){if(m&&m.userData.m0){m.material=m.userData.m0;}}
  function setTod(k){const T=TOD[k]||TOD.night;SKYU.a.value.set(...T.sky[0]);SKYU.b.value.set(...T.sky[1]);scene.fog.color.setHex(T.fog);scene.fog.near=T.fn;scene.fog.far=T.ff;
-  sun.color.setHex(T.sun[0]);sun.intensity=T.sun[1];HEMI.color.setHex(T.hemi[0]);HEMI.groundColor.setHex(T.hemi[1]);HEMI.intensity=T.hemi[2];renderer.toneMappingExposure=T.exp;if(FLOODSM)FLOODSM.opacity=T.flood;if(FLOODSTRIP)FLOODSTRIP.visible=T.flood>.2;}
+  sun.color.setHex(T.sun[0]);sun.intensity=T.sun[1];HEMI.color.setHex(T.hemi[0]);HEMI.groundColor.setHex(T.hemi[1]);HEMI.intensity=T.hemi[2];renderer.toneMappingExposure=T.exp;if(FLOODSM){FLOODSM.userData.t0=T.flood;FLOODSM.opacity=T.flood;}if(FLOODSTRIP)FLOODSTRIP.visible=T.flood>.2;}
  function ezPaint(){if(!TEAM)return;const c=FIELDM.map.image;if(!c._ez)c._ez=c.getContext('2d').getImageData(0,0,c.width,c.height);const ezBase=c._ez,g=c.getContext('2d'),k=c.width/FW;g.setTransform(1,0,0,1,0,0);g.putImageData(ezBase,0,0);g.save();g.scale(k,c.height/FL);   // end zones in the two clubs' colours, names in the turf paint
   for(const[y,t,flip]of[[0,'red',true],[FL-10*YD,'blue',false]]){const c0=new THREE.Color(TEAM[t][0]).getHSL({}).l>.7?TEAM[t][1]:TEAM[t][0];g.globalAlpha=.86;g.fillStyle=jxHex(c0);g.fillRect(.15,y+(flip?.15:0),FW-.3,10*YD-.25);g.globalAlpha=1;g.save();g.translate(FW/2,y+5*YD);if(flip)g.rotate(Math.PI);
    g.fillStyle='#f4f4ee';g.font='900 5.2px Impact,"Arial Black",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(String(TFULL[t]||t).toUpperCase(),0,.2);g.globalAlpha=.5;g.fillStyle=jxHex(TEAM[t][2]??0xffffff);g.fillRect(-FW/2+1,-4.3,FW-2,.25);g.fillRect(-FW/2+1,4.05,FW-2,.25);g.restore();}
@@ -4395,7 +4469,7 @@ const STAD=(()=>{let on=false,tod='night',env=null,base=null,ban=[],ezBase=null;
  function banners(){for(const b of ban){scene.remove(b);b.material.map&&b.material.map.dispose();b.material.dispose();}ban=[];if(!TEAM)return;   // supporter banners hung on the front wall, cloth that sways
   for(let i=0;i<12;i++){const t=i%2?'red':'blue',side=i<6?1:-1,z=-AZ+12+((i%6)/5)*(AZ*2-24),tx=ctex(256,128,(g,w,h)=>{g.fillStyle=jxHex(TEAM[t][0]);g.fillRect(0,0,w,h);g.fillStyle=jxHex(TEAM[t][2]??0xffffff);g.fillRect(0,h*.78,w,h*.1);g.fillStyle='#fff';g.font='900 52px Impact,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(String(TABB[t]),w/2,h*.42);grain(g,w,h,10);});
    const m=new THREE.Mesh(new THREE.PlaneGeometry(4.2,2.1,6,1),new THREE.MeshStandardMaterial({map:tx,roughness:.92,metalness:0,side:THREE.DoubleSide}));m.position.set(side*(AX+2.3),3.4,z);m.rotation.y=-side*Math.PI/2;m.userData.ph=Math.random()*6;scene.add(m);ban.push(m);}}
- function begin(k){end();if(!JFX())return;on=true;mats();const tl=VEN.tods()||['day','sunset','night','night'];tod=TOD[k]?k:tl[Math.random()*tl.length|0];
+ function begin(k){end();if(!JFX()||GFX.eff('material')<1)return;on=true;mats();const tl=VEN.tods()||['day','sunset','night','night'];tod=TOD[k]?k:tl[Math.random()*tl.length|0];
   base={fog:[scene.fog.color.getHex(),scene.fog.near,scene.fog.far],sun:[sun.color.getHex(),sun.intensity],hemi:[HEMI.color.getHex(),HEMI.groundColor.getHex(),HEMI.intensity],exp:renderer.toneMappingExposure,sky:[SKYU.a.value.clone(),SKYU.b.value.clone()],fm:[FIELDM.roughness,FIELDM.envMapIntensity]};
   for(const[m,k2]of STADM)swap(m,k2);FIELDM.roughness=.97;FIELDM.envMapIntensity=0;   // turf: matte, no sky reflection at all
   ezPaint();banners();setTod(tod);}
@@ -4405,7 +4479,7 @@ const STAD=(()=>{let on=false,tod='night',env=null,base=null,ban=[],ezBase=null;
  function wet(k){if(!on)return;const w=k==='rain'?.5:k==='heavy'?1:0;if(!w)return;   // rain: concrete darkens a little, steel and glass get a wetter sheen; turf stays matte
   M.concrete.color.setScalar(1-.22*w);M.concrete.roughness=.93-.25*w;M.steel.roughness=.42-.2*w;M.glass.roughness=.06;M.pad.roughness=.7-.3*w;}
  function dry(){if(!M.ok)return;M.concrete.color.setScalar(1);M.concrete.roughness=.93;M.steel.roughness=.42;M.pad.roughness=.7;}
- function tick(now){if(!on)return;for(const b of ban){const p=b.geometry.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i);p.setZ(i,Math.sin(now/600+b.userData.ph+x*1.4)*.06*(x+2.1));}p.needsUpdate=true;}}
+ function tick(now){if(!on||!GFX.eff('envFx'))return;for(const b of ban){const p=b.geometry.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i);p.setZ(i,Math.sin(now/600+b.userData.ph+x*1.4)*.06*(x+2.1));}p.needsUpdate=true;}}
  return{begin,end,wet,dry,tick,tod:()=>tod,on:()=>on};})();
 
 const BC=(()=>{

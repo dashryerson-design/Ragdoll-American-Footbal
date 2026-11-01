@@ -1869,6 +1869,15 @@ const PLAYBOOK=(()=>{const L=[],mir=(F,m)=>F.map(([x,z])=>[x*m,z]),side=m=>m>0?'
  const ids=new Set();return L.filter(p=>{const ok=!ids.has(p.id)&&['run','deep','mid'].includes(p.cat)&&p.slots.length===3&&p.slots.filter(s=>s.rb).length<=1&&p.slots.every(s=>s.rb||ROUTES[s.route])&&(p.cat!=='run'||p.qb||p.slots.some(s=>s.rb));ids.add(p.id);if(!ok)console.warn('playbook: dropped',p.id);return ok;});})();
 console.assert(['run','deep','mid'].every(c=>PLAYBOOK.filter(p=>p.cat===c).length>=100)&&PLAYBOOK.length>=300,'playbook needs 100+ plays per category');
 let PLAY=null;const PB_REC=[];
+// AI play call from the three dealt cards (run / deep / mid): weighted by down, distance, field position and the scoreboard, never the same play twice in a row
+function aiPlay(D){const togo=Math.max(1,Math.round((FD-LOS)/YD)),off=ORG.off,df=(SCORE[off]||0)-(SCORE[off==='blue'?'red':'blue']||0),late=MATCH&&MATCH.clock>0&&MATCH.clock<90,rz=GOAL_Z-LOS<=20*YD;
+ const w={run:1,deep:.8,mid:1.1};
+ if(togo<=2){w.run+=1.6;w.deep*=.5;}else if(togo>=8&&DOWN>=2){w.run*=.45;w.deep+=.6;w.mid+=.5;}
+ if(DOWN>=3&&togo>=5){w.run*=.5;w.mid+=.4;}if(DOWN===1){w.run+=.3;}
+ if(rz){w.deep*=.55;w.mid+=.3;}
+ if(late&&df<0){w.run*=.5;w.deep+=.5;}else if(late&&df>0){w.run+=.8;}
+ const last=aiPlay.last;const C=D.filter(p=>p.id!==last);const L=C.length?C:D;let s=L.reduce((a,p)=>a+(w[p.cat]||1),0)*Math.random();
+ for(const p of L){s-=w[p.cat]||1;if(s<=0){aiPlay.last=p.id;return p;}}aiPlay.last=L[0].id;return L[0];}
 function dealPlays(){return['run','deep','mid'].map(c=>{const A=PLAYBOOK.filter(p=>p.cat===c),F=A.filter(p=>!PB_REC.includes(p.id)),p=(F.length?F:A)[Math.random()*(F.length||A.length)|0];PB_REC.push(p.id);if(PB_REC.length>60)PB_REC.shift();return p;});}   // one per category, nothing seen in the last 20 possessions
 // diagram straight from the definition: x = metres across, y = metres downfield (LOS at 0)
 function playSVG(p){const W=22,top=40,qz=p.slots.some(o=>o.rb)?RUN_DEPTH:QB_DEPTH,bot=qz-4,sx=x=>(-x).toFixed(1),sy=z=>(-z).toFixed(1),pt=(x,z)=>`${sx(x)},${sy(z)}`,ln=(a,cls)=>`<polyline class="${cls}" points="${a.map(([x,z])=>pt(x,z)).join(' ')}"/>`;
@@ -1969,7 +1978,7 @@ function markTick(){xpTick();readOpen();const on=playOn&&mode;youRing.visible=on
  const car=roster.find(H);if(car){const h=car.parts.head.position;carMark.visible=true;carMark.position.set(h.x,h.y+.42+Math.sin(performance.now()/160)*.05,h.z);}}
 function playTick(){if(!playOn)return;if(BC.on()||RP.on()){playTick.t=performance.now();resetT=performance.now();return;}if(!$m('pcs').hidden||NET.waitPick){playTick.t=performance.now();resetT=performance.now();return;}readTick();const tn=performance.now();if(MATCH){MATCH.clock=Math.max(0,MATCH.clock-Math.min(.5,(tn-(playTick.t||tn))/1000));if((MATCH.clock|0)!==playTick.c){playTick.c=MATCH.clock|0;hud();}}playTick.t=tn;   // the game clock runs whenever the match isn't paused
  if(MATCH&&MATCH.clock<=0&&(playState==='pre'||playEnd&&tn>playEnd)){if(playEnd){playEnd=0;RP.fin();}flip=null;if(!RP.play(endMatch))endMatch();return;}   // a final-play highlight runs after the result is in, then the whistle   // time's up: the play in progress finishes, then the final whistle
- if(playEnd){if(performance.now()>playEnd){playEnd=0;RP.fin();if(RUNS.on&&MATCH&&MATCH.runs){RUNS.next();return;}if(flip!==null){const go=()=>{DRIVE++;ORG.off=NEXT||(ORG.off==='blue'?'red':'blue');NEXT=null;LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();};if(!RP.play(go))go();}else if(NEWSERIES&&ORG.four&&!ORG.free&&!DRILL){NEWSERIES=0;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
+ if(playEnd){if(performance.now()>playEnd){playEnd=0;RP.fin();if(RUNS.on&&MATCH&&MATCH.runs){RUNS.next();return;}if(flip!==null){const go=()=>{DRIVE++;ORG.off=NEXT||(ORG.off==='blue'?'red':'blue');NEXT=null;LOS=flip;DOWN=1;FD=Math.min(GOAL_Z,LOS+10*YD);flip=null;applyOrg();};if(!RP.play(go))go();}else if(ORG.four&&!ORG.free&&!DRILL&&!RUNS.on){NEWSERIES=0;applyOrg();}else resetPlay();}return;}   // career match: a set number of drives, then the final whistle   // possession change: rebuild both teams on their new sides
  if(playState==='pre'&&player.cur.side==='d'&&!CINE.on&&performance.now()-resetT>3000)playStart();   // you're on defence: the bot offence snaps on its own
  if(playState!=='live')return;handoffTick();const car=roster.find(H),ot=ORG.off;if(car)playTick.g=0;
  if(car&&car!==playTick.lc&&playTick.lc&&PASS&&car.cur.team===POSS()){RP.ctch(car);RUNS.catch(car);}
@@ -2026,7 +2035,7 @@ function plan(){const oT=ORG.off,dT=oT==='blue'?'red':'blue',youO=ORG.you===oT,n
  if(!youO)D[defPick(D)].you=true;   // after the depths are set, so the preference can read them
  return{oT,dT,O,D};}
 // apply it: your spot, everyone else a bot
-function applyOrg(){preEnd();if(!applyOrg.keep)NEWSERIES=0;if(!applyOrg.keep){ORG.wi=Math.random()*5|0;PLAY=null;if(!ORG.free&&ORG.four&&!DRILL){if(ORG.you===ORG.off)setTimeout(showPlays,0);else if(NET.host&&NET.on&&MATCH&&MATCH.mp)NET.askPlays();else PLAY=dealPlays()[Math.random()*3|0];}}for(const d of roster)if(d!==player)showDoll(d,false);use(player);held=false;aimOn=false;thr=-1;reset();looseBall();
+function applyOrg(){preEnd();if(!applyOrg.keep)NEWSERIES=0;if(!applyOrg.keep){ORG.wi=Math.random()*5|0;PLAY=null;if(!ORG.free&&ORG.four&&!DRILL){if(ORG.you===ORG.off)setTimeout(showPlays,0);else if(NET.host&&NET.on&&MATCH&&MATCH.mp)NET.askPlays();else PLAY=aiPlay(dealPlays());}}for(const d of roster)if(d!==player)showDoll(d,false);use(player);held=false;aimOn=false;thr=-1;reset();looseBall();
  const P=player.cur;for(const k of['role','role0','side','kind','mark','x0','z0','px','pz','half','you','lab','m'])delete P[k];
  roster=[player];playOn=!ORG.free;document.body.classList.toggle('play',playOn);let n=0,oT=ORG.you,dT;
  const add=(s,side)=>{const d=s.you?player:bot(n++);if(d!==player){d.cur={ai:true};roster.push(d);}Object.assign(d.cur,s,{side,role:side==='o'?s.role:'df',team:side==='o'?oT:dT});if(d!==player)d.cur.at=botAt(d.cur.role,d.cur.team);return d;};

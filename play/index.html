@@ -5213,7 +5213,7 @@ function exmUI(){show('exm');}
 function runStars(b){const L=lgEnsure(JSON.parse(JSON.stringify(b)));return CLUBS.map((_,c)=>{const P=L.rost[c].filter(id=>id!=='U'&&L.pl[id]&&STYLES[L.pl[id].style][4]!=='qb').map(id=>L.pl[id]).sort((x,y)=>ovr(y.att,y.style)-ovr(x.att,x.style)||(x.id<y.id?-1:1))[0];return P?{c,P,o:ovr(P.att,P.style)}:null;}).filter(Boolean);}
 const RUNS={on:false,win:5,c:{me:0,op:0},wr:'me',caught:false,rep:0,
  start(st){Object.assign(RUNS,{on:true,st,c:{me:0,op:0},wr:'me',caught:false,rep:1});RUNS.set();RUNS.cd();},
- cd(){RUNS.cdEnd=performance.now()+3000;RUNS.cdRun(RUNS.cdEnd);},   // host / offline: the authoritative 3-2-1 before every rep
+ cd(){RUNS.cdN=(RUNS.cdN||0)+1;RUNS.cdEnd=performance.now()+3000;RUNS.cdRun(RUNS.cdEnd);},   // host / offline: the authoritative 3-2-1 before every rep
  cdRun(end){RUNS.cdE=end;if(RUNS.cdRaf)return;const e=$m('rcd');const f=()=>{const ms=RUNS.cdE-performance.now();if(ms<-700||!mode&&!NET.on){e.hidden=true;RUNS.cdRaf=0;return;}const s=ms>0?String(Math.ceil(ms/1000)):'GO!';if(e.textContent!==s){e.textContent=s;e.classList.remove('tk');void e.offsetWidth;e.classList.add('tk');}e.hidden=false;RUNS.cdRaf=requestAnimationFrame(f);};RUNS.cdRaf=requestAnimationFrame(f);},
  set(){const meWR=RUNS.wr==='me';ORG.you='blue';ORG.off=meWR?'blue':'red';ORG.pos='wr';LOS=-25*YD;DOWN=1;FD=LOS+10*YD;flip=null;NEXT=null;RET=null;RUNS.caught=false;},
  dress(){const d=roster.find(x=>x!==player&&x.cur.team==='red'&&x.cur.role!=='qb'),P=RUNS.st&&RUNS.st.P;if(!d||!P)return;   // the opponent star in his slot (WR or the man-cover CB)
@@ -5299,7 +5299,7 @@ const NET=(()=>{const N={host:false,guest:false,on:false,rd:null,rk:{},rj:{on:fa
   if(m.t==='lobby'){N.mode=m.mode;N.peer=m.peer;N.phase='lobby';say('Connected. Waiting for the host to start…');return;}
   if(m.t==='deny'){N.phase='idle';say(m.why||'The host refused the connection.',true);close();return;}
   if(m.t==='starting'){N.phase='starting';say('Match starting…');return;}
-  if(m.t==='start')return startGuest(m);if(m.t==='cd'){RUNS.cdRun(performance.now()+Math.max(0,+m.ms||0));return;}if(m.t==='look')return look(m.L);
+  if(m.t==='start')return startGuest(m);if(m.t==='cd'){N.cdIn=(N.cdIn||0)+1;RUNS.cdRun(performance.now()+Math.max(0,+m.ms||0));return;}if(m.t==='look')return look(m.L);
   if(m.t==='plays'){N.picking=true;$m('pcards').innerHTML=m.h;$m('pcs').hidden=false;if(document.pointerLockElement)document.exitPointerLock();return;}
   if(m.t==='picked'){N.picking=false;$m('pcs').hidden=true;return;}
   if(m.t==='end'){const gr=m.b>m.a?'w':m.b<m.a?'l':'t';if(m.mode==='runs')EXH.tally('r',gr);EXH.tally('on',gr);if(!N.ended1){N.ended1=1;PROG.award({id:'net-'+N.code+'-'+(m.t0||0)+'-'+m.a+'-'+m.b,mode:m.mode==='runs'?'runs':'exh',online:true,r:gr,short:performance.now()-(N.st.t0||0)<60000&&!window.PAF_XPTEST});}N.on=false;N.phase='done';N.result=m;mode=null;$m('netwait').hidden=true;$m('pcs').hidden=true;$m('runhud').hidden=true;show('net');say('');return;}}

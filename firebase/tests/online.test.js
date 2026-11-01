@@ -40,11 +40,12 @@ ok('runsGuestIsRedReceiverCorner',await until(()=>H.p.evaluate(()=>{const d=NET.
 ok('runsGuestHud',await until(async()=>/1V1 RUNS · YOU 0 – 0/.test(await G.p.textContent('#nethud')),8000),await G.p.textContent('#nethud'));
 ok('sameWeatherBothSides',await until(async()=>{const a=await H.p.evaluate(()=>WX.cur()),b=await G.p.evaluate(()=>WX.cur());return !!a&&a===b;},8000));
 // countdown before each rep, seen on both screens; then a TOUCH guest moves with the joystick (no keys at all)
-ok('runsCountdownBoth',await until(async()=>{const h=await H.p.evaluate(()=>!$m('rcd').hidden||RUNS.cdEnd>0),g=await G.p.evaluate(()=>!$m('rcd').hidden);return h||g;},8000));
-await until(()=>H.p.evaluate(()=>playState==='live'||RUNS.wr==='me'),15000);
-await H.p.evaluate(()=>{if(playState==='pre'){RUNS.cdEnd=0;playStart();}});
-const mv=await (async()=>{const p0=await H.p.evaluate(()=>{const d=NET.rd;return d?[d.pel.position.x,d.pel.position.z]:null;});await G.p.evaluate(()=>{joy.on=true;joy.x=0;joy.y=-1;});await sleep(4000);const p1=await H.p.evaluate(()=>{const d=NET.rd;return d?[d.pel.position.x,d.pel.position.z]:null;});await G.p.evaluate(()=>{joy.on=false;joy.x=joy.y=0;});return p0&&p1?Math.hypot(p1[0]-p0[0],p1[1]-p0[1]):0;})();
-ok('touchGuestJoystickMoves',mv>1,mv);
+ok('runsCountdownBoth',await until(async()=>(await H.p.evaluate(()=>RUNS.cdN||0))>=1&&(await G.p.evaluate(()=>NET.cdIn||0))>=1,15000),JSON.stringify([await H.p.evaluate(()=>RUNS.cdN),await G.p.evaluate(()=>NET.cdIn)]));
+await until(()=>H.p.evaluate(()=>playState==='live'),20000);
+const dist=async(fn,off)=>{const p0=await H.p.evaluate(()=>{const d=NET.rd;return[d.pel.position.x,d.pel.position.z];});await G.p.evaluate(fn);await sleep(4000);const p1=await H.p.evaluate(()=>{const d=NET.rd;return[d.pel.position.x,d.pel.position.z];});await G.p.evaluate(off);return Math.hypot(p1[0]-p0[0],p1[1]-p0[1]);};
+const kb=await dist(()=>dispatchEvent(new KeyboardEvent('keydown',{key:'w'})),()=>dispatchEvent(new KeyboardEvent('keyup',{key:'w'})));await sleep(1500);
+const js=await dist(()=>{joy.on=true;joy.x=0;joy.y=-1;},()=>{joy.on=false;joy.x=joy.y=0;});
+ok('touchGuestJoystickMoves',js>.2&&js>kb*.5,JSON.stringify({kb,js}));
 // forged messages from the guest change nothing on the host
 await G.p.evaluate(()=>{NET._raw({t:'end',a:0,b:5});NET._raw({t:'pick',i:0});NET._raw({t:'start'});NET._raw({t:'k',k:1,y:'x',p:999});});await sleep(800);
 ok('forgedMessagesIgnored',await H.p.evaluate(()=>RUNS.on&&RUNS.c.me===0&&RUNS.c.op===0&&!!MATCH&&NET.rp<=1.2));

@@ -1079,15 +1079,19 @@ let cur={};   // movement memory (normal ground speed, queued bounds)
 function startJump(){js=1;jt=0;const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>1){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=jdz=0;}}
 // ===== hurdle: sprinting with the ball + the running-jump input. Same jump state machine (js 6 = plant, 7 = airborne), real impulses and joint targets only.
 // Quality from Agility (coordination / leg lift), Speed (carry), timing against the nearest defender ahead, and a little luck; Strength helps ride out a bad landing.
-function hurdleOK(){let vx=0,vz=0,m=0;for(const b of list){vx+=b.velocity.x*b.mass;vz+=b.velocity.z*b.mass;m+=b.mass;}const sp=Math.hypot(vx,vz)/m;   // whole-body speed: steady through the stride
- return held&&keys.shift&&mv>.3&&sp>3.8&&contact()&&!limp&&cs===0&&dv===0;}
+function hurdleTarget(){let vx=0,vz=0,m=0;for(const b of list){vx+=b.velocity.x*b.mass;vz+=b.velocity.z*b.mass;m+=b.mass;}const sp=Math.hypot(vx,vz)/m;if(sp<.5)return{sp,dd:99};const fx=vx/m/sp,fz=vz/m/sp;let dd=99;
+ for(const d of roster){if(d===curD||d.cur.side===cur.side||d.limp)continue;const q=d.pel.position,ax=q.x-pel.position.x,az=q.z-pel.position.z,al=ax*fx+az*fz,lat=Math.abs(ax*fz-az*fx),rv=(d.pel.velocity.x-vx/m)*fx+(d.pel.velocity.z-vz/m)*fz;   // closing speed
+  if(al>.6&&al<7&&lat<1.2+al*.18&&al/Math.max(1,-rv)<1.6&&al<dd)dd=al;}return{sp,dd};}   // a defender in the running lane (widening with distance), reachable within ~1.6 s
+function hurdleOK(){const H=hurdleTarget(),sp=H.sp,dd=H.dd;
+ return held&&(keys.shift||sp>4.5)&&dd<7&&sp>2.8&&contact()&&!limp&&cs===0&&dv===0;}
 function startHurdle(){const sp=Math.hypot(pel.velocity.x,pel.velocity.z);jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;let dd=9;
  for(const d of roster){if(d===curD||d.cur.side===cur.side)continue;const q=d.pel.position,ax=q.x-pel.position.x,az=q.z-pel.position.z,al=ax*jdx+az*jdz,lat=Math.abs(ax*jdz-az*jdx);if(al>0&&lat<1.4&&al<dd)dd=al;}   // nearest opponent in the running lane
- const tim=dd>8?.5:Math.abs(dd-2.3)/1.6;   // take off about 2.3 m out: too early lands on him, too late runs into him
+ const tim=dd>8?.5:Math.max(0,Math.abs(dd-2.4)-.9)/1.8;   // take off about 2.3 m out: too early lands on him, too late runs into him
  cur.hq=cl(.3+.4*AT('agi')+.15*AT('spd')-.35*cl(tim,0,1.2)+(Math.random()-.5)*.3,.05,1);js=6;jt=0;cur.hT=performance.now();}
 function startBound(){if(hurdleOK()){startHurdle();return;}bchg=Math.min(1,jpt/.35);const sp=Math.hypot(pel.velocity.x,pel.velocity.z);if(sp>.5){jdx=pel.velocity.x/sp;jdz=pel.velocity.z/sp;}else{jdx=Math.sin(yaw);jdz=Math.cos(yaw);}
  let best=1,bd=1e9;for(const sd of[-1,1]){const f=parts['foot'+sd],d=(f.position.x-pel.position.x)*jdx+(f.position.z-pel.position.z)*jdz;if(d<bd){bd=d;best=sd;}}bsd=best;js=5;jt=0;cur.bndB=1;}
 addEventListener('keydown',e=>{if(NET.guest&&NET.on)return NET.key(e,true);const k=e.key.toLowerCase();if(k==='p'&&mode&&!e.repeat&&!CINE.on){togglePause();return;}if(!mode||paused||CINE.on)return;if(keys[k])return;keys[k]=true;if(k===' ')e.preventDefault();
+ if(k===' '&&!playPre()&&held&&!limp&&cs===0&&dv===0&&js===0&&(()=>{const H=hurdleTarget();return H.dd<7&&H.sp>2.8;})()){if(contact()&&hurdleOK())startHurdle();else cur.hBuf=performance.now();return;}   // carrying the ball at a defender: Space is a hurdle (queued for the next foot plant if mid-stride)
  if(k===' '&&cur.runT>1){cur.boost=Math.min(.3,(cur.boost||0)+.06);return;}   // ball carrier in a long sprint: Space taps are a burst of speed, not a jump
  if(playPre()&&(k===' '||k==='q'||k==='e'||k==='x'))return;   // no jumping / diving before the snap
  // R: reset (QB / receiver drill), Q: dive the way the camera points, F: go limp / get up, T: drop the ball, 1: show the receiver's route, 2: receiver goes
@@ -1427,6 +1431,7 @@ cur.stam=cl((cur.stam??1)+(keys.shift&&mv>.3?-.07*(1-.5*AT('sta')):.12*(1+.5*AT(
  }
  joints.chest.y=0;joints.abd.y=0;joints.abd.x=run?.08*mv:0;joints.chest.x=run?.1*mv:0;joints.shoulder1.y=0;
  if(jp===1){jpt+=dt;if(jpt>.35){jp=0;if(!limp&&js===0&&contact())startBound();}}
+ if(cur.hBuf){if(performance.now()-cur.hBuf>350)cur.hBuf=0;else if(js===0&&contact()&&hurdleOK()){cur.hBuf=0;startHurdle();}}
  jt+=dt;
  if(js>0){
   const uj=Math.min(1,jt/.13),su=uj*uj*(3-2*uj);
